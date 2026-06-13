@@ -224,10 +224,20 @@
 
   async function carregarDesafio() {
     try {
-      const resp = await fetch(`${API_URL}?action=connect4&data=${encodeURIComponent(hoje())}`);
-      const json = await resp.json();
+      const url  = `${API_URL}?action=connect4&data=${encodeURIComponent(hoje())}`;
+      const resp = await fetch(url, { redirect: "follow" });
 
-      if (!json.grupos || json.grupos.length < 4) throw new Error("sem dados");
+      const texto = await resp.text();
+      let json;
+      try {
+        json = JSON.parse(texto);
+      } catch(_) {
+        const m = texto.match(/\{.*\}/s);
+        if (m) json = JSON.parse(m[0]);
+        else throw new Error("resposta invalida");
+      }
+
+      if (!json || !json.grupos || json.grupos.length < 4) throw new Error("sem dados");
 
       grupos = json.grupos.map((g, i) => ({ titulo: g.titulo, palavras: g.palavras, cor: CORES[i] }));
       palavras = grupos.flatMap(g => g.palavras.map(p => ({ texto: p, grupo: grupos.indexOf(g) })));
