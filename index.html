@@ -15,22 +15,16 @@ body{
     padding:40px 20px;
 }
 
-h1{
-    text-align:center;
-}
-
 input{
     width:100%;
     padding:12px;
-    font-size:16px;
     margin-top:10px;
     box-sizing:border-box;
 }
 
 button{
-    margin-top:10px;
     padding:12px 20px;
-    font-size:16px;
+    margin-top:10px;
     cursor:pointer;
 }
 
@@ -39,6 +33,10 @@ button{
     border-radius:10px;
     padding:15px;
     margin-top:15px;
+}
+
+.oculto{
+    display:none;
 }
 
 </style>
@@ -64,6 +62,8 @@ Buscar
 
 const API =
 "https://script.google.com/macros/s/AKfycbyxSn6mHgOu5jy68q6sMVTBaM7yWjx8-TXakfCECPTVCQ-n94kMcg8_Cr784IWyYpvG/exec";
+
+let convidadoSelecionado = null;
 
 async function buscar(){
 
@@ -95,15 +95,112 @@ async function buscar(){
     dados.forEach(item => {
 
         div.innerHTML += `
-            <div class="card">
-                <strong>${item.nome}</strong>
-                <br>
-                Telefone:
-                ${item.telefone}
-            </div>
+        <div class="card">
+
+            <strong>${item.nome}</strong><br>
+            Telefone: ${item.telefone}
+
+            <br><br>
+
+            <button onclick='selecionar(${JSON.stringify(item)})'>
+            Selecionar
+            </button>
+
+        </div>
         `;
 
     });
+
+}
+
+function selecionar(item){
+
+    convidadoSelecionado = item;
+
+    document.getElementById("resultado").innerHTML = `
+
+    <div class="card">
+
+        <h3>${item.nome}</h3>
+
+        <p>
+        Telefone cadastrado:
+        ${item.telefone}
+        </p>
+
+        <label>
+        Últimos 4 dígitos:
+        </label>
+
+        <input
+            id="ultimos4"
+            maxlength="4"
+        >
+
+        <label>
+        Email:
+        </label>
+
+        <input
+            id="email"
+            type="email"
+        >
+
+        <br>
+
+        <button onclick="confirmar()">
+        Confirmar presença
+        </button>
+
+    </div>
+    `;
+}
+
+async function confirmar(){
+
+    const ultimos4 =
+        document.getElementById("ultimos4").value;
+
+    const email =
+        document.getElementById("email").value;
+
+    const resposta =
+        await fetch(
+            API,
+            {
+                method:"POST",
+                body:JSON.stringify({
+                    nome:convidadoSelecionado.nome,
+                    ultimos4:ultimos4,
+                    email:email,
+                    status:"SIM"
+                })
+            }
+        );
+
+    const json =
+        await resposta.json();
+
+    if(json.sucesso){
+
+        document.getElementById("resultado").innerHTML = `
+        <div class="card">
+            <h3>Presença confirmada ❤️</h3>
+            <p>
+            Email registrado:
+            ${email}
+            </p>
+        </div>
+        `;
+
+    }else{
+
+        alert(
+            json.erro ||
+            "Erro ao confirmar"
+        );
+
+    }
 
 }
 
