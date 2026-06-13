@@ -185,7 +185,7 @@
      Coluna B = palavra (em maiúsculas)
   ══════════════════════════════════════════════ */
 
-  const API_URL = "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
   const MAX_TENTATIVAS = 6;
 
   let PALAVRA = "";
@@ -202,26 +202,30 @@
     return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
   }
 
-  /* ── carrega palavra do dia ── */
-  async function carregarPalavra() {
-    try {
-      // Google Apps Script faz redirect — precisamos de redirect:'follow'
-      const url  = `${API_URL}?action=wordle&data=${encodeURIComponent(hoje())}`;
-      const resp = await fetch(url, { redirect: "follow" });
+  /* ── carrega palavra do dia via JSONP (evita CORS com GAS) ── */
+  function carregarPalavra() {
+    const cbName = "cb_wordle_" + Date.now();
+    const url = `${API_URL}?action=wordle&data=${encodeURIComponent(hoje())}&callback=${cbName}`;
 
-      // GAS às vezes retorna text/html no redirect — tenta parsear mesmo assim
-      const texto = await resp.text();
-      let json;
-      try {
-        json = JSON.parse(texto);
-      } catch(_) {
-        // Extrai JSON de dentro do HTML se vier embutido
-        const m = texto.match(/\{.*\}/s);
-        if (m) json = JSON.parse(m[0]);
-        else throw new Error("resposta invalida");
+    // Timeout de 8s
+    const timer = setTimeout(() => {
+      delete window[cbName];
+      document.getElementById("wordleLoading").style.display = "none";
+      const errEl = document.getElementById("wordleErro");
+      errEl.style.display = "block";
+      errEl.innerHTML += `<p style="font-size:.7rem;color:var(--text-muted);margin-top:.5rem">Timeout ao conectar. Tente recarregar.</p>`;
+    }, 8000);
+
+    window[cbName] = function(json) {
+      clearTimeout(timer);
+      delete window[cbName];
+      document.getElementById("scriptTag") && document.getElementById("scriptTag").remove();
+
+      if (!json || !json.palavra) {
+        document.getElementById("wordleLoading").style.display = "none";
+        document.getElementById("wordleErro").style.display = "block";
+        return;
       }
-
-      if (!json || !json.palavra) throw new Error("sem palavra");
 
       PALAVRA = json.palavra.toUpperCase().trim();
       LETRAS  = PALAVRA.length;
@@ -234,14 +238,18 @@
 
       construirGrid();
       construirTeclado();
-    } catch(e) {
-      console.error("Wordle erro:", e);
+    };
+
+    const script = document.createElement("script");
+    script.id  = "scriptTag";
+    script.src = url;
+    script.onerror = () => {
+      clearTimeout(timer);
+      delete window[cbName];
       document.getElementById("wordleLoading").style.display = "none";
-      // Mostra o erro de debug para identificar o problema
-      const errEl = document.getElementById("wordleErro");
-      errEl.style.display = "block";
-      errEl.innerHTML += `<p style="font-size:.7rem;color:var(--text-muted);margin-top:1rem;word-break:break-all">Debug: ${e.message}</p>`;
-    }
+      document.getElementById("wordleErro").style.display = "block";
+    };
+    document.head.appendChild(script);
   }
 
   /* ── grid ── */
