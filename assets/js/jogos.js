@@ -1,7 +1,6 @@
 /* ═══════════════════════════════════════════════════════════
-   GIAN & TIAGO — jogos.js
-   Snake do Tiago + Flappy Gian
-   Placar salvo via Apps Script → Google Sheets (aba PLACAR)
+   GIAN & TIAGO — jogos.js v2
+   Correções: restart limpo, imagens com onload callback
 ═══════════════════════════════════════════════════════════ */
 "use strict";
 
@@ -10,64 +9,76 @@ const JOGOS_API = typeof API_URL !== "undefined"
   : "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
 
 /* ══════════════════════════════════════════════════════════
-   NAVEGAÇÃO ENTRE ARENAS
+   IMAGENS — carregadas uma vez, reutilizadas sempre
+══════════════════════════════════════════════════════════ */
+let imgTiagoOk = false;
+let imgGianOk  = false;
+
+const IMG_TIAGO = new Image();
+IMG_TIAGO.onload = () => { imgTiagoOk = true; };
+IMG_TIAGO.onerror = () => { imgTiagoOk = false; };
+IMG_TIAGO.src = "assets/img/tiago-face.png";
+
+const IMG_GIAN = new Image();
+IMG_GIAN.onload = () => { imgGianOk = true; };
+IMG_GIAN.onerror = () => { imgGianOk = false; };
+IMG_GIAN.src = "assets/img/gian-face.png";
+
+/* Desenha cara circular — usa imagem se carregou, senão fallback emoji */
+function desenharCara(ctx, img, imgOk, x, y, size, emoji, corBg) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+  ctx.clip();
+
+  if (imgOk) {
+    ctx.drawImage(img, x, y, size, size);
+  } else {
+    // Fallback: círculo colorido + emoji
+    ctx.fillStyle = corBg;
+    ctx.fill();
+    ctx.restore();
+    ctx.save();
+    ctx.font = `${Math.round(size * 0.55)}px serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(emoji, x + size / 2, y + size / 2);
+  }
+  ctx.restore();
+}
+
+/* ══════════════════════════════════════════════════════════
+   NAVEGAÇÃO
 ══════════════════════════════════════════════════════════ */
 function entrarJogo(jogo) {
   document.getElementById("arena-menu").style.display   = "none";
   document.getElementById("arena-snake").style.display  = jogo === "snake"  ? "block" : "none";
   document.getElementById("arena-flappy").style.display = jogo === "flappy" ? "block" : "none";
   window.scrollTo({ top: 0, behavior: "instant" });
-
-  if (jogo === "snake")  { resetSnake();  }
-  if (jogo === "flappy") { resetFlappy(); }
+  if (jogo === "snake")  resetSnake();
+  if (jogo === "flappy") resetFlappy();
 }
 
 function voltarMenu(jogo) {
-  if (jogo === "snake")  { pararSnake();  }
-  if (jogo === "flappy") { pararFlappy(); }
-  document.getElementById("arena-snake").style.display  = "none";
-  document.getElementById("arena-flappy").style.display = "none";
-  document.getElementById("arena-menu").style.display   = "block";
+  pararSnake();
+  pararFlappy();
+  document.getElementById("arena-snake").style.display   = "none";
+  document.getElementById("arena-flappy").style.display  = "none";
+  document.getElementById("arena-menu").style.display    = "block";
   document.getElementById("snake-postgame").style.display  = "none";
   document.getElementById("flappy-postgame").style.display = "none";
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
 /* ══════════════════════════════════════════════════════════
-   IMAGENS DAS CARAS
-══════════════════════════════════════════════════════════ */
-const IMG_TIAGO = new Image();
-IMG_TIAGO.src = "assets/img/tiago-face.png";
-
-const IMG_GIAN = new Image();
-IMG_GIAN.src = "assets/img/gian-face.png";
-
-/* helper: desenha cara ou fallback colorido */
-function desenharCara(ctx, img, x, y, size, cor) {
-  if (img.complete && img.naturalWidth > 0) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(x + size/2, y + size/2, size/2, 0, Math.PI*2);
-    ctx.clip();
-    ctx.drawImage(img, x, y, size, size);
-    ctx.restore();
-  } else {
-    ctx.fillStyle = cor;
-    ctx.beginPath();
-    ctx.arc(x + size/2, y + size/2, size/2, 0, Math.PI*2);
-    ctx.fill();
-  }
-}
-
-/* ══════════════════════════════════════════════════════════
    SNAKE DO TIAGO
 ══════════════════════════════════════════════════════════ */
-const SNAKE_CELL  = 24;
-const SNAKE_COLS  = 20; // 480 / 24
-const SNAKE_ROWS  = 20;
-const SNAKE_SPEED_INIT = 150; // ms por frame
+const SNAKE_CELL      = 24;
+const SNAKE_COLS      = 20;
+const SNAKE_ROWS      = 20;
+const SNAKE_SPEED_INIT = 150;
 
-let snakeLoop   = null;
+let snakeRafId  = null;
 let snakeScore  = 0;
 let snakeDir    = { x: 1, y: 0 };
 let snakeNext   = { x: 1, y: 0 };
@@ -78,64 +89,92 @@ let snakeSpeed  = SNAKE_SPEED_INIT;
 let snakeLast   = 0;
 
 function resetSnake() {
-  pararSnake();
+  // Para qualquer loop anterior sem misericórdia
+  snakeAlive = false;
+  if (snakeRafId) { cancelAnimationFrame(snakeRafId); snakeRafId = null; }
+
   snakeScore = 0;
+  snakeSpeed = SNAKE_SPEED_INIT;
   snakeDir   = { x: 1, y: 0 };
   snakeNext  = { x: 1, y: 0 };
+  snakeLast  = 0;
   snakeBody  = [{ x: 5, y: 10 }, { x: 4, y: 10 }, { x: 3, y: 10 }];
-  snakeAlive = false;
-  snakeSpeed = SNAKE_SPEED_INIT;
-  document.getElementById("snake-score").textContent = "0";
-  document.getElementById("snake-postgame").style.display = "none";
-  document.getElementById("snake-save-msg").textContent = "";
+
+  const scoreEl = document.getElementById("snake-score");
+  if (scoreEl) scoreEl.textContent = "0";
+
+  const pg = document.getElementById("snake-postgame");
+  if (pg) pg.style.display = "none";
+
+  const sm = document.getElementById("snake-save-msg");
+  if (sm) sm.textContent = "";
+
+  snakeNovaComida();
+
   mostrarOverlay("snake", "Snake do Tiago 🐍", "Guie o Tiago pelos hambúrgueres!", [
     { label: "Começar", fn: "iniciarSnake()" }
   ]);
-  snakeNovaComida();
+
   desenharSnake();
 }
 
 function iniciarSnake() {
+  // Se já tinha um loop rodando (restart), garante que está morto antes
+  snakeAlive = false;
+  if (snakeRafId) { cancelAnimationFrame(snakeRafId); snakeRafId = null; }
+
+  // Reseta estado do jogo mas mantém overlay oculto
+  snakeScore = 0;
+  snakeSpeed = SNAKE_SPEED_INIT;
+  snakeDir   = { x: 1, y: 0 };
+  snakeNext  = { x: 1, y: 0 };
+  snakeLast  = 0;
+  snakeBody  = [{ x: 5, y: 10 }, { x: 4, y: 10 }, { x: 3, y: 10 }];
+  snakeNovaComida();
+
+  const scoreEl = document.getElementById("snake-score");
+  if (scoreEl) scoreEl.textContent = "0";
+
+  const pg = document.getElementById("snake-postgame");
+  if (pg) pg.style.display = "none";
+
   ocultarOverlay("snake");
+
   snakeAlive = true;
-  document.getElementById("snake-canvas").focus();
-  snakeLast = 0;
-  requestAnimationFrame(snakeFrame);
+  document.getElementById("snake-canvas")?.focus();
+  snakeRafId = requestAnimationFrame(snakeFrame);
 }
 
 function pararSnake() {
   snakeAlive = false;
-  if (snakeLoop) { cancelAnimationFrame(snakeLoop); snakeLoop = null; }
+  if (snakeRafId) { cancelAnimationFrame(snakeRafId); snakeRafId = null; }
 }
 
 function snakeFrame(ts) {
   if (!snakeAlive) return;
-  snakeLoop = requestAnimationFrame(snakeFrame);
-  if (!snakeLast) { snakeLast = ts; }
+  snakeRafId = requestAnimationFrame(snakeFrame);
+
+  if (!snakeLast) snakeLast = ts;
   if (ts - snakeLast < snakeSpeed) return;
   snakeLast = ts;
 
-  // Avança direção
   snakeDir = { ...snakeNext };
   const head = { x: snakeBody[0].x + snakeDir.x, y: snakeBody[0].y + snakeDir.y };
 
-  // Colisão com parede
   if (head.x < 0 || head.x >= SNAKE_COLS || head.y < 0 || head.y >= SNAKE_ROWS) {
     return snakeGameOver();
   }
-  // Colisão com o próprio corpo
   if (snakeBody.some(s => s.x === head.x && s.y === head.y)) {
     return snakeGameOver();
   }
 
   snakeBody.unshift(head);
 
-  // Comeu?
   if (head.x === snakeFood.x && head.y === snakeFood.y) {
     snakeScore++;
-    document.getElementById("snake-score").textContent = snakeScore;
+    const scoreEl = document.getElementById("snake-score");
+    if (scoreEl) scoreEl.textContent = snakeScore;
     snakeNovaComida();
-    // Aumenta velocidade a cada 5 pontos (mínimo 60ms)
     if (snakeScore % 5 === 0) snakeSpeed = Math.max(60, snakeSpeed - 12);
   } else {
     snakeBody.pop();
@@ -157,40 +196,41 @@ function snakeNovaComida() {
 
 function desenharSnake() {
   const canvas = document.getElementById("snake-canvas");
-  const ctx    = canvas.getContext("2d");
-  const C = SNAKE_CELL;
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const C   = SNAKE_CELL;
 
-  // Fundo
   ctx.fillStyle = "#F0F5EC";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Grade sutil
-  ctx.strokeStyle = "rgba(180,200,170,.35)";
+  // Grade
+  ctx.strokeStyle = "rgba(180,200,170,.3)";
   ctx.lineWidth = .5;
   for (let c = 0; c <= SNAKE_COLS; c++) {
-    ctx.beginPath(); ctx.moveTo(c*C, 0); ctx.lineTo(c*C, canvas.height); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(c * C, 0); ctx.lineTo(c * C, canvas.height); ctx.stroke();
   }
   for (let r = 0; r <= SNAKE_ROWS; r++) {
-    ctx.beginPath(); ctx.moveTo(0, r*C); ctx.lineTo(canvas.width, r*C); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, r * C); ctx.lineTo(canvas.width, r * C); ctx.stroke();
   }
 
-  // Comida (hambúrguer emoji)
-  ctx.font = `${C - 4}px serif`;
+  // Comida
+  ctx.font = `${C - 2}px serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("🍔", snakeFood.x*C + C/2, snakeFood.y*C + C/2);
+  ctx.fillText("🍔", snakeFood.x * C + C / 2, snakeFood.y * C + C / 2);
 
-  // Corpo da snake (verde)
+  // Corpo
   snakeBody.forEach((seg, i) => {
     if (i === 0) {
       // Cabeça = cara do Tiago
-      desenharCara(ctx, IMG_TIAGO, seg.x*C + 1, seg.y*C + 1, C - 2, "#506B45");
+      desenharCara(ctx, IMG_TIAGO, imgTiagoOk,
+        seg.x * C + 1, seg.y * C + 1, C - 2,
+        "😄", "#506B45");
     } else {
-      // Corpo com gradiente verde
-      const alpha = Math.max(0.4, 1 - i * 0.04);
+      const alpha = Math.max(0.35, 1 - i * 0.04);
       ctx.fillStyle = `rgba(80,107,69,${alpha})`;
       ctx.beginPath();
-      ctx.roundRect(seg.x*C + 2, seg.y*C + 2, C - 4, C - 4, 4);
+      ctx.roundRect(seg.x * C + 2, seg.y * C + 2, C - 4, C - 4, 4);
       ctx.fill();
     }
   });
@@ -198,98 +238,121 @@ function desenharSnake() {
 
 function snakeGameOver() {
   snakeAlive = false;
-  mostrarOverlay("snake", "Game Over!", `Pontuação: ${snakeScore}`, [
+  if (snakeRafId) { cancelAnimationFrame(snakeRafId); snakeRafId = null; }
+
+  mostrarOverlay("snake", "Game Over! 🐍", `Pontuação: ${snakeScore} pts`, [
     { label: "Jogar de novo", fn: "iniciarSnake()" },
-    { label: "Voltar", fn: "voltarMenu('snake')" }
+    { label: "Voltar",        fn: "voltarMenu('snake')" }
   ]);
+
   setTimeout(() => {
-    document.getElementById("snake-postgame").style.display = "block";
+    const pg = document.getElementById("snake-postgame");
+    if (pg) pg.style.display = "block";
     carregarTop10("snake");
-  }, 400);
+  }, 300);
 }
 
-// Controles teclado
+// Teclado Snake
 document.addEventListener("keydown", (e) => {
-  const arena = document.getElementById("arena-snake");
-  if (!arena || arena.style.display === "none") return;
-  const mapa = {
-    ArrowUp:    { x: 0,  y: -1 },
-    ArrowDown:  { x: 0,  y: 1  },
-    ArrowLeft:  { x: -1, y: 0  },
-    ArrowRight: { x: 1,  y: 0  },
-    w: { x: 0, y: -1 }, W: { x: 0, y: -1 },
-    s: { x: 0, y:  1 }, S: { x: 0, y:  1 },
-    a: { x: -1,y:  0 }, A: { x: -1,y:  0 },
-    d: { x: 1, y:  0 }, D: { x: 1, y:  0 },
+  if (document.getElementById("arena-snake")?.style.display === "none") return;
+  const dirs = {
+    ArrowUp: { x:0,y:-1 }, ArrowDown: { x:0,y:1 },
+    ArrowLeft: { x:-1,y:0 }, ArrowRight: { x:1,y:0 },
+    w: { x:0,y:-1 }, s: { x:0,y:1 }, a: { x:-1,y:0 }, d: { x:1,y:0 },
+    W: { x:0,y:-1 }, S: { x:0,y:1 }, A: { x:-1,y:0 }, D: { x:1,y:0 },
   };
-  if (mapa[e.key]) {
-    const d = mapa[e.key];
-    // Impede inverter direção
+  if (dirs[e.key]) {
+    const d = dirs[e.key];
     if (d.x !== -snakeDir.x || d.y !== -snakeDir.y) snakeNext = d;
     e.preventDefault();
   }
-  if (e.key === " " && !snakeAlive) iniciarSnake();
 });
 
 function snakeDirInput(dir) {
-  const mapa = {
-    UP:    { x: 0, y: -1 }, DOWN:  { x: 0, y: 1 },
-    LEFT:  { x: -1,y:  0 }, RIGHT: { x: 1, y: 0 }
+  const dirs = {
+    UP:{x:0,y:-1}, DOWN:{x:0,y:1}, LEFT:{x:-1,y:0}, RIGHT:{x:1,y:0}
   };
-  const d = mapa[dir];
+  const d = dirs[dir];
   if (d && (d.x !== -snakeDir.x || d.y !== -snakeDir.y)) snakeNext = d;
 }
 
 /* ══════════════════════════════════════════════════════════
    FLAPPY GIAN
 ══════════════════════════════════════════════════════════ */
-const FW = 480;
-const FH = 600;
+const FW           = 480;
+const FH           = 600;
 const GRAVITY      = 0.45;
 const FLAP_FORCE   = -9;
-const PIPE_WIDTH   = 70;
+const PIPE_W       = 70;
 const PIPE_GAP     = 160;
-const PIPE_SPEED   = 3;
-const PIPE_INTERVAL= 90; // frames
+const PIPE_SPD     = 3;
+const PIPE_INTV    = 90;
 
-let flappyLoop   = null;
-let flappyAlive  = false;
-let flappyScore  = 0;
-let birdY        = FH / 2;
-let birdVY       = 0;
-let pipes        = [];
-let flappyFrame  = 0;
+let flappyRafId   = null;
+let flappyAlive   = false;
 let flappyStarted = false;
+let flappyScore   = 0;
+let birdY         = FH / 2;
+let birdVY        = 0;
+let flappyPipes   = [];
+let flappyTick    = 0;
 
 function resetFlappy() {
-  pararFlappy();
-  flappyScore   = 0;
-  birdY         = FH / 2;
-  birdVY        = 0;
-  pipes         = [];
-  flappyFrame   = 0;
   flappyAlive   = false;
   flappyStarted = false;
-  document.getElementById("flappy-score").textContent = "0";
-  document.getElementById("flappy-postgame").style.display = "none";
-  document.getElementById("flappy-save-msg").textContent = "";
+  if (flappyRafId) { cancelAnimationFrame(flappyRafId); flappyRafId = null; }
+
+  flappyScore = 0;
+  birdY       = FH / 2;
+  birdVY      = 0;
+  flappyPipes = [];
+  flappyTick  = 0;
+
+  const scoreEl = document.getElementById("flappy-score");
+  if (scoreEl) scoreEl.textContent = "0";
+
+  const pg = document.getElementById("flappy-postgame");
+  if (pg) pg.style.display = "none";
+
+  const sm = document.getElementById("flappy-save-msg");
+  if (sm) sm.textContent = "";
+
   mostrarOverlay("flappy", "Flappy Gian 🐦", "Toque / espaço para voar!", [
     { label: "Começar", fn: "iniciarFlappy()" }
   ]);
+
   desenharFlappy();
 }
 
 function iniciarFlappy() {
+  // Garante estado limpo a cada start/restart
+  flappyAlive   = false;
+  if (flappyRafId) { cancelAnimationFrame(flappyRafId); flappyRafId = null; }
+
+  flappyScore = 0;
+  birdY       = FH / 2;
+  birdVY      = 0;
+  flappyPipes = [];
+  flappyTick  = 0;
+
+  const scoreEl = document.getElementById("flappy-score");
+  if (scoreEl) scoreEl.textContent = "0";
+
+  const pg = document.getElementById("flappy-postgame");
+  if (pg) pg.style.display = "none";
+
   ocultarOverlay("flappy");
+
   flappyAlive   = true;
   flappyStarted = true;
-  document.getElementById("flappy-canvas").focus();
-  flappyLoopFn();
+  document.getElementById("flappy-canvas")?.focus();
+  flappyRafId = requestAnimationFrame(flappyLoopFn);
 }
 
 function pararFlappy() {
-  flappyAlive = false;
-  if (flappyLoop) { cancelAnimationFrame(flappyLoop); flappyLoop = null; }
+  flappyAlive   = false;
+  flappyStarted = false;
+  if (flappyRafId) { cancelAnimationFrame(flappyRafId); flappyRafId = null; }
 }
 
 function flappyTap() {
@@ -299,29 +362,28 @@ function flappyTap() {
 
 function flappyLoopFn() {
   if (!flappyAlive) return;
-  flappyLoop = requestAnimationFrame(flappyLoopFn);
+  flappyRafId = requestAnimationFrame(flappyLoopFn);
 
-  // Física
   birdVY += GRAVITY;
   birdY  += birdVY;
-  flappyFrame++;
+  flappyTick++;
 
   // Spawn canos
-  if (flappyFrame % PIPE_INTERVAL === 0) {
+  if (flappyTick % PIPE_INTV === 0) {
     const topH = 60 + Math.random() * (FH - PIPE_GAP - 120);
-    pipes.push({ x: FW, topH, scored: false });
+    flappyPipes.push({ x: FW + PIPE_W, topH, scored: false });
   }
 
-  // Move canos
-  pipes.forEach(p => { p.x -= PIPE_SPEED; });
-  pipes = pipes.filter(p => p.x > -PIPE_WIDTH);
+  flappyPipes.forEach(p => { p.x -= PIPE_SPD; });
+  flappyPipes = flappyPipes.filter(p => p.x > -PIPE_W);
 
   // Score
-  pipes.forEach(p => {
-    if (!p.scored && p.x + PIPE_WIDTH < 100) {
+  flappyPipes.forEach(p => {
+    if (!p.scored && p.x + PIPE_W < 100) {
       p.scored = true;
       flappyScore++;
-      document.getElementById("flappy-score").textContent = flappyScore;
+      const scoreEl = document.getElementById("flappy-score");
+      if (scoreEl) scoreEl.textContent = flappyScore;
     }
   });
 
@@ -329,10 +391,10 @@ function flappyLoopFn() {
   const birdR = 22;
   const birdX = 100;
 
-  if (birdY + birdR > FH || birdY - birdR < 0) return flappyGameOver();
+  if (birdY + birdR > FH - 32 || birdY - birdR < 0) return flappyGameOver();
 
-  for (const p of pipes) {
-    if (birdX + birdR > p.x && birdX - birdR < p.x + PIPE_WIDTH) {
+  for (const p of flappyPipes) {
+    if (birdX + birdR > p.x && birdX - birdR < p.x + PIPE_W) {
       if (birdY - birdR < p.topH || birdY + birdR > p.topH + PIPE_GAP) {
         return flappyGameOver();
       }
@@ -344,15 +406,42 @@ function flappyLoopFn() {
 
 function desenharFlappy() {
   const canvas = document.getElementById("flappy-canvas");
-  const ctx    = canvas.getContext("2d");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
 
-  // Céu gradiente
+  // Céu
   const sky = ctx.createLinearGradient(0, 0, 0, FH);
   sky.addColorStop(0,   "#C8DDB8");
-  sky.addColorStop(.6,  "#EBF0E6");
+  sky.addColorStop(.65, "#EBF0E6");
   sky.addColorStop(1,   "#D5E8C8");
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, FW, FH);
+
+  // Nuvens estáticas
+  ctx.fillStyle = "rgba(255,255,255,.75)";
+  [[60,80,60,18],[210,110,80,14],[380,65,70,16]].forEach(([x,y,w,h]) => {
+    ctx.beginPath(); ctx.ellipse(x,y,w,h,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x+28,y-8,w*.65,h*.65,0,0,Math.PI*2); ctx.fill();
+  });
+
+  // Canos
+  flappyPipes.forEach(p => {
+    const g = ctx.createLinearGradient(p.x, 0, p.x + PIPE_W, 0);
+    g.addColorStop(0,   "#506B45");
+    g.addColorStop(.45, "#7A9B6E");
+    g.addColorStop(1,   "#3A5035");
+    ctx.fillStyle = g;
+    // Cano cima
+    ctx.fillRect(p.x, 0, PIPE_W, p.topH);
+    ctx.fillStyle = "#3A5035";
+    ctx.fillRect(p.x - 5, p.topH - 18, PIPE_W + 10, 18);
+    // Cano baixo
+    const botY = p.topH + PIPE_GAP;
+    ctx.fillStyle = g;
+    ctx.fillRect(p.x, botY, PIPE_W, FH - botY);
+    ctx.fillStyle = "#3A5035";
+    ctx.fillRect(p.x - 5, botY, PIPE_W + 10, 18);
+  });
 
   // Chão
   ctx.fillStyle = "#7A9B6E";
@@ -360,67 +449,43 @@ function desenharFlappy() {
   ctx.fillStyle = "#506B45";
   ctx.fillRect(0, FH - 32, FW, 5);
 
-  // Nuvens decorativas (estáticas)
-  ctx.fillStyle = "rgba(255,255,255,.7)";
-  [[60,80,60,18],[200,120,80,14],[380,60,70,16]].forEach(([x,y,w,h]) => {
-    ctx.beginPath(); ctx.ellipse(x,y,w,h,0,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(x+30,y-8,w*.7,h*.7,0,0,Math.PI*2); ctx.fill();
-  });
-
-  // Canos
-  pipes.forEach(p => {
-    // Cano de cima
-    const pGrad = ctx.createLinearGradient(p.x, 0, p.x + PIPE_WIDTH, 0);
-    pGrad.addColorStop(0, "#506B45");
-    pGrad.addColorStop(.4,"#7A9B6E");
-    pGrad.addColorStop(1, "#3A5035");
-    ctx.fillStyle = pGrad;
-    ctx.fillRect(p.x, 0, PIPE_WIDTH, p.topH);
-    // Borda do cano
-    ctx.fillStyle = "#3A5035";
-    ctx.fillRect(p.x - 6, p.topH - 20, PIPE_WIDTH + 12, 20);
-
-    // Cano de baixo
-    const botY = p.topH + PIPE_GAP;
-    ctx.fillStyle = pGrad;
-    ctx.fillRect(p.x, botY, PIPE_WIDTH, FH - botY);
-    ctx.fillStyle = "#3A5035";
-    ctx.fillRect(p.x - 6, botY, PIPE_WIDTH + 12, 20);
-  });
-
-  // Pássaro (cara do Gian)
-  const birdX = 100;
+  // Pássaro (cara do Gian) com rotação
+  const birdX   = 100;
   const birdSize = 44;
-  // Rotação conforme velocidade
   ctx.save();
   ctx.translate(birdX, birdY);
   ctx.rotate(Math.min(Math.max(birdVY * 0.04, -0.5), 1.0));
-  desenharCara(ctx, IMG_GIAN, -birdSize/2, -birdSize/2, birdSize, "#B87B3E");
-  // Asinha
-  ctx.fillStyle = "#9C6631";
+  desenharCara(ctx, IMG_GIAN, imgGianOk,
+    -birdSize / 2, -birdSize / 2, birdSize,
+    "😊", "#B87B3E");
+  // Asinha animada
+  ctx.fillStyle = "rgba(156,102,49,.7)";
   ctx.beginPath();
-  const wingFlap = Math.sin(flappyFrame * 0.25) * 5;
-  ctx.ellipse(-8, 8 + wingFlap, 14, 7, 0.3, 0, Math.PI*2);
+  const wingFlap = Math.sin(flappyTick * 0.25) * 5;
+  ctx.ellipse(-8, 8 + wingFlap, 13, 6, 0.3, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }
 
 function flappyGameOver() {
   flappyAlive = false;
-  mostrarOverlay("flappy", "Game Over!", `Pontuação: ${flappyScore}`, [
+  if (flappyRafId) { cancelAnimationFrame(flappyRafId); flappyRafId = null; }
+
+  mostrarOverlay("flappy", "Game Over! 🐦", `Pontuação: ${flappyScore} pts`, [
     { label: "Jogar de novo", fn: "iniciarFlappy()" },
-    { label: "Voltar", fn: "voltarMenu('flappy')" }
+    { label: "Voltar",        fn: "voltarMenu('flappy')" }
   ]);
+
   setTimeout(() => {
-    document.getElementById("flappy-postgame").style.display = "block";
+    const pg = document.getElementById("flappy-postgame");
+    if (pg) pg.style.display = "block";
     carregarTop10("flappy");
-  }, 400);
+  }, 300);
 }
 
-// Controles teclado Flappy
+// Teclado Flappy
 document.addEventListener("keydown", (e) => {
-  const arena = document.getElementById("arena-flappy");
-  if (!arena || arena.style.display === "none") return;
+  if (document.getElementById("arena-flappy")?.style.display === "none") return;
   if (e.key === " " || e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
     e.preventDefault();
     if (!flappyStarted) { iniciarFlappy(); return; }
@@ -428,16 +493,15 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// Toque no canvas Flappy
-document.getElementById("flappy-canvas")?.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  if (!flappyStarted) { iniciarFlappy(); return; }
-  if (flappyAlive) birdVY = FLAP_FORCE;
-}, { passive: false });
-
-document.getElementById("flappy-canvas")?.addEventListener("click", () => {
-  if (!flappyStarted) { iniciarFlappy(); return; }
-  if (flappyAlive) birdVY = FLAP_FORCE;
+// Touch e click no canvas Flappy
+document.addEventListener("DOMContentLoaded", () => {
+  const fc = document.getElementById("flappy-canvas");
+  if (!fc) return;
+  fc.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    flappyTap();
+  }, { passive: false });
+  fc.addEventListener("click", () => flappyTap());
 });
 
 /* ══════════════════════════════════════════════════════════
@@ -454,14 +518,14 @@ function mostrarOverlay(jogo, titulo, msg, acoes) {
     wrap.appendChild(overlay);
   }
 
+  const icon = jogo === "snake" ? "🐍" : "🐦";
   overlay.innerHTML = `
-    <div class="overlay__icon">${jogo === "snake" ? "🐍" : "🐦"}</div>
+    <div class="overlay__icon">${icon}</div>
     <div class="overlay__title">${titulo}</div>
     <div class="overlay__score">${msg}</div>
     <div class="overlay__actions">
       ${acoes.map(a => `<button class="btn btn--primary" onclick="${a.fn}">${a.label}</button>`).join("")}
-    </div>
-  `;
+    </div>`;
   overlay.classList.remove("hidden");
 }
 
@@ -471,24 +535,23 @@ function ocultarOverlay(jogo) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   PLACAR — SALVAR E CARREGAR
+   PLACAR
 ══════════════════════════════════════════════════════════ */
 async function salvarScore(jogo) {
   const nomeInput = document.getElementById(`${jogo}-nome`);
   const msgEl     = document.getElementById(`${jogo}-save-msg`);
-  const btn       = nomeInput.nextElementSibling;
-  const nome      = (nomeInput.value || "").trim();
+  const btn       = nomeInput?.nextElementSibling;
+  const nome      = (nomeInput?.value || "").trim();
   const pontos    = jogo === "snake" ? snakeScore : flappyScore;
 
   if (!nome) {
     msgEl.style.color = "var(--terracotta)";
     msgEl.textContent = "Informe seu nome para salvar.";
-    nomeInput.focus();
+    nomeInput?.focus();
     return;
   }
 
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>';
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>'; }
 
   try {
     const resp = await fetch(JOGOS_API, {
@@ -500,16 +563,12 @@ async function salvarScore(jogo) {
     if (json.sucesso) {
       msgEl.style.color = "var(--sage-dark)";
       msgEl.textContent = "Recorde salvo! 🏆";
-      btn.disabled = true;
-      btn.textContent = "Salvo ✓";
-      nomeInput.disabled = true;
+      if (btn) { btn.disabled = true; btn.textContent = "Salvo ✓"; }
+      if (nomeInput) nomeInput.disabled = true;
       carregarTop10(jogo);
-    } else {
-      throw new Error(json.erro);
-    }
+    } else { throw new Error(json.erro); }
   } catch {
-    btn.disabled = false;
-    btn.textContent = "Salvar";
+    if (btn) { btn.disabled = false; btn.textContent = "Salvar"; }
     msgEl.style.color = "var(--terracotta)";
     msgEl.textContent = "Não conseguimos salvar. Tente novamente.";
   }
@@ -526,9 +585,8 @@ async function carregarTop10(jogo) {
     const resp  = await fetch(`${JOGOS_API}?action=top10&jogo=${jogo}`);
     const dados = await resp.json();
 
-    if (!dados || !dados.lista || dados.lista.length === 0) {
-      container.innerHTML = `
-        <h3 class="top10__title">${titulo}</h3>
+    if (!dados?.lista?.length) {
+      container.innerHTML = `<h3 class="top10__title">${titulo}</h3>
         <p class="top10__empty">Nenhum recorde ainda. Seja o primeiro!</p>`;
       return;
     }
@@ -536,46 +594,37 @@ async function carregarTop10(jogo) {
     const medalhas = ["🥇","🥈","🥉"];
     const classes  = ["top10__item--gold","top10__item--silver","top10__item--bronze"];
 
-    const itens = dados.lista.map((item, i) => {
-      const cls = classes[i] || "";
-      const med = medalhas[i] || (i + 1);
-      return `
-        <li class="top10__item ${cls}">
-          <span class="top10__pos">${med}</span>
-          <span class="top10__name">${escHtmlJ(item.nome)}</span>
-          <span class="top10__pts">${item.pontos} pts</span>
-        </li>`;
-    }).join("");
+    const itens = dados.lista.map((item, i) => `
+      <li class="top10__item ${classes[i] || ""}">
+        <span class="top10__pos">${medalhas[i] || (i + 1)}</span>
+        <span class="top10__name">${escHtmlJ(item.nome)}</span>
+        <span class="top10__pts">${item.pontos} pts</span>
+      </li>`).join("");
 
-    container.innerHTML = `
-      <h3 class="top10__title">${titulo}</h3>
+    container.innerHTML = `<h3 class="top10__title">${titulo}</h3>
       <ul class="top10__list">${itens}</ul>`;
 
   } catch {
-    container.innerHTML = `
-      <h3 class="top10__title">${titulo}</h3>
+    container.innerHTML = `<h3 class="top10__title">${titulo}</h3>
       <p class="top10__empty">Não foi possível carregar o placar.</p>`;
   }
 }
 
-/* Carrega preview do recorde no menu */
 async function carregarPreviewRecorde() {
   for (const jogo of ["snake","flappy"]) {
+    const el = document.getElementById(`record-${jogo}-preview`);
+    if (!el) continue;
     try {
       const resp  = await fetch(`${JOGOS_API}?action=top10&jogo=${jogo}`);
       const dados = await resp.json();
-      const el    = document.getElementById(`record-${jogo}-preview`);
-      if (!el) continue;
-
-      if (dados && dados.lista && dados.lista.length > 0) {
+      if (dados?.lista?.length) {
         const top = dados.lista[0];
         el.textContent = `🥇 Recorde: ${top.nome} — ${top.pontos} pts`;
       } else {
-        el.textContent = "Sem recordes ainda — seja o primeiro!";
+        el.textContent = "Seja o primeiro a pontuar!";
       }
     } catch {
-      const el = document.getElementById(`record-${jogo}-preview`);
-      if (el) el.textContent = "Placar disponível após jogar";
+      el.textContent = "Placar disponível após jogar";
     }
   }
 }
@@ -586,5 +635,4 @@ function escHtmlJ(str) {
     .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-// Inicia previews ao carregar
 carregarPreviewRecorde();
