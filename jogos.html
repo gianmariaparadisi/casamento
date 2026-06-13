@@ -9,241 +9,103 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
-    /* ── JOGOS PAGE ──────────────────────────────────────── */
-    .jogos-hero {
-      padding: 130px 5% 60px;
-      text-align: center;
-      background: var(--bg-main);
-      border-bottom: 1px solid var(--line);
-    }
-    .jogos-hero__key {
-      font-size: 2.5rem;
-      margin-bottom: .75rem;
-      display: block;
-      animation: key-wiggle 3s ease-in-out infinite;
-    }
-    @keyframes key-wiggle {
-      0%,100% { transform: rotate(-8deg); }
-      50%      { transform: rotate(8deg); }
-    }
-    .jogos-hero__title {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 300; color: var(--text-main); line-height: 1.1;
-      margin-bottom: .75rem;
-    }
-    .jogos-hero__sub {
-      font-size: .9rem; color: var(--text-muted); max-width: 460px;
-      margin-inline: auto; line-height: 1.75;
-    }
-
-    /* ── SELEÇÃO DE JOGOS ────────────────────────────────── */
-    .jogos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.5rem; margin-top: 2.5rem;
-    }
-    .jogo-card {
-      background: var(--white); border: 1px solid var(--line-green);
-      border-radius: var(--radius-lg); padding: 2rem 1.75rem;
-      box-shadow: var(--shadow-green); cursor: pointer;
-      transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
-      text-align: center;
-    }
+    /* ── JOGOS HERO ───────────────────────────────────────── */
+    .jogos-hero { padding: 130px 5% 60px; text-align: center; background: var(--bg-main); border-bottom: 1px solid var(--line); }
+    .jogos-hero__key { font-size: 2.5rem; margin-bottom: .75rem; display: block; animation: key-wiggle 3s ease-in-out infinite; }
+    @keyframes key-wiggle { 0%,100%{transform:rotate(-8deg);} 50%{transform:rotate(8deg);} }
+    .jogos-hero__title { font-family: var(--font-display); font-size: clamp(2rem,5vw,3.5rem); font-weight: 300; color: var(--text-main); line-height: 1.1; margin-bottom: .75rem; }
+    .jogos-hero__sub { font-size: .9rem; color: var(--text-muted); max-width: 460px; margin-inline: auto; line-height: 1.75; }
+    /* ── JOGO CARDS ───────────────────────────────────────── */
+    .jogos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-top: 2.5rem; max-width: 900px; margin-inline: auto; }
+    .jogo-card { background: var(--white); border: 1px solid var(--line-green); border-radius: var(--radius-lg); padding: 1.75rem 1.5rem; box-shadow: var(--shadow-green); cursor: pointer; transition: box-shadow var(--transition), transform var(--transition); text-align: center; }
     .jogo-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); border-color: var(--sage); }
-    .jogo-card__emoji { font-size: 3rem; margin-bottom: 1rem; display: block; }
-    .jogo-card__title {
-      font-family: var(--font-display); font-size: 1.5rem;
-      font-weight: 400; margin-bottom: .4rem;
-    }
-    .jogo-card__desc { font-size: .85rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 1.25rem; }
-    .jogo-card__record {
-      font-size: .75rem; color: var(--sage-dark); font-weight: 500;
-      background: var(--bg-green); padding: .35rem .75rem;
-      border-radius: 20px; display: inline-block; margin-bottom: 1rem;
-    }
-
-    /* ── ARENA (wrapper do canvas) ───────────────────────── */
-    .arena {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      padding: 100px 5% 60px;
-      min-height: 100svh;
-    }
-    .arena.active { display: flex; }
-
-    .arena__header {
-      display: flex; align-items: center; justify-content: space-between;
-      width: 100%; max-width: 520px; margin-bottom: 1.25rem;
-    }
-    .arena__title {
-      font-family: var(--font-display); font-size: 1.6rem; font-weight: 400;
-    }
-    .arena__score {
-      font-size: .8rem; font-weight: 600; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--sage-dark);
-      background: var(--bg-green); padding: .4rem .9rem;
-      border-radius: 20px; border: 1px solid var(--line-green);
-    }
-
-    canvas {
-      border: 2px solid var(--line-green);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-green);
-      background: #F0F5EC;
-      display: block;
-      max-width: 100%;
-      touch-action: none;
-    }
-
-    .arena__controls {
-      display: flex; gap: .75rem; margin-top: 1.25rem; flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    /* D-pad mobile */
-    .dpad {
-      display: none;
-      grid-template-columns: repeat(3, 52px);
-      grid-template-rows: repeat(3, 52px);
-      gap: 4px; margin-top: 1.25rem;
-    }
-    .dpad button {
-      width: 52px; height: 52px; border-radius: var(--radius);
-      background: var(--white); border: 1.5px solid var(--line-green);
-      font-size: 1.2rem; display: flex; align-items: center;
-      justify-content: center; box-shadow: var(--shadow);
-      transition: background var(--transition);
-      -webkit-tap-highlight-color: transparent;
-    }
-    .dpad button:active { background: var(--bg-green); }
-    .dpad__up    { grid-column: 2; grid-row: 1; }
-    .dpad__left  { grid-column: 1; grid-row: 2; }
-    .dpad__mid   { grid-column: 2; grid-row: 2; }
-    .dpad__right { grid-column: 3; grid-row: 2; }
-    .dpad__down  { grid-column: 2; grid-row: 3; }
-
-    /* Flappy tap button */
-    .tap-btn {
-      display: none;
-      width: 160px; height: 60px;
-      font-size: 1rem; font-weight: 600;
-      background: var(--sage); color: var(--white);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-green);
-      margin-top: 1rem;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    @media (max-width: 600px) {
-      .dpad { display: grid; }
-      .tap-btn { display: flex; align-items: center; justify-content: center; }
-    }
-
-    /* ── OVERLAY (game over / start) ─────────────────────── */
-    .overlay {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      background: rgba(240,245,236,.92);
-      border-radius: var(--radius-lg);
-      text-align: center; padding: 2rem;
-      backdrop-filter: blur(3px);
-    }
+    .jogo-card__emoji { font-size: 2.5rem; margin-bottom: .75rem; display: block; }
+    .jogo-card__title { font-family: var(--font-display); font-size: 1.35rem; font-weight: 400; margin-bottom: .35rem; }
+    .jogo-card__desc { font-size: .82rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem; }
+    .jogo-card__record { font-size: .72rem; color: var(--sage-dark); font-weight: 500; background: var(--bg-green); padding: .3rem .65rem; border-radius: 20px; display: inline-block; margin-bottom: .85rem; }
+    /* ── ARENAS ───────────────────────────────────────────── */
+    #arena-menu { display: block; padding: 100px 5% 60px; }
+    #arena-snake, #arena-flappy, #arena-bolo, #arena-docinhos, #arena-look { display: none; min-height: 100svh; flex-direction: column; align-items: center; padding-top: 80px; }
+    .arena__header { width: 100%; max-width: 560px; margin-inline: auto; padding: 0 5%; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
+    .arena__title { font-family: var(--font-display); font-size: 1.6rem; font-weight: 400; }
+    .arena__score { font-size: .78rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--sage-dark); background: var(--bg-green); padding: .4rem .9rem; border-radius: 20px; border: 1px solid var(--line-green); }
+    .canvas-wrap { position: relative; width: 520px; max-width: calc(100vw - 2rem); margin-inline: auto; }
+    canvas { display: block; width: 100%; border: 2px solid var(--line-green); border-radius: var(--radius-lg); box-shadow: var(--shadow-green); }
+    #snake-canvas { aspect-ratio: 1; }
+    #bolo-canvas { aspect-ratio: 7/9; }
+    #docinhos-canvas { aspect-ratio: 7/9; }
+    #flappy-canvas { aspect-ratio: 4/5; }
+    .arena-back { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--sage-dark); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; background: none; border: none; padding: 0; }
+    /* Overlay */
+    .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(240,245,236,.92); border-radius: var(--radius-lg); text-align: center; padding: 2rem; backdrop-filter: blur(3px); }
     .overlay.hidden { display: none; }
     .overlay__icon { font-size: 2.5rem; margin-bottom: .75rem; }
-    .overlay__title {
-      font-family: var(--font-display); font-size: 2rem;
-      font-weight: 300; margin-bottom: .4rem;
-    }
-    .overlay__score { font-size: 1.1rem; color: var(--sage-dark); margin-bottom: 1.25rem; }
+    .overlay__title { font-family: var(--font-display); font-size: 2rem; font-weight: 300; margin-bottom: .4rem; }
+    .overlay__score { font-size: .95rem; color: var(--sage-dark); margin-bottom: 1.25rem; }
     .overlay__actions { display: flex; gap: .75rem; flex-wrap: wrap; justify-content: center; }
+    /* D-pad */
+    .dpad { display: none; grid-template-columns: repeat(3,56px); grid-template-rows: repeat(3,56px); gap: 4px; margin: 1rem auto 0; }
+    .dpad button { width:56px;height:56px;border-radius:var(--radius);background:var(--white);border:1.5px solid var(--line-green);font-size:1.2rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);-webkit-tap-highlight-color:transparent; }
+    .dpad button:active { background: var(--bg-green); }
+    .tap-btn { display:none;width:160px;height:60px;font-size:1rem;font-weight:600;background:var(--sage);color:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-green);margin:1rem auto 0;-webkit-tap-highlight-color:transparent; }
+    @media(max-width:600px){ .dpad{display:grid;} .tap-btn{display:flex;align-items:center;justify-content:center;} }
+    /* Postgame */
+    .postgame { width:100%;max-width:560px;margin-inline:auto;padding:1.5rem 5% 60px; }
+    /* Save form */
+    .save-form { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow-green);margin-bottom:1.5rem; }
+    .save-form h3 { font-family:var(--font-display);font-size:1.3rem;font-weight:400;margin-bottom:.75rem; }
+    .save-form__row { display:flex;gap:.6rem; }
+    .save-form__row .rsvp__input { flex:1; }
+    .save-form__msg { font-size:.8rem;margin-top:.5rem; }
+    /* Top 10 */
+    .top10__title { font-family:var(--font-display);font-size:1.4rem;font-weight:400;margin-bottom:1rem; }
+    .top10__list { list-style:none; }
+    .top10__item { display:flex;align-items:center;gap:1rem;padding:.7rem 1rem;border-radius:var(--radius);margin-bottom:.4rem;background:var(--bg-main);border:1px solid var(--line); }
+    .top10__item--gold{background:#FFF8E7;border-color:#E8C84A;} .top10__item--silver{background:#F5F5F5;border-color:#C0C0C0;} .top10__item--bronze{background:#FFF2EC;border-color:#CD7F32;}
+    .top10__pos { font-family:var(--font-display);font-size:1.2rem;font-weight:500;width:28px;text-align:center;flex-shrink:0;color:var(--text-muted); }
+    .top10__name { flex:1;font-size:.92rem;font-weight:500; }
+    .top10__pts { font-size:.85rem;font-weight:600;color:var(--sage-dark);background:var(--bg-green);padding:.25rem .65rem;border-radius:20px; }
+    .top10__empty,.top10__loading { text-align:center;padding:1.5rem;font-size:.85rem;color:var(--text-muted);font-style:italic; }
 
-    /* ── SAVE SCORE FORM ─────────────────────────────────── */
-    .save-form {
-      background: var(--white); border: 1px solid var(--line-green);
-      border-radius: var(--radius-lg); padding: 1.5rem;
-      width: 100%; max-width: 520px; margin-top: 1.25rem;
-      box-shadow: var(--shadow-green);
-    }
-    .save-form h3 {
-      font-family: var(--font-display); font-size: 1.3rem;
-      font-weight: 400; margin-bottom: .75rem;
-    }
-    .save-form__row { display: flex; gap: .6rem; }
-    .save-form__row .rsvp__input { flex: 1; }
-    .save-form__msg { font-size: .8rem; margin-top: .5rem; }
-
-    /* ── TOP 10 ──────────────────────────────────────────── */
-    .top10 {
-      width: 100%; max-width: 520px; margin-top: 1.5rem;
-    }
-    .top10__title {
-      font-family: var(--font-display); font-size: 1.4rem;
-      font-weight: 400; margin-bottom: 1rem; color: var(--text-main);
-    }
-    .top10__list { list-style: none; }
-    .top10__item {
-      display: flex; align-items: center; gap: 1rem;
-      padding: .7rem 1rem; border-radius: var(--radius);
-      margin-bottom: .4rem; background: var(--bg-main);
-      border: 1px solid var(--line);
-      transition: background var(--transition);
-    }
-    .top10__item--gold   { background: #FFF8E7; border-color: #E8C84A; }
-    .top10__item--silver { background: #F5F5F5; border-color: #C0C0C0; }
-    .top10__item--bronze { background: #FFF2EC; border-color: #CD7F32; }
-    .top10__item--me     { background: var(--bg-green); border-color: var(--sage); }
-    .top10__pos {
-      font-family: var(--font-display); font-size: 1.2rem;
-      font-weight: 500; width: 28px; text-align: center; flex-shrink: 0;
-      color: var(--text-muted);
-    }
-    .top10__item--gold   .top10__pos { color: #B8860B; }
-    .top10__item--silver .top10__pos { color: #808080; }
-    .top10__item--bronze .top10__pos { color: #8B4513; }
-    .top10__name { flex: 1; font-size: .92rem; font-weight: 500; }
-    .top10__pts {
-      font-size: .85rem; font-weight: 600; color: var(--sage-dark);
-      background: var(--bg-green); padding: .25rem .65rem;
-      border-radius: 20px;
-    }
-    .top10__empty {
-      text-align: center; padding: 2rem; font-size: .85rem;
-      color: var(--text-muted); font-style: italic;
-    }
-    .top10__loading {
-      text-align: center; padding: 1.5rem; color: var(--sage);
-      font-size: .85rem;
-    }
-
-    /* canvas wrapper for overlay */
-    .canvas-wrap { position: relative; }
-
-    /* ── SELETOR DE ARENAS ────────────────────────────────── */
-    #arena-menu   { display: block; padding: 100px 5% 60px; }
-    #arena-snake  { display: none; }
-    #arena-flappy { display: none; }
-
-    .arena-back {
-      font-size: .75rem; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--sage-dark); text-decoration: underline; text-underline-offset: 3px;
-      cursor: pointer; background: none; border: none;
-      padding: 0; margin-bottom: 1.5rem;
-    }
+    /* ── MONTE O LOOK ───────────────────────────────────── */
+    #arena-look { background: #1A1020; color: #F5ECD8; }
+    .look-stage-wrap { width:100%;max-width:600px;margin-inline:auto;padding:0 5%; }
+    .look-header-bar { background:#120B18;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(200,160,80,.3);width:100%;max-width:600px;margin-inline:auto; }
+    .look-header-title { font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:#C8A050; }
+    .look-body { display:flex;gap:0;width:100%;max-width:600px;margin-inline:auto;min-height:360px;border:1px solid rgba(200,160,80,.2);border-radius:var(--radius-lg);overflow:hidden; }
+    .look-stage { flex:1;display:flex;align-items:center;justify-content:center;padding:20px 10px;background:linear-gradient(160deg,#1A1020 0%,#2A1840 60%,#1A1028 100%);position:relative; }
+    .look-lights { position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-around;padding:6px 20px; }
+    .look-bulb { width:10px;height:10px;border-radius:50%;background:#F5D878;box-shadow:0 0 6px #F5D878; }
+    .look-mirror { position:absolute;top:16px;right:10px;width:44px;height:60px;border:2px solid rgba(200,160,80,.4);border-radius:50% 50% 30% 30%/40% 40% 20% 20%;background:rgba(255,255,255,.04); }
+    #look-panels { width:190px;background:#120B18;overflow-y:auto;max-height:360px;flex-shrink:0; }
+    .look-cat-group {}
+    .look-cat-label { padding:10px 12px 4px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(200,160,80,.6);border-top:1px solid rgba(200,160,80,.12); }
+    .look-cat-group:first-child .look-cat-label { border-top:none; }
+    .look-items-row { display:flex;flex-wrap:wrap;gap:5px;padding:5px 8px 8px; }
+    .look-item-btn { width:42px;height:42px;border-radius:8px;background:rgba(255,255,255,.06);border:1.5px solid rgba(200,160,80,.2);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:background .15s,border-color .15s;flex-shrink:0; }
+    .look-item-btn:hover,.look-item-btn.active { background:rgba(200,160,80,.18);border-color:#C8A050; }
+    .look-footer { padding:14px 20px;background:#120B18;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(200,160,80,.2);flex-wrap:wrap;gap:8px;width:100%;max-width:600px;margin-inline:auto; }
+    #look-result { font-size:13px;color:#C8A050;font-style:italic;flex:1;min-width:160px; }
+    .look-btn-primary { background:#6B2737;color:#F5ECD8;border:none;padding:10px 18px;border-radius:8px;font-family:Georgia;font-size:13px;cursor:pointer;white-space:nowrap; }
+    .look-btn-primary:hover { background:#8B3548; }
+    .look-btn-ghost { background:transparent;color:rgba(200,160,80,.6);border:1px solid rgba(200,160,80,.25);padding:10px 14px;border-radius:8px;font-family:Georgia;font-size:12px;cursor:pointer;white-space:nowrap; }
+    .look-btn-ghost:hover { border-color:#C8A050;color:#C8A050; }
+    @media(max-width:500px){ #look-panels{width:150px;} .look-item-btn{width:36px;height:36px;font-size:16px;} }
   </style>
 </head>
 <body>
 
-  <!-- ─── NAV ───────────────────────────────────────────── -->
+  <!-- NAV -->
   <header class="nav" id="nav">
     <div class="nav__inner">
-      <a href="index.html" class="nav__logo"><img src="assets/img/logo_gianetiago.jpg" alt="Tiago e Gian" class="nav__logo-img" /></a>
-      <nav class="nav__links" id="navLinks" aria-label="Menu principal">
+      <a href="index.html" class="nav__logo">Tiago e Gian</a>
+      <nav class="nav__links" id="navLinks">
         <a href="index.html#evento">O Evento</a>
         <a href="index.html#cerimonia">Programação</a>
         <a href="presentes.html">Presentes</a>
+        <a href="jogos.html" class="nav__key" aria-label="Segredo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3"/></svg>
+        </a>
         <a href="index.html#rsvp" class="nav__cta">Confirmar presença</a>
       </nav>
       <button class="nav__hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
@@ -252,77 +114,74 @@
     </div>
   </header>
 
-  <!-- ═══════════════════════════════════════════════════
-       MENU DE JOGOS
-  ════════════════════════════════════════════════════ -->
+  <!-- ═══ MENU ═══ -->
   <div id="arena-menu">
     <div class="jogos-hero">
-      <span class="jogos-hero__key" aria-hidden="true">🗝️</span>
+      <span class="jogos-hero__key">🗝️</span>
       <h1 class="jogos-hero__title reveal">Você achou o segredo.</h1>
-      <p class="jogos-hero__sub reveal">
-        Jogue, bata recordes e quem chegar ao topo pode ganhar um prêmio especial no dia do casamento.<br>
-        <em>Boa sorte.</em>
-      </p>
+      <p class="jogos-hero__sub reveal">Jogue, bata recordes e quem chegar ao topo pode ganhar um prêmio especial no dia do casamento.</p>
     </div>
-
     <div class="container" style="padding-bottom:80px">
       <div class="jogos-grid">
-
         <div class="jogo-card reveal" onclick="entrarJogo('snake')">
           <span class="jogo-card__emoji">🐍</span>
           <h2 class="jogo-card__title">Snake do Tiago</h2>
           <p class="jogo-card__desc">Guie o Tiago pelos hambúrgueres. Quanto mais ele come, mais difícil fica.</p>
-          <p class="jogo-card__record" id="record-snake-preview">Carregando recordes…</p>
+          <p class="jogo-card__record" id="record-snake-preview">Carregando…</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </div>
-
         <div class="jogo-card reveal" onclick="entrarJogo('flappy')">
           <span class="jogo-card__emoji">🐦</span>
           <h2 class="jogo-card__title">Flappy Gian</h2>
-          <p class="jogo-card__desc">Mantenha o Gian voando sem bater nos canos. Cada cano é um ponto.</p>
-          <p class="jogo-card__record" id="record-flappy-preview">Carregando recordes…</p>
+          <p class="jogo-card__desc">Mantenha o Gian voando sem bater nos canos.</p>
+          <p class="jogo-card__record" id="record-flappy-preview">Carregando…</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </div>
-
+        <div class="jogo-card reveal" onclick="entrarJogo('bolo')">
+          <span class="jogo-card__emoji">🎂</span>
+          <h2 class="jogo-card__title">Empilha o Bolo</h2>
+          <p class="jogo-card__desc">Clique no momento certo e monte o bolo mais alto da festa.</p>
+          <p class="jogo-card__record" id="record-bolo-preview">Carregando…</p>
+          <span class="btn btn--primary btn--sm">Jogar</span>
+        </div>
+        <div class="jogo-card reveal" onclick="entrarJogo('docinhos')">
+          <span class="jogo-card__emoji">🍬</span>
+          <h2 class="jogo-card__title">Pega os Docinhos</h2>
+          <p class="jogo-card__desc">Salve os docinhos antes que os convidados cheguem. 45 segundos.</p>
+          <p class="jogo-card__record" id="record-docinhos-preview">Carregando…</p>
+          <span class="btn btn--primary btn--sm">Jogar</span>
+        </div>
+        <div class="jogo-card reveal" onclick="entrarJogo('look')">
+          <span class="jogo-card__emoji">✨</span>
+          <h2 class="jogo-card__title">Monte o Look</h2>
+          <p class="jogo-card__desc">Escolha um look digno de entrar depois dos noivos.</p>
+          <p class="jogo-card__record" style="visibility:hidden">—</p>
+          <span class="btn btn--primary btn--sm">Montar</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════
-       ARENA SNAKE
-  ════════════════════════════════════════════════════ -->
+  <!-- ═══ SNAKE ═══ -->
   <div id="arena-snake">
-    <div style="width:100%;max-width:520px;margin-inline:auto;padding:100px 5% 0">
+    <div style="width:100%;max-width:560px;margin-inline:auto;padding:0 5%">
       <button class="arena-back" onclick="voltarMenu('snake')">← Voltar aos jogos</button>
       <div class="arena__header">
         <h2 class="arena__title">Snake do Tiago 🐍</h2>
-        <div class="arena__score">Pontos: <span id="snake-score">0</span></div>
+        <div class="arena__score">Hambúrgueres: <span id="snake-score">0</span></div>
       </div>
     </div>
-
-    <div class="canvas-wrap" style="padding:0 5%">
-      <canvas id="snake-canvas" width="480" height="480" tabindex="0" aria-label="Jogo Snake"></canvas>
-      <div class="overlay" id="snake-overlay">
-        <div class="overlay__icon">🐍</div>
-        <div class="overlay__title" id="snake-overlay-title">Snake do Tiago</div>
-        <div class="overlay__score" id="snake-overlay-score">Guie o Tiago pelos hambúrgueres!</div>
-        <div class="overlay__actions">
-          <button class="btn btn--primary" onclick="iniciarSnake()">Começar</button>
-        </div>
-      </div>
+    <div class="canvas-wrap">
+      <canvas id="snake-canvas" tabindex="0" aria-label="Jogo Snake"></canvas>
     </div>
-
-    <!-- D-pad mobile -->
-    <div class="dpad" id="snake-dpad">
-      <button class="dpad__up"    onclick="snakeDirInput('UP')"    aria-label="Cima">↑</button>
-      <button class="dpad__left"  onclick="snakeDirInput('LEFT')"  aria-label="Esquerda">←</button>
-      <button class="dpad__mid"   disabled style="opacity:.3">·</button>
-      <button class="dpad__right" onclick="snakeDirInput('RIGHT')" aria-label="Direita">→</button>
-      <button class="dpad__down"  onclick="snakeDirInput('DOWN')"  aria-label="Baixo">↓</button>
+    <div class="dpad">
+      <div></div><button onclick="snakeDirInput('UP')" aria-label="Cima">↑</button><div></div>
+      <button onclick="snakeDirInput('LEFT')" aria-label="Esquerda">←</button>
+      <div style="opacity:.2">·</div>
+      <button onclick="snakeDirInput('RIGHT')" aria-label="Direita">→</button>
+      <div></div><button onclick="snakeDirInput('DOWN')" aria-label="Baixo">↓</button><div></div>
     </div>
-
-    <!-- Save + top10 (aparecem após game over) -->
-    <div id="snake-postgame" style="display:none;width:100%;max-width:520px;margin-inline:auto;padding:0 5% 60px">
+    <div id="snake-postgame" class="postgame" style="display:none">
       <div class="save-form">
         <h3>Salvar seu recorde</h3>
         <div class="save-form__row">
@@ -331,41 +190,24 @@
         </div>
         <p class="save-form__msg" id="snake-save-msg"></p>
       </div>
-
-      <div class="top10" id="snake-top10">
-        <h3 class="top10__title">🏆 Top 10 — Snake</h3>
-        <p class="top10__loading">Carregando…</p>
-      </div>
+      <div id="snake-top10"></div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════
-       ARENA FLAPPY
-  ════════════════════════════════════════════════════ -->
+  <!-- ═══ FLAPPY ═══ -->
   <div id="arena-flappy">
-    <div style="width:100%;max-width:520px;margin-inline:auto;padding:100px 5% 0">
+    <div style="width:100%;max-width:560px;margin-inline:auto;padding:0 5%">
       <button class="arena-back" onclick="voltarMenu('flappy')">← Voltar aos jogos</button>
       <div class="arena__header">
         <h2 class="arena__title">Flappy Gian 🐦</h2>
-        <div class="arena__score">Pontos: <span id="flappy-score">0</span></div>
+        <div class="arena__score">Canos: <span id="flappy-score">0</span></div>
       </div>
     </div>
-
-    <div class="canvas-wrap" style="padding:0 5%">
-      <canvas id="flappy-canvas" width="480" height="600" tabindex="0" aria-label="Jogo Flappy Bird"></canvas>
-      <div class="overlay" id="flappy-overlay">
-        <div class="overlay__icon">🐦</div>
-        <div class="overlay__title" id="flappy-overlay-title">Flappy Gian</div>
-        <div class="overlay__score" id="flappy-overlay-score">Toque / pressione espaço para voar!</div>
-        <div class="overlay__actions">
-          <button class="btn btn--primary" onclick="iniciarFlappy()">Começar</button>
-        </div>
-      </div>
+    <div class="canvas-wrap">
+      <canvas id="flappy-canvas" tabindex="0" aria-label="Jogo Flappy"></canvas>
     </div>
-
-    <button class="tap-btn" id="flappy-tap" onclick="flappyTap()">TAP ▲</button>
-
-    <div id="flappy-postgame" style="display:none;width:100%;max-width:520px;margin-inline:auto;padding:0 5% 60px">
+    <button class="tap-btn" onclick="flappyTap()">TAP ▲</button>
+    <div id="flappy-postgame" class="postgame" style="display:none">
       <div class="save-form">
         <h3>Salvar seu recorde</h3>
         <div class="save-form__row">
@@ -374,15 +216,90 @@
         </div>
         <p class="save-form__msg" id="flappy-save-msg"></p>
       </div>
-
-      <div class="top10" id="flappy-top10">
-        <h3 class="top10__title">🏆 Top 10 — Flappy Gian</h3>
-        <p class="top10__loading">Carregando…</p>
-      </div>
+      <div id="flappy-top10"></div>
     </div>
   </div>
 
-  <!-- ─── RODAPÉ ─────────────────────────────────────────── -->
+  <!-- ═══ BOLO ═══ -->
+  <div id="arena-bolo">
+    <div style="width:100%;max-width:560px;margin-inline:auto;padding:0 5%">
+      <button class="arena-back" onclick="voltarMenu('bolo')">← Voltar aos jogos</button>
+      <div class="arena__header">
+        <h2 class="arena__title">Empilha o Bolo 🎂</h2>
+        <div class="arena__score"><span id="bolo-score">0 andares</span></div>
+      </div>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="bolo-canvas" tabindex="0" aria-label="Jogo Empilha o Bolo"></canvas>
+    </div>
+    <div id="bolo-postgame" class="postgame" style="display:none">
+      <div class="save-form">
+        <h3>Salvar seu recorde</h3>
+        <div class="save-form__row">
+          <input type="text" id="bolo-nome" class="rsvp__input" placeholder="Seu nome" maxlength="30" autocomplete="name" />
+          <button class="btn btn--primary btn--sm" onclick="salvarScore('bolo')">Salvar</button>
+        </div>
+        <p class="save-form__msg" id="bolo-save-msg"></p>
+      </div>
+      <div id="bolo-top10"></div>
+    </div>
+  </div>
+
+  <!-- ═══ DOCINHOS ═══ -->
+  <div id="arena-docinhos">
+    <div style="width:100%;max-width:560px;margin-inline:auto;padding:0 5%">
+      <button class="arena-back" onclick="voltarMenu('docinhos')">← Voltar aos jogos</button>
+      <div class="arena__header">
+        <h2 class="arena__title">Pega os Docinhos 🍬</h2>
+        <div class="arena__score" style="display:flex;gap:12px">
+          <span id="docinhos-score">0 pts</span>
+          <span id="docinhos-time">45s</span>
+        </div>
+      </div>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="docinhos-canvas" tabindex="0" aria-label="Jogo Pega os Docinhos"></canvas>
+    </div>
+    <div id="docinhos-postgame" class="postgame" style="display:none">
+      <div class="save-form">
+        <h3>Salvar seu recorde</h3>
+        <div class="save-form__row">
+          <input type="text" id="docinhos-nome" class="rsvp__input" placeholder="Seu nome" maxlength="30" autocomplete="name" />
+          <button class="btn btn--primary btn--sm" onclick="salvarScore('docinhos')">Salvar</button>
+        </div>
+        <p class="save-form__msg" id="docinhos-save-msg"></p>
+      </div>
+      <div id="docinhos-top10"></div>
+    </div>
+  </div>
+
+  <!-- ═══ MONTE O LOOK ═══ -->
+  <div id="arena-look">
+    <div style="width:100%;max-width:600px;margin-inline:auto;padding:80px 5% 0">
+      <button class="arena-back" style="color:rgba(200,160,80,.7)" onclick="voltarMenu('look')">← Voltar aos jogos</button>
+    </div>
+    <div class="look-header-bar">
+      <div class="look-header-title">Monte o Look da Festa ✨</div>
+    </div>
+    <div class="look-body">
+      <div class="look-stage">
+        <div class="look-lights">
+          <div class="look-bulb"></div><div class="look-bulb"></div><div class="look-bulb"></div><div class="look-bulb"></div><div class="look-bulb"></div>
+        </div>
+        <div class="look-mirror"></div>
+        <svg id="look-svg" viewBox="0 0 140 280" width="140" height="280" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div id="look-panels"></div>
+    </div>
+    <div class="look-footer">
+      <div id="look-result">Escolha um look digno de entrar depois dos noivos.</div>
+      <button class="look-btn-ghost" onclick="lookReset()">Limpar</button>
+      <button class="look-btn-primary" onclick="lookAvaliar()">Look pronto ✓</button>
+    </div>
+    <div style="height:60px"></div>
+  </div>
+
+  <!-- FOOTER -->
   <footer class="footer">
     <div class="container footer__inner">
       <p class="footer__names">Tiago e Gian</p>
