@@ -16,113 +16,42 @@
       text-align: center;
       border-bottom: 1px solid var(--line-green);
     }
-    .page-hero__eyebrow {
-      font-size: .75rem; letter-spacing: .25em; text-transform: uppercase;
-      color: var(--sage); margin-bottom: .75rem;
-    }
-    .page-hero__title {
-      font-family: var(--font-display);
-      font-size: clamp(2.2rem, 5vw, 4rem);
-      font-weight: 300; color: var(--text-main); line-height: 1.1;
-      margin-bottom: 1rem;
-    }
-    .page-hero__sub {
-      font-size: .95rem; color: var(--text-muted);
-      max-width: 520px; margin-inline: auto; line-height: 1.85;
-    }
+    .page-hero__eyebrow { font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;color:var(--sage);margin-bottom:.75rem; }
+    .page-hero__title { font-family:var(--font-display);font-size:clamp(2.2rem,5vw,4rem);font-weight:300;color:var(--text-main);line-height:1.1;margin-bottom:1rem; }
+    .page-hero__sub { font-size:.95rem;color:var(--text-muted);max-width:520px;margin-inline:auto;line-height:1.85; }
 
-    .transfer__info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
-      margin-bottom: 3rem;
-    }
-    @media (max-width: 600px) {
-      .transfer__info-grid { grid-template-columns: 1fr; }
-    }
+    .transfer__info-grid { display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:3rem; }
+    @media(max-width:600px){ .transfer__info-grid{grid-template-columns:1fr;} }
 
-    .transfer__rota {
-      background: var(--white);
-      border: 1px solid var(--line-green);
-      border-radius: var(--radius-lg);
-      padding: 1.75rem;
-      box-shadow: var(--shadow-green);
-    }
-    .transfer__rota-emoji { font-size: 1.75rem; margin-bottom: .6rem; display: block; }
-    .transfer__rota-title {
-      font-family: var(--font-display);
-      font-size: 1.3rem; font-weight: 400;
-      margin-bottom: .3rem;
-    }
-    .transfer__rota-info {
-      font-size: .85rem; color: var(--text-muted); line-height: 1.7;
-    }
-    .transfer__contato {
-      background: var(--bg-soft);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem 2rem;
-      margin-bottom: 3rem;
-      display: flex; align-items: flex-start; gap: 1.25rem;
-    }
-    .transfer__contato-icon { color: var(--sage); flex-shrink: 0; margin-top: .15rem; }
-    .transfer__contato-title {
-      font-family: var(--font-display);
-      font-size: 1.1rem; font-weight: 400; margin-bottom: .3rem;
-    }
-    .transfer__contato-text { font-size: .85rem; color: var(--text-muted); line-height: 1.7; }
-    .transfer__contato strong { color: var(--text-main); }
+    .transfer__rota { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:1.75rem;box-shadow:var(--shadow-green); }
+    .transfer__rota-emoji { font-size:1.75rem;margin-bottom:.6rem;display:block; }
+    .transfer__rota-title { font-family:var(--font-display);font-size:1.3rem;font-weight:400;margin-bottom:.3rem; }
+    .transfer__rota-info { font-size:.85rem;color:var(--text-muted);line-height:1.7; }
 
-    .transfer__form-wrap {
-      background: var(--white);
-      border: 1px solid var(--line-green);
-      border-radius: var(--radius-lg);
-      padding: 2.5rem;
-      box-shadow: var(--shadow-green);
-      max-width: 560px;
-      margin-inline: auto;
-    }
-    .transfer__form-title {
-      font-family: var(--font-display);
-      font-size: 1.7rem; font-weight: 300;
-      margin-bottom: .4rem;
-    }
-    .transfer__form-sub {
-      font-size: .88rem; color: var(--text-muted);
-      line-height: 1.7; margin-bottom: 1.75rem;
-    }
+    .transfer__aviso { background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius-lg);padding:1.5rem 2rem;margin-bottom:3rem;display:flex;align-items:flex-start;gap:1.25rem; }
+    .transfer__aviso-icon { color:var(--sage);flex-shrink:0;margin-top:.15rem; }
+    .transfer__aviso-title { font-family:var(--font-display);font-size:1.1rem;font-weight:400;margin-bottom:.3rem; }
+    .transfer__aviso-text { font-size:.85rem;color:var(--text-muted);line-height:1.7; }
 
-    .trecho__options { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.25rem; }
-    .trecho__option {
-      display: flex; align-items: flex-start; gap: .75rem;
-      padding: .9rem 1.1rem;
-      border: 1.5px solid var(--line-green);
-      border-radius: var(--radius);
-      cursor: pointer;
-      transition: border-color var(--transition), background var(--transition);
-    }
-    .trecho__option:has(input:checked) {
-      border-color: var(--sage);
-      background: var(--bg-green);
-    }
-    .trecho__option input[type="radio"] { margin-top: .15rem; accent-color: var(--sage); }
-    .trecho__option-label { font-size: .9rem; font-weight: 500; color: var(--text-main); }
-    .trecho__option-sub { font-size: .78rem; color: var(--text-muted); margin-top: .1rem; }
+    .transfer__form-wrap { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:2.5rem;box-shadow:var(--shadow-green);max-width:560px;margin-inline:auto; }
+    .transfer__form-title { font-family:var(--font-display);font-size:1.7rem;font-weight:300;margin-bottom:.4rem; }
+    .transfer__form-sub { font-size:.88rem;color:var(--text-muted);line-height:1.7;margin-bottom:1.75rem; }
 
-    .transfer__sucesso {
-      text-align: center; padding: 2rem 0;
-    }
-    .transfer__sucesso-icon { font-size: 2.5rem; margin-bottom: .75rem; }
-    .transfer__sucesso h3 {
-      font-family: var(--font-display);
-      font-size: 1.7rem; font-weight: 300; margin-bottom: .5rem;
-    }
-    .transfer__sucesso p { font-size: .9rem; color: var(--text-muted); line-height: 1.7; }
+    .trecho__options { display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.25rem; }
+    .trecho__option { display:flex;align-items:flex-start;gap:.75rem;padding:.9rem 1.1rem;border:1.5px solid var(--line-green);border-radius:var(--radius);cursor:pointer;transition:border-color var(--transition),background var(--transition); }
+    .trecho__option:has(input:checked) { border-color:var(--sage);background:var(--bg-green); }
+    .trecho__option input[type="radio"] { margin-top:.15rem;accent-color:var(--sage); }
+    .trecho__option-label { font-size:.9rem;font-weight:500;color:var(--text-main); }
+    .trecho__option-sub { font-size:.78rem;color:var(--text-muted);margin-top:.1rem; }
+
+    .transfer__sucesso { text-align:center;padding:2rem 0; }
+    .transfer__sucesso-icon { font-size:2.5rem;margin-bottom:.75rem; }
+    .transfer__sucesso h3 { font-family:var(--font-display);font-size:1.7rem;font-weight:300;margin-bottom:.5rem; }
+    .transfer__sucesso p { font-size:.9rem;color:var(--text-muted);line-height:1.7; }
   </style>
 </head>
 <body>
 
-  <!-- ─── NAV ───────────────────────────────────────────── -->
   <header class="nav" id="nav">
     <div class="nav__inner">
       <a href="index.html" class="nav__logo">Tiago e Gian</a>
@@ -141,7 +70,6 @@
     </div>
   </header>
 
-  <!-- ─── HERO ──────────────────────────────────────────── -->
   <div class="page-hero">
     <p class="page-hero__eyebrow reveal">Como chegar</p>
     <h1 class="page-hero__title reveal">Transfer &<br><em>Transporte</em></h1>
@@ -150,49 +78,43 @@
     </p>
   </div>
 
-  <!-- ─── CONTEÚDO ─────────────────────────────────────── -->
   <section class="section">
     <div class="container container--narrow">
 
       <div class="transfer__info-grid reveal">
         <div class="transfer__rota">
           <span class="transfer__rota-emoji">🚌</span>
-          <h3 class="transfer__rota-title">Campinas → Limeira</h3>
+          <h3 class="transfer__rota-title">Campinas ↔ Limeira</h3>
           <p class="transfer__rota-info">
-            Saída do centro de Campinas com ponto de embarque a confirmar.<br><br>
-            Contato: <strong>XXXX Transfers</strong><br>
-            📞 (19) XXXXX-XXXX
+            Ida e volta — saída de Campinas no dia do casamento e retorno após a festa.<br><br>
+            Ponto de embarque e horários a confirmar conforme formação do grupo.
           </p>
         </div>
         <div class="transfer__rota">
           <span class="transfer__rota-emoji">🚌</span>
-          <h3 class="transfer__rota-title">São Paulo → Limeira</h3>
+          <h3 class="transfer__rota-title">São Paulo ↔ Limeira</h3>
           <p class="transfer__rota-info">
-            Saída da região central de SP com ponto de embarque a confirmar.<br><br>
-            Contato: <strong>XXXX Transfers</strong><br>
-            📞 (11) XXXXX-XXXX
+            Ida e volta — saída de São Paulo no dia do casamento e retorno após a festa.<br><br>
+            Ponto de embarque e horários a confirmar conforme formação do grupo.
           </p>
         </div>
       </div>
 
-      <div class="transfer__contato reveal">
-        <div class="transfer__contato-icon">
+      <div class="transfer__aviso reveal">
+        <div class="transfer__aviso-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
         <div>
-          <h3 class="transfer__contato-title">Como vai funcionar</h3>
-          <p class="transfer__contato-text">
-            O transfer não é organizado diretamente por nós — mas queremos ajudar a conectar quem tem interesse. Ao preencher o formulário abaixo, vamos juntar os interessados de cada trecho e facilitar a formação de grupos para que vocês possam combinar diretamente com a <strong>XXXX Transfers</strong>. Quanto mais gente do mesmo trecho, melhor o valor por pessoa!
+          <h3 class="transfer__aviso-title">Como vai funcionar</h3>
+          <p class="transfer__aviso-text">
+            Registre seu interesse abaixo. Vamos reunir todos os interessados por trecho e entrar em contato para combinar os detalhes e formar os grupos. Quanto mais gente do mesmo trecho, melhor o valor por pessoa!
           </p>
         </div>
       </div>
 
-      <!-- Formulário de interesse -->
       <div class="transfer__form-wrap reveal" id="transferFormWrap">
         <h2 class="transfer__form-title">Tenho interesse</h2>
-        <p class="transfer__form-sub">
-          Preencha abaixo e te avisamos quando formarmos um grupo do seu trecho. Sem compromisso por enquanto!
-        </p>
+        <p class="transfer__form-sub">Preencha abaixo e te avisamos quando formarmos um grupo do seu trecho. Sem compromisso por enquanto!</p>
 
         <div id="transferForm">
           <div class="rsvp__field">
@@ -206,15 +128,15 @@
               <label class="trecho__option">
                 <input type="radio" name="trecho" value="campinas" />
                 <div>
-                  <div class="trecho__option-label">Campinas → Limeira</div>
-                  <div class="trecho__option-sub">e volta de Limeira → Campinas</div>
+                  <div class="trecho__option-label">Campinas ↔ Limeira</div>
+                  <div class="trecho__option-sub">ida e volta</div>
                 </div>
               </label>
               <label class="trecho__option">
                 <input type="radio" name="trecho" value="sao_paulo" />
                 <div>
-                  <div class="trecho__option-label">São Paulo → Limeira</div>
-                  <div class="trecho__option-sub">e volta de Limeira → São Paulo</div>
+                  <div class="trecho__option-label">São Paulo ↔ Limeira</div>
+                  <div class="trecho__option-sub">ida e volta</div>
                 </div>
               </label>
               <label class="trecho__option">
@@ -257,7 +179,6 @@
     </div>
   </section>
 
-  <!-- ─── RODAPÉ ─────────────────────────────────────────── -->
   <footer class="footer">
     <div class="container footer__inner">
       <p class="footer__names">Tiago e Gian</p>
@@ -275,33 +196,29 @@
     const TRANSFER_API = "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
 
     window.enviarInteresseTransfer = async function() {
-      const nome    = (document.getElementById("transferNome")?.value || "").trim();
+      const nome     = (document.getElementById("transferNome")?.value || "").trim();
       const trechoEl = document.querySelector('input[name="trecho"]:checked');
-      const trecho  = trechoEl ? trechoEl.value : "";
-      const pessoas = (document.getElementById("transferPessoas")?.value || "").trim();
-      const tel     = (document.getElementById("transferTel")?.value || "").trim();
-      const erroDiv = document.getElementById("transferErro");
+      const trecho   = trechoEl ? trechoEl.value : "";
+      const pessoas  = (document.getElementById("transferPessoas")?.value || "").trim();
+      const tel      = (document.getElementById("transferTel")?.value || "").trim();
+      const erroDiv  = document.getElementById("transferErro");
 
       erroDiv.innerHTML = "";
 
       if (!nome) {
         erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Informe seu nome.</p>`;
-        document.getElementById("transferNome")?.focus();
-        return;
+        document.getElementById("transferNome")?.focus(); return;
       }
       if (!trecho) {
-        erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Selecione o trecho desejado.</p>`;
-        return;
+        erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Selecione o trecho desejado.</p>`; return;
       }
       if (!pessoas || isNaN(pessoas) || Number(pessoas) < 1) {
         erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Informe quantas pessoas.</p>`;
-        document.getElementById("transferPessoas")?.focus();
-        return;
+        document.getElementById("transferPessoas")?.focus(); return;
       }
       if (!tel || tel.replace(/\D/g, "").length < 8) {
         erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Informe um WhatsApp válido.</p>`;
-        document.getElementById("transferTel")?.focus();
-        return;
+        document.getElementById("transferTel")?.focus(); return;
       }
 
       const btn = document.querySelector('#transferForm .btn--primary');
