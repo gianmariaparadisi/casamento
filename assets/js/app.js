@@ -7,7 +7,7 @@
 const API_URL       = "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
 const PIX_CODE      = "COLE_AQUI_O_CODIGO_PIX_COPIA_E_COLA"; // ← substituir
 const EMAIL_CONTATO = "casamento.tiagoegian@gmail.com";
-const DATA_LIMITE_ALTERACAO = "12 de outubro de 2026";
+const DATA_LIMITE_ALTERACAO = "12 de agosto de 2026";
 const DATA_CASAMENTO = new Date("2026-12-12T16:30:00-03:00");
 
 /* ── ESTADO ───────────────────────────────────────────────── */
@@ -195,8 +195,10 @@ window.buscar = async function() {
       resultado.classList.remove("oculto");
       resultado.innerHTML = `
         <p class="rsvp__msg rsvp__msg--info">
-          Não encontramos esse nome. Tente pelo primeiro nome ou sobrenome.<br>
-          Dificuldades? <a href="mailto:${EMAIL_CONTATO}" style="color:var(--sage-dark)">${EMAIL_CONTATO}</a>
+          Hmmmm... não encontramos esse nome... já sabe né...<br>
+          <strong>BRINCADEIRINHA!</strong> 😄<br>
+          Tente pelo primeiro nome ou sobrenome.<br>
+          Ainda com dificuldades? Fale com a assessoria: <strong>(14) 99189-8540</strong>
         </p>`;
       return;
     }
