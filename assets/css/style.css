@@ -772,3 +772,195 @@ details[open] .faq__question::after { transform: rotate(45deg); }
   color: var(--sage-dark) !important;
   transform: rotate(15deg);
 }
+
+/* ══════════════════════════════════════════════════════════
+   FILTRO GLOBAL DE IMAGENS — Warm Matte
+   Aplica em todas as fotos do site de uma vez
+══════════════════════════════════════════════════════════ */
+.site-img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: sepia(15%) saturate(88%) brightness(97%) contrast(104%);
+  transition: filter .4s ease;
+}
+/* Ilustrações (desenho da fazenda, logo) — sem filtro fotográfico */
+.site-img--ilustracao {
+  filter: none;
+  width: 100%; height: 100%; object-fit: contain;
+  background: var(--bg-main);
+}
+
+/* ── NAV LOGO ────────────────────────────────────────────── */
+.nav__logo-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+  filter: none;
+  display: block;
+}
+.nav__logo { padding: 0; line-height: 1; }
+
+/* ── HERO COM FOTO REAL ──────────────────────────────────── */
+.hero__bg { position: absolute; inset: 0; overflow: hidden; }
+.hero__bg-img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: sepia(15%) saturate(80%) brightness(60%) contrast(105%);
+}
+/* Overlay de gradiente sobre a foto */
+.hero__bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(80,107,69,.45) 0%,
+    rgba(42,40,32,.55) 55%,
+    rgba(92,107,56,.3) 100%
+  );
+}
+
+/* ── HERO LOGO (substitui o título de texto) ─────────────── */
+.hero__logo-wrap { margin-bottom: .5rem; }
+.hero__logo {
+  height: clamp(80px, 18vw, 160px);
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1); /* branco sobre foto escura */
+  opacity: .92;
+  display: block;
+  margin-inline: auto;
+}
+
+/* ── FOOTER LOGO ─────────────────────────────────────────── */
+.footer__logo {
+  height: 60px; width: auto; object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: .75;
+  margin-bottom: .5rem;
+}
+
+/* ── EVENTO: ilustração da fazenda ──────────────────────── */
+.evento__foto {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-green);
+  background: var(--bg-main);
+  padding: 1rem;
+}
+
+/* ── TIMELINE WRAP ───────────────────────────────────────── */
+.timeline-wrap {
+  max-width: 600px;
+  margin-top: 4rem;
+}
+.timeline-titulo {
+  font-family: var(--font-display);
+  font-size: 2rem; font-weight: 300;
+  margin-bottom: 2rem; color: var(--text-main);
+}
+
+/* ══════════════════════════════════════════════════════════
+   JOGOS — OTIMIZAÇÃO DESKTOP E MOBILE
+══════════════════════════════════════════════════════════ */
+
+/* Container geral das arenas */
+#arena-snake,
+#arena-flappy {
+  min-height: 100svh;
+  padding-top: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Header da arena */
+.arena__header {
+  width: 100%;
+  max-width: 560px;
+  margin-inline: auto;
+  padding: 0 5%;
+  margin-bottom: 1rem;
+}
+
+/* Canvas — centralizado e responsivo */
+canvas {
+  display: block;
+  /* Desktop: tamanho fixo elegante */
+  width: 520px;
+  max-width: calc(100vw - 2rem);
+  /* altura proporcional via aspect-ratio no JS,
+     mas garantimos um máximo */
+  max-height: 80svh;
+}
+
+/* Wrapper do canvas */
+.canvas-wrap {
+  position: relative;
+  width: 520px;
+  max-width: calc(100vw - 2rem);
+  margin-inline: auto;
+}
+
+/* Postgame (save + top10) */
+#snake-postgame,
+#flappy-postgame {
+  width: 100%;
+  max-width: 560px;
+  margin-inline: auto;
+  padding: 1.5rem 5% 80px;
+}
+
+/* D-pad — mobile only, bem posicionado */
+.dpad {
+  margin-top: 1rem;
+  margin-inline: auto;
+}
+
+/* Tap button Flappy — mobile */
+.tap-btn {
+  margin-inline: auto;
+}
+
+/* Overlay dentro do canvas-wrap */
+.overlay {
+  border-radius: var(--radius-lg);
+}
+
+/* Cards de jogo no menu — desktop lado a lado */
+.jogos-grid {
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+/* Desktop: canvas maior */
+@media (min-width: 768px) {
+  canvas { width: 520px; }
+  .canvas-wrap { width: 520px; }
+  #snake-canvas { height: 520px; }
+  #flappy-canvas { height: 600px; }
+  .dpad { display: none !important; }
+  .tap-btn { display: none !important; }
+}
+
+/* Mobile: canvas ocupa a largura toda */
+@media (max-width: 767px) {
+  canvas {
+    width: calc(100vw - 2rem);
+    max-width: 420px;
+  }
+  .canvas-wrap {
+    width: calc(100vw - 2rem);
+    max-width: 420px;
+  }
+  #snake-canvas {
+    height: calc(100vw - 2rem);
+    max-height: 420px;
+  }
+  #flappy-canvas {
+    height: calc((100vw - 2rem) * 1.25);
+    max-height: 500px;
+  }
+  .arena__header { padding: 0 1rem; }
+  #snake-postgame,
+  #flappy-postgame { padding: 1rem 1rem 60px; }
+}
