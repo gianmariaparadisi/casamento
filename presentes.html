@@ -10,7 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
-    /* Estilos específicos desta página */
     .presentes-hero {
       padding: 140px 5% 80px;
       background: var(--bg-green);
@@ -31,14 +30,11 @@
       font-size: 1rem; color: var(--text-muted);
       max-width: 500px; margin-inline: auto; line-height: 1.8;
     }
-
-    /* Grid de presentes */
     .presentes__grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 1.25rem; margin-top: 3rem;
     }
-
     .presente__card {
       background: var(--white); border: 1px solid var(--line-green);
       border-radius: var(--radius-lg); overflow: hidden;
@@ -49,8 +45,6 @@
     .presente__card:hover {
       box-shadow: var(--shadow-lg); transform: translateY(-3px);
     }
-
-    /* Foto do presente */
     .presente__foto {
       width: 100%; height: 200px; object-fit: cover;
     }
@@ -60,7 +54,6 @@
       font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
       color: rgba(255,255,255,.5);
     }
-
     .presente__body {
       padding: 1.5rem 1.5rem 1.75rem;
       display: flex; flex-direction: column; gap: .4rem; flex: 1;
@@ -79,8 +72,6 @@
       margin-top: .5rem;
     }
     .presente__card .btn { align-self: flex-start; margin-top: .85rem; }
-
-    /* Card customizado */
     .presente__card--custom {
       border: 2px dashed var(--line-green);
       background: var(--bg-green);
@@ -90,8 +81,6 @@
       color: var(--sage-dark);
       font-size: .8rem;
     }
-
-    /* Pix info box na página */
     .pix-info {
       background: var(--white); border: 1px solid var(--line-green);
       border-radius: var(--radius-lg); padding: 2rem;
@@ -104,7 +93,6 @@
       font-weight: 400; margin-bottom: .4rem;
     }
     .pix-info__text { font-size: .88rem; color: var(--text-muted); line-height: 1.75; }
-
     @media (max-width: 768px) {
       .pix-info { flex-direction: column; gap: 1rem; }
       .presentes__grid { grid-template-columns: 1fr; }
@@ -116,10 +104,10 @@
   <!-- ─── NAV ───────────────────────────────────────────── -->
   <header class="nav" id="nav">
     <div class="nav__inner">
-      <a href="index.html" class="nav__logo"><img src="assets/img/logo_gianetiago.jpg" alt="Tiago e Gian" class="nav__logo-img" /></a>
+      <a href="index.html" class="nav__logo">Tiago e Gian</a>
       <nav class="nav__links" id="navLinks" aria-label="Menu principal">
-        <a href="index.html#evento">O Evento</a>
-        <a href="index.html#cerimonia">Programação</a>
+        <a href="index.html#evento">O Dia</a>
+        <a href="index.html#cerimonia">Local & Orientações</a>
         <a href="presentes.html" style="color:var(--sage-dark);font-weight:600">Presentes</a>
         <a href="jogos.html" class="nav__key" aria-label="Segredo">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3"/></svg>
@@ -148,16 +136,15 @@
 
       <div class="presentes__grid" id="presentesGrid">
 
-        <!-- Presentes fixos -->
         <article class="presente__card reveal"
           data-nome="Passeio de barco"
-          data-valor="350"
+          data-valor="600"
           data-desc="Uma tarde inteira no mar, só vocês dois.">
           <img src="assets/img/P01.jpg" alt="Passeio de barco" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Passeio de barco</h3>
             <p class="presente__desc">Uma tarde inteira no mar, só vocês dois.</p>
-            <p class="presente__valor">R$ 350</p>
+            <p class="presente__valor">R$ 600</p>
             <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
           </div>
         </article>
@@ -177,13 +164,13 @@
 
         <article class="presente__card reveal"
           data-nome="Resort all inclusive"
-          data-valor="600"
+          data-valor="1200"
           data-desc="Uma escapada completa, sem se preocupar com mais nada.">
           <img src="assets/img/P03.jpg" alt="Resort all inclusive" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Resort all inclusive</h3>
             <p class="presente__desc">Uma escapada completa, sem se preocupar com mais nada.</p>
-            <p class="presente__valor">R$ 600</p>
+            <p class="presente__valor">R$ 1.200</p>
             <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
           </div>
         </article>
@@ -216,13 +203,13 @@
 
         <article class="presente__card reveal"
           data-nome="Um mergulho relaxante"
-          data-valor="120"
+          data-valor="350"
           data-desc="Um momento de paz na água, sem pressa de sair.">
           <img src="assets/img/P06.jpg" alt="Um mergulho relaxante" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Um mergulho relaxante</h3>
             <p class="presente__desc">Um momento de paz na água, sem pressa de sair.</p>
-            <p class="presente__valor">R$ 120</p>
+            <p class="presente__valor">R$ 350</p>
             <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
           </div>
         </article>
@@ -243,8 +230,7 @@
         <article class="presente__card reveal"
           data-nome="Sessão de massagem relaxante"
           data-valor="200"
-          data-desc="Porque depois de organizar um casamento, vocês merecem."
-          >
+          data-desc="Porque depois de organizar um casamento, vocês merecem.">
           <img src="assets/img/P08.jpg" alt="Sessão de massagem relaxante" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Sessão de massagem relaxante</h3>
@@ -290,7 +276,7 @@
         <div>
           <h3 class="pix-info__title">Como funciona</h3>
           <p class="pix-info__text">
-            Ao clicar em "Presentear", você verá a chave Pix para transferência direta.<br>
+            Ao clicar em "Presentear", você verá o código Pix copia-e-cola para transferência direta.<br>
             Depois basta confirmar seu nome e e-mail — enviaremos uma cópia para você e avisaremos os noivos.<br>
             O site não confirma o Pix automaticamente; a confirmação é da sua intenção de presente.
           </p>
