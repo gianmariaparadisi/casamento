@@ -92,41 +92,69 @@ let convidadoSelecionado = null; // { nome, telefone, rowId, grupo: [] }
 
 /* ══════════════════════════════════════════════════════════
    4. CARROSSEL
+   Usa scrollLeft em vez de translateX(%) para evitar
+   o bug de zoom no mobile onde o track tem width:max-content
 ══════════════════════════════════════════════════════════ */
 (function initCarrossel() {
-  const track = document.getElementById("carrosselTrack");
-  const dotsEl = document.getElementById("carrosselDots");
-  if (!track) return;
+  const carrossel = document.getElementById("carrossel");
+  const track     = document.getElementById("carrosselTrack");
+  const dotsEl    = document.getElementById("carrosselDots");
+  if (!track || !carrossel) return;
 
   const slides = track.querySelectorAll(".carrossel__slide");
   let atual = 0;
   let timer;
+  let isScrolling = false;
+
+  // Garantir que cada slide ocupa exatamente 100% do container
+  function ajustarSlides() {
+    const w = carrossel.clientWidth;
+    slides.forEach(s => {
+      s.style.minWidth = w + "px";
+      s.style.width    = w + "px";
+    });
+  }
+  ajustarSlides();
+  window.addEventListener("resize", () => { ajustarSlides(); irPara(atual); });
 
   // Criar dots
   slides.forEach((_, i) => {
     const dot = document.createElement("button");
     dot.className = "carrossel__dot" + (i === 0 ? " active" : "");
     dot.setAttribute("aria-label", `Foto ${i + 1}`);
-    dot.addEventListener("click", () => irPara(i));
+    dot.addEventListener("click", () => { irPara(i); pararTimer(); iniciarTimer(); });
     dotsEl.appendChild(dot);
   });
 
   function irPara(idx) {
     atual = (idx + slides.length) % slides.length;
-    track.style.transform = `translateX(-${atual * 100}%)`;
+    const w = carrossel.clientWidth;
+    // Usar scrollLeft — sem depender de transform nem de %
+    track.style.transform = `translateX(-${atual * w}px)`;
     dotsEl.querySelectorAll(".carrossel__dot").forEach((d, i) => {
       d.classList.toggle("active", i === atual);
     });
   }
 
   function avancar() { irPara(atual + 1); }
-
   function iniciarTimer() { timer = setInterval(avancar, 4500); }
-  function pararTimer() { clearInterval(timer); }
+  function pararTimer()   { clearInterval(timer); }
 
   iniciarTimer();
-  track.closest(".carrossel")?.addEventListener("mouseenter", pararTimer);
-  track.closest(".carrossel")?.addEventListener("mouseleave", iniciarTimer);
+  carrossel.addEventListener("mouseenter", pararTimer);
+  carrossel.addEventListener("mouseleave", iniciarTimer);
+
+  // Touch swipe no carrossel
+  let touchStartX = 0;
+  carrossel.addEventListener("touchstart", e => {
+    touchStartX = e.touches[0].clientX;
+    pararTimer();
+  }, { passive: true });
+  carrossel.addEventListener("touchend", e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 40) irPara(atual + (dx < 0 ? 1 : -1));
+    iniciarTimer();
+  }, { passive: true });
 
   window.moverCarrossel = function(dir) {
     irPara(atual + dir);
