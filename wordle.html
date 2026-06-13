@@ -1,8 +1,6 @@
 <script src="assets/js/app.js"></script>
   <script>
-  
   const MAX_TENTATIVAS = 6;
-
   let PALAVRA = "";
   let LETRAS  = 0;
   let tentativas = [];
@@ -10,21 +8,22 @@
   let jogoFinalizado = false;
   let historicoCores = {};
   let emojiGrid = [];
+  let _respostaGAS = null;  // guarda resposta até DOM estar pronto
+  let _domPronto   = false;
 
   function hoje() {
-    const d = new Date();
+    var d = new Date();
     return String(d.getDate()).padStart(2,'0') + "/" + String(d.getMonth()+1).padStart(2,'0') + "/" + d.getFullYear();
   }
 
-  /* JSONP — único método que funciona de GitHub Pages para GAS */
+  /* Chama a API via JSONP */
   function carregarPalavra() {
-    const cbName = "cb_wordle_" + Date.now();
-    const url = API_URL + "?action=wordle&data=" + encodeURIComponent(hoje()) + "&callback=" + cbName;
+    var cbName = "cb_wordle_" + Date.now();
+    var url = API_URL + "?action=wordle&data=" + encodeURIComponent(hoje()) + "&callback=" + cbName;
 
-    const timer = setTimeout(function() {
+    var timer = setTimeout(function() {
       delete window[cbName];
-      document.getElementById("wordleLoading").style.display = "none";
-      document.getElementById("wordleErro").style.display = "block";
+      inicializarComResposta(null);
     }, 10000);
 
     window[cbName] = function(json) {
@@ -32,25 +31,9 @@
       delete window[cbName];
       var s = document.getElementById("_wscript");
       if (s) s.remove();
-
-      if (!json || !json.palavra) {
-        document.getElementById("wordleLoading").style.display = "none";
-        document.getElementById("wordleErro").style.display = "block";
-        return;
-      }
-
-      PALAVRA = json.palavra.toUpperCase().trim();
-      LETRAS  = PALAVRA.length;
-
-      var dateEl = document.getElementById("wordleDate");
-        if (dateEl) dateEl.textContent = new Date().toLocaleDateString("pt-BR", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
-       
-
-      document.getElementById("wordleLoading").style.display = "none";
-      document.getElementById("wordleGame").style.display    = "block";
-
-      construirGrid();
-      construirTeclado();
+      // Guarda a resposta e só processa quando DOM estiver pronto
+      _respostaGAS = json;
+      if (_domPronto) processarResposta();
     };
 
     var script = document.createElement("script");
@@ -59,11 +42,40 @@
     script.onerror = function() {
       clearTimeout(timer);
       delete window[cbName];
-      document.getElementById("wordleLoading").style.display = "none";
-      document.getElementById("wordleErro").style.display = "block";
+      inicializarComResposta(null);
     };
     document.head.appendChild(script);
   }
+
+  /* Processa a resposta — só chamado quando DOM E resposta estão prontos */
+  function processarResposta() {
+    var json = _respostaGAS;
+    if (!json || !json.palavra) {
+      inicializarComResposta(null);
+      return;
+    }
+    PALAVRA = json.palavra.toUpperCase().trim();
+    LETRAS  = PALAVRA.length;
+    document.getElementById("wordleDate").textContent =
+      new Date().toLocaleDateString("pt-BR", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+    document.getElementById("wordleLoading").style.display = "none";
+    document.getElementById("wordleGame").style.display    = "block";
+    construirGrid();
+    construirTeclado();
+  }
+
+  function inicializarComResposta(json) {
+    if (!_domPronto) { _respostaGAS = json; return; }
+    document.getElementById("wordleLoading").style.display = "none";
+    document.getElementById("wordleErro").style.display    = "block";
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    _domPronto = true;
+    carregarPalavra();
+    // Se a resposta já chegou antes do DOM (raro mas possível), processa agora
+    if (_respostaGAS !== null) processarResposta();
+  });
 
   function construirGrid() {
     var grid = document.getElementById("wordleGrid");
@@ -162,10 +174,8 @@
     var result = avaliarPalpite(guess);
     tentativas.push({ guess: guess, resultado: result });
     tentativaAtual = [];
-
     var emojiRow = result.map(function(r) { return r === "correct" ? "🟩" : r === "present" ? "🟨" : "⬛"; });
     emojiGrid.push(emojiRow.join(""));
-
     revelarLinha(linha, guess, result, function() {
       result.forEach(function(res, i) {
         var letra = guess[i];
@@ -177,7 +187,6 @@
           if (btn) btn.className = "kb-key" + (letra.length > 1 ? " kb-key--wide" : "") + " " + res;
         }
       });
-
       if (guess === PALAVRA) {
         jogoFinalizado = true;
         var msgs = ["Perfeito! 🎉","Incrível!","Muito bem!","Acertou!","Quase fácil demais 😄","Na última!"];
@@ -194,7 +203,6 @@
     var palavraArr = PALAVRA.split("");
     var guessArr   = guess.split("");
     var usados     = Array(LETRAS).fill(false);
-
     guessArr.forEach(function(l, i) {
       if (l === palavraArr[i]) { resultado[i] = "correct"; usados[i] = true; }
     });
@@ -244,8 +252,4 @@
       });
     }
   };
-
-  document.addEventListener("DOMContentLoaded", function() {
-  carregarPalavra();
-  });
   </script>
