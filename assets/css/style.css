@@ -757,3 +757,18 @@ details[open] .faq__question::after { transform: rotate(45deg); }
   .mosaico__item { height: 220px; }
   .mosaico__item:first-child { grid-row: span 1; }
 }
+
+/* ── CHAVE SECRETA NO NAV ────────────────────────────────── */
+.nav__key {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted) !important;
+  opacity: .55;
+  transition: opacity var(--transition), color var(--transition), transform var(--transition) !important;
+  padding: .2rem;
+}
+.nav__key:hover {
+  opacity: 1;
+  color: var(--sage-dark) !important;
+  transform: rotate(15deg);
+}
