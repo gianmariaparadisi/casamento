@@ -42,7 +42,8 @@
       PALAVRA = json.palavra.toUpperCase().trim();
       LETRAS  = PALAVRA.length;
 
-      document.getElementById("wordleDate").textContent =
+      var dateEl = document.getElementById("wordleDate");
+        if (dateEl) dateEl.textContent = new Date().toLocaleDateString("pt-BR", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
         new Date().toLocaleDateString("pt-BR", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
 
       document.getElementById("wordleLoading").style.display = "none";
