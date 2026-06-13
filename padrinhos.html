@@ -13,164 +13,51 @@
     .pad-hero {
       padding: 140px 5% 80px;
       background: linear-gradient(135deg, #1a0a12 0%, #2d1022 40%, #1a1a35 70%, #0d1520 100%);
-      text-align: center;
-      color: #f0e6d8;
-      position: relative;
-      overflow: hidden;
+      text-align: center; color: #f0e6d8; position: relative; overflow: hidden;
     }
-    .pad-hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 50% 0%, rgba(255,160,80,.12) 0%, transparent 65%);
-    }
-    .pad-hero__eyebrow {
-      font-size: .72rem; letter-spacing: .3em; text-transform: uppercase;
-      color: rgba(255,190,120,.7); margin-bottom: .85rem;
-      position: relative;
-    }
-    .pad-hero__title {
-      font-family: var(--font-display);
-      font-size: clamp(2.5rem, 6vw, 5rem);
-      font-weight: 300; line-height: 1.05;
-      margin-bottom: 1rem;
-      color: #f5e8d8;
-      position: relative;
-    }
-    .pad-hero__sub {
-      font-size: .95rem; color: rgba(255,220,180,.7);
-      max-width: 480px; margin-inline: auto; line-height: 1.85;
-      position: relative;
-    }
+    .pad-hero::before { content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,160,80,.12) 0%,transparent 65%); }
+    .pad-hero__eyebrow { font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,190,120,.7);margin-bottom:.85rem;position:relative; }
+    .pad-hero__title { font-family:var(--font-display);font-size:clamp(2.5rem,6vw,5rem);font-weight:300;line-height:1.05;margin-bottom:1rem;color:#f5e8d8;position:relative; }
+    .pad-hero__sub { font-size:.95rem;color:rgba(255,220,180,.7);max-width:480px;margin-inline:auto;line-height:1.85;position:relative; }
 
-    /* ─── SEÇÕES ─── */
-    .pad-section {
-      padding: 4rem 5%;
-    }
-    .pad-section--alt {
-      background: var(--bg-green);
-      border-top: 1px solid var(--line-green);
-      border-bottom: 1px solid var(--line-green);
-    }
-    .pad-section__eyebrow {
-      font-size: .7rem; letter-spacing: .22em; text-transform: uppercase;
-      color: var(--sage); margin-bottom: .6rem;
-    }
-    .pad-section__title {
-      font-family: var(--font-display);
-      font-size: clamp(1.8rem, 4vw, 2.8rem);
-      font-weight: 300; color: var(--text-main);
-      margin-bottom: 2rem;
-    }
+    .pad-section { padding:4rem 5%; }
+    .pad-section--alt { background:var(--bg-green);border-top:1px solid var(--line-green);border-bottom:1px solid var(--line-green); }
+    .pad-section__eyebrow { font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);margin-bottom:.6rem; }
+    .pad-section__title { font-family:var(--font-display);font-size:clamp(1.8rem,4vw,2.8rem);font-weight:300;color:var(--text-main);margin-bottom:2rem; }
 
-    /* ─── CRONOGRAMA ─── */
-    .cronograma { max-width: 600px; margin-inline: auto; }
-    .cronograma__item {
-      display: flex; gap: 1.5rem; align-items: flex-start;
-      padding: 1.25rem 0;
-      border-bottom: 1px solid var(--line-green);
-    }
-    .cronograma__item:last-child { border-bottom: none; }
-    .cronograma__hora {
-      font-family: var(--font-display);
-      font-size: 1.3rem; font-weight: 300; color: var(--sage-dark);
-      min-width: 70px; flex-shrink: 0; padding-top: .1rem;
-    }
-    .cronograma__desc { font-size: .9rem; color: var(--text-muted); line-height: 1.7; }
-    .cronograma__desc strong { color: var(--text-main); }
+    .cronograma { max-width:600px;margin-inline:auto; }
+    .cronograma__item { display:flex;gap:1.5rem;align-items:flex-start;padding:1.25rem 0;border-bottom:1px solid var(--line-green); }
+    .cronograma__item:last-child { border-bottom:none; }
+    .cronograma__hora { font-family:var(--font-display);font-size:1.3rem;font-weight:300;color:var(--sage-dark);min-width:70px;flex-shrink:0;padding-top:.1rem; }
+    .cronograma__desc { font-size:.9rem;color:var(--text-muted);line-height:1.7; }
+    .cronograma__desc strong { color:var(--text-main); }
 
-    /* ─── CARDS DE INFO ─── */
-    .pad-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-      gap: 1.25rem;
-      max-width: 900px; margin-inline: auto;
-    }
-    .pad-card {
-      background: var(--white);
-      border: 1px solid var(--line-green);
-      border-radius: var(--radius-lg);
-      padding: 1.75rem;
-      box-shadow: var(--shadow-green);
-    }
-    .pad-card__icon { font-size: 1.75rem; margin-bottom: .75rem; display: block; }
-    .pad-card__title {
-      font-family: var(--font-display);
-      font-size: 1.2rem; font-weight: 400; margin-bottom: .5rem;
-    }
-    .pad-card__text { font-size: .85rem; color: var(--text-muted); line-height: 1.7; }
-    .pad-card__text a { color: var(--sage-dark); text-decoration: underline; text-underline-offset: 3px; }
+    .pad-cards { display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.25rem;max-width:900px;margin-inline:auto; }
+    .pad-card { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:1.75rem;box-shadow:var(--shadow-green); }
+    .pad-card__icon { font-size:1.75rem;margin-bottom:.75rem;display:block; }
+    .pad-card__title { font-family:var(--font-display);font-size:1.2rem;font-weight:400;margin-bottom:.5rem; }
+    .pad-card__text { font-size:.85rem;color:var(--text-muted);line-height:1.7; }
+    .pad-card__text a { color:var(--sage-dark);text-decoration:underline;text-underline-offset:3px; }
 
-    /* ─── PALETA / TRAJES ─── */
-    .trajes-wrap {
-      max-width: 800px; margin-inline: auto;
-    }
-    .trajes-intro {
-      font-size: .9rem; color: var(--text-muted); line-height: 1.8;
-      margin-bottom: 2rem; max-width: 540px;
-    }
-    .trajes-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 3rem;
-      align-items: start;
-    }
-    @media (max-width: 580px) {
-      .trajes-grid { grid-template-columns: 1fr; gap: 2rem; }
-    }
-    .traje-item { text-align: center; }
-    .traje-item__label {
-      font-size: .75rem; letter-spacing: .2em; text-transform: uppercase;
-      color: var(--sage); margin-bottom: 1rem;
-    }
-    .traje-item__svg { margin-inline: auto; }
-    .traje-item__desc {
-      font-size: .82rem; color: var(--text-muted); margin-top: 1rem; line-height: 1.6;
-    }
+    .trajes-wrap { max-width:800px;margin-inline:auto; }
+    .trajes-intro { font-size:.9rem;color:var(--text-muted);line-height:1.8;margin-bottom:2rem;max-width:540px; }
+    .trajes-grid { display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start; }
+    @media(max-width:580px){ .trajes-grid{grid-template-columns:1fr;gap:2rem;} }
+    .traje-item { text-align:center; }
+    .traje-item__label { font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);margin-bottom:1rem; }
+    .traje-item__svg { margin-inline:auto; }
+    .traje-item__desc { font-size:.82rem;color:var(--text-muted);margin-top:1rem;line-height:1.6; }
 
-    /* ─── GRADIENTE PALETA ─── */
     .paleta-strip {
-      width: 100%; height: 12px;
-      border-radius: 8px;
-      background: linear-gradient(to right,
-        #0a0a0a,        /* preto */
-        #1a1a40,        /* azul escuro */
-        #2e1b5e,        /* crepúsculo roxo */
-        #7b2d5e,        /* bordô rosado */
-        #c85a7a,        /* rosa profundo */
-        #e8886a,        /* laranja rosado */
-        #f5a84b,        /* laranja */
-        #f9cc6e,        /* âmbar */
-        #fde8a0,        /* amarelo claro */
-        #b8d4ef,        /* azul lavanda */
-        #ddeeff          /* azul claríssimo */
-      );
-      margin-bottom: 1.25rem;
+      width:100%;height:12px;border-radius:8px;
+      background:linear-gradient(to right,#0a0a0a,#1a1a40,#2e1b5e,#7b2d5e,#c85a7a,#e8886a,#f5a84b,#f9cc6e,#fde8a0,#b8d4ef,#ddeeff);
+      margin-bottom:1.25rem;
     }
-    .paleta-desc {
-      font-size: .78rem; color: var(--text-muted); line-height: 1.6;
-      text-align: center; margin-bottom: 2rem;
-    }
-
-    /* ─── AIRBNB ─── */
-    .airbnb-box {
-      background: var(--white);
-      border: 1px solid var(--line-green);
-      border-radius: var(--radius-lg);
-      padding: 2rem;
-      max-width: 640px; margin-inline: auto;
-      box-shadow: var(--shadow-green);
-    }
-    .airbnb-box__title {
-      font-family: var(--font-display);
-      font-size: 1.4rem; font-weight: 300; margin-bottom: .6rem;
-    }
-    .airbnb-box__text { font-size: .87rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 1.25rem; }
-    .airbnb-box__text a { color: var(--sage-dark); text-decoration: underline; text-underline-offset: 3px; }
+    .paleta-desc { font-size:.78rem;color:var(--text-muted);line-height:1.6;text-align:center;margin-bottom:2rem; }
   </style>
 </head>
 <body>
 
-  <!-- ─── NAV ───────────────────────────────────────────── -->
   <header class="nav" id="nav">
     <div class="nav__inner">
       <a href="index.html" class="nav__logo">Tiago e Gian</a>
@@ -189,16 +76,13 @@
     </div>
   </header>
 
-  <!-- ─── HERO ──────────────────────────────────────────── -->
   <div class="pad-hero">
     <p class="pad-hero__eyebrow reveal">Obrigado por fazerem parte</p>
     <h1 class="pad-hero__title reveal">Queridos<br><em>padrinhos</em></h1>
-    <p class="pad-hero__sub reveal">
-      Esta página é exclusiva para vocês — com todas as orientações que precisam para o nosso grande dia.
-    </p>
+    <p class="pad-hero__sub reveal">Esta página é exclusiva para vocês — com todas as orientações que precisam para o nosso grande dia.</p>
   </div>
 
-  <!-- ─── CRONOGRAMA ─── -->
+  <!-- CRONOGRAMA -->
   <div class="pad-section" style="text-align:center">
     <p class="pad-section__eyebrow reveal">I.</p>
     <h2 class="pad-section__title reveal">Horários do dia</h2>
@@ -207,7 +91,7 @@
         <div class="cronograma__hora">10h00</div>
         <div class="cronograma__desc">
           <strong>Madrinhas — chegada na fazenda</strong><br>
-          A partir das 10h a fazenda estará disponível para as madrinhas chegarem, se arrumarem com calma e aproveitarem o espaço. O ambiente será exclusivo para vocês nesse período.
+          A partir das 10h a fazenda estará disponível para as madrinhas chegarem, se arrumarem com calma e aproveitarem o espaço. O ambiente será exclusivo para vocês nesse período, já que os noivos são 2 homens e o espaço estará liberado.
         </div>
       </div>
       <div class="cronograma__item">
@@ -234,7 +118,7 @@
     </div>
   </div>
 
-  <!-- ─── LOCAL ─── -->
+  <!-- LOCAL -->
   <div class="pad-section pad-section--alt" style="text-align:center">
     <p class="pad-section__eyebrow reveal">II.</p>
     <h2 class="pad-section__title reveal">O Local</h2>
@@ -242,30 +126,22 @@
       <div class="pad-card reveal">
         <span class="pad-card__icon">📍</span>
         <h3 class="pad-card__title">Fazenda Quilombo</h3>
-        <p class="pad-card__text">
-          Limeira — SP<br><br>
-          <a href="https://maps.google.com/?q=Fazenda+Quilombo+Limeira+SP" target="_blank" rel="noopener">Abrir no Google Maps →</a>
-        </p>
+        <p class="pad-card__text">Limeira — SP<br><br><a href="https://maps.google.com/?q=Fazenda+Quilombo+Limeira+SP" target="_blank" rel="noopener">Abrir no Google Maps →</a></p>
       </div>
       <div class="pad-card reveal">
         <span class="pad-card__icon">🚗</span>
         <h3 class="pad-card__title">Chegando</h3>
-        <p class="pad-card__text">
-          Estacionamento gratuito com manobrista no local. Se precisar de transfer, confira nossa <a href="transfer.html">página de transfer</a>.
-        </p>
+        <p class="pad-card__text">Estacionamento gratuito com manobrista no local. Se precisar de transfer, confira nossa <a href="transfer.html">página de transfer</a>.</p>
       </div>
       <div class="pad-card reveal">
         <span class="pad-card__icon">📱</span>
         <h3 class="pad-card__title">Dúvidas</h3>
-        <p class="pad-card__text">
-          Assessoria: <strong>(14) 99189-8540</strong><br><br>
-          E-mail: <a href="mailto:casamento.tiagoegian@gmail.com">casamento.tiagoegian@gmail.com</a>
-        </p>
+        <p class="pad-card__text">Assessoria: <strong>(14) 99189-8540</strong><br><br>E-mail: <a href="mailto:casamento.tiagoegian@gmail.com">casamento.tiagoegian@gmail.com</a></p>
       </div>
     </div>
   </div>
 
-  <!-- ─── TRAJES ─── -->
+  <!-- TRAJES -->
   <div class="pad-section" style="text-align:center">
     <p class="pad-section__eyebrow reveal">III.</p>
     <h2 class="pad-section__title reveal">Trajes</h2>
@@ -283,45 +159,26 @@
           <svg class="traje-item__svg" viewBox="0 0 200 340" width="160" height="272" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="vestidoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#2e1b5e;stop-opacity:1" />
-                <stop offset="30%" style="stop-color:#c85a7a;stop-opacity:1" />
-                <stop offset="60%" style="stop-color:#e8886a;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#b8d4ef;stop-opacity:1" />
+                <stop offset="0%" style="stop-color:#2e1b5e" />
+                <stop offset="30%" style="stop-color:#c85a7a" />
+                <stop offset="60%" style="stop-color:#e8886a" />
+                <stop offset="100%" style="stop-color:#b8d4ef" />
               </linearGradient>
             </defs>
-
-            <!-- Cabeça -->
             <ellipse cx="100" cy="38" rx="22" ry="25" fill="#f5dcc8" />
-            <!-- Cabelo -->
             <ellipse cx="100" cy="26" rx="23" ry="14" fill="#4a2d1a" />
             <path d="M78 32 Q72 55 74 70" stroke="#4a2d1a" stroke-width="8" fill="none" stroke-linecap="round"/>
             <path d="M122 32 Q128 55 126 70" stroke="#4a2d1a" stroke-width="8" fill="none" stroke-linecap="round"/>
-
-            <!-- Pescoço -->
             <rect x="94" y="61" width="12" height="14" rx="4" fill="#f5dcc8" />
-
-            <!-- Corpo / vestido longo -->
-            <!-- Busto -->
             <path d="M78 75 Q85 70 100 68 Q115 70 122 75 L120 115 Q100 120 80 115 Z" fill="url(#vestidoGrad)" />
-            <!-- Alças finas -->
             <line x1="88" y1="68" x2="85" y2="75" stroke="url(#vestidoGrad)" stroke-width="4" stroke-linecap="round"/>
             <line x1="112" y1="68" x2="115" y2="75" stroke="url(#vestidoGrad)" stroke-width="4" stroke-linecap="round"/>
-
-            <!-- Saia longa -->
             <path d="M80 115 Q68 160 58 240 Q70 280 100 290 Q130 280 142 240 Q132 160 120 115 Q100 120 80 115 Z" fill="url(#vestidoGrad)" />
-
-            <!-- Detalhe barra saia -->
             <path d="M60 238 Q100 250 140 238" stroke="rgba(255,255,255,.3)" stroke-width="1.5" fill="none"/>
-
-            <!-- Braços -->
             <path d="M78 80 Q60 110 62 135" stroke="#f5dcc8" stroke-width="9" fill="none" stroke-linecap="round"/>
             <path d="M122 80 Q140 110 138 135" stroke="#f5dcc8" stroke-width="9" fill="none" stroke-linecap="round"/>
-
-            <!-- Mãos -->
             <ellipse cx="62" cy="138" rx="7" ry="9" fill="#f5dcc8"/>
             <ellipse cx="138" cy="138" rx="7" ry="9" fill="#f5dcc8"/>
-
-            <!-- Pés -->
             <ellipse cx="88" cy="292" rx="9" ry="5" fill="#c8a07a"/>
             <ellipse cx="112" cy="292" rx="9" ry="5" fill="#c8a07a"/>
           </svg>
@@ -332,87 +189,41 @@
         <div class="traje-item">
           <p class="traje-item__label">Padrinhos</p>
           <svg class="traje-item__svg" viewBox="0 0 200 340" width="160" height="272" xmlns="http://www.w3.org/2000/svg">
-            <!-- Cabeça -->
             <ellipse cx="100" cy="38" rx="21" ry="24" fill="#f0d4b8" />
-            <!-- Cabelo -->
             <ellipse cx="100" cy="24" rx="22" ry="12" fill="#2a1a0a" />
-
-            <!-- Pescoço -->
             <rect x="94" y="60" width="12" height="14" rx="3" fill="#f0d4b8" />
-
-            <!-- Camisa / terno -->
-            <!-- Colarinho -->
             <path d="M88 72 L100 80 L112 72 L110 68 L100 74 L90 68 Z" fill="white" />
-
-            <!-- Gravata / borboleta não — lenço no bolso -->
-            <!-- Corpo terno base escuro -->
             <path d="M72 78 L88 72 L100 80 L112 72 L128 78 L130 190 L70 190 Z" fill="#1a1a2e" />
-
-            <!-- Lapela esquerda -->
             <path d="M72 78 L88 72 L94 90 L78 95 Z" fill="#22223e" />
-            <!-- Lapela direita -->
             <path d="M128 78 L112 72 L106 90 L122 95 Z" fill="#22223e" />
-
-            <!-- Camisa branca entre lapelas -->
             <path d="M94 90 L100 80 L106 90 L104 190 L96 190 Z" fill="#f5f0e8" />
-
-            <!-- Lenço no bolso — tom laranja -->
+            <!-- Lenço laranja -->
             <path d="M118 100 L126 96 L128 106 L120 104 Z" fill="#e8886a" />
             <path d="M122 96 Q126 91 128 94" stroke="#e8886a" stroke-width="2" fill="none" stroke-linecap="round"/>
-
-            <!-- Botões da camisa -->
             <circle cx="100" cy="105" r="2" fill="#d4c8b8"/>
             <circle cx="100" cy="118" r="2" fill="#d4c8b8"/>
             <circle cx="100" cy="131" r="2" fill="#d4c8b8"/>
-
-            <!-- Calça -->
             <path d="M70 190 L76 300 L94 300 L100 220 L106 300 L124 300 L130 190 Z" fill="#12122a" />
-
-            <!-- Risca da calça sutil -->
             <line x1="83" y1="190" x2="85" y2="300" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
             <line x1="117" y1="190" x2="115" y2="300" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
-
-            <!-- Braços -->
             <path d="M72 82 Q54 120 56 155" stroke="#1a1a2e" stroke-width="14" fill="none" stroke-linecap="round"/>
             <path d="M128 82 Q146 120 144 155" stroke="#1a1a2e" stroke-width="14" fill="none" stroke-linecap="round"/>
-
-            <!-- Punhos camisa -->
             <rect x="48" y="152" width="16" height="10" rx="3" fill="#f5f0e8"/>
             <rect x="136" y="152" width="16" height="10" rx="3" fill="#f5f0e8"/>
-
-            <!-- Mãos -->
             <ellipse cx="56" cy="166" rx="7" ry="9" fill="#f0d4b8"/>
             <ellipse cx="144" cy="166" rx="7" ry="9" fill="#f0d4b8"/>
-
-            <!-- Sapatos -->
             <ellipse cx="83" cy="303" rx="12" ry="6" fill="#0a0a14"/>
             <ellipse cx="117" cy="303" rx="12" ry="6" fill="#0a0a14"/>
           </svg>
-          <p class="traje-item__desc">Terno escuro (preto, grafite ou azul) com <strong>lenço no bolso em tom laranja</strong> — o toque de cor que vai unir o cortejo.</p>
+          <p class="traje-item__desc">Terno escuro (preto, grafite ou azul) com <strong>lenço no bolso em tom laranja</strong> — o toque que une o cortejo.</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ─── HOSPEDAGEM / AIRBNB ─── -->
+  <!-- CONTATO -->
   <div class="pad-section pad-section--alt" style="text-align:center">
     <p class="pad-section__eyebrow reveal">IV.</p>
-    <h2 class="pad-section__title reveal">Onde ficar</h2>
-    <div class="airbnb-box reveal">
-      <h3 class="airbnb-box__title">Sugestões de hospedagem</h3>
-      <p class="airbnb-box__text">
-        Para quem precisar dormir em Limeira, preparamos uma <a href="hospedagem.html">página com 3 opções de hotéis</a>. Mas se preferirem dividir um Airbnb com outros padrinhos, é uma ótima pedida — especialmente para aproveitar o fim de semana com calma!<br><br>
-        <a href="https://www.airbnb.com.br/s/Limeira--SP" target="_blank" rel="noopener">Buscar Airbnbs em Limeira →</a>
-      </p>
-      <p class="airbnb-box__text" style="margin:0;padding-top:.75rem;border-top:1px solid var(--line-green)">
-        Para as <strong>madrinhas</strong> que quiserem chegar na sexta à noite e se arrumar com calma no sábado a partir das 10h, um Airbnb próximo à fazenda é a melhor opção. Ficamos à disposição para ajudar a coordenar!
-      </p>
-    </div>
-  </div>
-
-  <!-- ─── CONTATO ─── -->
-  <div class="pad-section" style="text-align:center">
-    <p class="pad-section__eyebrow reveal">V.</p>
     <h2 class="pad-section__title reveal">Fale com a gente</h2>
     <div class="pad-cards" style="max-width:560px">
       <div class="pad-card reveal">
@@ -428,7 +239,6 @@
     </div>
   </div>
 
-  <!-- ─── RODAPÉ ─────────────────────────────────────────── -->
   <footer class="footer">
     <div class="container footer__inner">
       <p class="footer__names">Tiago e Gian</p>
