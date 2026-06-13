@@ -1,10 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Confirmação de Presença</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    max-width:800px;
+    margin:auto;
+    padding:40px 20px;
+}
+
+h1{
+    text-align:center;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    font-size:16px;
+    margin-top:10px;
+    box-sizing:border-box;
+}
+
+button{
+    margin-top:10px;
+    padding:12px 20px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.card{
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:15px;
+    margin-top:15px;
+}
+
+</style>
+</head>
 <body>
 
-<h1>Site do Casamento</h1>
+<h1>Confirmação de Presença</h1>
 
-<p>Teste GitHub Pages</p>
+<p>Digite seu nome:</p>
+
+<input
+    id="nomeBusca"
+    placeholder="Ex: Gian"
+/>
+
+<button onclick="buscar()">
+Buscar
+</button>
+
+<div id="resultado"></div>
+
+<script>
+
+const API =
+"https://script.google.com/macros/s/AKfycbyxSn6mHgOu5jy68q6sMVTBaM7yWjx8-TXakfCECPTVCQ-n94kMcg8_Cr784IWyYpvG/exec";
+
+async function buscar(){
+
+    const nome =
+        document.getElementById("nomeBusca").value;
+
+    const resposta =
+        await fetch(
+            API + "?nome=" +
+            encodeURIComponent(nome)
+        );
+
+    const dados =
+        await resposta.json();
+
+    const div =
+        document.getElementById("resultado");
+
+    div.innerHTML = "";
+
+    if(dados.length === 0){
+
+        div.innerHTML =
+        "<p>Nenhum convidado encontrado.</p>";
+
+        return;
+    }
+
+    dados.forEach(item => {
+
+        div.innerHTML += `
+            <div class="card">
+                <strong>${item.nome}</strong>
+                <br>
+                Telefone:
+                ${item.telefone}
+            </div>
+        `;
+
+    });
+
+}
+
+</script>
 
 </body>
 </html>
