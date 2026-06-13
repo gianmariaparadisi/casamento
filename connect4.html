@@ -204,7 +204,7 @@
        Col R-U: 4 palavras do grupo 4
   ══════════════════════════════════════════════ */
 
-  const API_URL   = "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+  const API_URL   = "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
   const MAX_VIDAS = 4;
   const CORES     = ["g0","g1","g2","g3"];
   const EMOJIS    = ["🟨","🟩","🟦","🟪"];
@@ -222,21 +222,37 @@
     return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
   }
 
-  async function carregarDesafio() {
+  function carregarDesafio() {
+    const cbName = "cb_conn_" + Date.now();
+    const url = `${API_URL}?action=connect4&data=${encodeURIComponent(hoje())}&callback=${cbName}`;
+
+    const timer = setTimeout(() => {
+      delete window[cbName];
+      document.getElementById("connLoading").style.display = "none";
+      document.getElementById("connErro").style.display = "block";
+    }, 8000);
+
+    window[cbName] = function(json) {
+      clearTimeout(timer);
+      delete window[cbName];
+      document.getElementById("connScriptTag") && document.getElementById("connScriptTag").remove();
+      processarDesafio(json);
+    };
+
+    const script = document.createElement("script");
+    script.id  = "connScriptTag";
+    script.src = url;
+    script.onerror = () => {
+      clearTimeout(timer);
+      delete window[cbName];
+      document.getElementById("connLoading").style.display = "none";
+      document.getElementById("connErro").style.display = "block";
+    };
+    document.head.appendChild(script);
+  }
+
+  function processarDesafio(json) {
     try {
-      const url  = `${API_URL}?action=connect4&data=${encodeURIComponent(hoje())}`;
-      const resp = await fetch(url, { redirect: "follow" });
-
-      const texto = await resp.text();
-      let json;
-      try {
-        json = JSON.parse(texto);
-      } catch(_) {
-        const m = texto.match(/\{.*\}/s);
-        if (m) json = JSON.parse(m[0]);
-        else throw new Error("resposta invalida");
-      }
-
       if (!json || !json.grupos || json.grupos.length < 4) throw new Error("sem dados");
 
       grupos = json.grupos.map((g, i) => ({ titulo: g.titulo, palavras: g.palavras, cor: CORES[i] }));
