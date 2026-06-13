@@ -1,17 +1,61 @@
 /* ═══════════════════════════════════════════════════════════
-   GIAN & TIAGO — app.js v2
+   GIAN & TIAGO — app.js v3
 ═══════════════════════════════════════════════════════════ */
 "use strict";
 
 /* ── CONFIGURAÇÃO ─────────────────────────────────────────── */
 const API_URL       = "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
-const PIX_CODE      = "COLE_AQUI_O_CODIGO_PIX_COPIA_E_COLA"; // ← substituir
 const EMAIL_CONTATO = "casamento.tiagoegian@gmail.com";
 const DATA_LIMITE_ALTERACAO = "12 de agosto de 2026";
 const DATA_CASAMENTO = new Date("2026-12-12T16:30:00-03:00");
 
+/* ── PIX POR PRESENTE ─────────────────────────────────────── */
+const PIX_MAP = {
+  "Passeio de barco": "00020126580014BR.GOV.BCB.PIX0136d2376c5e-4233-4bd1-b053-2854e71b70fc5204000053039865406600.005802BR5919Gian Maria Paradisi6009SAO PAULO62140510gsoZjzwjdq63046D3B",
+  "Degustação de vinhos e champagnes": "00020126580014BR.GOV.BCB.PIX0136d2376c5e-4233-4bd1-b053-2854e71b70fc5204000053039865406280.005802BR5919Gian Maria Paradisi6009SAO PAULO62140510y4bgvGBPBW6304EC64",
+  "Resort all inclusive": "00020126580014BR.GOV.BCB.PIX0136d2376c5e-4233-4bd1-b053-2854e71b70fc52040000530398654071200.005802BR5919Gian Maria Paradisi6009SAO PAULO62140510B3p031F31d6304A29E",
+  "Café da manhã com vista": "00020126580014BR.GOV.BCB.PIX0136d2376c5e-4233-4bd1-b053-2854e71b70fc5204000053039865406150.005802BR5919Gian Maria Paradisi6009SAO PAULO62140510hXG9PjNj4u6304D870",
+  "Um vaso lindo para casa": "00020126580014BR.GOV.BCB.PIX0136d2376c5e-4233-4bd1-b053-2854e71b70fc5204000053039865406180.005802BR5919Gian Maria Paradisi6009SAO PAULO62140510eiwztZg6ME6304957F",
+  "Um mergulho relaxante": "00020126580014BR.GOV.BCB.PIX0136d2376c5e-4233-4bd1-b053-2854e71b70fc5204000053039865406350.005802BR5919Gian Maria Paradisi6009SAO PAULO62140510MQ45XYdDpO6304177E",
+  "Passeio de vespa": "00020126580014BR.GOV.BCB.PIX0136d2376c5e-4233-4bd1-b053-2854e71b70fc5204000053039865406220.005802BR5919Gian Maria Paradisi6009SAO PAULO62140510eiaVkBQR3J630432FA",
+  "Sessão de massagem relaxante": "00020126580014BR.GOV.BCB.PIX0136d2376c5e-4233-4bd1-b053-2854e71b70fc5204000053039865406200.005802BR5919Gian Maria Paradisi6009SAO PAULO62140510sMKjd9SpAr6304D08C",
+  "Jantar italiano delicioso": "00020126580014BR.GOV.BCB.PIX0136d2376c5e-4233-4bd1-b053-2854e71b70fc5204000053039865406250.005802BR5919Gian Maria Paradisi6009SAO PAULO62140510fOsSwm7D4O6304A9FB",
+  "_default": "casamento.tiagoegian@gmail.com"
+};
+
+function getPixCode(nomepresente) {
+  return PIX_MAP[nomepresente] || PIX_MAP["_default"];
+}
+
+function isPixEmailChave(code) {
+  return code.includes("@");
+}
+
 /* ── ESTADO ───────────────────────────────────────────────── */
 let convidadoSelecionado = null; // { nome, telefone, rowId, grupo: [] }
+
+/* ══════════════════════════════════════════════════════════
+   UTILS — MÁSCARA DE TELEFONE
+   Esconde os últimos 4 dígitos, exibe o restante
+══════════════════════════════════════════════════════════ */
+function mascararTelefone(tel) {
+  if (!tel || tel === "****") return null;
+  // Remove tudo que não é dígito
+  const digits = String(tel).replace(/\D/g, "");
+  if (digits.length < 5) return null;
+  // Mantém todos os dígitos menos os 4 últimos, substitui os 4 últimos por ••••
+  const visiveis = digits.slice(0, -4);
+  // Formata: (XX) XXXXX-••••
+  let formatted = "";
+  if (visiveis.length >= 2) {
+    formatted += "(" + visiveis.slice(0, 2) + ") ";
+    const resto = visiveis.slice(2);
+    if (resto.length > 0) formatted += resto;
+  } else {
+    formatted += visiveis;
+  }
+  return formatted + "••••";
+}
 
 /* ══════════════════════════════════════════════════════════
    1. NAV
@@ -92,8 +136,6 @@ let convidadoSelecionado = null; // { nome, telefone, rowId, grupo: [] }
 
 /* ══════════════════════════════════════════════════════════
    4. CARROSSEL
-   Usa scrollLeft em vez de translateX(%) para evitar
-   o bug de zoom no mobile onde o track tem width:max-content
 ══════════════════════════════════════════════════════════ */
 (function initCarrossel() {
   const carrossel = document.getElementById("carrossel");
@@ -104,9 +146,7 @@ let convidadoSelecionado = null; // { nome, telefone, rowId, grupo: [] }
   const slides = track.querySelectorAll(".carrossel__slide");
   let atual = 0;
   let timer;
-  let isScrolling = false;
 
-  // Garantir que cada slide ocupa exatamente 100% do container
   function ajustarSlides() {
     const w = carrossel.clientWidth;
     slides.forEach(s => {
@@ -117,7 +157,6 @@ let convidadoSelecionado = null; // { nome, telefone, rowId, grupo: [] }
   ajustarSlides();
   window.addEventListener("resize", () => { ajustarSlides(); irPara(atual); });
 
-  // Criar dots
   slides.forEach((_, i) => {
     const dot = document.createElement("button");
     dot.className = "carrossel__dot" + (i === 0 ? " active" : "");
@@ -129,7 +168,6 @@ let convidadoSelecionado = null; // { nome, telefone, rowId, grupo: [] }
   function irPara(idx) {
     atual = (idx + slides.length) % slides.length;
     const w = carrossel.clientWidth;
-    // Usar scrollLeft — sem depender de transform nem de %
     track.style.transform = `translateX(-${atual * w}px)`;
     dotsEl.querySelectorAll(".carrossel__dot").forEach((d, i) => {
       d.classList.toggle("active", i === atual);
@@ -144,7 +182,6 @@ let convidadoSelecionado = null; // { nome, telefone, rowId, grupo: [] }
   carrossel.addEventListener("mouseenter", pararTimer);
   carrossel.addEventListener("mouseleave", iniciarTimer);
 
-  // Touch swipe no carrossel
   let touchStartX = 0;
   carrossel.addEventListener("touchstart", e => {
     touchStartX = e.touches[0].clientX;
@@ -211,12 +248,15 @@ window.buscar = async function() {
       const statusLabel = item.status
         ? `<span class="convidado__badge ${item.status === "Confirmado" ? "convidado__badge--sim" : "convidado__badge--nao"}">${item.status}</span>`
         : "";
+      const telMascarado = mascararTelefone(item.telefone);
       const card = document.createElement("div");
       card.className = "convidado__card";
       card.innerHTML = `
         <div class="convidado__info">
           <p class="convidado__nome">${escHtml(item.nome)} ${statusLabel}</p>
-          <p class="convidado__tel">${item.telefone ? "Tel: " + escHtml(item.telefone) : '<em style="color:var(--sage)">Telefone não cadastrado</em>'}</p>
+          ${telMascarado
+            ? `<p class="convidado__tel">Tel: ${escHtml(telMascarado)}</p>`
+            : `<p class="convidado__tel"><em style="color:var(--sage)">Telefone não cadastrado</em></p>`}
         </div>
         <button class="btn btn--outline btn--sm" type="button">Selecionar</button>`;
       card.querySelector("button").addEventListener("click", () => selecionarConvidado(item, lista));
@@ -243,10 +283,10 @@ function selecionarConvidado(item, todosDaBusca) {
   convidadoSelecionado = item;
   const resultado = document.getElementById("rsvp-resultado");
 
-  // Filtra outros do mesmo grupo (exclui o próprio)
   const grupo = (todosDaBusca || []).filter(p => p.grupo && p.grupo === item.grupo && p.rowId !== item.rowId);
   const temGrupo = grupo.length > 0;
   const semTelefone = !item.telefone || item.telefone === "****";
+  const telMascarado = mascararTelefone(item.telefone);
 
   resultado.innerHTML = `
     <div class="rsvp__form" id="rsvpForm">
@@ -254,7 +294,7 @@ function selecionarConvidado(item, todosDaBusca) {
       <div style="padding:.75rem 1rem;background:var(--bg-green);border-radius:var(--radius);border:1px solid var(--line-green)">
         <p style="font-size:.85rem;color:var(--sage-dark)">
           Confirmando: <strong>${escHtml(item.nome)}</strong>
-          ${item.telefone ? "· Tel: " + escHtml(item.telefone) : ""}
+          ${telMascarado ? "· Tel: " + escHtml(telMascarado) : ""}
         </p>
         <button type="button" style="font-size:.75rem;color:var(--sage);text-decoration:underline;margin-top:.25rem;background:none;border:none;cursor:pointer" onclick="voltarBusca()">← Buscar outro nome</button>
       </div>
@@ -302,6 +342,16 @@ function selecionarConvidado(item, todosDaBusca) {
             <label class="grupo__membro">
               <input type="checkbox" name="grupo" value="${escHtml(p.rowId)}" data-nome="${escHtml(p.nome)}" />
               <span class="grupo__membro-nome">${escHtml(p.nome)}</span>
+              <div class="rsvp__status" role="group" style="margin-top:.35rem;margin-left:.25rem">
+                <label class="rsvp__status-option" style="font-size:.8rem">
+                  <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="SIM" checked />
+                  ✓ Confirmado
+                </label>
+                <label class="rsvp__status-option" style="font-size:.8rem">
+                  <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="NAO" />
+                  ✕ Não poderá comparecer
+                </label>
+              </div>
               ${p.status ? `<span class="grupo__membro-status">${escHtml(p.status)}</span>` : ""}
             </label>
           `).join("")}
@@ -334,7 +384,6 @@ window.confirmar = async function() {
 
   erroDiv.innerHTML = "";
 
-  // Validações
   if (!semTelefone && ultimos4.length !== 4) {
     erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Digite os 4 últimos dígitos do telefone.</p>`;
     document.getElementById("ultimos4")?.focus();
@@ -351,10 +400,14 @@ window.confirmar = async function() {
     return;
   }
 
-  // Membros do grupo selecionados
+  // Membros do grupo selecionados — cada um com seu próprio status
   const grupoChecks = document.querySelectorAll('input[name="grupo"]:checked');
   const grupoRowIds = Array.from(grupoChecks).map(c => c.value);
   const grupoNomes  = Array.from(grupoChecks).map(c => c.dataset.nome);
+  const grupoStatuses = grupoRowIds.map(rowId => {
+    const radioChecked = document.querySelector(`input[name="grupoStatus_${rowId}"]:checked`);
+    return radioChecked ? radioChecked.value : "SIM";
+  });
 
   btnConf.disabled = true;
   btnConf.innerHTML = '<span class="spinner"></span> Enviando…';
@@ -363,17 +416,17 @@ window.confirmar = async function() {
     const resp = await fetch(API_URL, {
       method: "POST",
       body: JSON.stringify({
-        action:       "rsvp",
-        nome:         convidadoSelecionado.nome,
-        rowId:        convidadoSelecionado.rowId,
-        ultimos4:     ultimos4,
-        semTelefone:  semTelefone,
-        telefoneCad:  telefoneCad,
-        email:        email,
-        status:       status,
-        grupoRowIds:  grupoRowIds,
-        grupoNomes:   grupoNomes,
-        grupoStatus:  status  // aplica mesmo status para o grupo
+        action:        "rsvp",
+        nome:          convidadoSelecionado.nome,
+        rowId:         convidadoSelecionado.rowId,
+        ultimos4:      ultimos4,
+        semTelefone:   semTelefone,
+        telefoneCad:   telefoneCad,
+        email:         email,
+        status:        status,
+        grupoRowIds:   grupoRowIds,
+        grupoNomes:    grupoNomes,
+        grupoStatuses: grupoStatuses
       })
     });
 
@@ -416,7 +469,6 @@ function mostrarSucessoRsvp(email, status, grupoNomes) {
     ? `<p class="mt-2" style="font-size:.85rem;color:var(--sage-dark)">Confirmado também para: <strong>${grupoNomes.map(escHtml).join(", ")}</strong></p>`
     : "";
 
-  // Link do whatsapp para convidados sem confirmação
   const urlSite = encodeURIComponent(window.location.origin + (window.location.pathname.replace("index.html","")) + "#rsvp");
   const msgWpp  = encodeURIComponent(`Oi! Confirme sua presença no casamento do Gian & Tiago aqui: ${decodeURIComponent(urlSite)}`);
   const linkWpp = `https://wa.me/?text=${msgWpp}`;
@@ -521,7 +573,6 @@ window.reenviarEmail = async function() {
   const rowId  = params.get("rowId");
   if (!token || !rowId) return;
 
-  // Scrolar para RSVP
   setTimeout(() => {
     document.getElementById("rsvp")?.scrollIntoView({ behavior: "smooth" });
   }, 600);
@@ -536,7 +587,6 @@ window.reenviarEmail = async function() {
     <div id="rsvp-resultado"></div>
   `;
 
-  // Valida token no servidor
   fetch(`${API_URL}?action=validarToken&token=${encodeURIComponent(token)}&rowId=${encodeURIComponent(rowId)}`)
     .then(r => r.json())
     .then(json => {
@@ -557,7 +607,6 @@ window.reenviarEmail = async function() {
         return;
       }
 
-      // Token válido — mostrar formulário de alteração diretamente
       convidadoSelecionado = { nome: json.nome, rowId: rowId, telefone: json.telefone, token: token };
       document.getElementById("rsvp-busca").innerHTML = `
         <p class="rsvp__msg rsvp__msg--ok">
@@ -741,7 +790,8 @@ window.confirmarCustom = function() {
 function renderizarModalPresente(nome, valor, desc) {
   const modal    = document.getElementById("modal");
   const conteudo = document.getElementById("modalConteudo");
-  const pixExiste = PIX_CODE !== "COLE_AQUI_O_CODIGO_PIX_COPIA_E_COLA";
+  const pixCode  = getPixCode(nome);
+  const isEmail  = isPixEmailChave(pixCode);
 
   conteudo.innerHTML = `
     <p class="modal__eyebrow">Presente</p>
@@ -749,16 +799,11 @@ function renderizarModalPresente(nome, valor, desc) {
     <p class="modal__valor">R$ ${escHtml(valor)}</p>
     <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem">${escHtml(desc)}</p>
 
-    ${pixExiste ? `
     <div class="pix__box">
-      <p class="pix__label">Chave Pix copia-e-cola</p>
-      <p class="pix__code" id="pixCode">${escHtml(PIX_CODE)}</p>
-      <button class="btn btn--outline-green btn--sm" type="button" onclick="copiarPix()">Copiar chave Pix</button>
-    </div>` : `
-    <div class="pix__box">
-      <p class="pix__label">Chave Pix</p>
-      <p style="font-size:.82rem;color:var(--sage);font-style:italic">[Código Pix será adicionado em breve]</p>
-    </div>`}
+      <p class="pix__label">${isEmail ? "Chave Pix (e-mail)" : "Pix copia-e-cola"}</p>
+      <p class="pix__code" id="pixCode">${escHtml(pixCode)}</p>
+      <button class="btn btn--outline-green btn--sm" type="button" onclick="copiarPix()">${isEmail ? "Copiar chave" : "Copiar código Pix"}</button>
+    </div>
 
     <div class="modal__form" id="presenteForm">
       <div class="modal__field">
