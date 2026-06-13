@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Casamento de Gian & Tiago — 12 de dezembro de 2026, Fazenda Quilombo, Limeira." />
-  <title>Gian & Tiago — 12.12.2026</title>
+  <meta name="description" content="Casamento de Tiago e Gian — 12 de dezembro de 2026, Fazenda Quilombo, Limeira." />
+  <title>Tiago e Gian — 12.12.2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -15,15 +15,16 @@
   <!-- ─── NAV ───────────────────────────────────────────── -->
   <header class="nav" id="nav">
     <div class="nav__inner">
-      <a href="#hero" class="nav__logo">G&T</a>
+      <a href="#hero" class="nav__logo">
+        <img src="assets/img/Logo_gianetiago.jpg" alt="Tiago e Gian" class="nav__logo-img" />
+      </a>
       <nav class="nav__links" id="navLinks" aria-label="Menu principal">
         <a href="#evento">O Evento</a>
         <a href="#cerimonia">Programação</a>
         <a href="presentes.html">Presentes</a>
         <a href="jogos.html" class="nav__key" aria-label="Segredo">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="7.5" cy="15.5" r="5.5"/>
-            <path d="M21 2l-9.6 9.6M15.5 7.5l3 3"/>
+            <circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3"/>
           </svg>
         </a>
         <a href="#rsvp" class="nav__cta">Confirmar presença</a>
@@ -36,33 +37,24 @@
 
   <!-- ─── HERO ──────────────────────────────────────────── -->
   <section class="hero" id="hero">
-    <div class="hero__bg" aria-hidden="true"></div>
+    <div class="hero__bg" aria-hidden="true">
+      <img src="assets/img/GT01.jpg" alt="" class="hero__bg-img" />
+    </div>
     <div class="hero__content">
       <p class="hero__eyebrow reveal">12 de dezembro de 2026</p>
-      <h1 class="hero__title reveal">Gian<span class="hero__amp"> & </span>Tiago</h1>
+      <div class="hero__logo-wrap reveal">
+        <img src="assets/img/Logo_gianetiago.jpg" alt="Tiago e Gian" class="hero__logo" />
+      </div>
       <p class="hero__place reveal">Fazenda Quilombo · Limeira</p>
 
-      <!-- Contagem regressiva -->
-      <div class="hero__countdown reveal" id="countdown" aria-label="Contagem regressiva para o casamento">
-        <div class="countdown__item">
-          <span class="countdown__num" id="cd-dias">—</span>
-          <span class="countdown__label">dias</span>
-        </div>
+      <div class="hero__countdown reveal" id="countdown" aria-label="Contagem regressiva">
+        <div class="countdown__item"><span class="countdown__num" id="cd-dias">—</span><span class="countdown__label">dias</span></div>
         <span class="countdown__sep" aria-hidden="true">·</span>
-        <div class="countdown__item">
-          <span class="countdown__num" id="cd-horas">—</span>
-          <span class="countdown__label">horas</span>
-        </div>
+        <div class="countdown__item"><span class="countdown__num" id="cd-horas">—</span><span class="countdown__label">horas</span></div>
         <span class="countdown__sep" aria-hidden="true">·</span>
-        <div class="countdown__item">
-          <span class="countdown__num" id="cd-min">—</span>
-          <span class="countdown__label">min</span>
-        </div>
+        <div class="countdown__item"><span class="countdown__num" id="cd-min">—</span><span class="countdown__label">min</span></div>
         <span class="countdown__sep" aria-hidden="true">·</span>
-        <div class="countdown__item">
-          <span class="countdown__num" id="cd-seg">—</span>
-          <span class="countdown__label">seg</span>
-        </div>
+        <div class="countdown__item"><span class="countdown__num" id="cd-seg">—</span><span class="countdown__label">seg</span></div>
       </div>
 
       <div class="hero__actions reveal">
@@ -78,25 +70,24 @@
 
   <!-- ─── PHOTO STRIP 1 ─────────────────────────────────── -->
   <div class="photo-strip" id="foto-strip-1" aria-hidden="true">
-    <div class="photo-strip__track" id="stripTrack1">
-      <!-- 8 placeholders, duplicados para loop contínuo -->
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#506B45,#7A9B6E)">Foto 1</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#3A3428,#686A3A)">Foto 2</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#7A9B6E,#B8C49A)">Foto 3</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#B87B3E,#9C6631)">Foto 4</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#506B45,#A8C49A)">Foto 5</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#2A2820,#506B45)">Foto 6</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#7A9B6E,#506B45)">Foto 7</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#686A3A,#B8C49A)">Foto 8</div></div>
-      <!-- duplicado para loop -->
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#506B45,#7A9B6E)">Foto 1</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#3A3428,#686A3A)">Foto 2</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#7A9B6E,#B8C49A)">Foto 3</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#B87B3E,#9C6631)">Foto 4</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#506B45,#A8C49A)">Foto 5</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#2A2820,#506B45)">Foto 6</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#7A9B6E,#506B45)">Foto 7</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#686A3A,#B8C49A)">Foto 8</div></div>
+    <div class="photo-strip__track">
+      <div class="photo-strip__item"><img src="assets/img/Q02.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT03.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q07.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT05.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q01.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT02.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q05.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT04.jpg" alt="" class="site-img" /></div>
+      <!-- duplicado para loop contínuo -->
+      <div class="photo-strip__item"><img src="assets/img/Q02.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT03.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q07.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT05.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q01.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT02.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q05.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT04.jpg" alt="" class="site-img" /></div>
     </div>
   </div>
 
@@ -108,11 +99,11 @@
 
       <div class="evento__intro">
         <div class="evento__text reveal-left">
-          <p>[Texto sobre o evento — o tom, o ambiente, o que os convidados podem esperar. Uma tarde de inverno na fazenda, entre jardins, amigos próximos e muito amor.]</p>
+          <p>[Texto sobre o evento — o tom, o ambiente, o que os convidados podem esperar. Uma tarde de dezembro na fazenda, entre jardins, amigos próximos e muito amor.]</p>
           <p>[Parágrafo adicional — algo pessoal sobre a escolha do local, o que ele representa para vocês.]</p>
         </div>
         <div class="evento__foto-wrap reveal-right">
-          <div class="evento__foto-ph">foto dos noivos</div>
+          <img src="assets/img/Desenho_fazenda.jpg" alt="Ilustração da Fazenda Quilombo" class="evento__foto site-img--ilustracao" />
           <div class="evento__foto-badge">
             <strong>12 · 12 · 2026</strong>
             Fazenda Quilombo<br>Limeira, SP
@@ -123,11 +114,11 @@
       <!-- Carrossel -->
       <div class="carrossel reveal" id="carrossel">
         <div class="carrossel__track" id="carrosselTrack">
-          <div class="carrossel__slide"><div class="carrossel-ph" style="background:linear-gradient(135deg,#506B45 0%,#7A9B6E 100%)">Foto do casal 1</div></div>
-          <div class="carrossel__slide"><div class="carrossel-ph" style="background:linear-gradient(160deg,#2A2820 0%,#506B45 100%)">Foto do casal 2</div></div>
-          <div class="carrossel__slide"><div class="carrossel-ph" style="background:linear-gradient(135deg,#686A3A 0%,#A8C49A 100%)">Foto do casal 3</div></div>
-          <div class="carrossel__slide"><div class="carrossel-ph" style="background:linear-gradient(135deg,#3A3428 0%,#7A9B6E 100%)">Foto do casal 4</div></div>
-          <div class="carrossel__slide"><div class="carrossel-ph" style="background:linear-gradient(160deg,#506B45 0%,#B8C49A 100%)">Foto do casal 5</div></div>
+          <div class="carrossel__slide"><img src="assets/img/GT03.jpg" alt="Tiago e Gian num jardim verde" class="site-img" /></div>
+          <div class="carrossel__slide"><img src="assets/img/GT01.jpg" alt="Tiago e Gian de terno" class="site-img" /></div>
+          <div class="carrossel__slide"><img src="assets/img/GT02.jpg" alt="Tiago e Gian na praia" class="site-img" /></div>
+          <div class="carrossel__slide"><img src="assets/img/GT04.jpg" alt="Tiago e Gian em Nova York" class="site-img" /></div>
+          <div class="carrossel__slide"><img src="assets/img/GT05.jpg" alt="Tiago e Gian com amigos" class="site-img" /></div>
         </div>
         <button class="carrossel__btn carrossel__btn--prev" aria-label="Foto anterior" onclick="moverCarrossel(-1)">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15 18 9 12 15 6"/></svg>
@@ -139,8 +130,8 @@
       </div>
 
       <!-- Timeline do dia -->
-      <div style="max-width:600px;margin-top:1rem">
-        <h3 class="section__title" style="font-size:2rem;margin-bottom:2rem" class="reveal">O dia</h3>
+      <div class="timeline-wrap">
+        <h3 class="timeline-titulo reveal">O dia</h3>
         <div class="timeline">
           <div class="timeline__item reveal">
             <div class="timeline__dot"></div>
@@ -171,13 +162,13 @@
     </div>
   </section>
 
-  <!-- ─── MOSAICO DE FOTOS ───────────────────────────────── -->
+  <!-- ─── MOSAICO ───────────────────────────────────────── -->
   <div class="mosaico" aria-hidden="true">
-    <div class="mosaico__item"><div class="mosaico-ph" style="background:linear-gradient(160deg,#506B45,#A8C49A)">Foto</div></div>
-    <div class="mosaico__item"><div class="mosaico-ph" style="background:linear-gradient(135deg,#3A3428,#686A3A)">Foto</div></div>
-    <div class="mosaico__item"><div class="mosaico-ph" style="background:linear-gradient(135deg,#7A9B6E,#B8C49A)">Foto</div></div>
-    <div class="mosaico__item"><div class="mosaico-ph" style="background:linear-gradient(135deg,#B87B3E,#686A3A)">Foto</div></div>
-    <div class="mosaico__item"><div class="mosaico-ph" style="background:linear-gradient(160deg,#2A2820,#506B45)">Foto</div></div>
+    <div class="mosaico__item"><img src="assets/img/Q02.jpg" alt="" class="site-img" /></div>
+    <div class="mosaico__item"><img src="assets/img/Q07.jpg" alt="" class="site-img" /></div>
+    <div class="mosaico__item"><img src="assets/img/Q04.jpg" alt="" class="site-img" /></div>
+    <div class="mosaico__item"><img src="assets/img/Q01.jpg" alt="" class="site-img" /></div>
+    <div class="mosaico__item"><img src="assets/img/Q06.jpg" alt="" class="site-img" /></div>
   </div>
 
   <!-- ─── CERIMÔNIA ─────────────────────────────────────── -->
@@ -195,7 +186,7 @@
           <p class="ceri__location">Fazenda Quilombo<br>Limeira — SP</p>
           <div class="ceri__actions">
             <a href="https://maps.google.com/?q=Fazenda+Quilombo+Limeira+SP" target="_blank" rel="noopener" class="btn btn--outline-green btn--sm">Abrir no Maps</a>
-            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Casamento+Gian+%26+Tiago&dates=20261212T193000Z/20261213T020000Z&details=Cerim%C3%B4nia+%2816h30%29+e+recep%C3%A7%C3%A3o+na+Fazenda+Quilombo%2C+Limeira+SP&location=Fazenda+Quilombo%2C+Limeira+SP" target="_blank" rel="noopener" class="btn btn--outline-green btn--sm">+ Calendário</a>
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Casamento+Tiago+e+Gian&dates=20261212T193000Z/20261213T020000Z&details=Cerim%C3%B4nia+%2816h30%29+e+recep%C3%A7%C3%A3o+na+Fazenda+Quilombo%2C+Limeira+SP&location=Fazenda+Quilombo%2C+Limeira+SP" target="_blank" rel="noopener" class="btn btn--outline-green btn--sm">+ Calendário</a>
           </div>
         </article>
         <article class="ceri__card reveal">
@@ -212,8 +203,8 @@
 
   <!-- ─── PHOTO PAIR ─────────────────────────────────────── -->
   <div class="photo-pair" aria-hidden="true">
-    <div class="photo-pair__item"><div class="photo-pair-ph" style="background:linear-gradient(160deg,#506B45,#7A9B6E)">Foto do local</div></div>
-    <div class="photo-pair__item"><div class="photo-pair-ph" style="background:linear-gradient(135deg,#3A3428,#686A3A)">Foto do local</div></div>
+    <div class="photo-pair__item"><img src="assets/img/Q03.jpg" alt="" class="site-img" /></div>
+    <div class="photo-pair__item"><img src="assets/img/Q08.jpg" alt="" class="site-img" /></div>
   </div>
 
   <!-- ─── DESLOCAMENTO ──────────────────────────────────── -->
@@ -241,23 +232,23 @@
   <!-- ─── PHOTO STRIP 2 ─────────────────────────────────── -->
   <div class="photo-strip" aria-hidden="true">
     <div class="photo-strip__track" style="animation-direction:reverse;animation-duration:32s">
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#686A3A,#A8C49A)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#506B45,#2A2820)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#B87B3E,#686A3A)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#7A9B6E,#506B45)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#2A2820,#7A9B6E)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#A8C49A,#506B45)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#686A3A,#2A2820)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#B8C49A,#7A9B6E)">Foto</div></div>
+      <div class="photo-strip__item"><img src="assets/img/Q08.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT01.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q03.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q06.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT05.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q04.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT03.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q05.jpg" alt="" class="site-img" /></div>
       <!-- duplicado -->
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#686A3A,#A8C49A)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#506B45,#2A2820)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#B87B3E,#686A3A)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#7A9B6E,#506B45)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#2A2820,#7A9B6E)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#A8C49A,#506B45)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#686A3A,#2A2820)">Foto</div></div>
-      <div class="photo-strip__item"><div class="photo-ph" style="background:linear-gradient(135deg,#B8C49A,#7A9B6E)">Foto</div></div>
+      <div class="photo-strip__item"><img src="assets/img/Q08.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT01.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q03.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q06.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT05.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q04.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT03.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q05.jpg" alt="" class="site-img" /></div>
     </div>
   </div>
 
@@ -267,12 +258,11 @@
       <p class="section__eyebrow reveal">IV.</p>
       <h2 class="section__title reveal">Confirme sua presença</h2>
       <p class="section__subtitle reveal">Por favor, confirme até <strong>30 de novembro de 2026</strong>.</p>
-
       <div class="rsvp__box reveal" id="rsvpBox">
         <div id="rsvp-busca">
           <label for="nomeBusca" class="rsvp__label">Digite seu nome</label>
           <div class="rsvp__row">
-            <input type="text" id="nomeBusca" class="rsvp__input" placeholder="Ex: Gian" autocomplete="name" aria-label="Nome do convidado" />
+            <input type="text" id="nomeBusca" class="rsvp__input" placeholder="Ex: Tiago" autocomplete="name" aria-label="Nome do convidado" />
             <button class="btn btn--primary" id="btnBuscar" onclick="buscar()">Buscar</button>
           </div>
           <p class="rsvp__hint" id="rsvpHint">Digite seu nome como ele aparece no convite.</p>
@@ -315,7 +305,7 @@
   <!-- ─── RODAPÉ ─────────────────────────────────────────── -->
   <footer class="footer">
     <div class="container footer__inner">
-      <p class="footer__names">Gian & Tiago</p>
+      <img src="assets/img/Logo_gianetiago.jpg" alt="Tiago e Gian" class="footer__logo" />
       <p class="footer__date">12 · 12 · 2026</p>
       <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
       <div class="footer__links">
@@ -325,7 +315,6 @@
     </div>
   </footer>
 
-  <!-- ─── MODAL PRESENTE ────────────────────────────────── -->
   <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" hidden>
     <div class="modal__overlay" onclick="fecharModal()"></div>
     <div class="modal__box">
