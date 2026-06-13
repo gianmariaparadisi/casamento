@@ -205,10 +205,23 @@
   /* ── carrega palavra do dia ── */
   async function carregarPalavra() {
     try {
-      const resp = await fetch(`${API_URL}?action=wordle&data=${encodeURIComponent(hoje())}`);
-      const json = await resp.json();
+      // Google Apps Script faz redirect — precisamos de redirect:'follow'
+      const url  = `${API_URL}?action=wordle&data=${encodeURIComponent(hoje())}`;
+      const resp = await fetch(url, { redirect: "follow" });
 
-      if (!json.palavra) throw new Error("sem palavra");
+      // GAS às vezes retorna text/html no redirect — tenta parsear mesmo assim
+      const texto = await resp.text();
+      let json;
+      try {
+        json = JSON.parse(texto);
+      } catch(_) {
+        // Extrai JSON de dentro do HTML se vier embutido
+        const m = texto.match(/\{.*\}/s);
+        if (m) json = JSON.parse(m[0]);
+        else throw new Error("resposta invalida");
+      }
+
+      if (!json || !json.palavra) throw new Error("sem palavra");
 
       PALAVRA = json.palavra.toUpperCase().trim();
       LETRAS  = PALAVRA.length;
@@ -222,8 +235,12 @@
       construirGrid();
       construirTeclado();
     } catch(e) {
+      console.error("Wordle erro:", e);
       document.getElementById("wordleLoading").style.display = "none";
-      document.getElementById("wordleErro").style.display = "block";
+      // Mostra o erro de debug para identificar o problema
+      const errEl = document.getElementById("wordleErro");
+      errEl.style.display = "block";
+      errEl.innerHTML += `<p style="font-size:.7rem;color:var(--text-muted);margin-top:1rem;word-break:break-all">Debug: ${e.message}</p>`;
     }
   }
 
