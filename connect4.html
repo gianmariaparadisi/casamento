@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Conexões — Tiago e Gian</title>
+  <title>Conexões, Tiago e Gian</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -114,7 +114,10 @@
 
   <header class="nav" id="nav">
     <div class="nav__inner">
-      <a href="index.html" class="nav__logo">Tiago e Gian</a>
+      <a href="index.html" class="nav__logo-wrap">
+        <img src="assets/img/monograma_light.png" alt="" class="site-logo site-logo--mono" aria-hidden="true">
+        <span>Tiago e Gian</span>
+      </a>
       <nav class="nav__links" id="navLinks">
         <a href="index.html#evento">O Dia</a>
         <a href="index.html#cerimonia">Local & Orientações</a>
@@ -210,7 +213,9 @@
 
   <footer class="footer">
     <div class="container footer__inner">
-      <p class="footer__names">Tiago e Gian</p>
+      <p class="footer__names" aria-label="Tiago e Gian">
+      <img src="assets/img/logohorizontal_light.png" alt="Tiago e Gian" class="site-logo site-logo--footer">
+    </p>
       <p class="footer__date">12 · 12 · 2026</p>
       <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
     </div>
@@ -219,7 +224,7 @@
   <script src="assets/js/app.js"></script>
   <script>
   /* ══════════════════════════════════════════════
-     CONEXÕES (NYT Connections) — Tiago e Gian
+     CONEXÕES (NYT Connections), Tiago e Gian
      Planilha aba "CONNECT 4":
      Estrutura esperada por grupo:
        Col A: data
@@ -447,7 +452,7 @@
       ? `Você achou todos os grupos!`
       : `Acertou ${resolvidos.length} de 4 grupos.`;
 
-    // Gabarito completo — sempre mostrado, com indicação do que você acertou
+    // Gabarito completo, sempre mostrado, com indicação do que você acertou
     const gab = document.getElementById("connGabarito");
     if (gab) {
       gab.innerHTML = "";

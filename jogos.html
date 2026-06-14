@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jogos — Tiago e Gian</title>
+  <title>Jogos, Tiago e Gian</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -16,7 +16,14 @@
     @keyframes key-wiggle { 0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)} }
     .jogos-hero__title { font-family:var(--font-display);font-size:clamp(2rem,5vw,3.5rem);font-weight:300;margin-bottom:.75rem; }
     .jogos-hero__sub { font-size:.9rem;color:var(--text-muted);max-width:440px;margin-inline:auto;line-height:1.75; }
-    .jogos-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-top:2.5rem;max-width:860px;margin-inline:auto; }
+    .jogos-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-top:2.5rem;max-width:860px;margin-inline:auto;justify-items:center; }
+    .jogos-grid .jogo-card { width:100%; }
+    @media(max-width:480px){
+      .jogos-grid { grid-template-columns:1fr; }
+    }
+    @media(min-width:481px) and (max-width:720px){
+      .jogos-grid { grid-template-columns:repeat(2,1fr); }
+    }
     .jogo-card { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:1.75rem 1.5rem;box-shadow:var(--shadow-green);cursor:pointer;transition:box-shadow var(--transition),transform var(--transition);text-align:center; }
     .jogo-card:hover { box-shadow:var(--shadow-lg);transform:translateY(-3px);border-color:var(--sage); }
     .jogo-card__icon { width:2.75rem;height:2.75rem;margin:0 auto .75rem;display:block;color:var(--sage-dark); }
@@ -27,14 +34,14 @@
 
     /* ─── ARENAS ─────────────────────────────────────── */
     #arena-menu { display:block;padding:0 0 60px; }
-    #arena-flappy,#arena-look { display:none;min-height:100svh;flex-direction:column;align-items:center;padding-top:80px; }
+    #arena-flappy { display:none;min-height:100svh;flex-direction:column;align-items:center;padding-top:80px;overflow-x:hidden; }
     .arena-header { width:100%;max-width:520px;margin-inline:auto;padding:0 5%;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between; }
     .arena-title { font-family:var(--font-display);font-size:1.5rem;font-weight:400; }
     .arena-score { font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dark);background:var(--bg-green);padding:.4rem .9rem;border-radius:20px;border:1px solid var(--line-green); }
     .arena-back { font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dark);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:none;padding:0;width:100%;max-width:520px;margin-inline:auto;display:block;padding:0 5%;margin-bottom:.5rem; }
 
     /* Canvas wrapper */
-    .canvas-wrap { position:relative;width:100%;max-width:480px;margin-inline:auto;padding:0 5%; }
+    .canvas-wrap { position:relative;width:100%;max-width:480px;margin-inline:auto;padding:0; }
     .canvas-wrap canvas { display:block;width:100%;border:2px solid var(--line-green);border-radius:var(--radius-lg);box-shadow:var(--shadow-green); }
 
     /* Overlay */
@@ -69,52 +76,20 @@
     .top10__pts { font-size:.85rem;font-weight:600;color:var(--sage-dark);background:var(--bg-green);padding:.25rem .65rem;border-radius:20px; }
     .top10__empty,.top10__loading { text-align:center;padding:1.5rem;font-size:.85rem;color:var(--text-muted);font-style:italic; }
 
-    /* ─── MONTE O LOOK ───────────────────────────────── */
-    #arena-look { background:#0E0A14;color:#F0E6D0;padding-top:0; }
-    .look-topbar { background:#080510;border-bottom:1px solid rgba(200,160,80,.25);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:72px; }
-    .look-topbar-title { font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#C8A050; }
-    .look-char-sel { display:flex;gap:8px; }
-    .char-pick { font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:20px;border:1px solid rgba(200,160,80,.3);background:transparent;color:rgba(200,160,80,.6);cursor:pointer;font-family:Georgia;transition:all .15s; }
-    .char-pick.active { background:rgba(200,160,80,.18);border-color:#C8A050;color:#C8A050; }
-    .look-body { display:flex;width:100%;flex:1;overflow:hidden;border-bottom:1px solid rgba(200,160,80,.15); }
-    .look-stage { width:clamp(150px,35%,210px);flex-shrink:0;background:linear-gradient(180deg,#150E20 0%,#1C1228 65%,#110C1A 100%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:16px;position:relative;border-right:1px solid rgba(200,160,80,.15); }
-    .look-lights { position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-around;padding:8px; }
-    .look-bulb { width:9px;height:9px;border-radius:50%;background:#F5D060;box-shadow:0 0 7px #F5D060; }
-    .look-mirror { position:absolute;top:14px;right:8px;width:36px;height:52px;border:1.5px solid rgba(200,160,80,.3);border-radius:50% 50% 28% 28%/38% 38% 18% 18%;background:rgba(255,255,255,.03); }
-    .look-stage-floor { width:80%;height:5px;background:rgba(200,160,80,.12);border-radius:3px;margin-top:8px; }
-    #look-panels { flex:1;background:#080510;overflow-y:auto;min-height:360px;max-height:420px; }
-    .look-cat-label { padding:9px 12px 4px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(200,160,80,.5);border-top:1px solid rgba(200,160,80,.1); }
-    .look-items-row { display:flex;flex-wrap:wrap;gap:5px;padding:5px 8px 9px; }
-    .look-item-btn { width:68px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(200,160,80,.15);cursor:pointer;transition:all .15s;overflow:hidden;display:flex;flex-direction:column;align-items:center; }
-    .look-item-btn svg { display:block;width:68px;height:52px; }
-    .look-item-btn:hover,.look-item-btn.active { background:rgba(200,160,80,.18);border-color:#C8A050; }
-    .look-item-label { font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:rgba(200,160,80,.5);text-align:center;padding:3px 3px 5px;line-height:1.2; }
-    .look-item-btn.active .look-item-label { color:#C8A050; }
-    .look-footer { padding:12px 18px;background:#080510;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid rgba(200,160,80,.2);width:100%; }
-    #look-result { flex:1;min-width:140px;font-size:12px;color:#C8A050;font-style:italic;line-height:1.4; }
-    .look-btn-gold { background:#6B2737;color:#F0E6D0;border:none;padding:9px 16px;border-radius:8px;font-family:Georgia;font-size:12px;cursor:pointer;white-space:nowrap; }
-    .look-btn-gold:hover { background:#8B3548; }
-    .look-btn-clear { background:transparent;color:rgba(200,160,80,.5);border:1px solid rgba(200,160,80,.2);padding:9px 12px;border-radius:8px;font-family:Georgia;font-size:11px;cursor:pointer;white-space:nowrap; }
-    .look-btn-clear:hover { color:#C8A050;border-color:#C8A050; }
-    .look-back { font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,160,80,.6);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:none;padding:14px 18px 0;display:block;width:100%; }
-    @media(max-width:480px){ .look-item-btn{width:58px;} .look-item-btn svg{width:58px;height:44px;} .look-stage{width:130px;} }
 
-    /* ─── MOBILE: trava rolagem da página durante o jogo ─────── */
+
+    /* overscroll suave */
     html, body { overscroll-behavior: none; }
-    @media (max-width: 640px) {
-      html.game-locked, body.game-locked {
-        overflow: hidden;
-        height: 100%;
-        touch-action: none;
-      }
-    }
   </style>
 </head>
 <body>
 
   <header class="nav" id="nav">
     <div class="nav__inner">
-      <a href="index.html" class="nav__logo">Tiago e Gian</a>
+      <a href="index.html" class="nav__logo-wrap">
+        <img src="assets/img/monograma_light.png" alt="" class="site-logo site-logo--mono" aria-hidden="true">
+        <span>Tiago e Gian</span>
+      </a>
       <nav class="nav__links" id="navLinks">
         <a href="index.html#evento">O Dia</a>
         <a href="index.html#cerimonia">Local & Orientações</a>
@@ -222,13 +197,7 @@
           <span class="btn btn--primary btn--sm">Jogar</span>
         </a>
 
-        <div class="jogo-card reveal" onclick="entrarJogo('look')">
-          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 10a4 4 0 1 1 4 4"/><path d="M24 14 6 24l4 4 14-7 14 7 4-4z"/><path d="M14 25 9 40h30l-5-15"/></svg></span>
-          <h2 class="jogo-card__title">Monte o Look</h2>
-          <p class="jogo-card__desc">Vista o Tiago ou o Gian para a festa: cabelo, roupa, sapato e acessórios.</p>
-          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Editorial</p>
-          <span class="btn btn--primary btn--sm">Jogar</span>
-        </div>
+
       </div>
     </div>
   </div>
@@ -237,8 +206,20 @@
   <div id="arena-flappy">
     <button class="arena-back" onclick="voltarMenu()">← Voltar aos jogos</button>
     <div class="arena-header">
-      <h2 class="arena-title">Flappy Gian 🐦</h2>
+      <h2 class="arena-title" id="flappy-title">Flappy Gian 🐦</h2>
       <div class="arena-score">Canos: <span id="flappy-score">0</span></div>
+    </div>
+    <div style="display:flex;gap:.5rem;justify-content:center;margin-bottom:.75rem">
+      <button class="fl-char-btn active" data-char="gian"
+        onclick="setFlappyPersonagem('gian');document.getElementById('flappy-title').textContent='Flappy Gian 🐦'"
+        style="font-size:.75rem;padding:.35rem .9rem;border-radius:20px;border:1.5px solid var(--line-green);background:var(--sage);color:white;cursor:pointer">
+        Gian
+      </button>
+      <button class="fl-char-btn" data-char="tiago"
+        onclick="setFlappyPersonagem('tiago');document.getElementById('flappy-title').textContent='Flappy Tiago 🐦'"
+        style="font-size:.75rem;padding:.35rem .9rem;border-radius:20px;border:1.5px solid var(--line-green);background:var(--white);color:var(--sage-dark);cursor:pointer">
+        Tiago
+      </button>
     </div>
     <div class="canvas-wrap">
       <canvas id="flappy-canvas" tabindex="0"></canvas>
@@ -257,39 +238,13 @@
     </div>
   </div>
 
-  <!-- ══ MONTE O LOOK ══ -->
-  <div id="arena-look">
-    <button class="look-back" onclick="voltarMenu()">← Voltar aos jogos</button>
-    <div class="look-topbar">
-      <div class="look-topbar-title">Monte o Look da Festa ✦</div>
-      <div class="look-char-sel">
-        <button class="char-pick active" onclick="setLookChar('T')">Tiago</button>
-        <button class="char-pick" onclick="setLookChar('G')">Gian</button>
-      </div>
-    </div>
-    <div class="look-body">
-      <div class="look-stage">
-        <div class="look-lights">
-          <div class="look-bulb"></div><div class="look-bulb"></div>
-          <div class="look-bulb"></div><div class="look-bulb"></div>
-        </div>
-        <div class="look-mirror"></div>
-        <svg id="look-svg" viewBox="0 0 200 280" width="160" height="224" xmlns="http://www.w3.org/2000/svg" style="display:block"></svg>
-        <div class="look-stage-floor"></div>
-      </div>
-      <div id="look-panels"></div>
-    </div>
-    <div class="look-footer">
-      <div id="look-result">Escolha um look digno de entrar depois dos noivos.</div>
-      <button class="look-btn-clear" onclick="lookReset()">Limpar</button>
-      <button class="look-btn-gold" onclick="lookAvaliar()">Look pronto ✦</button>
-    </div>
-    <div style="height:60px"></div>
-  </div>
+
 
   <footer class="footer">
     <div class="container footer__inner">
-      <p class="footer__names">Tiago e Gian</p>
+      <p class="footer__names" aria-label="Tiago e Gian">
+      <img src="assets/img/logohorizontal_light.png" alt="Tiago e Gian" class="site-logo site-logo--footer">
+    </p>
       <p class="footer__date">12 · 12 · 2026</p>
       <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
     </div>

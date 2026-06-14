@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Lista de presentes — Tiago e Gian" />
-  <title>Presentes — Tiago e Gian</title>
+  <meta name="description" content="Lista de presentes, Tiago e Gian" />
+  <title>Presentes, Tiago e Gian</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -98,20 +98,7 @@
       .presentes__grid { grid-template-columns: 1fr; }
     }
 
-    /* ─── FILTRO POR FAIXA DE VALOR ─── */
-    .presentes__filtros {
-      display: flex; flex-wrap: wrap; gap: .6rem;
-      margin-top: 2.25rem; justify-content: center;
-    }
-    .presentes__filtro {
-      font-size: .8rem; font-weight: 500; color: var(--text-muted);
-      background: var(--white); border: 1.5px solid var(--line-green);
-      border-radius: 999px; padding: .5rem 1.1rem; cursor: pointer;
-      transition: background var(--transition), color var(--transition), border-color var(--transition);
-    }
-    .presentes__filtro:hover { border-color: var(--sage); color: var(--sage-dark); }
-    .presentes__filtro.active { background: var(--sage); color: var(--white); border-color: var(--sage); }
-    .presente__card.is-hidden { display: none; }
+
   </style>
 </head>
 <body>
@@ -119,7 +106,10 @@
   <!-- ─── NAV ───────────────────────────────────────────── -->
   <header class="nav" id="nav">
     <div class="nav__inner">
-      <a href="index.html" class="nav__logo">Tiago e Gian</a>
+      <a href="index.html" class="nav__logo-wrap">
+        <img src="assets/img/monograma_light.png" alt="" class="site-logo site-logo--mono" aria-hidden="true">
+        <span>Tiago e Gian</span>
+      </a>
       <nav class="nav__links" id="navLinks" aria-label="Menu principal">
         <a href="index.html#evento">O Dia</a>
         <a href="index.html#cerimonia">Local & Orientações</a>
@@ -148,11 +138,15 @@
 
   <!-- ─── HERO DA PÁGINA ────────────────────────────────── -->
   <div class="presentes-hero">
-    <p class="presentes-hero__eyebrow reveal">Tiago e Gian</p>
+    <div class="reveal" style="margin-bottom:1.25rem">
+        <img src="assets/img/logohorizontal_light.png" alt="Tiago e Gian"
+             class="site-logo site-logo--horiz" style="opacity:.85">
+      </div>
+      <p class="presentes-hero__eyebrow reveal" aria-hidden="true" style="display:none">Tiago e Gian</p>
     <h1 class="presentes-hero__title reveal">Lista de<br><em>presentes</em></h1>
     <p class="presentes-hero__sub reveal">
       A melhor forma de nos presentear é estar aqui.<br>
-      Mas se quiser marcar esse momento de outro jeito, preparamos algumas sugestões.
+      Mas se quiser mandar um mimo além da sua presença, separamos algumas ideias.
     </p>
   </div>
 
@@ -160,23 +154,18 @@
   <section class="section">
     <div class="container">
 
-      <div class="presentes__filtros reveal" role="group" aria-label="Filtrar por faixa de valor">
-        <button class="presentes__filtro active" data-filtro="todos">Todos</button>
-        <button class="presentes__filtro" data-filtro="0-200">Até R$ 200</button>
-        <button class="presentes__filtro" data-filtro="200-400">R$ 200 – 400</button>
-        <button class="presentes__filtro" data-filtro="400-9999">A partir de R$ 400</button>
-      </div>
+
 
       <div class="presentes__grid" id="presentesGrid">
 
         <article class="presente__card reveal"
           data-nome="Passeio de barco"
           data-valor="600"
-          data-desc="Uma tarde inteira no mar, só vocês dois.">
+          data-desc="Sai essa imagem de cineque! Uma tarde no mar, dois apaixonados, e total falta de responsabilidade.">
           <img src="assets/img/P01.jpg" alt="Passeio de barco" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Passeio de barco</h3>
-            <p class="presente__desc">Uma tarde inteira no mar, só vocês dois.</p>
+            <p class="presente__desc">Sai essa imagem de cineque! Uma tarde no mar, dois apaixonados, e total falta de responsabilidade.</p>
             <p class="presente__valor">R$ 600</p>
             <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
           </div>
@@ -185,11 +174,11 @@
         <article class="presente__card reveal"
           data-nome="Degustação de vinhos e champagnes"
           data-valor="280"
-          data-desc="Para brindar cada conquista juntos, com calma e bom gosto.">
+          data-desc="Porque champagne de caixinha já não basta mais. Vem sofisticar.">
           <img src="assets/img/P02.jpg" alt="Degustação de vinhos e champagnes" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Degustação de vinhos e champagnes</h3>
-            <p class="presente__desc">Para brindar cada conquista juntos, com calma e bom gosto.</p>
+            <p class="presente__desc">Porque champagne de caixinha já não basta mais. Vem sofisticar.</p>
             <p class="presente__valor">R$ 280</p>
             <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
           </div>
@@ -198,11 +187,11 @@
         <article class="presente__card reveal"
           data-nome="Resort all inclusive"
           data-valor="1200"
-          data-desc="Uma escapada completa, sem se preocupar com mais nada.">
+          data-desc="Tudo incluso. Frigobar, piscina, aquele café da manhã que ninguém consegue terminar. O sonho.">
           <img src="assets/img/P03.jpg" alt="Resort all inclusive" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Resort all inclusive</h3>
-            <p class="presente__desc">Uma escapada completa, sem se preocupar com mais nada.</p>
+            <p class="presente__desc">Tudo incluso. Frigobar, piscina, aquele café da manhã que ninguém consegue terminar. O sonho.</p>
             <p class="presente__valor">R$ 1.200</p>
             <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
           </div>
@@ -211,11 +200,11 @@
         <article class="presente__card reveal"
           data-nome="Café da manhã com vista"
           data-valor="150"
-          data-desc="Despertar devagar, sem pressa, em algum lugar bonito.">
+          data-desc="Vista linda, café na xícara, zero compromisso. Perfeito para dois que acabaram de sobreviver a um casamento.">
           <img src="assets/img/P04.jpg" alt="Café da manhã com vista" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Café da manhã com vista</h3>
-            <p class="presente__desc">Despertar devagar, sem pressa, em algum lugar bonito.</p>
+            <p class="presente__desc">Vista linda, café na xícara, zero compromisso. Perfeito para dois que acabaram de sobreviver a um casamento.</p>
             <p class="presente__valor">R$ 150</p>
             <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
           </div>
@@ -224,11 +213,11 @@
         <article class="presente__card reveal"
           data-nome="Um vaso lindo para casa"
           data-valor="180"
-          data-desc="Uma peça especial para começar a decorar o novo lar.">
+          data-desc="O tipo de vaso que vira assunto em toda visita. 'Ai que lindo, de onde é?' De gente que nos ama.">
           <img src="assets/img/P05.jpg" alt="Um vaso lindo para casa" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Um vaso lindo para casa</h3>
-            <p class="presente__desc">Uma peça especial para começar a decorar o novo lar.</p>
+            <p class="presente__desc">O tipo de vaso que vira assunto em toda visita. 'Ai que lindo, de onde é?' De gente que nos ama.</p>
             <p class="presente__valor">R$ 180</p>
             <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
           </div>
@@ -237,11 +226,11 @@
         <article class="presente__card reveal"
           data-nome="Um mergulho relaxante"
           data-valor="350"
-          data-desc="Um momento de paz na água, sem pressa de sair.">
+          data-desc="Água cristalina, nenhum email, e a sensação de que a vida é boa. Você vai presentear isso.">
           <img src="assets/img/P06.jpg" alt="Um mergulho relaxante" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Um mergulho relaxante</h3>
-            <p class="presente__desc">Um momento de paz na água, sem pressa de sair.</p>
+            <p class="presente__desc">Água cristalina, nenhum email, e a sensação de que a vida é boa. Você vai presentear isso.</p>
             <p class="presente__valor">R$ 350</p>
             <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
           </div>
@@ -250,11 +239,11 @@
         <article class="presente__card reveal"
           data-nome="Passeio de vespa"
           data-valor="220"
-          data-desc="Para rodar por aí com estilo, vento no rosto e boas risadas.">
+          data-desc="Vespa, estrada, cabelo bagunçado e sorriso na cara. A vida em resumo.">
           <img src="assets/img/P07.jpg" alt="Passeio de vespa" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Passeio de vespa</h3>
-            <p class="presente__desc">Para rodar por aí com estilo, vento no rosto e boas risadas.</p>
+            <p class="presente__desc">Vespa, estrada, cabelo bagunçado e sorriso na cara. A vida em resumo.</p>
             <p class="presente__valor">R$ 220</p>
             <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
           </div>
@@ -263,11 +252,11 @@
         <article class="presente__card reveal"
           data-nome="Sessão de massagem relaxante"
           data-valor="200"
-          data-desc="Porque depois de organizar um casamento, vocês merecem.">
+          data-desc="Honestamente? Depois de planejar tudo isso, a massagem é praticamente medicinal.">
           <img src="assets/img/P08.jpg" alt="Sessão de massagem relaxante" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Sessão de massagem relaxante</h3>
-            <p class="presente__desc">Porque depois de organizar um casamento, vocês merecem.</p>
+            <p class="presente__desc">Honestamente? Depois de planejar tudo isso, a massagem é praticamente medicinal.</p>
             <p class="presente__valor">R$ 200</p>
             <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
           </div>
@@ -276,11 +265,11 @@
         <article class="presente__card reveal"
           data-nome="Jantar italiano delicioso"
           data-valor="250"
-          data-desc="Uma noite inesquecível para começar a vida a dois.">
+          data-desc="Massa feita na hora, vinho que vai bem com qualquer conversa, sobremesa que faz os olhos brilharem.">
           <img src="assets/img/P09.jpg" alt="Jantar italiano delicioso" class="site-img presente__foto" />
           <div class="presente__body">
             <h3 class="presente__nome">Jantar italiano delicioso</h3>
-            <p class="presente__desc">Uma noite inesquecível para começar a vida a dois.</p>
+            <p class="presente__desc">Massa feita na hora, vinho que vai bem com qualquer conversa, sobremesa que faz os olhos brilharem.</p>
             <p class="presente__valor">R$ 250</p>
             <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
           </div>
@@ -293,7 +282,7 @@
           </div>
           <div class="presente__body">
             <h3 class="presente__nome">Presente personalizado</h3>
-            <p class="presente__desc">Quer criar o seu próprio presente? Escolha um nome, valor e adicione uma foto se quiser.</p>
+            <p class="presente__desc">Não achou nada que combina? Inventa. Sério, pode ser qualquer coisa. Viagem? Curso? Uma pizza muito boa? Vale.</p>
             <p class="presente__valor">Você escolhe</p>
             <button class="btn btn--outline-green btn--sm" onclick="abrirModalCustom()">Criar presente</button>
           </div>
@@ -310,7 +299,7 @@
           <h3 class="pix-info__title">Como funciona</h3>
           <p class="pix-info__text">
             Ao clicar em "Presentear", você verá o código Pix copia-e-cola para transferência direta.<br>
-            Depois basta confirmar seu nome e e-mail — enviaremos uma cópia para você e avisaremos os noivos.<br>
+            Depois basta confirmar seu nome e e-mail, enviaremos uma cópia para você e avisaremos os noivos.<br>
             O site não confirma o Pix automaticamente; a confirmação é da sua intenção de presente.
           </p>
         </div>
@@ -322,7 +311,9 @@
   <!-- ─── RODAPÉ ─────────────────────────────────────────── -->
   <footer class="footer">
     <div class="container footer__inner">
-      <p class="footer__names">Tiago e Gian</p>
+      <p class="footer__names" aria-label="Tiago e Gian">
+      <img src="assets/img/logohorizontal_light.png" alt="Tiago e Gian" class="site-logo site-logo--footer">
+    </p>
       <p class="footer__date">12 · 12 · 2026</p>
       <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
       <div class="footer__links">
@@ -344,25 +335,6 @@
   </div>
 
   <script src="assets/js/app.js"></script>
-  <script>
-    (function () {
-      const filtros = document.querySelectorAll(".presentes__filtro");
-      const cards = document.querySelectorAll(".presente__card");
-      filtros.forEach(btn => {
-        btn.addEventListener("click", () => {
-          filtros.forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          const faixa = btn.dataset.filtro;
-          cards.forEach(card => {
-            if (card.classList.contains("presente__card--custom")) return; // sempre visível
-            if (faixa === "todos") { card.classList.remove("is-hidden"); return; }
-            const [min, max] = faixa.split("-").map(Number);
-            const valor = Number(card.dataset.valor || 0);
-            card.classList.toggle("is-hidden", !(valor >= min && valor <= max));
-          });
-        });
-      });
-    })();
-  </script>
+
 </body>
 </html>
