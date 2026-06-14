@@ -97,6 +97,21 @@
       .pix-info { flex-direction: column; gap: 1rem; }
       .presentes__grid { grid-template-columns: 1fr; }
     }
+
+    /* ─── FILTRO POR FAIXA DE VALOR ─── */
+    .presentes__filtros {
+      display: flex; flex-wrap: wrap; gap: .6rem;
+      margin-top: 2.25rem; justify-content: center;
+    }
+    .presentes__filtro {
+      font-size: .8rem; font-weight: 500; color: var(--text-muted);
+      background: var(--white); border: 1.5px solid var(--line-green);
+      border-radius: 999px; padding: .5rem 1.1rem; cursor: pointer;
+      transition: background var(--transition), color var(--transition), border-color var(--transition);
+    }
+    .presentes__filtro:hover { border-color: var(--sage); color: var(--sage-dark); }
+    .presentes__filtro.active { background: var(--sage); color: var(--white); border-color: var(--sage); }
+    .presente__card.is-hidden { display: none; }
   </style>
 </head>
 <body>
@@ -144,6 +159,13 @@
   <!-- ─── PRESENTES ─────────────────────────────────────── -->
   <section class="section">
     <div class="container">
+
+      <div class="presentes__filtros reveal" role="group" aria-label="Filtrar por faixa de valor">
+        <button class="presentes__filtro active" data-filtro="todos">Todos</button>
+        <button class="presentes__filtro" data-filtro="0-200">Até R$ 200</button>
+        <button class="presentes__filtro" data-filtro="200-400">R$ 200 – 400</button>
+        <button class="presentes__filtro" data-filtro="400-9999">A partir de R$ 400</button>
+      </div>
 
       <div class="presentes__grid" id="presentesGrid">
 
@@ -267,7 +289,7 @@
         <!-- Card personalizado -->
         <article class="presente__card presente__card--custom reveal">
           <div class="presente__foto-ph" style="background:linear-gradient(135deg,#D4E5CC,#EBF0E6)">
-            <span style="font-size:2rem">✨</span>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--sage-dark)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/><path d="M7 7l-2-2M19 19l-2-2M7 17l-2 2M19 5l-2 2"/></svg>
           </div>
           <div class="presente__body">
             <h3 class="presente__nome">Presente personalizado</h3>
@@ -322,5 +344,25 @@
   </div>
 
   <script src="assets/js/app.js"></script>
+  <script>
+    (function () {
+      const filtros = document.querySelectorAll(".presentes__filtro");
+      const cards = document.querySelectorAll(".presente__card");
+      filtros.forEach(btn => {
+        btn.addEventListener("click", () => {
+          filtros.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const faixa = btn.dataset.filtro;
+          cards.forEach(card => {
+            if (card.classList.contains("presente__card--custom")) return; // sempre visível
+            if (faixa === "todos") { card.classList.remove("is-hidden"); return; }
+            const [min, max] = faixa.split("-").map(Number);
+            const valor = Number(card.dataset.valor || 0);
+            card.classList.toggle("is-hidden", !(valor >= min && valor <= max));
+          });
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

@@ -64,6 +64,8 @@
     .hotel__categoria { font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--sage);font-weight:500; }
     .hotel__nome { font-family:var(--font-display);font-size:1.3rem;font-weight:400;color:var(--text-main); }
     .hotel__nota { display:inline-flex;align-items:center;gap:.3rem;font-size:.78rem;font-weight:600;color:var(--sage-dark);background:var(--bg-green);padding:.2rem .6rem;border-radius:20px;margin-top:.1rem;width:fit-content; }
+    .hotel__preco { display:inline-flex;align-items:baseline;gap:.3rem;font-size:.78rem;font-weight:600;color:var(--terracotta-hover);background:#FBF1E6;border:1px solid #EBD9C2;padding:.2rem .6rem;border-radius:20px;margin-top:.35rem;width:fit-content; }
+    .hotel__preco strong { font-size:.95rem; }
     .hotel__desc { font-size:.84rem;color:var(--text-muted);line-height:1.7;flex:1;margin-top:.3rem; }
     .hotel__info { margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--line-green);display:flex;flex-direction:column;gap:.35rem; }
     .hotel__info-row { display:flex;align-items:flex-start;gap:.5rem;font-size:.81rem;color:var(--text-muted); }
@@ -140,7 +142,13 @@
 
         <!-- 1 - Carlton Suítes -->
         <article class="hotel__card reveal">
-          <div class="hotel__foto-ph" style="background:linear-gradient(135deg,#e8f2e4,#c8dcbf)">🏊</div>
+          <div class="hotel__foto-ph" style="background:linear-gradient(135deg,#e8f2e4,#c8dcbf)">
+            <svg width="56" height="56" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#7A9B6E">
+              <rect x="6" y="18" width="36" height="22" rx="1.5"/><path d="M6 18 24 6l18 12"/>
+              <path d="M14 40v-8h8v8M26 40v-8h8v8"/>
+              <path d="M4 44h40"/>
+            </svg>
+          </div>
           <div class="hotel__body">
             <p class="hotel__categoria">Hotel 4 estrelas · Resort</p>
             <h3 class="hotel__nome">Carlton Suítes Limeira</h3>
@@ -148,6 +156,7 @@
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
               Excelente avaliação · Booking
             </div>
+            <p class="hotel__preco">A partir de <strong>R$ 175</strong> /noite (casal)</p>
             <p class="hotel__desc">O melhor da cidade: piscinas externas, sauna, quadra de tênis, campo de futebol e área de lazer completa. Boa distância do centro, ótimo para relaxar antes e depois da festa. Café da manhã em buffet incluso.</p>
             <div class="hotel__info">
               <div class="hotel__info-row">
@@ -168,7 +177,13 @@
 
         <!-- 2 - Nacional Inn -->
         <article class="hotel__card reveal">
-          <div class="hotel__foto-ph" style="background:linear-gradient(135deg,#f0ece4,#ddd5c5)">🏨</div>
+          <div class="hotel__foto-ph" style="background:linear-gradient(135deg,#f0ece4,#ddd5c5)">
+            <svg width="56" height="56" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#B87B3E">
+              <rect x="8" y="8" width="32" height="34" rx="1.5"/>
+              <path d="M16 16h4v4h-4zM28 16h4v4h-4zM16 26h4v4h-4zM28 26h4v4h-4z"/>
+              <path d="M20 42v-8h8v8"/>
+            </svg>
+          </div>
           <div class="hotel__body">
             <p class="hotel__categoria">Hotel 4 estrelas · Centro</p>
             <h3 class="hotel__nome">Hotel Nacional Inn Limeira</h3>
@@ -176,6 +191,7 @@
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
               8.4 · mais de 1.500 avaliações
             </div>
+            <p class="hotel__preco">A partir de <strong>R$ 160</strong> /noite (casal)</p>
             <p class="hotel__desc">Localização privilegiada: a 120 metros da rodoviária e no coração do comércio de Limeira. Café da manhã farto com mais de 50 itens incluso, 109 quartos modernos, piscina e sauna. Ótimo custo-benefício.</p>
             <div class="hotel__info">
               <div class="hotel__info-row">
@@ -196,7 +212,13 @@
 
         <!-- 3 - Zahara -->
         <article class="hotel__card reveal">
-          <div class="hotel__foto-ph" style="background:linear-gradient(135deg,#e4ecf5,#c5d5e8)">🌿</div>
+          <div class="hotel__foto-ph" style="background:linear-gradient(135deg,#e4ecf5,#c5d5e8)">
+            <svg width="56" height="56" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#7A93B8">
+              <path d="M8 40c2-3 4-3 6 0s4 3 6 0 4-3 6 0 4 3 6 0 4-3 6 0"/>
+              <circle cx="24" cy="14" r="7"/>
+              <path d="M24 21v12"/>
+            </svg>
+          </div>
           <div class="hotel__body">
             <p class="hotel__categoria">Hotel 4 estrelas · Gastronomia</p>
             <h3 class="hotel__nome">Zahara Hotel</h3>
@@ -204,6 +226,7 @@
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
               9.2 · Decolar · muito bem avaliado
             </div>
+            <p class="hotel__preco">A partir de <strong>R$ 280</strong> /noite (casal)</p>
             <p class="hotel__desc">Hotel com estrutura completa de hospedagem e gastronomia — restaurante premiado, spa, sauna, academia e estacionamento privativo. Uma das opções mais bem avaliadas de Limeira.</p>
             <div class="hotel__info">
               <div class="hotel__info-row">
@@ -229,7 +252,8 @@
       </div>
 
       <div class="hospedagem__nota reveal">
-        <strong>💡 Dica:</strong> o casamento é no dia <strong>12 de dezembro (sábado)</strong>. Se quiser aproveitar e passar o fim de semana, recomendamos reservar também a noite de sexta (11/12) para chegar com calma. Dezembro é alta temporada — reserve com antecedência!
+        <strong>💡 Dica:</strong> o casamento é no dia <strong>12 de dezembro (sábado)</strong>. Se quiser aproveitar e passar o fim de semana, recomendamos reservar também a noite de sexta (11/12) para chegar com calma. Dezembro é alta temporada — reserve com antecedência!<br><br>
+        Os valores de diária mostrados são aproximados (pesquisa recente) e podem variar bastante por data e disponibilidade — confira sempre o valor atualizado no site oficial ou no Booking antes de reservar.
       </div>
 
     </div>

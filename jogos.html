@@ -27,7 +27,7 @@
 
     /* ─── ARENAS ─────────────────────────────────────── */
     #arena-menu { display:block;padding:0 0 60px; }
-    #arena-flappy,#arena-bolo,#arena-docinhos,#arena-look { display:none;min-height:100svh;flex-direction:column;align-items:center;padding-top:80px; }
+    #arena-flappy,#arena-look { display:none;min-height:100svh;flex-direction:column;align-items:center;padding-top:80px; }
     .arena-header { width:100%;max-width:520px;margin-inline:auto;padding:0 5%;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between; }
     .arena-title { font-family:var(--font-display);font-size:1.5rem;font-weight:400; }
     .arena-score { font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dark);background:var(--bg-green);padding:.4rem .9rem;border-radius:20px;border:1px solid var(--line-green); }
@@ -190,7 +190,7 @@
         </a>
 
         <!-- Champagne Problems -->
-        <a href="champagne-problems.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
+        <a href="champagne-breakout.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
           <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 6h10l2 10c1 5-2 9-7 9s-8-4-7-9z"/><path d="M24 25v13M17 38h14"/><circle cx="22" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="26" cy="17" r="1" fill="currentColor" stroke="none"/></svg></span>
           <h2 class="jogo-card__title">Champagne Problems</h2>
           <p class="jogo-card__desc">Rebata a rolha de champagne e quebre blocos dourados em 3 fases.</p>
@@ -221,11 +221,12 @@
           <p class="jogo-card__record" id="record-bolo-preview">Carregando…</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </a>
-        <div class="jogo-card reveal" onclick="entrarJogo('docinhos')">
-          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="9"/><path d="M9 16l4 4-4 4M39 16l-4 4 4 4M9 32l4-4M39 32l-4-4"/></svg></span>
-          <h2 class="jogo-card__title">Pega os Docinhos</h2>
-          <p class="jogo-card__desc">Salve os docinhos antes que os convidados cheguem. 45 segundos.</p>
-          <p class="jogo-card__record" id="record-docinhos-preview">Carregando…</p>
+
+        <div class="jogo-card reveal" onclick="entrarJogo('look')">
+          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 10a4 4 0 1 1 4 4"/><path d="M24 14 6 24l4 4 14-7 14 7 4-4z"/><path d="M14 25 9 40h30l-5-15"/></svg></span>
+          <h2 class="jogo-card__title">Monte o Look</h2>
+          <p class="jogo-card__desc">Vista o Tiago ou o Gian para a festa: cabelo, roupa, sapato e acessórios.</p>
+          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Editorial</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </div>
       </div>
@@ -253,55 +254,6 @@
         <p class="save-form__msg" id="flappy-save-msg"></p>
       </div>
       <div id="flappy-top10"></div>
-    </div>
-  </div>
-
-  <!-- ══ BOLO ══ -->
-  <div id="arena-bolo">
-    <button class="arena-back" onclick="voltarMenu()">← Voltar aos jogos</button>
-    <div class="arena-header">
-      <h2 class="arena-title">Empilha o Bolo 🎂</h2>
-      <div class="arena-score"><span id="bolo-score">0 andares</span></div>
-    </div>
-    <div class="canvas-wrap">
-      <canvas id="bolo-canvas" tabindex="0"></canvas>
-    </div>
-    <div id="bolo-postgame" class="postgame" style="display:none">
-      <div class="save-form">
-        <h3>Salvar seu recorde</h3>
-        <div class="save-form__row">
-          <input type="text" id="bolo-nome" class="rsvp__input" placeholder="Seu nome" maxlength="30" autocomplete="name"/>
-          <button class="btn btn--primary btn--sm" onclick="salvarScore('bolo')">Salvar</button>
-        </div>
-        <p class="save-form__msg" id="bolo-save-msg"></p>
-      </div>
-      <div id="bolo-top10"></div>
-    </div>
-  </div>
-
-  <!-- ══ DOCINHOS ══ -->
-  <div id="arena-docinhos">
-    <button class="arena-back" onclick="voltarMenu()">← Voltar aos jogos</button>
-    <div class="arena-header">
-      <h2 class="arena-title">Pega os Docinhos 🍬</h2>
-      <div class="arena-score" style="display:flex;gap:12px">
-        <span id="docinhos-score">0 pts</span>
-        <span id="docinhos-time">45s</span>
-      </div>
-    </div>
-    <div class="canvas-wrap">
-      <canvas id="docinhos-canvas" tabindex="0"></canvas>
-    </div>
-    <div id="docinhos-postgame" class="postgame" style="display:none">
-      <div class="save-form">
-        <h3>Salvar seu recorde</h3>
-        <div class="save-form__row">
-          <input type="text" id="docinhos-nome" class="rsvp__input" placeholder="Seu nome" maxlength="30" autocomplete="name"/>
-          <button class="btn btn--primary btn--sm" onclick="salvarScore('docinhos')">Salvar</button>
-        </div>
-        <p class="save-form__msg" id="docinhos-save-msg"></p>
-      </div>
-      <div id="docinhos-top10"></div>
     </div>
   </div>
 
