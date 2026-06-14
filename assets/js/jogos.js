@@ -59,6 +59,42 @@ function faceOk(personagem) {
   return facesFor(personagem).some(f => f.loaded);
 }
 
+/* ══════════════════════════════════════════════════════════
+   ASSETS VISUAIS — flappy, jogos em geral
+══════════════════════════════════════════════════════════ */
+function loadImg(src) {
+  const img = new Image();
+  img.src = src;
+  return img;
+}
+
+// Flappy
+const FL_SKY      = loadImg("assets/img/flappy-sky-bg.png");
+const FL_CLOUD    = [
+  loadImg("assets/img/flappy-cloud-01.png"),
+  loadImg("assets/img/flappy-cloud-02.png"),
+  loadImg("assets/img/flappy-cloud-03.png"),
+];
+const FL_SUN      = loadImg("assets/img/flappy-sun.png");
+const FL_GROUND   = loadImg("assets/img/flappy-ground-hill.png");
+const FL_GRASS    = loadImg("assets/img/flappy-grass-tuft.png");
+const FL_FLOWERS  = loadImg("assets/img/flappy-flowers.png");
+const FL_PIPE_TOP = loadImg("assets/img/flappy-pipe-top-sage.png");
+const FL_PIPE_BOT = loadImg("assets/img/flappy-pipe-bottom-sage.png");
+const FL_PIPE_ALT = loadImg("assets/img/flappy-pipe-terracota.png");
+const FL_BIRD_BG  = loadImg("assets/img/flappy-bird-bg.png");
+const FL_BURST    = loadImg("assets/img/icon-collision-burst.png");
+const FL_SPARKLE  = loadImg("assets/img/fx-sparkle-burst.png");
+
+// Cross-game reutilizados
+const FX_GOLD     = loadImg("assets/img/fx-gold-sparkles.png");
+const ICON_TROPHY = loadImg("assets/img/icon-trophy.png");
+const ICON_BIRD   = loadImg("assets/img/icon-bird.png");
+
+// Offset de scroll de nuvens (parallax)
+let flCloudOffsets = [0, 60, 140];
+
+
 /* Desenha rosto circular — grande e goofy */
 function drawFaceCircle(ctx, personagem, faceIdx, cx, cy, radius) {
   const faces = facesFor(personagem);
@@ -231,64 +267,107 @@ function flLoop() {
 }
 
 function flDraw() {
-  const ctx=flCtx; if(!ctx) return;
-  /* Sky */
-  const sky=ctx.createLinearGradient(0,0,0,flH*.6);
-  sky.addColorStop(0,"#89CFF0"); sky.addColorStop(1,"#C8DDB8");
-  ctx.fillStyle=sky; ctx.fillRect(0,0,flW,flH*.6);
-  ctx.fillStyle="#EBF0E6"; ctx.fillRect(0,flH*.6,flW,flH*.4);
+  const ctx = flCtx; if (!ctx) return;
+  const W = flW, H = flH;
 
-  /* Nuvens */
-  ctx.fillStyle="rgba(255,255,255,.8)";
-  [[flW*.1,flH*.08,52,16],[flW*.5,flH*.06,70,18],[flW*.8,flH*.12,44,14]].forEach(([cx,cy,rw,rh])=>{
-    ctx.beginPath();ctx.ellipse(cx,cy,rw,rh,0,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(cx+rw*.4,cy-rh*.6,rw*.6,rh*.6,0,0,Math.PI*2);ctx.fill();
+  /* ── Fundo / céu ── */
+  if (FL_SKY.complete && FL_SKY.naturalWidth > 0) {
+    ctx.drawImage(FL_SKY, 0, 0, W, H * .65);
+  } else {
+    const sky = ctx.createLinearGradient(0,0,0,H*.65);
+    sky.addColorStop(0,"#89CFF0"); sky.addColorStop(1,"#C8DDB8");
+    ctx.fillStyle = sky; ctx.fillRect(0,0,W,H*.65);
+  }
+
+  /* ── Chão (cor base) ── */
+  ctx.fillStyle = "#EBF0E6"; ctx.fillRect(0, H*.6, W, H*.4);
+
+  /* ── Sol ── */
+  if (FL_SUN.complete && FL_SUN.naturalWidth > 0) {
+    ctx.drawImage(FL_SUN, W*.74, H*.03, W*.18, W*.18);
+  }
+
+  /* ── Nuvens com parallax ── */
+  flCloudOffsets = flCloudOffsets || [0,60,140];
+  if (flAlive) flCloudOffsets = flCloudOffsets.map((x,i) => (x - (0.35+i*.12)) % (W + 100));
+  FL_CLOUD.forEach((img, i) => {
+    const x = ((flCloudOffsets[i] + W + 100) % (W + 100)) - 50;
+    const y = [H*.06, H*.04, H*.10][i];
+    const sz = [90, 110, 70][i];
+    if (img.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, x, y, sz, sz * .55);
+    } else {
+      ctx.fillStyle = "rgba(255,255,255,.8)";
+      ctx.beginPath(); ctx.ellipse(x+sz/2, y+sz*.2, sz*.5, sz*.2, 0,0,Math.PI*2); ctx.fill();
+    }
   });
 
-  /* Canos */
-  flPipes.forEach(p=>{
-    const g=ctx.createLinearGradient(p.x,0,p.x+FL_PIPE_W,0);
-    g.addColorStop(0,"#3A5035"); g.addColorStop(.4,"#7A9B6E"); g.addColorStop(1,"#3A5035");
-    ctx.fillStyle=g;
-    /* cano de cima */
-    ctx.beginPath(); ctx.roundRect(p.x,0,FL_PIPE_W,p.topH,4); ctx.fill();
-    ctx.fillStyle="#2A3E22";
-    ctx.fillRect(p.x-5,p.topH-18,FL_PIPE_W+10,18);
-    /* cano de baixo */
-    const bY=p.topH+FL_GAP;
-    ctx.fillStyle=g;
-    ctx.beginPath(); ctx.roundRect(p.x,bY,FL_PIPE_W,flH-bY,4); ctx.fill();
-    ctx.fillStyle="#2A3E22";
-    ctx.fillRect(p.x-5,bY,FL_PIPE_W+10,18);
+  /* ── Canos com imagens ── */
+  flPipes.forEach((p, pi) => {
+    const useAlt = (pi % 3 === 2);
+    const pipeTop = useAlt ? FL_PIPE_ALT : FL_PIPE_TOP;
+    const pipeBot = useAlt ? FL_PIPE_ALT : FL_PIPE_BOT;
+    const pw = FL_PIPE_W + 12; // ligeiramente mais largo para a imagem
+    const px = p.x - 6;
+
+    if (pipeTop.complete && pipeTop.naturalWidth > 0) {
+      // Cano de cima: estica da borda até o fundo do cap
+      ctx.drawImage(pipeTop, px, 0, pw, p.topH + 20);
+    } else {
+      const g = ctx.createLinearGradient(p.x,0,p.x+FL_PIPE_W,0);
+      g.addColorStop(0,"#3A5035"); g.addColorStop(.4,"#7A9B6E"); g.addColorStop(1,"#3A5035");
+      ctx.fillStyle=g; ctx.beginPath(); ctx.roundRect(p.x,0,FL_PIPE_W,p.topH,4); ctx.fill();
+      ctx.fillStyle="#2A3E22"; ctx.fillRect(p.x-5,p.topH-18,FL_PIPE_W+10,18);
+    }
+
+    const bY = p.topH + FL_GAP;
+    if (pipeBot.complete && pipeBot.naturalWidth > 0) {
+      ctx.drawImage(pipeBot, px, bY - 16, pw, H - bY + 16);
+    } else {
+      const g2 = ctx.createLinearGradient(p.x,0,p.x+FL_PIPE_W,0);
+      g2.addColorStop(0,"#3A5035"); g2.addColorStop(.4,"#7A9B6E"); g2.addColorStop(1,"#3A5035");
+      ctx.fillStyle=g2; ctx.beginPath(); ctx.roundRect(p.x,bY,FL_PIPE_W,H-bY,4); ctx.fill();
+      ctx.fillStyle="#2A3E22"; ctx.fillRect(p.x-5,bY,FL_PIPE_W+10,18);
+    }
   });
 
-  /* Chão */
-  ctx.fillStyle="#7A9B6E"; ctx.fillRect(0,flH-30,flW,30);
-  ctx.fillStyle="#506B45"; ctx.fillRect(0,flH-30,flW,5);
+  /* ── Chão com imagem ── */
+  if (FL_GROUND.complete && FL_GROUND.naturalWidth > 0) {
+    ctx.drawImage(FL_GROUND, 0, H - 42, W, 42);
+  } else {
+    ctx.fillStyle="#7A9B6E"; ctx.fillRect(0,H-30,W,30);
+    ctx.fillStyle="#506B45"; ctx.fillRect(0,H-30,W,5);
+  }
 
-  /* Pássaro = rosto grande goofy */
-  const bX=flW*.22;
+  /* Grama e flores no chão */
+  if (FL_GRASS.complete && FL_GRASS.naturalWidth > 0)
+    ctx.drawImage(FL_GRASS, W*.02, H-48, 56, 22);
+  if (FL_FLOWERS.complete && FL_FLOWERS.naturalWidth > 0)
+    ctx.drawImage(FL_FLOWERS, W*.62, H-52, 48, 26);
+
+  /* ── Pássaro (rosto goofy grande) ── */
+  const bX = W * .22;
   ctx.save();
   ctx.translate(bX, flBirdY);
-  ctx.rotate(Math.min(Math.max(flBirdVY*.04,-.5),.9));
+  ctx.rotate(Math.min(Math.max(flBirdVY * .04, -.5), .9));
 
-  /* Sombra sob o rosto */
-  ctx.fillStyle="rgba(0,0,0,.12)";
+  // Sombra
+  ctx.fillStyle = "rgba(0,0,0,.12)";
   ctx.beginPath();
   ctx.ellipse(0, FL_BIRD_R*.7, FL_BIRD_R*.9, FL_BIRD_R*.25, 0, 0, Math.PI*2);
   ctx.fill();
 
-  /* Asinha fofa */
-  ctx.fillStyle = flPersonagem==="tiago" ? "#C8A060" : "#90B870";
+  // Asinha
+  ctx.fillStyle = flPersonagem === "tiago" ? "#C8A060" : "#90B870";
   ctx.beginPath();
   ctx.ellipse(-FL_BIRD_R*.7, FL_BIRD_R*.1, FL_BIRD_R*.45, FL_BIRD_R*.22, -.5, 0, Math.PI*2);
   ctx.fill();
 
-  /* Rosto */
+  // Rosto
   drawFaceCircle(ctx, flPersonagem, flFaceIdx, 0, 0, FL_BIRD_R);
 
-  /* Biquinho */
-  ctx.fillStyle="#E8901A";
+  // Biquinho
+  ctx.fillStyle = "#E8901A";
   ctx.beginPath();
   ctx.moveTo(FL_BIRD_R*.7, 0);
   ctx.lineTo(FL_BIRD_R*1.1, FL_BIRD_R*.1);
@@ -310,7 +389,7 @@ function setFlappyPersonagem(p) {
   });
   const nome = p === "tiago" ? "Tiago" : "Gian";
   const title = document.getElementById("flappy-title");
-  if (title) title.textContent = `Flappy ${nome} 🐦`;
+  if (title) title.innerHTML = `Flappy ${nome} <img src='assets/img/icon-bird.png' alt='' style='width:1.1em;height:1.1em;object-fit:contain;vertical-align:middle'>`;
   resetFlappy();
 }
 window.setFlappyPersonagem = setFlappyPersonagem;
@@ -324,7 +403,8 @@ function flGameOver(){
                flScore>=8  ? [`O ${nome} voou bem hoje.`,"Consegue bater esse recorde?"] :
                flScore>=3  ? ["Quase...","Tenta mais uma vez!"] :
                              [`O ${nome} bateu logo de cara.`,"Cuidado com os canos!"];
-  showOverlay("flappy","💥","Game Over!",`${flScore} cano${flScore!==1?"s":""} · ${msgs[0]}`,
+  if(FL_BURST.complete && FL_BURST.naturalWidth>0){ flCtx.drawImage(FL_BURST, flW*.22-40, flBirdY-40, 80, 80); }
+  showOverlay("flappy","<img src='assets/img/icon-collision-burst.png' alt='' style='width:3rem;height:3rem;object-fit:contain'>","Game Over!",`${flScore} cano${flScore!==1?"s":""} · ${msgs[0]}`,
     [{label:"Jogar de novo",fn:"startFlappy()"},{label:"Voltar",fn:"voltarMenu()"}]);
   setTimeout(()=>{
     const pg=document.getElementById("flappy-postgame"); if(pg) pg.style.display="block";
