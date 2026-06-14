@@ -1046,63 +1046,24 @@ canvas {
   color: rgba(255,255,255,.6);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   LOGO TIAGO & GIAN — incorporação suave
-═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   LOGOS — logo.png / logohorizontal.png / monograma.png
+   Versões _light já têm fundo transparente e cor bege-dourada
+═══════════════════════════════════════════════════════ */
+.site-logo          { display:block; height:auto; }
+.site-logo--hero    { width:clamp(200px,38vw,400px); margin-inline:auto; }
+.site-logo--horiz   { width:clamp(160px,28vw,300px); margin-inline:auto; }
+.site-logo--mono    { width:clamp(36px,6vw,56px); }
+.site-logo--footer  { width:clamp(120px,18vw,180px); margin-inline:auto; opacity:.9; }
 
-/* Logo no hero (fundo escuro/foto) — usa screen para o fundo preto sumir */
-.logo-img {
-  display: block;
-  width: clamp(220px, 40vw, 420px);
-  height: auto;
-  mix-blend-mode: screen;        /* fundo preto vira transparente */
-  filter: brightness(1.6) sepia(0.3) saturate(0.8) hue-rotate(5deg);
-  /* resultado: caligrafia fica num bege-dourado suave */
-  opacity: 0.92;
-  margin-inline: auto;
-}
+/* Nav: monograma ao lado do texto ou substituindo */
+.nav__logo-wrap     { display:flex; align-items:center; gap:.5rem; text-decoration:none; }
+.nav__logo-wrap img { width:28px; height:28px; object-fit:contain; }
+.nav__logo-wrap span{ font-family:var(--font-display);font-size:1.15rem;font-weight:300;color:var(--text-main); }
 
-/* Variante para fundos claros (seções verdes/bege) — inverte blend */
-.logo-img--dark {
-  mix-blend-mode: multiply;
-  filter: brightness(0.55) sepia(0.5) saturate(1.2) hue-rotate(-10deg);
-  opacity: 0.75;
-}
+/* Hero title vira container da imagem */
+.hero__title { font-size:0; line-height:1; margin-bottom:.75rem; }
+.hero__title .site-logo--hero { filter:drop-shadow(0 2px 12px rgba(0,0,0,.3)); }
 
-/* Variante pequena para nav e footer */
-.logo-img--sm {
-  width: clamp(90px, 15vw, 140px);
-  filter: brightness(2.2) sepia(0.2) saturate(0.6);
-  opacity: 0.85;
-}
-
-/* Footer — sobre fundo escuro */
-.footer .logo-img {
-  width: clamp(140px, 22vw, 220px);
-  mix-blend-mode: screen;
-  filter: brightness(1.8) sepia(0.2) saturate(0.7) opacity(0.9);
-  margin-bottom: .25rem;
-}
-
-/* Hero title agora é imagem, não precisa do font-size grande */
-.hero__title {
-  font-size: 0;          /* esconde o aria-label text fallback se imagem carregar */
-  line-height: 1;
-  margin-bottom: .75rem;
-}
-.hero__title .logo-img {
-  /* no hero (foto escura) -- screen blend já declarado em .logo-img */
-  width: clamp(260px, 45vw, 480px);
-  filter: brightness(1.9) sepia(0.25) saturate(0.7) hue-rotate(5deg);
-}
-
-/* Footer names também virou imagem */
-.footer__names {
-  font-size: 0;
-}
-.footer__names .logo-img {
-  width: clamp(140px, 20vw, 210px);
-  filter: brightness(2) sepia(0.2) saturate(0.6);
-  mix-blend-mode: screen;
-  opacity: 0.88;
-}
+/* Footer */
+.footer__names { font-size:0; }
