@@ -83,9 +83,21 @@ for (let i = 1; i <= 7; i++) {
   const img = new Image();
   img.loaded = false;
   img.onload = () => { img.loaded = true; if (i === 1) imgGianOk = true; };
-  img.src = `assets/img/gian${String(i).padStart(2,"0")}.png`;
+  img.src = `assets/img/gianface${String(i).padStart(2,"0")}.png`;
   GIAN_FACES.push(img);
 }
+
+let imgTiagoOk = false;
+const TIAGO_FACES = [];
+for (let i = 1; i <= 7; i++) {
+  const img = new Image();
+  img.loaded = false;
+  img.onload = () => { img.loaded = true; if (i === 1) imgTiagoOk = true; };
+  img.src = `assets/img/tiagoface${String(i).padStart(2,"0")}.png`;
+  TIAGO_FACES.push(img);
+}
+
+let flPersonagem = "gian";
 let flFaceIdx = 0;
 
 function drawFace(ctx, img, ok, x, y, size, fallbackColor, fallbackEmoji) {
@@ -158,7 +170,8 @@ function startFlappy() {
   flAlive=false;
   if(flRaf){cancelAnimationFrame(flRaf);flRaf=null;}
   flScore=0; flBirdY=flH/2; flBirdVY=0; flPipes=[]; flTick=0;
-  flFaceIdx = Math.floor(Math.random()*GIAN_FACES.length);
+  const _faces0 = flPersonagem === "tiago" ? TIAGO_FACES : GIAN_FACES;
+  flFaceIdx = Math.floor(Math.random()*_faces0.length);
   const sc=document.getElementById("flappy-score"); if(sc) sc.textContent="0";
   const pg=document.getElementById("flappy-postgame"); if(pg) pg.style.display="none";
   hideOverlay("flappy");
@@ -184,7 +197,8 @@ function flLoop() {
   flPipes.forEach(p=>{
     if(!p.scored&&p.x+FL_PIPE_W<flW*.22){p.scored=true;flScore++;
       const sc=document.getElementById("flappy-score");if(sc)sc.textContent=flScore;
-      let novoIdx; do { novoIdx = Math.floor(Math.random()*GIAN_FACES.length); } while(novoIdx===flFaceIdx && GIAN_FACES.length>1);
+      const _faceArr = flPersonagem === "tiago" ? TIAGO_FACES : GIAN_FACES;
+      let novoIdx; do { novoIdx = Math.floor(Math.random()*_faceArr.length); } while(novoIdx===flFaceIdx && _faceArr.length>1);
       flFaceIdx = novoIdx;
     }
   });
@@ -228,11 +242,21 @@ function flDraw() {
   ctx.save();
   ctx.translate(bX,flBirdY);
   ctx.rotate(Math.min(Math.max(flBirdVY*.038,-.5),.9));
-  const face = GIAN_FACES[flFaceIdx];
+  const _flFaces = flPersonagem === "tiago" ? TIAGO_FACES : GIAN_FACES;
+  const _flOk = flPersonagem === "tiago" ? imgTiagoOk : imgGianOk;
+  const face = _flFaces[flFaceIdx];
   drawFace(ctx,face,face.loaded,-bSize/2,-bSize/2,bSize,"#B87B3E","😊");
   ctx.fillStyle="rgba(156,102,49,.65)";
   ctx.beginPath();ctx.ellipse(-7,7+Math.sin(flTick*.25)*4,11,5,.3,0,Math.PI*2);ctx.fill();
   ctx.restore();
+}
+
+function setFlappyPersonagem(p) {
+  flPersonagem = p;
+  document.querySelectorAll(".fl-char-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.char === p);
+  });
+  resetFlappy();
 }
 
 function flGameOver(){
@@ -266,164 +290,8 @@ let lookChar = "T";
 const lookSel = {head:null,makeup:null,top:null,bottom:null,shoes:null,acc:[]};
 const LOOK_VERDICTS=["Categoria: madrinha que roubou a cena inteira.","Acabou de sair de um editorial da Vogue Noivos.","Proibido sentar perto da tia conservadora.","Mais brilho que a pista de dança às 3h.","O vestido da noiva quem? Esse look é o centro.","Chegou depois dos noivos. Ninguém reclamou.","Stylist da lua de mel já mandou mensagem.","Velas apagam, look fica.","A confeiteira tirou foto do look, não do bolo.","Convidado do ano, todo ano, todo casamento."];
 
-function makeSVGItem(content){return `<svg viewBox="0 0 72 56" xmlns="http://www.w3.org/2000/svg">${content}</svg>`;}
 
-const LOOK_ITEMS = {
-  head:[
-    {id:"crown",label:"Coroa",svg:()=>makeSVGItem(`<g transform="translate(12,8)"><polygon points="24,30 4,30 8,14 14,22 24,6 34,22 40,14 44,30" fill="#C8A030" stroke="#A07820" stroke-width="1"/><circle cx="24" cy="6" r="3" fill="#D04060"/><circle cx="8" cy="14" r="2.5" fill="#4080D0"/><circle cx="40" cy="14" r="2.5" fill="#4080D0"/></g>`)},
-    {id:"hat",label:"Cartola",svg:()=>makeSVGItem(`<g transform="translate(36,28)"><rect x="-20" y="-24" width="40" height="24" rx="2" fill="#1A1A2A" stroke="#2A2A3A" stroke-width="1"/><rect x="-25" y="0" width="50" height="6" rx="3" fill="#1A1A2A" stroke="#2A2A3A" stroke-width="1"/><rect x="-14" y="-22" width="28" height="3" fill="#C8A030" opacity=".8"/></g>`)},
-    {id:"tiara",label:"Tiara",svg:()=>makeSVGItem(`<g transform="translate(36,34)"><path d="M-20,0 Q-10,-18 0,-8 Q10,-18 20,0" fill="none" stroke="#C8A030" stroke-width="2.5"/><circle cx="0" cy="-8" r="4" fill="#D04060" stroke="#C8A030" stroke-width="1"/><circle cx="-10" cy="-3" r="2.5" fill="#fff" opacity=".8"/><circle cx="10" cy="-3" r="2.5" fill="#fff" opacity=".8"/><circle cx="-18" cy="0" r="2" fill="#C8A030"/><circle cx="18" cy="0" r="2" fill="#C8A030"/></g>`)},
-    {id:"feathers",label:"Plumas",svg:()=>makeSVGItem(`<g transform="translate(36,32)"><path d="M0,0 Q-12,-28 -6,-38 Q0,-28 0,0" fill="#D04070" stroke="#B03050" stroke-width="1"/><path d="M0,0 Q-3,-30 5,-38 Q5,-26 0,0" fill="#E070B0" stroke="#C04090" stroke-width="1"/><path d="M0,0 Q6,-28 14,-36 Q10,-24 0,0" fill="#D04070" stroke="#B03050" stroke-width="1"/><path d="M0,0 Q15,-20 20,-30 Q13,-18 0,0" fill="#C030A0" stroke="#A01080" stroke-width="1"/></g>`)},
-    {id:"veil",label:"Véu Dramático",svg:()=>makeSVGItem(`<path d="M20,8 Q36,4 52,8 L58,52 Q36,44 14,52 Z" fill="rgba(255,255,255,.22)" stroke="rgba(255,255,255,.45)" stroke-width="1"/><path d="M24,8 Q36,2 48,8" fill="none" stroke="#C8A030" stroke-width="2"/><circle cx="36" cy="8" r="3" fill="#D04060"/>`)},
-    {id:"beret",label:"Boina",svg:()=>makeSVGItem(`<g transform="translate(36,30)"><ellipse cx="0" cy="-4" rx="22" ry="16" fill="#6B2040" stroke="#4A1428" stroke-width="1"/><ellipse cx="0" cy="-12" rx="14" ry="10" fill="#8B3060"/><circle cx="8" cy="-14" r="3" fill="#C8A030"/><ellipse cx="0" cy="6" rx="18" ry="4" fill="#4A1428"/></g>`)},
-  ],
-  makeup:[
-    {id:"natural",label:"Natural",svg:()=>makeSVGItem(`<ellipse cx="36" cy="32" rx="22" ry="24" fill="#C8956A"/><path d="M26 24 Q32 20 38 24" stroke="#8A4020" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M34 24 Q40 20 46 24" stroke="#8A4020" stroke-width="1.4" fill="none" stroke-linecap="round"/><ellipse cx="28" cy="30" rx="4" ry="2" fill="rgba(220,120,100,.28)"/><ellipse cx="44" cy="30" rx="4" ry="2" fill="rgba(220,120,100,.28)"/><path d="M30 38 Q36 42 42 38" stroke="#B06050" stroke-width="1.5" fill="none" stroke-linecap="round"/>`)},
-    {id:"glam",label:"Glam Dourado",svg:()=>makeSVGItem(`<ellipse cx="36" cy="32" rx="22" ry="24" fill="#C8956A"/><path d="M24 24 L37 22 L37 25 L24 26 Z" fill="rgba(200,160,40,.7)"/><path d="M35 22 L48 24 L48 26 L35 25 Z" fill="rgba(200,160,40,.7)"/><ellipse cx="25" cy="32" rx="6" ry="3" fill="rgba(230,100,80,.45)"/><ellipse cx="47" cy="32" rx="6" ry="3" fill="rgba(230,100,80,.45)"/><path d="M28 38 Q36 44 44 38" stroke="#B04040" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M24 23 Q30 18 38 23" stroke="#8A5020" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M34 23 Q42 18 50 23" stroke="#8A5020" stroke-width="1.8" fill="none" stroke-linecap="round"/>`)},
-    {id:"smokey",label:"Smokey Eye",svg:()=>makeSVGItem(`<ellipse cx="36" cy="32" rx="22" ry="24" fill="#C8956A"/><path d="M22 26 L38 24 L37 30 L22 30 Z" fill="rgba(20,10,30,.82)"/><path d="M34 24 L50 26 L50 30 L35 30 Z" fill="rgba(20,10,30,.82)"/><path d="M22 24 Q30 18 39 24" stroke="#050310" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M33 24 Q41 18 52 24" stroke="#050310" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M29 38 Q36 43 43 38" stroke="#7A0818" stroke-width="2.5" fill="none" stroke-linecap="round"/>`)},
-    {id:"drag",label:"Drag Completa",svg:()=>makeSVGItem(`<ellipse cx="36" cy="32" rx="22" ry="24" fill="#C8956A"/><path d="M20 26 L37 22 L37 28 L20 30 Z" fill="rgba(200,40,140,.88)"/><path d="M35 22 L52 26 L52 30 L36 28 Z" fill="rgba(200,40,140,.88)"/><path d="M20 24 Q28 14 38 22 L40 17 Q28 10 18 23 Z" fill="rgba(70,10,70,.95)"/><path d="M34 22 Q44 14 54 24 L54 21 Q44 11 33 18 Z" fill="rgba(70,10,70,.95)"/><ellipse cx="23" cy="34" rx="7" ry="3.5" fill="rgba(255,70,70,.55)"/><ellipse cx="49" cy="34" rx="7" ry="3.5" fill="rgba(255,70,70,.55)"/><path d="M26 38 Q36 46 46 38 L44 41 Q36 49 28 41 Z" fill="#B80828"/><path d="M18 22 L13 16" stroke="#C8A030" stroke-width="1.5" stroke-linecap="round"/><path d="M54 22 L59 16" stroke="#C8A030" stroke-width="1.5" stroke-linecap="round"/>`)},
-    {id:"graphic",label:"Delineado Gráfico",svg:()=>makeSVGItem(`<ellipse cx="36" cy="32" rx="22" ry="24" fill="#C8956A"/><path d="M22 27 L37 25" stroke="#050510" stroke-width="4" stroke-linecap="round"/><path d="M37 25 L43 19" stroke="#050510" stroke-width="3" stroke-linecap="round"/><path d="M35 25 L50 27" stroke="#050510" stroke-width="4" stroke-linecap="round"/><path d="M35 25 L29 19" stroke="#050510" stroke-width="3" stroke-linecap="round"/><path d="M22 27 L16 23" stroke="#050510" stroke-width="3" stroke-linecap="round"/><path d="M50 27 L56 23" stroke="#050510" stroke-width="3" stroke-linecap="round"/><path d="M29 38 Q36 43 43 38" stroke="#C8A030" stroke-width="2.5" fill="none" stroke-linecap="round"/>`)},
-    {id:"rouge",label:"Blush Rouge",svg:()=>makeSVGItem(`<ellipse cx="36" cy="32" rx="22" ry="24" fill="#C8956A"/><path d="M22 24 Q29 20 36 24" stroke="#7A3018" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M36 24 Q43 20 50 24" stroke="#7A3018" stroke-width="1.6" fill="none" stroke-linecap="round"/><ellipse cx="22" cy="33" rx="8" ry="4.5" fill="rgba(220,70,70,.5)" transform="rotate(-12,22,33)"/><ellipse cx="50" cy="33" rx="8" ry="4.5" fill="rgba(220,70,70,.5)" transform="rotate(12,50,33)"/><path d="M28 38 Q36 44 44 38 Q36 41 28 38 Z" fill="#C02840"/>`)},
-  ],
-  top:[
-    {id:"blazer",label:"Blazer Paetê",svg:()=>makeSVGItem(`<g transform="translate(36,30)"><path d="M-18,22 L-18,-14 Q0,-6 18,-14 L18,22 Z" fill="#2A1A40" stroke="#1A0A30" stroke-width="1"/><path d="M-18,-14 L0,0 L0,22 L-18,22 Z" fill="#3A2A50"/><path d="M18,-14 L0,0 L0,22 L18,22 Z" fill="#3A2A50"/><circle cx="-5" cy="6" r="2.2" fill="#C8A030"/><circle cx="-5" cy="14" r="2.2" fill="#C8A030"/><rect x="-18" y="-1" width="6" height="11" rx="1" fill="#C8A030" opacity=".45"/><rect x="12" y="-1" width="6" height="11" rx="1" fill="#C8A030" opacity=".45"/><path d="M-18,22 L-22,22 L-22,-18 L-18,-14" fill="#1A0A30" stroke="#0A0020" stroke-width="1"/><path d="M18,22 L22,22 L22,-18 L18,-14" fill="#1A0A30" stroke="#0A0020" stroke-width="1"/></g>`)},
-    {id:"crop",label:"Cropped Preto",svg:()=>makeSVGItem(`<g transform="translate(36,34)"><rect x="-15" y="-19" width="30" height="19" rx="3" fill="#1A1A1A" stroke="#111" stroke-width="1"/><line x1="-15" y1="-15" x2="15" y2="-15" stroke="#333" stroke-width="1"/><path d="M-15,-19 L-22,-19 L-22,-8 L-15,-8" fill="none" stroke="#1A1A1A" stroke-width="7" stroke-linecap="round"/><path d="M15,-19 L22,-19 L22,-8 L15,-8" fill="none" stroke="#1A1A1A" stroke-width="7" stroke-linecap="round"/></g>`)},
-    {id:"cape",label:"Capa de Plumas",svg:()=>makeSVGItem(`<g transform="translate(36,14)"><path d="M0,-5 Q-30,8 -26,44 Q-12,36 0,40 Q12,36 26,44 Q30,8 0,-5 Z" fill="#6B0A28" stroke="#4A0818" stroke-width="1"/><path d="M-26,44 Q-16,42 -8,44 L-10,48 Q-18,46 -30,48 Z" fill="#D04070" opacity=".6"/><path d="M26,44 Q16,42 8,44 L10,48 Q18,46 30,48 Z" fill="#D04070" opacity=".6"/><path d="M0,-5 Q-7,8 0,14 Q7,8 0,-5 Z" fill="#8B1A38"/><circle cx="0" cy="-2" r="4" fill="#C8A030"/></g>`)},
-    {id:"corselet",label:"Corselet",svg:()=>makeSVGItem(`<g transform="translate(36,30)"><path d="M-13,22 L-15,-12 Q-7,-18 0,-17 Q7,-18 15,-12 L13,22 Z" fill="#3A0A20" stroke="#2A0818" stroke-width="1"/><line x1="-3" y1="-17" x2="-2" y2="22" stroke="#C8A030" stroke-width="1"/><line x1="3" y1="-17" x2="2" y2="22" stroke="#C8A030" stroke-width="1"/><line x1="-9" y1="-5" x2="9" y2="-5" stroke="#C8A030" stroke-width=".8"/><line x1="-9" y1="3" x2="9" y2="3" stroke="#C8A030" stroke-width=".8"/><line x1="-9" y1="11" x2="9" y2="11" stroke="#C8A030" stroke-width=".8"/></g>`)},
-    {id:"suit",label:"Terno Slim",svg:()=>makeSVGItem(`<g transform="translate(36,30)"><path d="M-18,22 L-18,-14 L0,-4 L18,-14 L18,22 Z" fill="#1A2840" stroke="#0A1830" stroke-width="1"/><path d="M-18,-14 L-8,-6 L0,-4 L0,22 L-18,22 Z" fill="#243050"/><path d="M18,-14 L8,-6 L0,-4 L0,22 L18,22 Z" fill="#243050"/><path d="M-6,-12 L-1,-6 L1,-6 L6,-12" fill="#F0E8D8" stroke="#D0C8B0" stroke-width=".5"/><circle cx="-4" cy="4" r="2" fill="#C8A030"/><circle cx="-4" cy="12" r="2" fill="#C8A030"/><path d="M-18,-14 L-22,-12 L-22,22 L-18,22" fill="#0A1830"/><path d="M18,-14 L22,-12 L22,22 L18,22" fill="#0A1830"/></g>`)},
-    {id:"sheer",label:"Camisa Transparente",svg:()=>makeSVGItem(`<g transform="translate(36,30)"><path d="M-15,22 L-15,-14 L0,-8 L15,-14 L15,22 Z" fill="rgba(180,180,220,.2)" stroke="rgba(180,180,220,.5)" stroke-width="1"/><line x1="0" y1="-8" x2="0" y2="22" stroke="rgba(180,180,220,.4)" stroke-width="1"/><circle cx="-2" cy="4" r="1.5" fill="rgba(200,160,80,.8)"/><circle cx="-2" cy="12" r="1.5" fill="rgba(200,160,80,.8)"/><path d="M-15,-14 L-22,-14 L-22,10 L-15,10" fill="none" stroke="rgba(180,180,220,.5)" stroke-width="7" stroke-linecap="round"/><path d="M15,-14 L22,-14 L22,10 L15,10" fill="none" stroke="rgba(180,180,220,.5)" stroke-width="7" stroke-linecap="round"/></g>`)},
-  ],
-  bottom:[
-    {id:"flare",label:"Calça Flare",svg:()=>makeSVGItem(`<g transform="translate(36,10)"><path d="M-11,0 L-17,46 L-27,46 L-11,0 Z" fill="#1A1A2E" stroke="#111" stroke-width="1"/><path d="M11,0 L17,46 L27,46 L11,0 Z" fill="#1A1A2E" stroke="#111" stroke-width="1"/><rect x="-11" y="0" width="22" height="14" rx="1" fill="#242438"/><rect x="-11" y="-5" width="22" height="6" rx="2" fill="#141428"/><line x1="0" y1="0" x2="0" y2="14" stroke="#C8A030" stroke-width=".8"/><circle cx="0" cy="-2" r="2" fill="#C8A030"/></g>`)},
-    {id:"skirt",label:"Saia Volumosa",svg:()=>makeSVGItem(`<g transform="translate(36,12)"><path d="M-11,0 Q-34,14 -32,44 Q-14,38 0,42 Q14,38 32,44 Q34,14 11,0 Z" fill="#6B1030" stroke="#4A0820" stroke-width="1"/><rect x="-11" y="-5" width="22" height="7" rx="2" fill="#5A0828"/><path d="M-32,44 Q-18,50 0,48 Q18,50 32,44" fill="none" stroke="rgba(200,160,80,.4)" stroke-width="1.5"/></g>`)},
-    {id:"palazzo",label:"Palazzo",svg:()=>makeSVGItem(`<g transform="translate(36,10)"><path d="M-11,0 L-18,46 L-7,46 L0,24 L7,46 L18,46 L11,0 Z" fill="#183040" stroke="#0E1E2A" stroke-width="1"/><rect x="-11" y="-5" width="22" height="7" rx="2" fill="#102030"/><path d="M-18,46 Q-12,48 -7,46" fill="none" stroke="#C8A030" stroke-width="1.2"/><path d="M7,46 Q12,48 18,46" fill="none" stroke="#C8A030" stroke-width="1.2"/></g>`)},
-    {id:"leather",label:"Calça Couro",svg:()=>makeSVGItem(`<g transform="translate(36,10)"><path d="M-11,0 L-12,46 L-4,46 L0,26 L4,46 L12,46 L11,0 Z" fill="#181818" stroke="#0A0A0A" stroke-width="1.5"/><rect x="-11" y="-4" width="22" height="6" rx="1" fill="#101010"/><path d="M-11,8 Q0,10 11,8" fill="none" stroke="#333" stroke-width="1"/><line x1="0" y1="0" x2="0" y2="46" stroke="#282828" stroke-width="1"/><circle cx="0" cy="-1" r="2.5" fill="#C8A030"/></g>`)},
-    {id:"shorts",label:"Short Brilhante",svg:()=>makeSVGItem(`<g transform="translate(36,20)"><path d="M-13,-1 L-15,30 L-3,30 L0,14 L3,30 L15,30 L13,-1 Z" fill="#2A1A40"/><rect x="-13" y="-7" width="26" height="7" rx="2" fill="#1A0A30"/><path d="M-13,-1 L13,-1 L13,-7 L-13,-7" fill="none" stroke="#C8A030" stroke-width="1.5"/><line x1="0" y1="-7" x2="0" y2="30" stroke="#C8A030" stroke-width=".5" opacity=".6"/></g>`)},
-    {id:"asymskirt",label:"Saia Assimétrica",svg:()=>makeSVGItem(`<g transform="translate(36,12)"><path d="M-11,0 Q-29,8 -30,46 Q-9,40 0,42 Q15,38 28,18 Q22,6 11,0 Z" fill="#4A1060" stroke="#300A48" stroke-width="1"/><rect x="-11" y="-5" width="22" height="7" rx="2" fill="#3A0850"/><path d="M-30,46 Q-16,50 0,48" fill="none" stroke="rgba(200,160,80,.5)" stroke-width="1.5"/></g>`)},
-  ],
-  shoes:[
-    {id:"platform",label:"Plataforma",svg:()=>makeSVGItem(`<g transform="translate(36,36)"><rect x="-17" y="-19" width="34" height="12" rx="2" fill="#1A0A20"/><path d="M-17,-7 L-17,0 L17,0 L17,-7" fill="#3A1A40" stroke="#2A0A30" stroke-width="1"/><rect x="-17" y="0" width="34" height="7" rx="1" fill="#C8A030"/><path d="M-7,-19 L-7,-28 L7,-28 L7,-19" fill="#1A0A20" stroke="#0A0010" stroke-width="1"/></g>`)},
-    {id:"boot",label:"Bota Over",svg:()=>makeSVGItem(`<g transform="translate(36,16)"><rect x="-12" y="0" width="24" height="28" rx="3" fill="#1A1A2A" stroke="#111" stroke-width="1"/><path d="M-12,28 L-14,40 L14,40 L12,28 Z" fill="#141422"/><rect x="-10" y="4" width="6" height="4" rx="1" fill="#C8A030" opacity=".7"/><line x1="-10" y1="11" x2="-4" y2="11" stroke="#C8A030" stroke-width=".9" opacity=".7"/><line x1="-10" y1="17" x2="-4" y2="17" stroke="#C8A030" stroke-width=".9" opacity=".7"/><line x1="-10" y1="23" x2="-4" y2="23" stroke="#C8A030" stroke-width=".9" opacity=".7"/></g>`)},
-    {id:"loafer",label:"Mocassim Fashionista",svg:()=>makeSVGItem(`<g transform="translate(36,36)"><path d="M-20,-7 Q-20,-16 -8,-17 L12,-17 Q22,-17 22,-7 L22,0 L-20,0 Z" fill="#3A2810" stroke="#2A1808" stroke-width="1"/><rect x="-20" y="0" width="42" height="6" rx="1" fill="#2A1808"/><path d="M-4,-13 L4,-13 L4,-9 L-4,-9 Z" fill="#C8A030"/><path d="M4,-11 L10,-11" stroke="#C8A030" stroke-width="1.5"/></g>`)},
-    {id:"strappy",label:"Sandália Joia",svg:()=>makeSVGItem(`<g transform="translate(36,32)"><path d="M-18,-3 L-16,16 L16,16 L18,-3" fill="none" stroke="#C8A030" stroke-width="2"/><rect x="-18" y="16" width="36" height="6" rx="1" fill="#C8A030" opacity=".6"/><path d="M-18,-3 L-8,-14" stroke="#C8A030" stroke-width="2"/><path d="M18,-3 L8,-14" stroke="#C8A030" stroke-width="2"/><path d="M-8,-14 L8,-14" stroke="#C8A030" stroke-width="2"/><circle cx="-12" cy="-9" r="2.2" fill="#D04060"/><circle cx="12" cy="-9" r="2.2" fill="#D04060"/></g>`)},
-    {id:"sneaker",label:"Tênis Chunky",svg:()=>makeSVGItem(`<g transform="translate(36,34)"><path d="M-20,-10 Q-20,-20 -6,-22 L16,-20 Q22,-17 22,-9 L22,4 L-20,4 Z" fill="#E8E8E8" stroke="#CCC" stroke-width="1"/><path d="M-20,4 L22,4 L22,8 L-20,8 Z" fill="#1A1A1A"/><path d="M-4,-19 Q4,-13 14,-13" fill="none" stroke="#3060D0" stroke-width="2.5"/><circle cx="-10" cy="-5" r="2.2" fill="#3060D0"/><circle cx="-10" cy="1" r="2.2" fill="#3060D0"/></g>`)},
-  ],
-  acc:[
-    {id:"fan",label:"Leque",svg:()=>makeSVGItem(`<g transform="translate(40,36)"><path d="M0,0 L-28,-22 Q-20,-32 -8,-27 Z" fill="#C8A030" stroke="#A07820" stroke-width="1"/><path d="M0,0 L-20,-28 Q-7,-36 3,-29 Z" fill="#D4B040" stroke="#A07820" stroke-width="1"/><path d="M0,0 L-9,-31 Q5,-37 13,-27 Z" fill="#C8A030" stroke="#A07820" stroke-width="1"/><path d="M0,0 L3,-31 Q17,-31 21,-21 Z" fill="#D4B040" stroke="#A07820" stroke-width="1"/><circle cx="0" cy="0" r="4" fill="#8A6010"/></g>`)},
-    {id:"clutch",label:"Clutch",svg:()=>makeSVGItem(`<g transform="translate(14,18)"><rect x="0" y="0" width="44" height="28" rx="6" fill="#2A1A40" stroke="#1A0A30" stroke-width="1"/><rect x="6" y="4" width="32" height="20" rx="4" fill="rgba(200,160,80,.12)"/><circle cx="22" cy="14" r="4.5" fill="#C8A030"/><circle cx="22" cy="14" r="2.2" fill="#A07820"/></g>`)},
-    {id:"gloves",label:"Luvas Longas",svg:()=>makeSVGItem(`<path d="M16,8 L16,50 Q10,54 6,50 L4,30 Q2,30 2,19 Q2,13 8,13 L8,8 Q8,4 12,4 Q16,4 16,8 Z" fill="#1A0A20" stroke="#0A0010" stroke-width="1"/><path d="M56,8 L56,50 Q62,54 66,50 L68,30 Q70,30 70,19 Q70,13 64,13 L64,8 Q64,4 60,4 Q56,4 56,8 Z" fill="#1A0A20" stroke="#0A0010" stroke-width="1"/>`)},
-    {id:"necklace",label:"Colar Maxi",svg:()=>makeSVGItem(`<g transform="translate(36,30)"><path d="M-22,-6 Q-20,-22 0,-24 Q20,-22 22,-6" fill="none" stroke="#C8A030" stroke-width="2"/><path d="M-22,-6 Q-18,6 0,10 Q18,6 22,-6" fill="none" stroke="#C8A030" stroke-width="2"/><circle cx="0" cy="10" r="5.5" fill="#D04060" stroke="#C8A030" stroke-width="1"/><circle cx="-12" cy="4" r="3" fill="#C8A030"/><circle cx="12" cy="4" r="3" fill="#C8A030"/><circle cx="-20" cy="-5" r="2.5" fill="#C8A030"/><circle cx="20" cy="-5" r="2.5" fill="#C8A030"/></g>`)},
-    {id:"bouquet",label:"Buquê Roubado",svg:()=>makeSVGItem(`<g transform="translate(36,28)"><rect x="-4" y="5" width="8" height="18" rx="2" fill="#8B6040"/><circle cx="0" cy="-1" r="9" fill="#E06090"/><circle cx="-8" cy="-3" r="7" fill="#D05080"/><circle cx="8" cy="-3" r="7" fill="#D05080"/><circle cx="-4" cy="-10" r="6" fill="#E06090"/><circle cx="4" cy="-10" r="6" fill="#C04070"/><path d="M-4,5 Q0,1 4,5" fill="none" stroke="#C8A030" stroke-width="1.2"/></g>`)},
-    {id:"glass",label:"Taça de Cristal",svg:()=>makeSVGItem(`<g transform="translate(36,30)"><path d="M-8,-22 L-12,2 L12,2 L8,-22 Z" fill="rgba(200,220,255,.28)" stroke="rgba(180,200,240,.55)" stroke-width="1"/><ellipse cx="0" cy="-22" rx="8" ry="3" fill="rgba(200,220,255,.22)" stroke="rgba(180,200,240,.55)" stroke-width="1"/><rect x="-1" y="2" width="2" height="14" fill="rgba(180,200,240,.65)"/><ellipse cx="0" cy="16" rx="10" ry="3" fill="rgba(180,200,240,.3)" stroke="rgba(180,200,240,.55)" stroke-width="1"/><ellipse cx="0" cy="-26" rx="6" ry="2" fill="rgba(200,240,255,.45)"/></g>`)},
-  ],
-};
-
-function initLook(){
-  lookSel.head=null;lookSel.makeup=null;lookSel.top=null;lookSel.bottom=null;lookSel.shoes=null;lookSel.acc=[];
-  const panels=document.getElementById("look-panels");
-  if(!panels) return;
-  panels.innerHTML="";
-  const catNames={head:"Cabeça",makeup:"Maquiagem",top:"Parte de cima",bottom:"Parte de baixo",shoes:"Sapatos",acc:"Acessórios"};
-  Object.entries(LOOK_ITEMS).forEach(([cat,items])=>{
-    const sec=document.createElement("div");
-    sec.innerHTML=`<div class="look-cat-label">${catNames[cat]}</div><div class="look-items-row" id="look-cat-${cat}"></div>`;
-    panels.appendChild(sec);
-    const row=sec.querySelector(".look-items-row");
-    items.forEach(item=>{
-      const div=document.createElement("div");
-      div.className="look-item-btn";div.title=item.label;
-      div.dataset.cat=cat;div.dataset.id=item.id;
-      div.innerHTML=item.svg()+`<div class="look-item-label">${item.label}</div>`;
-      div.addEventListener("click",()=>lookToggle(div,cat,item.id));
-      row.appendChild(div);
-    });
-  });
-  lookRenderChar();
-}
-
-function lookToggle(el,cat,id){
-  if(cat==="acc"){
-    const idx=lookSel.acc.indexOf(id);
-    if(idx>=0){lookSel.acc.splice(idx,1);el.classList.remove("active");}
-    else if(lookSel.acc.length<2){lookSel.acc.push(id);el.classList.add("active");}
-  } else {
-    const was=lookSel[cat]===id;
-    document.querySelectorAll(`.look-item-btn[data-cat="${cat}"]`).forEach(b=>b.classList.remove("active"));
-    lookSel[cat]=was?null:id;
-    if(!was)el.classList.add("active");
-  }
-  lookRenderChar();
-}
-
-function setLookChar(c){
-  lookChar=c;
-  document.querySelectorAll(".char-pick").forEach(b=>{
-    b.classList.toggle("active",(c==="T"&&b.textContent.trim()==="Tiago")||(c==="G"&&b.textContent.trim()==="Gian"));
-  });
-  lookRenderChar();
-}
-
-function lookRenderChar(){
-  const svg=document.getElementById("look-svg"); if(!svg) return;
-  const skin=lookChar==="T"?"#C8956A":"#D4A878";
-  const hair=lookChar==="T"?"#1A0E08":"#2A1808";
-  const topItem=lookSel.top?LOOK_ITEMS.top.find(i=>i.id===lookSel.top):null;
-  const botItem=lookSel.bottom?LOOK_ITEMS.bottom.find(i=>i.id===lookSel.bottom):null;
-  const shoeItem=lookSel.shoes?LOOK_ITEMS.shoes.find(i=>i.id===lookSel.shoes):null;
-  const headItem=lookSel.head?LOOK_ITEMS.head.find(i=>i.id===lookSel.head):null;
-  const mkItem=lookSel.makeup?LOOK_ITEMS.makeup.find(i=>i.id===lookSel.makeup):null;
-  const accItems=lookSel.acc.map(id=>LOOK_ITEMS.acc.find(i=>i.id===id)).filter(Boolean);
-
-  // Build makeup face SVG inline
-  const mkSVG = mkItem ? (() => {
-    const m=lookSel.makeup;
-    return m==="natural"?`<path d="M82 66 Q88 62 94 66" stroke="#8A4020" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M106 66 Q112 62 118 66" stroke="#8A4020" stroke-width="1.6" fill="none" stroke-linecap="round"/><ellipse cx="84" cy="76" rx="6" ry="3" fill="rgba(220,120,100,.28)"/><ellipse cx="116" cy="76" rx="6" ry="3" fill="rgba(220,120,100,.28)"/>`:
-           m==="glam"?`<path d="M80 65 L96 63 L96 67 L80 68 Z" fill="rgba(200,160,40,.72)"/><path d="M104 63 L120 65 L120 68 L104 67 Z" fill="rgba(200,160,40,.72)"/><ellipse cx="82" cy="77" rx="8" ry="3.5" fill="rgba(230,100,80,.48)"/><ellipse cx="118" cy="77" rx="8" ry="3.5" fill="rgba(230,100,80,.48)"/><path d="M88 85 Q100 91 112 85" stroke="#B04040" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M79 64 Q88 58 97 64" stroke="#8A5020" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M103 64 Q112 58 121 64" stroke="#8A5020" stroke-width="2" fill="none" stroke-linecap="round"/>`:
-           m==="smokey"?`<path d="M79 67 L97 64 L96 71 L79 72 Z" fill="rgba(15,8,25,.85)"/><path d="M103 64 L121 67 L121 72 L103 71 Z" fill="rgba(15,8,25,.85)"/><path d="M79 64 Q88 57 98 64" stroke="#040210" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M102 64 Q111 57 123 64" stroke="#040210" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M88 85 Q100 91 112 85" stroke="#7A0818" stroke-width="2.5" fill="none" stroke-linecap="round"/>`:
-           m==="drag"?`<path d="M77 67 L97 63 L97 70 L77 72 Z" fill="rgba(200,40,140,.9)"/><path d="M103 63 L123 67 L123 72 L103 70 Z" fill="rgba(200,40,140,.9)"/><path d="M77 65 Q86 53 99 63 L102 57 Q86 47 75 64 Z" fill="rgba(65,8,65,.96)"/><path d="M101 63 Q114 53 125 65 L125 63 Q115 50 98 58 Z" fill="rgba(65,8,65,.96)"/><ellipse cx="80" cy="78" rx="9" ry="4" fill="rgba(255,60,60,.55)"/><ellipse cx="120" cy="78" rx="9" ry="4" fill="rgba(255,60,60,.55)"/><path d="M85 85 Q100 95 115 85 L113 88 Q100 99 87 88 Z" fill="#B80828"/><path d="M75 63 L68 55" stroke="#C8A030" stroke-width="1.8" stroke-linecap="round"/><path d="M125 63 L132 55" stroke="#C8A030" stroke-width="1.8" stroke-linecap="round"/>`:
-           m==="graphic"?`<path d="M79 69 L97 66" stroke="#030310" stroke-width="4.5" stroke-linecap="round"/><path d="M97 66 L104 59" stroke="#030310" stroke-width="3.5" stroke-linecap="round"/><path d="M103 66 L121 69" stroke="#030310" stroke-width="4.5" stroke-linecap="round"/><path d="M103 66 L96 59" stroke="#030310" stroke-width="3.5" stroke-linecap="round"/><path d="M79 69 L71 64" stroke="#030310" stroke-width="3" stroke-linecap="round"/><path d="M121 69 L129 64" stroke="#030310" stroke-width="3" stroke-linecap="round"/><path d="M88 85 Q100 91 112 85" stroke="#C8A030" stroke-width="3" fill="none" stroke-linecap="round"/>`:
-           `<path d="M80 67 Q88 61 96 67" stroke="#7A3018" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M104 67 Q112 61 120 67" stroke="#7A3018" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="80" cy="76" rx="9" ry="5" fill="rgba(220,70,70,.52)" transform="rotate(-12,80,76)"/><ellipse cx="120" cy="76" rx="9" ry="5" fill="rgba(220,70,70,.52)" transform="rotate(12,120,76)"/><path d="M86 85 Q100 92 114 85 Q100 89 86 85 Z" fill="#C02840"/>`;
-  })() : `<path d="M82 66 Q88 62 94 66" stroke="${hair==='#1A0E08'?'#2A1208':'#3A1A08'}" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M106 66 Q112 62 118 66" stroke="${hair==='#1A0E08'?'#2A1208':'#3A1A08'}" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M90 85 Q100 90 110 85" stroke="#A06050" stroke-width="1.5" fill="none" stroke-linecap="round"/>`;
-
-  svg.innerHTML=`
-    <defs><clipPath id="hc"><ellipse cx="100" cy="74" rx="36" ry="40"/></clipPath></defs>
-    ${botItem?`<g transform="translate(-2,154) scale(1.5)">${botItem.svg()}</g>`:`<rect x="76" y="168" width="22" height="92" rx="5" fill="${skin}"/><rect x="102" y="168" width="22" height="92" rx="5" fill="${skin}"/>`}
-    ${topItem?`<g transform="translate(-2,88) scale(1.5)">${topItem.svg()}</g>`:`<rect x="66" y="124" width="68" height="50" rx="7" fill="${skin}"/><rect x="42" y="128" width="22" height="42" rx="9" fill="${skin}"/><rect x="136" y="128" width="22" height="42" rx="9" fill="${skin}"/>`}
-    ${shoeItem?`<g transform="translate(-2,238) scale(1.5)">${shoeItem.svg()}</g>`:`<rect x="72" y="258" width="24" height="13" rx="3" fill="#2A1A0A"/><rect x="104" y="258" width="24" height="13" rx="3" fill="#2A1A0A"/>`}
-    <rect x="86" y="108" width="28" height="24" rx="4" fill="${skin}"/>
-    <ellipse cx="100" cy="74" rx="36" ry="40" fill="${skin}"/>
-    ${lookChar==="T"?`<ellipse cx="100" cy="46" rx="36" ry="20" fill="${hair}"/><ellipse cx="76" cy="55" rx="11" ry="16" fill="${hair}"/><ellipse cx="124" cy="55" rx="11" ry="16" fill="${hair}"/>`:`<ellipse cx="100" cy="46" rx="36" ry="18" fill="${hair}"/><path d="M64,56 Q57,74 62,88" stroke="${hair}" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M136,56 Q143,74 138,88" stroke="${hair}" stroke-width="10" fill="none" stroke-linecap="round"/>`}
-    <ellipse cx="88" cy="74" rx="7.5" ry="8.5" fill="#fff"/>
-    <ellipse cx="112" cy="74" rx="7.5" ry="8.5" fill="#fff"/>
-    <circle cx="88" cy="75" r="4.5" fill="#2A1A10"/>
-    <circle cx="112" cy="75" r="4.5" fill="#2A1A10"/>
-    <circle cx="90" cy="73" r="1.8" fill="#fff"/>
-    <circle cx="114" cy="73" r="1.8" fill="#fff"/>
-    ${mkSVG}
-    ${headItem?`<g transform="translate(-5,-30) scale(1.4)">${headItem.svg()}</g>`:""}
-    ${accItems.map((item,i)=>{const pos=[[2,52],[142,62]][i]||[2,52];return `<g transform="translate(${pos[0]},${pos[1]}) scale(.95)">${item.svg()}</g>`;}).join("")}
-  `;
-}
-
-function lookAvaliar(){
-  const total=[lookSel.head,lookSel.makeup,lookSel.top,lookSel.bottom,lookSel.shoes,...lookSel.acc].filter(Boolean).length;
-  const el=document.getElementById("look-result"); if(!el) return;
-  if(total<3){el.textContent="Monte mais o look antes de avaliar...";return;}
-  el.textContent=LOOK_VERDICTS[Math.floor(Math.random()*LOOK_VERDICTS.length)];
-}
-
-function lookReset(){
-  Object.assign(lookSel,{head:null,makeup:null,top:null,bottom:null,shoes:null,acc:[]});
-  document.querySelectorAll(".look-item-btn").forEach(b=>b.classList.remove("active"));
-  const el=document.getElementById("look-result");
-  if(el)el.textContent="Escolha um look digno de entrar depois dos noivos.";
-  lookRenderChar();
-}
-
-/* ══════════════════════════════════════════════════════════
-   PLACAR
-══════════════════════════════════════════════════════════ */
-async function salvarScore(jogo){
+function salvarScore(jogo){
   const ni=document.getElementById(jogo+"-nome");
   const me=document.getElementById(jogo+"-save-msg");
   const btn=ni?.nextElementSibling;
