@@ -75,7 +75,17 @@ function mascararTelefone(tel) {
     hamburger.setAttribute("aria-expanded", String(aberto));
   });
 
-  links.querySelectorAll("a").forEach(link => {
+  // Dropdown "Mais" — clique no mobile, hover no desktop (via CSS)
+  links.querySelectorAll(".nav__dropdown-toggle").forEach(toggle => {
+    toggle.addEventListener("click", (e) => {
+      if (window.innerWidth <= 900) {
+        e.preventDefault();
+        toggle.closest(".nav__dropdown").classList.toggle("open");
+      }
+    });
+  });
+
+  links.querySelectorAll("a:not(.nav__dropdown-toggle)").forEach(link => {
     link.addEventListener("click", () => {
       links.classList.remove("open");
       hamburger.setAttribute("aria-expanded", "false");
