@@ -193,7 +193,7 @@
       ["00111100","01222210","12344321","12222221","01111110"],
       ["00111100","01222210","12344321","12355321","01222210","00111100"]
     ];
-    const colors={1:["#F7E8C6","#C9A76A"],2:["#F4C889","#BF7A31"],3:["#F0A381","#B74E35"],4:["#F7DD83","#C79D24"],5:["#E88376","#AA372F"]};
+    const colors={1:["#EBF0E6","#B8C49A"],2:["#F4C889","#C46D28"],3:["#D98A82","#B05A52"],4:["#7A9B6E","#506B45"],5:["#C46D28","#8B4A1A"]};
     function fitCanvas(){const dpr=Math.min(devicePixelRatio||1,2.5);canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width="100%";canvas.style.aspectRatio=W+"/"+H;ctx.setTransform(dpr,0,0,dpr,0,0);} fitCanvas();
     function reset(){score=0;lives=3;level=1;state="ready";particles=[];bubbles=[];stars=[];makeLevel();updateHud();draw();endModal.hidden=true;}
     function makeLevel(){bricks=[];const rows=layouts[(level-1)%layouts.length], cols=8, gap=9, bw=(W-70-gap*(cols-1))/cols, bh=28; rows.forEach((row,r)=>{[...row].forEach((ch,c)=>{if(ch!=="0")bricks.push({x:35+c*(bw+gap),y:94+r*(bh+gap),w:bw,h:bh,type:Number(ch),hits:ch==="3"?2:1});});}); resetBall();}
@@ -243,9 +243,24 @@
       }
       ctx.restore();
     }
-    function draw(){ctx.clearRect(0,0,W,H); const grd=ctx.createLinearGradient(0,0,0,H);grd.addColorStop(0,"#FFF8EC");grd.addColorStop(.65,"#F3DFC2");grd.addColorStop(1,"#EBD4B8");ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
+    function draw(){ctx.clearRect(0,0,W,H); ctx.fillStyle="#F4EFE4";ctx.fillRect(0,0,W,H);
       ctx.fillStyle="rgba(255,255,255,.25)";for(const b of bubbles){ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.strokeStyle="rgba(255,255,255,.65)";ctx.stroke();}
-      bricks.forEach(b=>{const g=ctx.createLinearGradient(b.x,b.y,b.x,b.y+b.h);g.addColorStop(0,colors[b.type][0]);g.addColorStop(1,colors[b.type][1]);ctx.fillStyle=g;ctx.strokeStyle="rgba(110,70,30,.22)";ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,9);ctx.fill();ctx.stroke();ctx.fillStyle="rgba(255,255,255,.38)";ctx.beginPath();ctx.roundRect(b.x+5,b.y+4,b.w-10,5,3);ctx.fill(); if(b.hits>1){ctx.fillStyle="rgba(70,35,20,.35)";ctx.font="700 14px Inter";ctx.textAlign="center";ctx.fillText("×2",b.x+b.w/2,b.y+19);} });
+      bricks.forEach(b=>{
+        const sh=5; // espessura da sombra (camada de papel por baixo)
+        // sombra/plano inferior, levemente deslocado
+        ctx.fillStyle=colors[b.type][1];
+        ctx.beginPath();ctx.roundRect(b.x,b.y+sh,b.w,b.h,9);ctx.fill();
+        // bloco principal flat por cima
+        ctx.fillStyle=colors[b.type][0];
+        ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h-sh,9);ctx.fill();
+        if(b.hits>1){
+          // badge "×2": círculo creme com texto terracota
+          const bx=b.x+b.w-18, by=b.y+(b.h-sh)/2;
+          ctx.fillStyle="#FBF7EF";ctx.beginPath();ctx.arc(bx,by,12,0,Math.PI*2);ctx.fill();
+          ctx.fillStyle="#C46D28";ctx.font="700 13px Inter";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("×2",bx,by+1);
+          ctx.textBaseline="alphabetic";
+        }
+      });
       drawBottle(); ctx.fillStyle="rgba(122,83,41,.18)";ctx.beginPath();ctx.ellipse(W/2,H-46,190,20,0,0,Math.PI*2);ctx.fill();
       // Paddle com img + rosto sobreposto
       const pcx = paddle.x + paddle.w/2;

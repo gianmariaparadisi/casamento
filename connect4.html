@@ -32,7 +32,8 @@
 
     .conn-gabarito { margin-top:1.25rem; }
     .conn-gabarito__title { font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);text-align:center;margin-bottom:.75rem; }
-    .conn-solved-group__check { font-size:.68rem;font-weight:700;letter-spacing:.05em;opacity:.8;margin-top:2px; }
+    .conn-solved-group__check { font-size:.68rem;font-weight:700;letter-spacing:.05em;opacity:.8;margin-top:2px;display:flex;align-items:center;gap:.3rem; }
+    .conn-solved-group__check img { width:1rem;height:1rem;object-fit:contain; }
 
     /* GRID DE PALAVRAS */
     .conn-grid {
@@ -85,6 +86,13 @@
     .conn-result { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:1.75rem;text-align:center;box-shadow:var(--shadow-green);margin-bottom:1.5rem; }
     .conn-result__icon { font-size:2.5rem;margin-bottom:.5rem; }
     .conn-result__icon img { width:5.5rem;height:5.5rem;object-fit:contain;display:block;margin:0 auto; }
+    /* Chuva de confete para vitória */
+    .confetti-rain{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
+    .confetti-rain__piece{position:absolute;top:-10%;width:28px;height:28px;object-fit:contain;animation:confettiFall linear forwards;}
+    @keyframes confettiFall{
+      0%{transform:translateY(0) rotate(0deg);opacity:1;}
+      100%{transform:translateY(110vh) rotate(360deg);opacity:.85;}
+    }
     .conn-result__title { font-family:var(--font-display);font-size:1.6rem;font-weight:300;margin-bottom:.4rem; }
     .conn-result__sub { font-size:.84rem;color:var(--text-muted);margin-bottom:1rem; }
 
@@ -446,11 +454,38 @@
     cont.appendChild(div);
   }
 
+  // Chuva de confete (12 peças ilustradas) para celebrar vitórias
+  function confettiRain(){
+    const wrap = document.createElement("div");
+    wrap.className = "confetti-rain";
+    const n = 24;
+    for(let i=0;i<n;i++){
+      const img = document.createElement("img");
+      const piece = String((i % 12) + 1).padStart(2,"0");
+      img.src = `assets/img/confetti-piece-${piece}.png`;
+      img.className = "confetti-rain__piece";
+      img.alt = "";
+      const left = Math.random()*100;
+      const duration = 2.6 + Math.random()*1.8;
+      const delay = Math.random()*0.6;
+      const size = 18 + Math.random()*18;
+      img.style.left = left + "vw";
+      img.style.width = size + "px";
+      img.style.height = size + "px";
+      img.style.animationDuration = duration + "s";
+      img.style.animationDelay = delay + "s";
+      wrap.appendChild(img);
+    }
+    document.body.appendChild(wrap);
+    setTimeout(() => wrap.remove(), 5000);
+  }
+
   function mostrarResultado(ganhou) {
     jogoFinalizado = true;
     document.getElementById("connGame").style.display = "none";
     document.getElementById("connResult").style.display = "block";
     document.getElementById("connResultIcon").innerHTML = ganhou ? "<img src='assets/img/icon-confetti-burst.png' alt=''>" : "<img src='assets/img/icon-heart-broken.png' alt=''>";
+    if(ganhou) confettiRain();
     document.getElementById("connResultTitle").textContent = ganhou ? "Incrível!" : "Quase lá!";
     document.getElementById("connResultSub").textContent = ganhou
       ? `Você achou todos os grupos!`
@@ -467,7 +502,7 @@
         div.innerHTML = `
           <div class="conn-solved-group__label">${g.titulo}</div>
           <div class="conn-solved-group__words">${g.palavras.join(" · ")}</div>
-          <div class="conn-solved-group__check">${acertou ? "✓ Você acertou" : "Não foi desta vez"}</div>
+          <div class="conn-solved-group__check">${acertou ? "<img src='assets/img/icon-check-decorative.png' alt=''> Você acertou" : "<img src='assets/img/icon-cancel-decorative.png' alt=''> Não foi desta vez"}</div>
         `;
         gab.appendChild(div);
       });

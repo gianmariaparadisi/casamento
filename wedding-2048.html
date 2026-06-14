@@ -55,6 +55,13 @@
     .modal__icon{font-size:2.1rem;margin-bottom:.45rem;}
     .modal__icon img{width:4rem;height:4rem;object-fit:contain;display:block;margin:0 auto;}
     #endIcon img{width:9rem;height:auto;object-fit:contain;display:block;margin:0 auto;}
+    /* Chuva de confete para vitória */
+    .confetti-rain{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
+    .confetti-rain__piece{position:absolute;top:-10%;width:28px;height:28px;object-fit:contain;animation:confettiFall linear forwards;}
+    @keyframes confettiFall{
+      0%{transform:translateY(0) rotate(0deg);opacity:1;}
+      100%{transform:translateY(110vh) rotate(360deg);opacity:.85;}
+    }
     .modal__title{font-family:var(--font-display);font-size:2rem;font-weight:300;line-height:1.05;margin-bottom:.4rem;}
     .modal__text{color:var(--game-muted);font-size:.9rem;line-height:1.6;margin-bottom:1rem;}
     .save-box{margin-top:1rem;background:rgba(255,255,255,.62);border:1px solid rgba(216,205,188,.8);border-radius:18px;padding:1rem;}
@@ -338,9 +345,36 @@
       for(let r=0;r<4;r++)for(let c=0;c<4;c++){const t=tiles.find(x=>x.r===r&&x.c===c); if(!t) return true; const n=tiles.find(x=>(x.r===r+1&&x.c===c)||(x.r===r&&x.c===c+1)); if(n&&n.level===t.level)return true;}
       return false;
     }
+    // Chuva de confete (12 peças ilustradas) para celebrar a vitória
+    function confettiRain(){
+      const wrap = document.createElement("div");
+      wrap.className = "confetti-rain";
+      const n = 24;
+      for(let i=0;i<n;i++){
+        const img = document.createElement("img");
+        const piece = String((i % 12) + 1).padStart(2,"0");
+        img.src = `assets/img/confetti-piece-${piece}.png`;
+        img.className = "confetti-rain__piece";
+        img.alt = "";
+        const left = Math.random()*100;
+        const duration = 2.6 + Math.random()*1.8;
+        const delay = Math.random()*0.6;
+        const size = 18 + Math.random()*18;
+        img.style.left = left + "vw";
+        img.style.width = size + "px";
+        img.style.height = size + "px";
+        img.style.animationDuration = duration + "s";
+        img.style.animationDelay = delay + "s";
+        wrap.appendChild(img);
+      }
+      document.body.appendChild(wrap);
+      setTimeout(() => wrap.remove(), 5000);
+    }
+
     function showEnd(win){
       unlockScroll();
       endModal.hidden=false; endIcon.innerHTML=win?"<img src='assets/img/endgame-2048-grooms.png' alt=''>":"<img src='assets/img/icon-toast-glasses.png' alt=''>"; endTitle.textContent=win?"Dois noivos. Fim perfeito!":"Acabaram os movimentos";
+      if(win) confettiRain();
       endText.textContent=win?`Você chegou ao fim com ${score} pontos.`:`Você fez ${score} pontos. Dá para tentar uma progressão mais limpa.`;
     }
     document.getElementById("startBtn").onclick=()=>{startModal.hidden=true;reset();lockScroll();};
