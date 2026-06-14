@@ -1067,3 +1067,6 @@ canvas {
 
 /* Footer */
 .footer__names { font-size:0; }
+
+/* ── Spin para loading hourglass ── */
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
