@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🗝️ — Tiago e Gian</title>
+  <title>Jogos — Tiago e Gian</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -11,14 +11,16 @@
   <style>
     /* ─── MENU ──────────────────────────────────────── */
     .jogos-hero { padding: 130px 5% 56px; text-align: center; }
-    .jogos-hero__key { font-size: 2.5rem; display: block; margin-bottom: .75rem; animation: key-wiggle 3s ease-in-out infinite; }
+    .jogos-hero__key { width:3rem;height:3rem;margin:0 auto .75rem;display:block;color:var(--sage-dark);animation: key-wiggle 3s ease-in-out infinite; }
+    .jogos-hero__key svg { width:100%;height:100%; }
     @keyframes key-wiggle { 0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)} }
     .jogos-hero__title { font-family:var(--font-display);font-size:clamp(2rem,5vw,3.5rem);font-weight:300;margin-bottom:.75rem; }
     .jogos-hero__sub { font-size:.9rem;color:var(--text-muted);max-width:440px;margin-inline:auto;line-height:1.75; }
     .jogos-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-top:2.5rem;max-width:860px;margin-inline:auto; }
     .jogo-card { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:1.75rem 1.5rem;box-shadow:var(--shadow-green);cursor:pointer;transition:box-shadow var(--transition),transform var(--transition);text-align:center; }
     .jogo-card:hover { box-shadow:var(--shadow-lg);transform:translateY(-3px);border-color:var(--sage); }
-    .jogo-card__emoji { font-size:2.5rem;margin-bottom:.75rem;display:block; }
+    .jogo-card__icon { width:2.75rem;height:2.75rem;margin:0 auto .75rem;display:block;color:var(--sage-dark); }
+    .jogo-card__icon svg { width:100%;height:100%; }
     .jogo-card__title { font-family:var(--font-display);font-size:1.35rem;font-weight:400;margin-bottom:.35rem; }
     .jogo-card__desc { font-size:.82rem;color:var(--text-muted);line-height:1.6;margin-bottom:1rem; }
     .jogo-card__record { font-size:.72rem;color:var(--sage-dark);font-weight:500;background:var(--bg-green);padding:.3rem .65rem;border-radius:20px;display:inline-block;margin-bottom:.85rem; }
@@ -107,6 +109,17 @@
         <a href="index.html#evento">O Dia</a>
         <a href="index.html#cerimonia">Local & Orientações</a>
         <a href="presentes.html">Presentes</a>
+        <div class="nav__dropdown">
+          <button class="nav__dropdown-toggle" aria-haspopup="true">
+            Informações
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav__dropdown-menu">
+            <a href="padrinhos.html">Para os Padrinhos</a>
+            <a href="transfer.html">Transfer</a>
+            <a href="hospedagem.html">Hospedagem</a>
+          </div>
+        </div>
         <a href="jogos.html" class="nav__key" aria-label="Segredo">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3"/></svg>
         </a>
@@ -121,7 +134,9 @@
   <!-- ══ MENU ══ -->
   <div id="arena-menu">
     <div class="jogos-hero">
-      <span class="jogos-hero__key">🗝️</span>
+      <span class="jogos-hero__key">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="24" r="9"/><path d="M25 24h17M36 24v6M42 24v6"/></svg>
+      </span>
       <h1 class="jogos-hero__title reveal">Você achou o segredo.</h1>
       <p class="jogos-hero__sub reveal">Jogue, bata recordes e quem chegar ao topo pode ganhar um prêmio no dia do casamento.</p>
     </div>
@@ -129,75 +144,75 @@
       <div class="jogos-grid">
         <!-- Snake do Tiago (página dedicada) -->
         <a href="snake.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__emoji">🐍</span>
+          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6 6 2.7 6 6 2.7 6 6 6 6-2.7 6-6-2.7-6-6-6"/><circle cx="14" cy="14" r="1.6" fill="currentColor" stroke="none"/></svg></span>
           <h2 class="jogo-card__title">Snake do Tiago</h2>
           <p class="jogo-card__desc">Guie o Tiago pelos hambúrgueres. Quanto mais ele come, mais rápido fica.</p>
-          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Clássico 🐍</p>
+          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Clássico</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </a>
 
         <!-- Wordle do dia -->
         <a href="wordle.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__emoji">🟩</span>
+          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="9" height="9" rx="1.5"/><rect x="19.5" y="6" width="9" height="9" rx="1.5" fill="currentColor" stroke="none"/><rect x="33" y="6" width="9" height="9" rx="1.5"/><rect x="6" y="19.5" width="9" height="9" rx="1.5"/><rect x="19.5" y="19.5" width="9" height="9" rx="1.5"/><rect x="33" y="19.5" width="9" height="9" rx="1.5" fill="currentColor" stroke="none"/><rect x="6" y="33" width="9" height="9" rx="1.5"/><rect x="19.5" y="33" width="9" height="9" rx="1.5"/><rect x="33" y="33" width="9" height="9" rx="1.5"/></svg></span>
           <h2 class="jogo-card__title">Wordle do Casamento</h2>
           <p class="jogo-card__desc">Uma palavra nova a cada dia, relacionada ao nosso casamento. Você tem 6 tentativas.</p>
-          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Palavra do dia 🗓️</p>
+          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Palavra do dia</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </a>
 
         <!-- Conexões do dia -->
         <a href="connect4.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__emoji">🟦</span>
+          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12L24 24M24 24L36 12M24 24L12 36M24 24L36 36"/><circle cx="12" cy="12" r="4"/><circle cx="36" cy="12" r="4" fill="currentColor" stroke="none"/><circle cx="12" cy="36" r="4" fill="currentColor" stroke="none"/><circle cx="36" cy="36" r="4"/><circle cx="24" cy="24" r="4"/></svg></span>
           <h2 class="jogo-card__title">Conexões</h2>
           <p class="jogo-card__desc">Encontre os 4 grupos de 4 palavras que se conectam. Inspirado no NYT Connections.</p>
-          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Desafio do dia 🗓️</p>
+          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Desafio do dia</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </a>
 
 
         <!-- Docinho Ninja -->
         <a href="docinho-ninja.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__emoji">🍬</span>
+          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="9"/><path d="M9 16l4 4-4 4M39 16l-4 4 4 4M9 32l4-4M39 32l-4-4"/></svg></span>
           <h2 class="jogo-card__title">Docinho Ninja</h2>
           <p class="jogo-card__desc">Corte brigadeiros, éclairs e macarons com o dedo. Cuidado com a taça quebrada.</p>
-          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Novo arcade ✨</p>
+          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Novo arcade</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </a>
 
         <!-- Champagne Problems -->
         <a href="champagne-problems.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__emoji">🍾</span>
+          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 6h10l2 10c1 5-2 9-7 9s-8-4-7-9z"/><path d="M24 25v13M17 38h14"/><circle cx="22" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="26" cy="17" r="1" fill="currentColor" stroke="none"/></svg></span>
           <h2 class="jogo-card__title">Champagne Problems</h2>
           <p class="jogo-card__desc">Rebata a rolha de champagne e quebre blocos dourados em 3 fases.</p>
-          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">3 fases 🥂</p>
+          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">3 fases</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </a>
 
         <!-- Wedding 2048 -->
         <a href="wedding-2048.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__emoji">💍</span>
+          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="29" r="10"/><path d="M19 19l5-9 5 9z"/><path d="M19 19h10l-5 6z"/></svg></span>
           <h2 class="jogo-card__title">Wedding 2048</h2>
           <p class="jogo-card__desc">Junte anéis, bouquets, bolo e champagne até chegar ao para sempre.</p>
-          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Puzzle 💐</p>
+          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Puzzle</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </a>
 
         <div class="jogo-card reveal" onclick="entrarJogo('flappy')">
-          <span class="jogo-card__emoji">🐦</span>
+          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 26c0-7 6-13 14-13 6 0 11 3 13 8l5 2-5 2c-1 5-6 9-13 9-4 0-7.5-1.5-10-4"/><path d="M19 19l3 3-3 3"/><circle cx="28" cy="18" r="1" fill="currentColor" stroke="none"/></svg></span>
           <h2 class="jogo-card__title">Flappy Gian</h2>
           <p class="jogo-card__desc">Mantenha o Gian voando entre os canos. Cada cano é um ponto.</p>
           <p class="jogo-card__record" id="record-flappy-preview">Carregando…</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </div>
         <a href="empilha-bolo.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__emoji">🎂</span>
+          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6v6M20 6c0 2 2 2 2 4M24 6c0 2 2 2 2 4M28 6c0 2 2 2 2 4"/><rect x="10" y="18" width="28" height="9" rx="1.5"/><rect x="8" y="27" width="32" height="11" rx="1.5"/><path d="M10 22.5h28M8 32.5h32"/></svg></span>
           <h2 class="jogo-card__title">Empilha o Bolo</h2>
           <p class="jogo-card__desc">Versão confeitaria: glacê, partículas e pedaços de bolo caindo.</p>
           <p class="jogo-card__record" id="record-bolo-preview">Carregando…</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </a>
         <div class="jogo-card reveal" onclick="entrarJogo('docinhos')">
-          <span class="jogo-card__emoji">🍬</span>
+          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="9"/><path d="M9 16l4 4-4 4M39 16l-4 4 4 4M9 32l4-4M39 32l-4-4"/></svg></span>
           <h2 class="jogo-card__title">Pega os Docinhos</h2>
           <p class="jogo-card__desc">Salve os docinhos antes que os convidados cheguem. 45 segundos.</p>
           <p class="jogo-card__record" id="record-docinhos-preview">Carregando…</p>
