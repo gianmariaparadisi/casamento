@@ -1,27 +1,28 @@
 /* ═══════════════════════════════════════════════════════════
-   TIAGO E GIAN — jogos.js v4
-   Snake · Flappy · Empilha o Bolo · Pega os Docinhos · Monte o Look
-   Canvas com devicePixelRatio para nitidez em Retina/HDPI
+   TIAGO E GIAN — jogos.js v5
+   Flappy · com faces gian/tiago grandes e goofy
 ═══════════════════════════════════════════════════════════ */
 "use strict";
 
 const JOGOS_API = typeof API_URL !== "undefined"
   ? API_URL
-  : "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
+  : "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
 
 const DPR = Math.min(window.devicePixelRatio || 1, 3);
 
-/* Trava/destrava rolagem da página (mobile) durante o jogo. */
+/* ── Scroll lock: só trava o scroll, não toca em height/position ── */
+let _scrollY = 0;
 function lockScroll() {
-  document.documentElement.classList.add("game-locked");
-  document.body.classList.add("game-locked");
+  _scrollY = window.scrollY;
+  document.body.style.overflow = "hidden";
+  document.body.style.touchAction = "none";
 }
 function unlockScroll() {
-  document.documentElement.classList.remove("game-locked");
-  document.body.classList.remove("game-locked");
+  document.body.style.overflow = "";
+  document.body.style.touchAction = "";
+  window.scrollTo(0, _scrollY);
 }
 
-/* helper: configura canvas para alta resolução */
 function setupCanvas(id, w, h) {
   const c = document.getElementById(id);
   if (!c) return null;
@@ -34,20 +35,55 @@ function setupCanvas(id, w, h) {
   return ctx;
 }
 
-/* helper: largura lógica de um canvas pelo id */
-function cw(id) {
-  const c = document.getElementById(id);
-  return c ? c.width / DPR : 0;
+/* ══════════════════════════════════════════════════════════
+   FACES — carrega gianface01-07 e tiagoface01-07
+══════════════════════════════════════════════════════════ */
+const GIAN_FACES = [];
+const TIAGO_FACES = [];
+for (let i = 1; i <= 7; i++) {
+  const gi = new Image(); gi.loaded = false;
+  gi.onload = () => { gi.loaded = true; };
+  gi.src = `assets/img/gianface${String(i).padStart(2,"0")}.png`;
+  GIAN_FACES.push(gi);
+
+  const ti = new Image(); ti.loaded = false;
+  ti.onload = () => { ti.loaded = true; };
+  ti.src = `assets/img/tiagoface${String(i).padStart(2,"0")}.png`;
+  TIAGO_FACES.push(ti);
 }
-function ch(id) {
-  const c = document.getElementById(id);
-  return c ? c.height / DPR : 0;
+
+function facesFor(personagem) {
+  return personagem === "tiago" ? TIAGO_FACES : GIAN_FACES;
+}
+function faceOk(personagem) {
+  return facesFor(personagem).some(f => f.loaded);
+}
+
+/* Desenha rosto circular — grande e goofy */
+function drawFaceCircle(ctx, personagem, faceIdx, cx, cy, radius) {
+  const faces = facesFor(personagem);
+  const img   = faces[faceIdx % faces.length];
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.clip();
+  if (img && img.loaded) {
+    ctx.drawImage(img, cx - radius, cy - radius, radius * 2, radius * 2);
+  } else {
+    ctx.fillStyle = personagem === "tiago" ? "#B87B3E" : "#7A9B6E";
+    ctx.fill();
+    ctx.font = `${Math.round(radius * 1.1)}px serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(personagem === "tiago" ? "😄" : "😊", cx, cy);
+  }
+  ctx.restore();
 }
 
 /* ══════════════════════════════════════════════════════════
-   NAVEGAÇÃO
+   NAVEGAÇÃO (Flappy está inline no jogos.html)
 ══════════════════════════════════════════════════════════ */
-const ARENAS = ["menu","flappy","look"];
+const ARENAS = ["menu","flappy"];
 
 function entrarJogo(jogo) {
   ARENAS.forEach(id => {
@@ -55,10 +91,9 @@ function entrarJogo(jogo) {
     if (el) el.style.display = "none";
   });
   const target = document.getElementById("arena-" + jogo);
-  if (target) target.style.display = "block";
+  if (target) target.style.display = "flex";
   window.scrollTo({ top: 0, behavior: "instant" });
-  if (jogo === "flappy")   resetFlappy();
-  if (jogo === "look")     initLook();
+  if (jogo === "flappy") resetFlappy();
 }
 
 function voltarMenu() {
@@ -72,52 +107,6 @@ function voltarMenu() {
   const menu = document.getElementById("arena-menu");
   if (menu) menu.style.display = "block";
   window.scrollTo({ top: 0, behavior: "instant" });
-}
-
-/* ══════════════════════════════════════════════════════════
-   IMAGENS DAS CARAS
-══════════════════════════════════════════════════════════ */
-let imgGianOk = false;
-const GIAN_FACES = [];
-for (let i = 1; i <= 7; i++) {
-  const img = new Image();
-  img.loaded = false;
-  img.onload = () => { img.loaded = true; if (i === 1) imgGianOk = true; };
-  img.src = `assets/img/gianface${String(i).padStart(2,"0")}.png`;
-  GIAN_FACES.push(img);
-}
-
-let imgTiagoOk = false;
-const TIAGO_FACES = [];
-for (let i = 1; i <= 7; i++) {
-  const img = new Image();
-  img.loaded = false;
-  img.onload = () => { img.loaded = true; if (i === 1) imgTiagoOk = true; };
-  img.src = `assets/img/tiagoface${String(i).padStart(2,"0")}.png`;
-  TIAGO_FACES.push(img);
-}
-
-let flPersonagem = "gian";
-let flFaceIdx = 0;
-
-function drawFace(ctx, img, ok, x, y, size, fallbackColor, fallbackEmoji) {
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
-  ctx.clip();
-  if (ok) {
-    ctx.drawImage(img, x, y, size, size);
-  } else {
-    ctx.fillStyle = fallbackColor;
-    ctx.fill();
-    ctx.restore();
-    ctx.save();
-    ctx.font = Math.round(size * 0.55) + "px serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(fallbackEmoji, x + size / 2, y + size / 2);
-  }
-  ctx.restore();
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -141,12 +130,19 @@ function hideOverlay(jogo) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   FLAPPY GIAN
+   FLAPPY GIAN / TIAGO
+   - personagem selecionável
+   - rosto GRANDE e goofy (radius = 32px)
+   - canvas centralizado, sem scroll lock agressivo
 ══════════════════════════════════════════════════════════ */
 let flCtx=null, flW=0, flH=0;
 let flRaf=null, flAlive=false, flStarted=false, flScore=0;
 let flBirdY=0, flBirdVY=0, flPipes=[], flTick=0;
-const FL_GRAVITY=0.42, FL_FLAP=-8.5, FL_PIPE_W=58, FL_GAP=155, FL_SPD=2.8, FL_INTV=95;
+let flPersonagem = "gian";
+let flFaceIdx = 0;
+
+const FL_GRAVITY=0.42, FL_FLAP=-8.5, FL_PIPE_W=58, FL_GAP=160, FL_SPD=2.8, FL_INTV=95;
+const FL_BIRD_R = 32; // raio grande e goofy!
 
 function resetFlappy() {
   flAlive=false; flStarted=false;
@@ -154,24 +150,31 @@ function resetFlappy() {
 
   const canvas = document.getElementById("flappy-canvas");
   if (!canvas) return;
-  const W = canvas.parentElement.clientWidth || 480;
-  flW = Math.min(W, 480); flH = Math.round(flW * 1.2);
+
+  /* Canvas ocupa toda a largura disponível */
+  const wrap = canvas.parentElement;
+  const W = wrap ? wrap.clientWidth : 340;
+  flW = Math.min(W, 420);
+  flH = Math.round(flW * 1.35);
+
   flCtx = setupCanvas("flappy-canvas", flW, flH);
   if (!flCtx) return;
 
   flScore=0; flBirdY=flH/2; flBirdVY=0; flPipes=[]; flTick=0;
+  flFaceIdx = Math.floor(Math.random() * facesFor(flPersonagem).length);
   const sc=document.getElementById("flappy-score"); if(sc) sc.textContent="0";
   const pg=document.getElementById("flappy-postgame"); if(pg) pg.style.display="none";
+
+  const nome = flPersonagem === "tiago" ? "Tiago" : "Gian";
   flDraw();
-  showOverlay("flappy","🐦","Flappy Gian","Toque ou espaço para voar",[{label:"Começar",fn:"startFlappy()"}]);
+  showOverlay("flappy","🐦",`Flappy ${nome}`,`Toque para o ${nome} voar!`,[{label:"Começar",fn:"startFlappy()"}]);
 }
 
 function startFlappy() {
   flAlive=false;
   if(flRaf){cancelAnimationFrame(flRaf);flRaf=null;}
   flScore=0; flBirdY=flH/2; flBirdVY=0; flPipes=[]; flTick=0;
-  const _faces0 = flPersonagem === "tiago" ? TIAGO_FACES : GIAN_FACES;
-  flFaceIdx = Math.floor(Math.random()*_faces0.length);
+  flFaceIdx = Math.floor(Math.random() * facesFor(flPersonagem).length);
   const sc=document.getElementById("flappy-score"); if(sc) sc.textContent="0";
   const pg=document.getElementById("flappy-postgame"); if(pg) pg.style.display="none";
   hideOverlay("flappy");
@@ -180,33 +183,48 @@ function startFlappy() {
   flRaf=requestAnimationFrame(flLoop);
 }
 
-function pararFlappy(){flAlive=false;flStarted=false;if(flRaf){cancelAnimationFrame(flRaf);flRaf=null;}unlockScroll();}
+function pararFlappy(){
+  flAlive=false; flStarted=false;
+  if(flRaf){cancelAnimationFrame(flRaf);flRaf=null;}
+  unlockScroll();
+}
 
-function flTap(){if(!flStarted){startFlappy();return;}if(flAlive)flBirdVY=FL_FLAP;}
+window.flTap = function(){
+  if(!flStarted){startFlappy();return;}
+  if(flAlive)flBirdVY=FL_FLAP;
+};
+window.startFlappy = startFlappy;
+window.voltarMenu  = voltarMenu;
+window.entrarJogo  = entrarJogo;
 
 function flLoop() {
   if(!flAlive) return;
   flRaf=requestAnimationFrame(flLoop);
   flBirdVY+=FL_GRAVITY; flBirdY+=flBirdVY; flTick++;
+
   if (flTick%FL_INTV===0) {
-    const topH = 55 + Math.random()*(flH-FL_GAP-110);
-    flPipes.push({x:flW+FL_PIPE_W,topH,scored:false});
+    const topH = 60 + Math.random()*(flH-FL_GAP-120);
+    flPipes.push({x:flW+FL_PIPE_W, topH, scored:false});
   }
   flPipes.forEach(p=>{p.x-=FL_SPD;});
-  flPipes=flPipes.filter(p=>p.x>-FL_PIPE_W);
+  flPipes=flPipes.filter(p=>p.x>-FL_PIPE_W-10);
+
   flPipes.forEach(p=>{
-    if(!p.scored&&p.x+FL_PIPE_W<flW*.22){p.scored=true;flScore++;
-      const sc=document.getElementById("flappy-score");if(sc)sc.textContent=flScore;
-      const _faceArr = flPersonagem === "tiago" ? TIAGO_FACES : GIAN_FACES;
-      let novoIdx; do { novoIdx = Math.floor(Math.random()*_faceArr.length); } while(novoIdx===flFaceIdx && _faceArr.length>1);
-      flFaceIdx = novoIdx;
+    if(!p.scored && p.x+FL_PIPE_W < flW*.22-FL_BIRD_R) {
+      p.scored=true; flScore++;
+      const sc=document.getElementById("flappy-score"); if(sc) sc.textContent=flScore;
+      /* Troca a cara a cada cano — efeito goofy */
+      const faces = facesFor(flPersonagem);
+      let ni; do { ni=Math.floor(Math.random()*faces.length); } while(ni===flFaceIdx && faces.length>1);
+      flFaceIdx=ni;
     }
   });
-  const bR=20, bX=flW*.22;
-  if(flBirdY+bR>flH-28||flBirdY-bR<0) return flGameOver();
+
+  const bX=flW*.22;
+  if(flBirdY+FL_BIRD_R>flH-30||flBirdY-FL_BIRD_R<0) return flGameOver();
   for(const p of flPipes){
-    if(bX+bR>p.x&&bX-bR<p.x+FL_PIPE_W){
-      if(flBirdY-bR<p.topH||flBirdY+bR>p.topH+FL_GAP) return flGameOver();
+    if(bX+FL_BIRD_R>p.x && bX-FL_BIRD_R<p.x+FL_PIPE_W){
+      if(flBirdY-FL_BIRD_R<p.topH || flBirdY+FL_BIRD_R>p.topH+FL_GAP) return flGameOver();
     }
   }
   flDraw();
@@ -214,129 +232,168 @@ function flLoop() {
 
 function flDraw() {
   const ctx=flCtx; if(!ctx) return;
-  // Sky
-  ctx.fillStyle="#C8DDB8"; ctx.fillRect(0,0,flW,flH*.6);
+  /* Sky */
+  const sky=ctx.createLinearGradient(0,0,0,flH*.6);
+  sky.addColorStop(0,"#89CFF0"); sky.addColorStop(1,"#C8DDB8");
+  ctx.fillStyle=sky; ctx.fillRect(0,0,flW,flH*.6);
   ctx.fillStyle="#EBF0E6"; ctx.fillRect(0,flH*.6,flW,flH*.4);
-  // Clouds
-  ctx.fillStyle="rgba(255,255,255,.72)";
-  [[flW*.12,flH*.1,48,14],[flW*.45,flH*.07,66,16],[flW*.78,flH*.13,54,13]].forEach(([cx,cy,rw,rh])=>{
+
+  /* Nuvens */
+  ctx.fillStyle="rgba(255,255,255,.8)";
+  [[flW*.1,flH*.08,52,16],[flW*.5,flH*.06,70,18],[flW*.8,flH*.12,44,14]].forEach(([cx,cy,rw,rh])=>{
     ctx.beginPath();ctx.ellipse(cx,cy,rw,rh,0,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(cx+rw*.4,cy-rh*.5,rw*.55,rh*.55,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx+rw*.4,cy-rh*.6,rw*.6,rh*.6,0,0,Math.PI*2);ctx.fill();
   });
-  // Pipes
+
+  /* Canos */
   flPipes.forEach(p=>{
     const g=ctx.createLinearGradient(p.x,0,p.x+FL_PIPE_W,0);
-    g.addColorStop(0,"#506B45");g.addColorStop(.5,"#7A9B6E");g.addColorStop(1,"#3A5035");
+    g.addColorStop(0,"#3A5035"); g.addColorStop(.4,"#7A9B6E"); g.addColorStop(1,"#3A5035");
     ctx.fillStyle=g;
-    ctx.fillRect(p.x,0,FL_PIPE_W,p.topH);
-    ctx.fillStyle="#3A5035";ctx.fillRect(p.x-4,p.topH-16,FL_PIPE_W+8,16);
+    /* cano de cima */
+    ctx.beginPath(); ctx.roundRect(p.x,0,FL_PIPE_W,p.topH,4); ctx.fill();
+    ctx.fillStyle="#2A3E22";
+    ctx.fillRect(p.x-5,p.topH-18,FL_PIPE_W+10,18);
+    /* cano de baixo */
     const bY=p.topH+FL_GAP;
-    ctx.fillStyle=g;ctx.fillRect(p.x,bY,FL_PIPE_W,flH-bY);
-    ctx.fillStyle="#3A5035";ctx.fillRect(p.x-4,bY,FL_PIPE_W+8,16);
+    ctx.fillStyle=g;
+    ctx.beginPath(); ctx.roundRect(p.x,bY,FL_PIPE_W,flH-bY,4); ctx.fill();
+    ctx.fillStyle="#2A3E22";
+    ctx.fillRect(p.x-5,bY,FL_PIPE_W+10,18);
   });
-  // Ground
-  ctx.fillStyle="#7A9B6E";ctx.fillRect(0,flH-28,flW,28);
-  ctx.fillStyle="#506B45";ctx.fillRect(0,flH-28,flW,4);
-  // Bird
-  const bX=flW*.22, bSize=42;
+
+  /* Chão */
+  ctx.fillStyle="#7A9B6E"; ctx.fillRect(0,flH-30,flW,30);
+  ctx.fillStyle="#506B45"; ctx.fillRect(0,flH-30,flW,5);
+
+  /* Pássaro = rosto grande goofy */
+  const bX=flW*.22;
   ctx.save();
-  ctx.translate(bX,flBirdY);
-  ctx.rotate(Math.min(Math.max(flBirdVY*.038,-.5),.9));
-  const _flFaces = flPersonagem === "tiago" ? TIAGO_FACES : GIAN_FACES;
-  const _flOk = flPersonagem === "tiago" ? imgTiagoOk : imgGianOk;
-  const face = _flFaces[flFaceIdx];
-  drawFace(ctx,face,face.loaded,-bSize/2,-bSize/2,bSize,"#B87B3E","😊");
-  ctx.fillStyle="rgba(156,102,49,.65)";
-  ctx.beginPath();ctx.ellipse(-7,7+Math.sin(flTick*.25)*4,11,5,.3,0,Math.PI*2);ctx.fill();
+  ctx.translate(bX, flBirdY);
+  ctx.rotate(Math.min(Math.max(flBirdVY*.04,-.5),.9));
+
+  /* Sombra sob o rosto */
+  ctx.fillStyle="rgba(0,0,0,.12)";
+  ctx.beginPath();
+  ctx.ellipse(0, FL_BIRD_R*.7, FL_BIRD_R*.9, FL_BIRD_R*.25, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  /* Asinha fofa */
+  ctx.fillStyle = flPersonagem==="tiago" ? "#C8A060" : "#90B870";
+  ctx.beginPath();
+  ctx.ellipse(-FL_BIRD_R*.7, FL_BIRD_R*.1, FL_BIRD_R*.45, FL_BIRD_R*.22, -.5, 0, Math.PI*2);
+  ctx.fill();
+
+  /* Rosto */
+  drawFaceCircle(ctx, flPersonagem, flFaceIdx, 0, 0, FL_BIRD_R);
+
+  /* Biquinho */
+  ctx.fillStyle="#E8901A";
+  ctx.beginPath();
+  ctx.moveTo(FL_BIRD_R*.7, 0);
+  ctx.lineTo(FL_BIRD_R*1.1, FL_BIRD_R*.1);
+  ctx.lineTo(FL_BIRD_R*.7, FL_BIRD_R*.22);
+  ctx.closePath();
+  ctx.fill();
+
   ctx.restore();
 }
 
 function setFlappyPersonagem(p) {
   flPersonagem = p;
   document.querySelectorAll(".fl-char-btn").forEach(b => {
-    b.classList.toggle("active", b.dataset.char === p);
+    const isActive = b.dataset.char === p;
+    b.style.background    = isActive ? "var(--sage)" : "var(--white)";
+    b.style.color         = isActive ? "white" : "var(--sage-dark)";
+    b.style.borderColor   = isActive ? "var(--sage)" : "var(--line-green)";
+    b.style.fontWeight    = isActive ? "600" : "400";
   });
+  const nome = p === "tiago" ? "Tiago" : "Gian";
+  const title = document.getElementById("flappy-title");
+  if (title) title.textContent = `Flappy ${nome} 🐦`;
   resetFlappy();
 }
+window.setFlappyPersonagem = setFlappyPersonagem;
 
 function flGameOver(){
-  flAlive=false;if(flRaf){cancelAnimationFrame(flRaf);flRaf=null;}
+  flAlive=false; if(flRaf){cancelAnimationFrame(flRaf);flRaf=null;}
   unlockScroll();
   flDraw();
-  const msgs=flScore>=15?["O Gian virou pombo de competição!","Recorde lendário."]:
-              flScore>=8?["O Gian voou bem hoje.","Consegue bater esse recorde?"]:
-              flScore>=3?["Quase...","Tenta mais uma vez!"]:["O Gian bateu logo de cara.","Cuidado com os canos!"];
-  showOverlay("flappy","💥","Game Over!",`${flScore} cano${flScore!==1?"s":""} · ${msgs[0]}`,[
-    {label:"Jogar de novo",fn:"startFlappy()"},{label:"Voltar",fn:"voltarMenu()"}
-  ]);
-  setTimeout(()=>{const pg=document.getElementById("flappy-postgame");if(pg)pg.style.display="block";carregarTop10("flappy");},300);
+  const nome = flPersonagem === "tiago" ? "Tiago" : "Gian";
+  const msgs = flScore>=15 ? [`O ${nome} virou pombo de competição!`,"Recorde lendário."] :
+               flScore>=8  ? [`O ${nome} voou bem hoje.`,"Consegue bater esse recorde?"] :
+               flScore>=3  ? ["Quase...","Tenta mais uma vez!"] :
+                             [`O ${nome} bateu logo de cara.`,"Cuidado com os canos!"];
+  showOverlay("flappy","💥","Game Over!",`${flScore} cano${flScore!==1?"s":""} · ${msgs[0]}`,
+    [{label:"Jogar de novo",fn:"startFlappy()"},{label:"Voltar",fn:"voltarMenu()"}]);
+  setTimeout(()=>{
+    const pg=document.getElementById("flappy-postgame"); if(pg) pg.style.display="block";
+    carregarTop10("flappy");
+  },300);
 }
 
 document.addEventListener("keydown",e=>{
-  if(document.getElementById("arena-flappy")?.style.display==="none")return;
+  const arena = document.getElementById("arena-flappy");
+  if(!arena || arena.style.display==="none") return;
   if([" ","ArrowUp","w","W"].includes(e.key)){e.preventDefault();flTap();}
 });
+
 document.addEventListener("DOMContentLoaded",()=>{
   const fc=document.getElementById("flappy-canvas");
-  if(!fc)return;
+  if(!fc) return;
   fc.addEventListener("touchstart",e=>{e.preventDefault();flTap();},{passive:false});
   fc.addEventListener("click",()=>flTap());
 });
 
 /* ══════════════════════════════════════════════════════════
-   MONTE O LOOK — SVG editorial com rosto real
+   PLACAR
 ══════════════════════════════════════════════════════════ */
-let lookChar = "T";
-const lookSel = {head:null,makeup:null,top:null,bottom:null,shoes:null,acc:[]};
-const LOOK_VERDICTS=["Categoria: madrinha que roubou a cena inteira.","Acabou de sair de um editorial da Vogue Noivos.","Proibido sentar perto da tia conservadora.","Mais brilho que a pista de dança às 3h.","O vestido da noiva quem? Esse look é o centro.","Chegou depois dos noivos. Ninguém reclamou.","Stylist da lua de mel já mandou mensagem.","Velas apagam, look fica.","A confeiteira tirou foto do look, não do bolo.","Convidado do ano, todo ano, todo casamento."];
-
-
 function salvarScore(jogo){
   const ni=document.getElementById(jogo+"-nome");
   const me=document.getElementById(jogo+"-save-msg");
   const btn=ni?.nextElementSibling;
   const nome=(ni?.value||"").trim();
-  const ptMap={flappy:flScore,bolo:boScore,docinhos:dcScore};
+  const ptMap={flappy:flScore};
   const pts=ptMap[jogo]||0;
   if(!nome){if(me){me.style.color="var(--terracotta)";me.textContent="Informe seu nome.";}if(ni)ni.focus();return;}
   if(btn){btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';}
-  try{
-    const r=await fetch(JOGOS_API,{method:"POST",body:JSON.stringify({action:"score",jogo,nome,pontos:pts})});
-    const j=await r.json();
-    if(j.sucesso){
-      if(me){me.style.color="var(--sage-dark)";me.textContent="Recorde salvo! 🏆";}
-      if(btn){btn.disabled=true;btn.textContent="Salvo ✓";}
-      if(ni)ni.disabled=true;
-      carregarTop10(jogo);
-    } else throw new Error();
-  } catch{
-    if(btn){btn.disabled=false;btn.textContent="Salvar";}
-    if(me){me.style.color="var(--terracotta)";me.textContent="Não conseguimos salvar. Tente novamente.";}
-  }
+  fetch(JOGOS_API,{method:"POST",body:JSON.stringify({action:"score",jogo,nome,pontos:pts})})
+    .then(r=>r.json()).then(j=>{
+      if(j.sucesso){
+        if(me){me.style.color="var(--sage-dark)";me.textContent="Recorde salvo! 🏆";}
+        if(btn){btn.disabled=true;btn.textContent="Salvo ✓";}
+        if(ni)ni.disabled=true;
+        carregarTop10(jogo);
+      } else throw new Error();
+    }).catch(()=>{
+      if(btn){btn.disabled=false;btn.textContent="Salvar";}
+      if(me){me.style.color="var(--terracotta)";me.textContent="Não conseguimos salvar.";}
+    });
 }
+window.salvarScore = salvarScore;
 
 async function carregarTop10(jogo){
   const el=document.getElementById(jogo+"-top10"); if(!el) return;
-  const nomes={snake:"🏆 Top 10 — Snake",flappy:"🏆 Top 10 — Flappy Gian",bolo:"🏆 Top 10 — Empilha o Bolo",docinhos:"🏆 Top 10 — Pega os Docinhos"};
+  const nomes={flappy:"🏆 Top 10 — Flappy"};
   el.innerHTML=`<h3 class="top10__title">${nomes[jogo]||"Top 10"}</h3><p class="top10__loading">Carregando…</p>`;
   try{
     const r=await fetch(`${JOGOS_API}?action=top10&jogo=${jogo}`);
     const d=await r.json();
-    if(!d?.lista?.length){el.innerHTML=`<h3 class="top10__title">${nomes[jogo]}</h3><p class="top10__empty">Nenhum recorde. Seja o primeiro!</p>`;return;}
+    if(!d?.lista?.length){el.innerHTML=`<h3 class="top10__title">${nomes[jogo]}</h3><p class="top10__empty">Nenhum recorde ainda!</p>`;return;}
     const m=["🥇","🥈","🥉"],cs=["top10__item--gold","top10__item--silver","top10__item--bronze"];
     el.innerHTML=`<h3 class="top10__title">${nomes[jogo]}</h3><ul class="top10__list">${d.lista.map((it,i)=>`<li class="top10__item ${cs[i]||""}"><span class="top10__pos">${m[i]||(i+1)}</span><span class="top10__name">${escJ(it.nome)}</span><span class="top10__pts">${it.pontos} pts</span></li>`).join("")}</ul>`;
-  } catch{el.innerHTML=`<h3 class="top10__title">${nomes[jogo]}</h3><p class="top10__empty">Não foi possível carregar.</p>`;}
+  } catch{el.innerHTML=`<h3 class="top10__title">${nomes[jogo]||"Top 10"}</h3><p class="top10__empty">Não foi possível carregar.</p>`;}
 }
 
 async function carregarPreviewRecorde(){
-  for(const j of["flappy","bolo"]){
+  for(const j of["flappy"]){
     const el=document.getElementById("record-"+j+"-preview"); if(!el) continue;
     try{
       const r=await fetch(`${JOGOS_API}?action=top10&jogo=${j}`);
       const d=await r.json();
-      if(d?.lista?.length){const t=d.lista[0];el.textContent=`🥇 ${t.nome} — ${t.pontos} pts`;}
+      if(d?.lista?.length){const t=d.lista[0];el.textContent=`🥇 ${t.nome} · ${t.pontos} pts`;}
       else el.textContent="Seja o primeiro!";
-    } catch{el.textContent="Placar disponível após jogar";}
+    } catch{el.textContent="Placar disponível";}
   }
 }
 
