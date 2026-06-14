@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Empilha o Bolo — Tiago e Gian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    :root{
+      --cake-bg:#FFF8EF;
+      --cake-cream:#F7E7D2;
+      --cake-cream-2:#FCEFD8;
+      --cake-pink:#F5B8B8;
+      --cake-rose:#C96E75;
+      --cake-apricot:#F2A665;
+      --cake-gold:#C89B45;
+      --cake-cocoa:#7B4C38;
+      --cake-red:#A94D4D;
+      --cake-shadow:0 18px 60px rgba(116,72,46,.16);
+    }
+    body{
+      min-height:100svh;
+      background:
+        radial-gradient(circle at 14% 10%, rgba(255,218,166,.68) 0 14%, transparent 29%),
+        radial-gradient(circle at 92% 16%, rgba(245,184,184,.48) 0 12%, transparent 26%),
+        linear-gradient(180deg,#FFF9F0 0%,#F5E7D2 54%,#F9EFE3 100%);
+      color:#35261D;
+      overflow-x:hidden;
+    }
+    .cake-page{padding:100px 5% 56px; min-height:100svh; position:relative;}
+    .cake-page::before{
+      content:""; position:fixed; inset:0; pointer-events:none; opacity:.45;
+      background-image:
+        radial-gradient(circle, rgba(200,155,69,.25) 0 1.5px, transparent 1.8px),
+        radial-gradient(circle, rgba(201,110,117,.18) 0 1.2px, transparent 1.5px);
+      background-size:38px 38px, 54px 54px;
+      background-position:0 0, 16px 18px;
+      mask-image:linear-gradient(to bottom, black, transparent 92%);
+    }
+    .cake-shell{width:min(100%,980px); margin:0 auto; display:grid; grid-template-columns:minmax(0,420px) minmax(320px,1fr); gap:28px; align-items:start;}
+    .cake-intro{padding:24px 0 0; position:sticky; top:92px;}
+    .back-link{display:inline-flex;align-items:center;gap:.45rem;margin-bottom:1.1rem;color:#7D5B3A;font-size:.76rem;text-transform:uppercase;letter-spacing:.12em;text-decoration:underline;text-underline-offset:4px;}
+    .cake-kicker{font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:#A36B4F;margin-bottom:.8rem;font-weight:600;}
+    .cake-title{font-family:var(--font-display);font-size:clamp(3.2rem,8vw,5.8rem);font-weight:300;line-height:.9;margin:0 0 1rem;color:#4A3126;}
+    .cake-title span{display:block;font-style:italic;color:#B86F52;font-size:.58em;margin-top:.2em;}
+    .cake-sub{max-width:390px;color:#6F5A4A;font-size:1rem;line-height:1.85;margin-bottom:1.4rem;}
+    .cake-rules{display:grid;gap:.65rem;max-width:400px;margin-top:1.2rem;}
+    .rule{display:flex;gap:.7rem;align-items:flex-start;background:rgba(255,255,255,.54);border:1px solid rgba(200,155,69,.22);border-radius:18px;padding:.72rem .82rem;box-shadow:0 8px 24px rgba(116,72,46,.05);}
+    .rule b{font-size:.74rem;color:#8B573C;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:.08rem;}
+    .rule p{font-size:.83rem;color:#6F5A4A;line-height:1.5;margin:0;}
+    .cake-panel{position:relative;background:rgba(255,255,255,.72);border:1px solid rgba(200,155,69,.28);border-radius:32px;padding:16px;box-shadow:var(--cake-shadow);backdrop-filter:blur(10px);}
+    .cake-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 4px 12px;}
+    .pill{display:inline-flex;align-items:center;gap:.4rem;border:1px solid rgba(200,155,69,.34);background:#FFF7EB;border-radius:999px;padding:.46rem .76rem;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#86553E;white-space:nowrap;}
+    .pill strong{font-size:.9rem;color:#4A3126;letter-spacing:0;}
+    .cake-canvas-wrap{position:relative;border-radius:26px;overflow:hidden;background:#FFF4E7;border:1px solid rgba(200,155,69,.26);box-shadow:inset 0 0 0 1px rgba(255,255,255,.45);touch-action:none;}
+    #cakeCanvas{display:block;width:100%;height:auto;aspect-ratio: 4/5.45;}
+    .cake-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:26px;background:linear-gradient(180deg,rgba(255,249,240,.88),rgba(255,236,218,.94));backdrop-filter:blur(5px);z-index:4;}
+    .cake-card{width:min(92%,340px);background:rgba(255,255,255,.82);border:1px solid rgba(200,155,69,.32);border-radius:28px;padding:26px 22px;box-shadow:0 18px 50px rgba(116,72,46,.14);}
+    .cake-card__icon{font-size:3rem;margin-bottom:.35rem;filter:drop-shadow(0 6px 8px rgba(116,72,46,.12));}
+    .cake-card h2{font-family:var(--font-display);font-size:2.2rem;font-weight:300;line-height:1;margin-bottom:.7rem;color:#4A3126;}
+    .cake-card p{font-size:.92rem;color:#6F5A4A;line-height:1.65;margin:0 auto 1.2rem;}
+    .cake-actions{display:flex;gap:.65rem;justify-content:center;flex-wrap:wrap;}
+    .cake-btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border-radius:999px;padding:.78rem 1.12rem;background:#A75B42;color:#fff;font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid transparent;box-shadow:0 10px 26px rgba(167,91,66,.22);transition:.18s ease;}
+    .cake-btn:hover{transform:translateY(-1px);background:#8F4933;color:#fff;}
+    .cake-btn--ghost{background:#FFF7EB;color:#8B573C;border-color:rgba(200,155,69,.35);box-shadow:none;}
+    .cake-btn--ghost:hover{background:#F8E8D0;color:#7B4C38;}
+    .tap-helper{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:3;background:rgba(255,255,255,.78);border:1px solid rgba(200,155,69,.32);color:#8B573C;border-radius:999px;padding:.5rem .85rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;font-weight:700;box-shadow:0 8px 22px rgba(116,72,46,.1);pointer-events:none;opacity:0;transition:.2s ease;}
+    .tap-helper.show{opacity:1;}
+    .cake-post{margin-top:16px;display:none;grid-template-columns:1fr;gap:14px;}
+    .save-box,.ranking-box{background:rgba(255,255,255,.68);border:1px solid rgba(200,155,69,.28);border-radius:24px;padding:18px;box-shadow:0 12px 34px rgba(116,72,46,.08);}
+    .save-box h3,.ranking-box h3{font-family:var(--font-display);font-size:1.45rem;font-weight:400;margin-bottom:.75rem;color:#4A3126;}
+    .save-row{display:flex;gap:8px;}
+    .save-row input{flex:1;border:1px solid rgba(200,155,69,.34);background:#fff;border-radius:999px;padding:.78rem 1rem;font:inherit;font-size:.9rem;outline:none;color:#4A3126;min-width:0;}
+    .save-row input:focus{border-color:#A75B42;box-shadow:0 0 0 3px rgba(167,91,66,.12);}
+    .save-msg{font-size:.82rem;margin-top:.55rem;color:#8B573C;min-height:1.2em;}
+    .rank-list{list-style:none;display:grid;gap:8px;padding:0;margin:0;}
+    .rank-item{display:flex;align-items:center;gap:.8rem;background:#FFF7EB;border:1px solid rgba(200,155,69,.24);border-radius:16px;padding:.62rem .72rem;color:#5A3C2D;}
+    .rank-pos{width:34px;text-align:center;font-family:var(--font-display);font-size:1.25rem;color:#A36B4F;}
+    .rank-name{flex:1;font-weight:650;font-size:.9rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .rank-pts{font-size:.78rem;font-weight:800;color:#8B573C;background:#F8E8D0;border-radius:999px;padding:.24rem .58rem;}
+    .loading,.empty{font-size:.86rem;color:#7D5B3A;font-style:italic;padding:.8rem;text-align:center;}
+    .mini-controls{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;justify-content:center;}
+    @media(max-width:860px){
+      .cake-page{padding-top:86px;}
+      .cake-shell{grid-template-columns:1fr;gap:18px;}
+      .cake-intro{position:relative;top:auto;text-align:center;padding-top:0;}
+      .cake-sub{margin-inline:auto;}
+      .cake-rules{margin-inline:auto;}
+      .rule{text-align:left;}
+      .cake-panel{max-width:500px;margin-inline:auto;width:100%;}
+    }
+    @media(max-width:520px){
+      .cake-page{padding-left:3.5%;padding-right:3.5%;}
+      .cake-title{font-size:3.4rem;}
+      .cake-topbar{gap:6px;}
+      .pill{font-size:.62rem;padding:.4rem .58rem;}
+      .pill strong{font-size:.78rem;}
+      .cake-panel{border-radius:24px;padding:10px;}
+      .cake-canvas-wrap{border-radius:20px;}
+      .save-row{flex-direction:column;}
+      .save-row .cake-btn{width:100%;}
+      .cake-card{padding:22px 18px;}
+    }
+  </style>
+</head>
+<body>
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">Tiago e Gian</a>
+      <nav class="nav__links" id="navLinks">
+        <a href="index.html#evento">O Dia</a>
+        <a href="index.html#cerimonia">Local & Orientações</a>
+        <a href="presentes.html">Presentes</a>
+        <a href="jogos.html">Jogos</a>
+        <a href="index.html#rsvp" class="nav__cta">Confirmar presença</a>
+      </nav>
+      <button class="nav__hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main class="cake-page">
+    <section class="cake-shell">
+      <div class="cake-intro">
+        <a class="back-link" href="jogos.html">← Voltar aos jogos</a>
+        <div class="cake-kicker">mini arcade</div>
+        <h1 class="cake-title">Empilha <span>o Bolo</span></h1>
+        <p class="cake-sub">Toque quando o andar estiver alinhado. O pedaço que sobra cai, o bolo afina e a confeitaria inteira fica progressivamente mais caótica.</p>
+        <div class="cake-rules" aria-label="regras do jogo">
+          <div class="rule"><span>🍰</span><div><b>Timing</b><p>Quanto mais centralizado, mais pontos e mais confeitos.</p></div></div>
+          <div class="rule"><span>✨</span><div><b>Combo perfeito</b><p>Acertos quase exatos acendem glitter e dão bônus.</p></div></div>
+          <div class="rule"><span>🏆</span><div><b>Ranking</b><p>Usa o mesmo placar do jogo antigo: chave <strong>bolo</strong>.</p></div></div>
+        </div>
+      </div>
+
+      <div class="cake-panel">
+        <div class="cake-topbar">
+          <div class="pill">Andares <strong id="scoreTxt">0</strong></div>
+          <div class="pill">Combo <strong id="comboTxt">0</strong></div>
+          <div class="pill">Largura <strong id="widthTxt">100%</strong></div>
+        </div>
+        <div class="cake-canvas-wrap" id="canvasWrap">
+          <canvas id="cakeCanvas" width="800" height="1090" aria-label="Jogo Empilha o Bolo"></canvas>
+          <div class="tap-helper" id="tapHelper">toque para empilhar</div>
+          <div class="cake-overlay" id="overlay">
+            <div class="cake-card">
+              <div class="cake-card__icon">🎂</div>
+              <h2 id="overlayTitle">Empilha o Bolo</h2>
+              <p id="overlayText">Uma versão mais bonita, com glacê, prato, partículas e aquele caos de confeitaria.</p>
+              <div class="cake-actions" id="overlayActions">
+                <button class="cake-btn" type="button" onclick="startGame()">Começar</button>
+                <a class="cake-btn cake-btn--ghost" href="jogos.html">Voltar</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mini-controls">
+          <button class="cake-btn cake-btn--ghost" type="button" onclick="startGame()">Novo jogo</button>
+          <button class="cake-btn cake-btn--ghost" type="button" onclick="togglePause()" id="pauseBtn">Pausar</button>
+        </div>
+
+        <div class="cake-post" id="postgame">
+          <div class="save-box">
+            <h3>Salvar no ranking</h3>
+            <div class="save-row">
+              <input type="text" id="playerName" placeholder="Seu nome" maxlength="30" autocomplete="name" />
+              <button class="cake-btn" id="saveBtn" type="button" onclick="saveScore()">Salvar</button>
+            </div>
+            <div class="save-msg" id="saveMsg"></div>
+          </div>
+          <div class="ranking-box" id="rankBox">
+            <h3>🏆 Top 10 — Empilha o Bolo</h3>
+            <p class="loading">Carregando…</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+    const JOGOS_API = "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
+    const DPR = Math.min(window.devicePixelRatio || 1, 3);
+    const canvas = document.getElementById("cakeCanvas");
+    const wrap = document.getElementById("canvasWrap");
+    const ctx = canvas.getContext("2d");
+    const overlay = document.getElementById("overlay");
+    const overlayTitle = document.getElementById("overlayTitle");
+    const overlayText = document.getElementById("overlayText");
+    const overlayActions = document.getElementById("overlayActions");
+    const scoreTxt = document.getElementById("scoreTxt");
+    const comboTxt = document.getElementById("comboTxt");
+    const widthTxt = document.getElementById("widthTxt");
+    const tapHelper = document.getElementById("tapHelper");
+    const postgame = document.getElementById("postgame");
+    const pauseBtn = document.getElementById("pauseBtn");
+
+    let W = 800, H = 1090;
+    let raf = null;
+    let state = "intro";
+    let layers = [];
+    let moving = null;
+    let crumbs = [];
+    let sparkles = [];
+    let floatingText = [];
+    let score = 0;
+    let combo = 0;
+    let cameraY = 0;
+    let targetCameraY = 0;
+    let lastTs = 0;
+    let frame = 0;
+    let currentPoints = 0;
+    let saved = false;
+
+    const layerH = 58;
+    const baseW = 500;
+    const palette = [
+      {body:"#F9D1C6", icing:"#FFF8F2", trim:"#C96E75", dot:"#F5A0A8"},
+      {body:"#FBE1B9", icing:"#FFF9E8", trim:"#D79B48", dot:"#F2A665"},
+      {body:"#F5B8B8", icing:"#FFF6F6", trim:"#B95D68", dot:"#E88996"},
+      {body:"#F7D795", icing:"#FFF9E0", trim:"#C89B45", dot:"#E7B95E"},
+      {body:"#EFC7A4", icing:"#FFF2E6", trim:"#A36B4F", dot:"#D49068"},
+      {body:"#F6C3B2", icing:"#FFF7ED", trim:"#B86F52", dot:"#EA9A81"}
+    ];
+
+    function resize(){
+      const cssW = Math.min(520, wrap.clientWidth || 420);
+      const cssH = Math.round(cssW * 1.3625);
+      canvas.style.width = cssW + "px";
+      canvas.style.height = cssH + "px";
+      canvas.width = Math.round(cssW * DPR);
+      canvas.height = Math.round(cssH * DPR);
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      W = cssW; H = cssH;
+      draw();
+    }
+    window.addEventListener("resize", resize, {passive:true});
+
+    function initGame(){
+      const floor = H - 82;
+      layers = [{x:W/2-baseW/2, y:floor-layerH, w:baseW, h:layerH, color:palette[0], landed:true, perfect:false}];
+      moving = makeMoving(1, baseW, floor - layerH * 2);
+      crumbs = []; sparkles = []; floatingText = [];
+      score = 0; combo = 0; currentPoints = 0; saved = false;
+      cameraY = targetCameraY = 0;
+      updateHud();
+      postgame.style.display = "none";
+      document.getElementById("playerName").disabled = false;
+      document.getElementById("saveBtn").disabled = false;
+      document.getElementById("saveBtn").textContent = "Salvar";
+      document.getElementById("saveMsg").textContent = "";
+    }
+
+    function makeMoving(index, w, y){
+      const fromLeft = index % 2 === 0;
+      return {
+        x: fromLeft ? -w - 18 : W + 18,
+        y, w, h:layerH,
+        dir: fromLeft ? 1 : -1,
+        speed: Math.min(4.8, 2.15 + index * .13),
+        color: palette[index % palette.length],
+        index,
+        bob: Math.random() * Math.PI * 2
+      };
+    }
+
+    function startGame(){
+      hideOverlay();
+      initGame();
+      state = "playing";
+      tapHelper.classList.add("show");
+      lastTs = performance.now();
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(loop);
+    }
+    window.startGame = startGame;
+
+    function togglePause(){
+      if(state === "playing"){
+        state = "paused";
+        pauseBtn.textContent = "Continuar";
+        showOverlay("Pausa", "O bolo está esperando seu timing.", [
+          {label:"Continuar", fn:"togglePause()", ghost:false},
+          {label:"Novo jogo", fn:"startGame()", ghost:true}
+        ]);
+      }else if(state === "paused"){
+        hideOverlay();
+        pauseBtn.textContent = "Pausar";
+        state = "playing";
+        lastTs = performance.now();
+        raf = requestAnimationFrame(loop);
+      }
+    }
+    window.togglePause = togglePause;
+
+    function showOverlay(title, text, actions){
+      overlayTitle.textContent = title;
+      overlayText.textContent = text;
+      overlayActions.innerHTML = actions.map(a => `<button class="cake-btn ${a.ghost ? 'cake-btn--ghost' : ''}" type="button" onclick="${a.fn}">${a.label}</button>`).join("");
+      overlay.style.display = "flex";
+    }
+    function hideOverlay(){ overlay.style.display = "none"; }
+
+    function stack(){
+      if(state === "intro") return startGame();
+      if(state !== "playing" || !moving) return;
+      const top = layers[layers.length-1];
+      const left = Math.max(moving.x, top.x);
+      const right = Math.min(moving.x + moving.w, top.x + top.w);
+      const overlap = right - left;
+      const minAllowed = Math.max(14, top.w * .11);
+      if(overlap <= minAllowed){
+        spawnFallingPiece(moving.x, moving.y, moving.w, moving.h, moving.color, moving.dir);
+        endGame();
+        return;
+      }
+      const delta = Math.abs((moving.x + moving.w/2) - (top.x + top.w/2));
+      const perfect = delta <= Math.max(7, top.w * .035);
+      let newX = left;
+      let newW = overlap;
+      if(perfect){
+        newX = top.x;
+        newW = Math.min(top.w + 4, baseW);
+        combo += 1;
+        const bonus = 10 + combo * 3;
+        score += bonus;
+        currentPoints = score;
+        addFloatingText(`perfeito +${bonus}`, W/2, moving.y - 16, "#B86F52");
+        burstSparkles(W/2, moving.y + 12, 32, true);
+      }else{
+        combo = 0;
+        const points = Math.max(1, Math.round((overlap / baseW) * 10));
+        score += points;
+        currentPoints = score;
+        const cutLeft = moving.x < top.x;
+        const cutW = moving.w - overlap;
+        if(cutW > 3){
+          const cutX = cutLeft ? moving.x : right;
+          spawnFallingPiece(cutX, moving.y, cutW, moving.h, moving.color, moving.dir);
+        }
+        if(delta < top.w * .12) addFloatingText("quase!", W/2, moving.y - 16, "#C89B45");
+      }
+      layers.push({x:newX, y:moving.y, w:newW, h:layerH, color:moving.color, landed:true, perfect});
+      burstCrumbs(newX + newW/2, moving.y + layerH/2, 12 + Math.min(18, layers.length));
+      if(layers.length > 6){
+        const highest = layers[layers.length-1].y;
+        targetCameraY = Math.min(0, H*.37 - highest);
+      }
+      const nextY = moving.y - layerH;
+      moving = makeMoving(layers.length, newW, nextY);
+      updateHud();
+    }
+
+    function endGame(){
+      state = "over";
+      tapHelper.classList.remove("show");
+      cancelAnimationFrame(raf);
+      const msg = score >= 180 ? "Bolo monumental. A confeitaria pediu seu contato." : score >= 90 ? "Bolo bonito, alto e perigosamente instável." : score >= 35 ? "Tem bolo. Não está reto, mas tem charme." : "O bolo ficou minimalista. Quase conceitual.";
+      showOverlay("Fim de fornada", `${score} ponto${score === 1 ? "" : "s"}. ${msg}`, [
+        {label:"Jogar de novo", fn:"startGame()", ghost:false},
+        {label:"Voltar", fn:"location.href='jogos.html'", ghost:true}
+      ]);
+      postgame.style.display = "grid";
+      loadTop10();
+      draw();
+    }
+
+    function loop(ts){
+      if(state !== "playing") return;
+      const dt = Math.min(32, ts - lastTs) / 16.666;
+      lastTs = ts;
+      frame++;
+      if(moving){
+        moving.x += moving.dir * moving.speed * dt;
+        if(moving.dir > 0 && moving.x > W + 24) moving.x = -moving.w - 24;
+        if(moving.dir < 0 && moving.x + moving.w < -24) moving.x = W + 24;
+        moving.bob += .05 * dt;
+      }
+      cameraY += (targetCameraY - cameraY) * .08;
+      updateParticles(dt);
+      draw();
+      raf = requestAnimationFrame(loop);
+    }
+
+    function updateParticles(dt){
+      for(const p of crumbs){
+        p.x += p.vx * dt; p.y += p.vy * dt; p.vy += .22 * dt; p.r *= .994; p.life -= .018 * dt; p.rot += p.vr * dt;
+      }
+      crumbs = crumbs.filter(p => p.life > 0 && p.y < H + 80 && p.r > .3);
+      for(const p of sparkles){
+        p.x += p.vx * dt; p.y += p.vy * dt; p.vy += .045 * dt; p.life -= .024 * dt; p.rot += p.vr * dt;
+      }
+      sparkles = sparkles.filter(p => p.life > 0);
+      for(const t of floatingText){t.y -= .8 * dt; t.life -= .02 * dt;}
+      floatingText = floatingText.filter(t => t.life > 0);
+    }
+
+    function spawnFallingPiece(x,y,w,h,color,dir){
+      for(let i=0;i<12;i++) crumbs.push({x:x+Math.random()*Math.max(1,w), y:y+Math.random()*h, vx:dir*(1.5+Math.random()*2)+(Math.random()-.5)*1.4, vy:-1-Math.random()*2, r:3+Math.random()*7, color:Math.random()<.45?color.body:color.icing, life:.9+Math.random()*.45, rot:0, vr:(Math.random()-.5)*.18, rect:true});
+      crumbs.push({x:x+w/2,y:y+h/2,vx:dir*3.2,vy:-1.2,r:Math.max(8,Math.min(60,w/2)),w,h,color:color.body,icing:color.icing,life:1.25,rot:0,vr:dir*.05,piece:true});
+    }
+    function burstCrumbs(x,y,n){
+      for(let i=0;i<n;i++) crumbs.push({x,y,vx:(Math.random()-.5)*4.6,vy:-1.4-Math.random()*3.2,r:2+Math.random()*4.5,color:Math.random()<.55?"#FFF7ED":["#F5A0A8","#F2A665","#C89B45","#C96E75"][Math.floor(Math.random()*4)],life:.55+Math.random()*.55,rot:0,vr:(Math.random()-.5)*.2,rect:Math.random()<.5});
+    }
+    function burstSparkles(x,y,n,big){
+      for(let i=0;i<n;i++){
+        const a = Math.random()*Math.PI*2, sp = (big?2.8:1.6)+Math.random()*(big?4.2:2.8);
+        sparkles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1.5,r:(big?2:1.2)+Math.random()*3.5,life:.55+Math.random()*.7,rot:Math.random()*6,vr:(Math.random()-.5)*.3,color:["#C89B45","#FFE6A8","#F5B8B8","#FFFFFF"][Math.floor(Math.random()*4)]});
+      }
+    }
+    function addFloatingText(text,x,y,color){ floatingText.push({text,x,y,color,life:1}); }
+
+    function updateHud(){
+      scoreTxt.textContent = String(score);
+      comboTxt.textContent = String(combo);
+      const pct = layers.length ? Math.round((layers[layers.length-1].w / baseW) * 100) : 100;
+      widthTxt.textContent = Math.max(1,pct) + "%";
+    }
+
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      drawBackground();
+      ctx.save();
+      ctx.translate(0, cameraY);
+      drawCakeScene();
+      ctx.restore();
+      drawForeground();
+    }
+
+    function drawBackground(){
+      const g = ctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0,"#FFF9F1"); g.addColorStop(.58,"#F6E2C7"); g.addColorStop(1,"#EAC9AA");
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = "rgba(255,255,255,.45)";
+      for(let i=0;i<18;i++){
+        const x = (i*73 + frame*.08) % (W+80) - 40;
+        const y = 38 + (i*97 % Math.max(1,H*.62));
+        ctx.beginPath(); ctx.arc(x,y,1.2+(i%3),0,Math.PI*2); ctx.fill();
+      }
+      // bakery awning / shelf
+      ctx.fillStyle = "rgba(255,255,255,.38)";
+      ctx.beginPath(); ctx.roundRect(W*.08, H*.08, W*.84, 58, 20); ctx.fill();
+      ctx.fillStyle = "rgba(200,155,69,.18)";
+      ctx.fillRect(W*.12, H*.08+28, W*.76, 2);
+      // back plate silhouettes
+      ctx.strokeStyle = "rgba(163,107,79,.12)"; ctx.lineWidth = 2;
+      for(let i=0;i<3;i++){
+        ctx.beginPath(); ctx.ellipse(W*(.2+i*.3), H*.22, 52+i*10, 16, 0, 0, Math.PI*2); ctx.stroke();
+      }
+      // counter
+      ctx.fillStyle = "rgba(255,255,255,.46)"; ctx.fillRect(0,H-95,W,95);
+      ctx.fillStyle = "rgba(123,76,56,.08)"; ctx.fillRect(0,H-95,W,2);
+    }
+
+    function drawCakeScene(){
+      const floor = H - 82;
+      drawPlate(floor);
+      for(const l of layers) drawLayer(l);
+      if(moving && state === "playing") drawLayer({...moving, y:moving.y + Math.sin(moving.bob)*1.8, moving:true});
+      for(const p of crumbs) drawCrumb(p);
+      for(const p of sparkles) drawSparkle(p);
+      if(layers.length > 2) drawTopper();
+    }
+
+    function drawPlate(floor){
+      ctx.save();
+      ctx.shadowColor = "rgba(123,76,56,.18)"; ctx.shadowBlur=22; ctx.shadowOffsetY=12;
+      const pg = ctx.createLinearGradient(W/2-260,floor,W/2+260,floor);
+      pg.addColorStop(0,"#D6B373"); pg.addColorStop(.52,"#FFF1BE"); pg.addColorStop(1,"#C89B45");
+      ctx.fillStyle = pg;
+      ctx.beginPath(); ctx.ellipse(W/2,floor+26,Math.min(260,W*.42),25,0,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.fillStyle = "rgba(255,255,255,.45)";
+      ctx.beginPath(); ctx.ellipse(W/2,floor+18,Math.min(220,W*.36),12,0,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+
+    function drawLayer(l){
+      const x=l.x, y=l.y, w=l.w, h=l.h, c=l.color;
+      if(w<=0) return;
+      ctx.save();
+      ctx.shadowColor = l.moving ? "rgba(167,91,66,.18)" : "rgba(96,49,31,.13)";
+      ctx.shadowBlur = l.moving ? 16 : 9;
+      ctx.shadowOffsetY = l.moving ? 9 : 5;
+      const grad = ctx.createLinearGradient(x,y,x,y+h);
+      grad.addColorStop(0, lighten(c.body,.18)); grad.addColorStop(.58,c.body); grad.addColorStop(1,darken(c.body,.07));
+      ctx.fillStyle = grad;
+      roundRect(x,y,w,h,16); ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.strokeStyle = "rgba(123,76,56,.18)"; ctx.lineWidth = 1.2; roundRect(x,y,w,h,16); ctx.stroke();
+
+      // icing top
+      ctx.fillStyle = c.icing;
+      roundRect(x+4,y+4,w-8,16,12); ctx.fill();
+      // drips
+      ctx.fillStyle = c.icing;
+      const count = Math.max(2, Math.floor(w/54));
+      for(let i=0;i<count;i++){
+        const dx = x + 18 + (i+.28)*((w-36)/count);
+        const dh = 10 + ((i*17 + l.index*9) % 17);
+        ctx.beginPath();
+        ctx.roundRect(dx, y+12, 9 + (i%2)*4, dh, 7);
+        ctx.fill();
+      }
+      // lower trim
+      ctx.fillStyle = c.trim;
+      ctx.globalAlpha = .86;
+      ctx.beginPath();
+      ctx.roundRect(x+6, y+h-12, w-12, 8, 7);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // sprinkles
+      const spr = Math.min(16, Math.floor(w/28));
+      for(let i=0;i<spr;i++){
+        const sx = x + 16 + ((i*29 + l.index*13) % Math.max(1,w-32));
+        const sy = y + 26 + ((i*11 + l.index*7) % 18);
+        ctx.save(); ctx.translate(sx,sy); ctx.rotate((i+l.index)*.7);
+        ctx.fillStyle = [c.dot,"#FFF7ED","#C89B45","#C96E75"][i%4];
+        ctx.beginPath(); ctx.roundRect(-3,-1,6,2,1); ctx.fill();
+        ctx.restore();
+      }
+      if(l.perfect){
+        ctx.strokeStyle = "rgba(200,155,69,.65)"; ctx.lineWidth = 2;
+        roundRect(x+3,y+3,w-6,h-6,14); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawTopper(){
+      const top = layers[layers.length-1];
+      const cx = top.x + top.w/2;
+      const y = top.y - 30;
+      ctx.save();
+      ctx.strokeStyle = "#B86F52"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cx, top.y + 4); ctx.lineTo(cx, y+20); ctx.stroke();
+      ctx.fillStyle = "#C89B45";
+      ctx.font = "28px Georgia, serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("T&G", cx, y+6);
+      ctx.restore();
+    }
+
+    function drawCrumb(p){
+      ctx.save(); ctx.globalAlpha = Math.max(0,p.life);
+      ctx.translate(p.x,p.y); ctx.rotate(p.rot || 0);
+      if(p.piece){
+        ctx.fillStyle = p.color; roundRect(-p.r, -p.h/2, p.r*2, p.h, 10); ctx.fill();
+        ctx.fillStyle = p.icing; roundRect(-p.r+3, -p.h/2+4, p.r*2-6, 10, 8); ctx.fill();
+      }else if(p.rect){
+        ctx.fillStyle = p.color; ctx.beginPath(); ctx.roundRect(-p.r, -p.r*.55, p.r*2, p.r*1.1, 3); ctx.fill();
+      }else{
+        ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(0,0,p.r,0,Math.PI*2); ctx.fill();
+      }
+      ctx.restore();
+    }
+    function drawSparkle(p){
+      ctx.save(); ctx.globalAlpha = Math.max(0,p.life); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.moveTo(0,-p.r*1.7); ctx.lineTo(p.r*.45,-p.r*.45); ctx.lineTo(p.r*1.7,0); ctx.lineTo(p.r*.45,p.r*.45); ctx.lineTo(0,p.r*1.7); ctx.lineTo(-p.r*.45,p.r*.45); ctx.lineTo(-p.r*1.7,0); ctx.lineTo(-p.r*.45,-p.r*.45); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+    function drawForeground(){
+      for(const t of floatingText){
+        ctx.save(); ctx.globalAlpha = t.life; ctx.fillStyle = t.color; ctx.font="700 15px Inter, sans-serif"; ctx.textAlign="center"; ctx.fillText(t.text, t.x, t.y + cameraY); ctx.restore();
+      }
+      if(state === "playing"){
+        ctx.save();
+        ctx.globalAlpha=.64;
+        ctx.strokeStyle="#A75B42"; ctx.lineWidth=1.2; ctx.setLineDash([5,6]);
+        const top = layers[layers.length-1];
+        const y = top.y - layerH + cameraY;
+        ctx.beginPath(); ctx.moveTo(top.x, y-8); ctx.lineTo(top.x, y-34); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(top.x+top.w, y-8); ctx.lineTo(top.x+top.w, y-34); ctx.stroke();
+        ctx.setLineDash([]); ctx.restore();
+      }
+    }
+
+    function roundRect(x,y,w,h,r){
+      r=Math.max(0,Math.min(r,w/2,h/2));
+      ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+    }
+    function lighten(hex, amt){ return shade(hex, amt); }
+    function darken(hex, amt){ return shade(hex, -amt); }
+    function shade(hex, amt){
+      const n=parseInt(hex.slice(1),16); let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+      r=Math.round(r+(255-r)*Math.max(0,amt)+r*Math.min(0,amt));
+      g=Math.round(g+(255-g)*Math.max(0,amt)+g*Math.min(0,amt));
+      b=Math.round(b+(255-b)*Math.max(0,amt)+b*Math.min(0,amt));
+      return `rgb(${Math.max(0,Math.min(255,r))},${Math.max(0,Math.min(255,g))},${Math.max(0,Math.min(255,b))})`;
+    }
+
+    function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+    async function saveScore(){
+      const input = document.getElementById("playerName");
+      const btn = document.getElementById("saveBtn");
+      const msg = document.getElementById("saveMsg");
+      const nome = input.value.trim();
+      if(!nome){ msg.textContent = "Informe seu nome."; input.focus(); return; }
+      if(saved) return;
+      btn.disabled = true; btn.textContent = "Salvando…"; msg.textContent = "";
+      try{
+        const r = await fetch(JOGOS_API,{method:"POST",body:JSON.stringify({action:"score",jogo:"bolo",nome,pontos:score})});
+        const j = await r.json();
+        if(!j || !j.sucesso) throw new Error("Falha");
+        saved = true; input.disabled = true; btn.textContent = "Salvo ✓"; msg.textContent = "Recorde salvo!";
+        loadTop10();
+      }catch(e){
+        btn.disabled = false; btn.textContent = "Salvar"; msg.textContent = "Não conseguimos salvar. Tente novamente.";
+      }
+    }
+    window.saveScore = saveScore;
+
+    async function loadTop10(){
+      const box = document.getElementById("rankBox");
+      box.innerHTML = `<h3>🏆 Top 10 — Empilha o Bolo</h3><p class="loading">Carregando…</p>`;
+      try{
+        const r = await fetch(`${JOGOS_API}?action=top10&jogo=bolo`);
+        const d = await r.json();
+        if(!d?.lista?.length){ box.innerHTML = `<h3>🏆 Top 10 — Empilha o Bolo</h3><p class="empty">Nenhum recorde. Seja o primeiro!</p>`; return; }
+        const medal=["🥇","🥈","🥉"];
+        box.innerHTML = `<h3>🏆 Top 10 — Empilha o Bolo</h3><ol class="rank-list">${d.lista.map((it,i)=>`<li class="rank-item"><span class="rank-pos">${medal[i] || i+1}</span><span class="rank-name">${esc(it.nome)}</span><span class="rank-pts">${it.pontos} pts</span></li>`).join("")}</ol>`;
+      }catch(e){
+        box.innerHTML = `<h3>🏆 Top 10 — Empilha o Bolo</h3><p class="empty">Não foi possível carregar o ranking.</p>`;
+      }
+    }
+
+    wrap.addEventListener("pointerdown", e => { e.preventDefault(); stack(); });
+    document.addEventListener("keydown", e => {
+      if([" ","Enter","ArrowUp"].includes(e.key)){ e.preventDefault(); stack(); }
+      if(e.key === "Escape") togglePause();
+    });
+
+    // menu mobile reaproveitado do site
+    (function initNav(){
+      const nav=document.getElementById("nav"), hamburger=document.getElementById("hamburger"), links=document.getElementById("navLinks");
+      if(!nav || !hamburger || !links) return;
+      window.addEventListener("scroll",()=>nav.classList.toggle("scrolled",window.scrollY>40),{passive:true});
+      hamburger.addEventListener("click",()=>{const aberto=links.classList.toggle("open");hamburger.setAttribute("aria-expanded",String(aberto));});
+      links.querySelectorAll("a").forEach(link=>link.addEventListener("click",()=>{links.classList.remove("open");hamburger.setAttribute("aria-expanded","false");}));
+    })();
+
+    resize();
+    initGame();
+    draw();
+  </script>
+</body>
+</html>
