@@ -171,6 +171,13 @@
     }
 
     const GAME_KEY="champagne-problems";
+    // Assets visuais
+    const _brickImg    = new Image(); _brickImg.src    = 'assets/img/breakout-bricks-row.png';
+    const _bottleImg   = new Image(); _bottleImg.src   = 'assets/img/champagne-bottle-side.png';
+    const _corkImg     = new Image(); _corkImg.src     = 'assets/img/champagne-cork-fly.png';
+    const _paddleImg   = new Image(); _paddleImg.src   = 'assets/img/breakout-paddle.png';
+    const _burstImg    = new Image(); _burstImg.src    = 'assets/img/fx-bubble-burst.png';
+    const _goldSpkImg  = new Image(); _goldSpkImg.src  = 'assets/img/fx-gold-sparkles.png';
     const canvas=document.getElementById("gameCanvas"), ctx=canvas.getContext("2d");
     const scoreEl=document.getElementById("score"), livesEl=document.getElementById("lives"), levelEl=document.getElementById("level");
     const startModal=document.getElementById("startModal"), endModal=document.getElementById("endModal"), endTitle=document.getElementById("endTitle"), endText=document.getElementById("endText"), endIcon=document.getElementById("endIcon");
@@ -200,21 +207,42 @@
     }
     function updateParticles(dt){particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.06*dt;p.life-=dt;p.rot+=.08*dt;});particles=particles.filter(p=>p.life>0); if(Math.random()<.35){bubbles.push({x:Math.random()*W,y:H+10,r:2+Math.random()*5,vy:.45+Math.random()*1.2,life:240});} bubbles.forEach(b=>{b.y-=b.vy*dt;b.life-=dt;});bubbles=bubbles.filter(b=>b.life>0&&b.y>-20);}
     function finish(win){state="idle";cancelAnimationFrame(raf);unlockScroll();endModal.hidden=false;endIcon.innerHTML=win?"<img src='assets/img/icon-toast-glasses.png' alt=''>":"<img src='assets/img/tile-champagne.png' alt=''>";endTitle.textContent=win?"Brinde perfeito!":"A rolha escapou…";endText.textContent=win?`Você limpou tudo com ${score} pontos e muito glitter.`:`Você fez ${score} pontos. Mais uma rodada resolve esses champagne problems.`;}
-    function drawBottle(t=0){ctx.save();ctx.translate(W*.39,H-120);ctx.rotate(-.72);ctx.fillStyle="#5B7D5D";ctx.strokeStyle="#38523B";ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(-28,-95,56,124,14);ctx.fill();ctx.stroke();ctx.fillStyle="#F2D27A";ctx.fillRect(-22,-80,44,20);ctx.fillStyle="#2F4A35";ctx.fillRect(-13,-150,26,64);ctx.fillStyle="#D3A33F";ctx.fillRect(-15,-154,30,10);ctx.restore();}
-    function drawCork(){ctx.save();ctx.translate(ball.x,ball.y);ctx.rotate(performance.now()/160);ctx.fillStyle="#B98B5B";ctx.strokeStyle="#7B5434";ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-14,-8,28,16,7);ctx.fill();ctx.stroke();ctx.strokeStyle="rgba(85,55,30,.35)";for(let x=-8;x<=8;x+=8){ctx.beginPath();ctx.moveTo(x,-7);ctx.lineTo(x,7);ctx.stroke();}ctx.restore();}
+    function drawBottle(t=0){
+      ctx.save();ctx.translate(W*.39,H-120);ctx.rotate(-.72);
+      if(_bottleImg.complete && _bottleImg.naturalWidth>0){
+        ctx.drawImage(_bottleImg,-52,-130,104,200);
+      } else {
+        ctx.fillStyle="#5B7D5D";ctx.strokeStyle="#38523B";ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(-28,-95,56,124,14);ctx.fill();ctx.stroke();ctx.fillStyle="#F2D27A";ctx.fillRect(-22,-80,44,20);ctx.fillStyle="#2F4A35";ctx.fillRect(-13,-150,26,64);ctx.fillStyle="#D3A33F";ctx.fillRect(-15,-154,30,10);
+      }
+      ctx.restore();
+    }
+    function drawCork(){
+      ctx.save();ctx.translate(ball.x,ball.y);ctx.rotate(performance.now()/200);
+      if(_corkImg.complete && _corkImg.naturalWidth>0){
+        ctx.drawImage(_corkImg,-18,-18,36,36);
+      } else {
+        ctx.fillStyle="#B98B5B";ctx.strokeStyle="#7B5434";ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-14,-8,28,16,7);ctx.fill();ctx.stroke();ctx.strokeStyle="rgba(85,55,30,.35)";for(let x=-8;x<=8;x+=8){ctx.beginPath();ctx.moveTo(x,-7);ctx.lineTo(x,7);ctx.stroke();}
+      }
+      ctx.restore();
+    }
     function draw(){ctx.clearRect(0,0,W,H); const grd=ctx.createLinearGradient(0,0,0,H);grd.addColorStop(0,"#FFF8EC");grd.addColorStop(.65,"#F3DFC2");grd.addColorStop(1,"#EBD4B8");ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
       ctx.fillStyle="rgba(255,255,255,.25)";for(const b of bubbles){ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.strokeStyle="rgba(255,255,255,.65)";ctx.stroke();}
       bricks.forEach(b=>{const g=ctx.createLinearGradient(b.x,b.y,b.x,b.y+b.h);g.addColorStop(0,colors[b.type][0]);g.addColorStop(1,colors[b.type][1]);ctx.fillStyle=g;ctx.strokeStyle="rgba(110,70,30,.22)";ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,9);ctx.fill();ctx.stroke();ctx.fillStyle="rgba(255,255,255,.38)";ctx.beginPath();ctx.roundRect(b.x+5,b.y+4,b.w-10,5,3);ctx.fill(); if(b.hits>1){ctx.fillStyle="rgba(70,35,20,.35)";ctx.font="700 14px Inter";ctx.textAlign="center";ctx.fillText("×2",b.x+b.w/2,b.y+19);} });
       drawBottle(); ctx.fillStyle="rgba(122,83,41,.18)";ctx.beginPath();ctx.ellipse(W/2,H-46,190,20,0,0,Math.PI*2);ctx.fill();
-      // Rosto grande como raquete!
+      // Paddle com img + rosto sobreposto
       const pcx = paddle.x + paddle.w/2;
       const pcy = paddle.y + paddle.h/2;
-      const pr  = paddle.h * 1.8; // bem maior que o paddle
-      _drawFace(ctx, pcx, pcy, pr);
-      // Borda dourada
-      ctx.save(); ctx.strokeStyle="#B48842"; ctx.lineWidth=2.5;
-      ctx.beginPath(); ctx.arc(pcx, pcy, pr+1.5, 0, Math.PI*2); ctx.stroke();
-      ctx.restore();
+      if(_paddleImg.complete && _paddleImg.naturalWidth>0){
+        ctx.drawImage(_paddleImg, paddle.x-4, paddle.y-4, paddle.w+8, paddle.h+8);
+      } else {
+        const pg=ctx.createLinearGradient(paddle.x,paddle.y,paddle.x,paddle.y+paddle.h);
+        pg.addColorStop(0,"#FFFFFF");pg.addColorStop(1,"#D9B675");
+        ctx.fillStyle=pg;ctx.strokeStyle="#B48842";ctx.lineWidth=2;
+        ctx.beginPath();ctx.roundRect(paddle.x,paddle.y,paddle.w,paddle.h,999);ctx.fill();ctx.stroke();
+      }
+      // Rosto goofy sobre o paddle
+      const pr = paddle.h * 1.4;
+      _drawFace(ctx, pcx, pcy - pr*.15, pr);
 
       drawCork();
       particles.forEach(p=>{const a=Math.max(0,p.life/p.max);ctx.globalAlpha=Math.min(1,a*1.4);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);if(p.kind==="bubble"){ctx.strokeStyle="rgba(255,255,255,.82)";ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.stroke();}else{ctx.fillStyle=p.col;ctx.beginPath();ctx.moveTo(0,-p.r*1.8);ctx.lineTo(p.r*.7,-p.r*.35);ctx.lineTo(p.r*1.8,0);ctx.lineTo(p.r*.7,p.r*.35);ctx.lineTo(0,p.r*1.8);ctx.lineTo(-p.r*.7,p.r*.35);ctx.lineTo(-p.r*1.8,0);ctx.lineTo(-p.r*.7,-p.r*.35);ctx.closePath();ctx.fill();}ctx.restore();ctx.globalAlpha=1;});
