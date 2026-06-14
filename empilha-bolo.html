@@ -142,7 +142,8 @@
 
   <main class="cake-page">
     <section class="cake-shell">
-      <div class="cake-intro">
+      <div class="cake-intro" style="position:relative">
+          <img src="assets/img/cake-3tier.png" alt="" style="position:absolute;right:-20px;top:-10px;width:110px;opacity:.18;pointer-events:none">
         <a class="back-link" href="jogos.html">← Voltar aos jogos</a>
         <div class="cake-kicker">mini arcade</div>
         <h1 class="cake-title">Empilha <span>o Bolo</span></h1>
@@ -424,6 +425,12 @@
     }
 
     function endGame(){
+      // Mostrar cake-candle e cherry como decoração da sidebar
+      const deco = document.querySelector('.cake-intro');
+      if(deco){
+        const toppled = deco.querySelector('img');
+        if(toppled){ toppled.src='assets/img/cake-toppled.png'; toppled.style.opacity='.22'; }
+      }
       state = "over";
       unlockScroll();
       tapHelper.classList.remove("show");

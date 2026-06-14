@@ -178,6 +178,11 @@
     const _paddleImg   = new Image(); _paddleImg.src   = 'assets/img/breakout-paddle.png';
     const _burstImg    = new Image(); _burstImg.src    = 'assets/img/fx-bubble-burst.png';
     const _goldSpkImg  = new Image(); _goldSpkImg.src  = 'assets/img/fx-gold-sparkles.png';
+    const _toastImg    = new Image(); _toastImg.src    = 'assets/img/fx-toast-splash.png';
+    const _sparkleImg  = new Image(); _sparkleImg.src  = 'assets/img/fx-sparkle-burst.png';
+    const _confettiImg = new Image(); _confettiImg.src = 'assets/img/icon-confetti-burst.png';
+    // Confetti pieces cross-game
+    const _confPieces  = [1,2,3,4,5,6].map(i=>{const im=new Image();im.src=`assets/img/confetti-piece-0${i}.png`;return im;});
     const canvas=document.getElementById("gameCanvas"), ctx=canvas.getContext("2d");
     const scoreEl=document.getElementById("score"), livesEl=document.getElementById("lives"), levelEl=document.getElementById("level");
     const startModal=document.getElementById("startModal"), endModal=document.getElementById("endModal"), endTitle=document.getElementById("endTitle"), endText=document.getElementById("endText"), endIcon=document.getElementById("endIcon");
@@ -198,7 +203,14 @@
     function launchAfterIntro(){ball.x=W*.55;ball.y=H-300;ball.vx=3.2;ball.vy=-4.4;state="play";}
     function popBurst(x,y){for(let i=0;i<105;i++)spawnParticle(x,y,Math.random()*Math.PI*2,1+Math.random()*7,Math.random()<.55?"glitter":"bubble");}
     function spawnParticle(x,y,ang,spd,kind="glitter",col=null){particles.push({x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd-1,life:45+Math.random()*42,max:90,r:kind==="bubble"?2+Math.random()*5:1.5+Math.random()*3,kind,col:col||["#D5A640","#F5D67B","#FFFFFF","#D98E45","#EEC7A4"][Math.floor(Math.random()*5)],rot:Math.random()*6});}
-    function brickBurst(b){const cx=b.x+b.w/2, cy=b.y+b.h/2; for(let i=0;i<44+(b.type===4?42:0);i++)spawnParticle(cx,cy,Math.random()*Math.PI*2,1+Math.random()*5.6,Math.random()<.72?"glitter":"bubble",colors[b.type]?.[1]);}
+    function brickBurst(b){
+      const cx=b.x+b.w/2, cy=b.y+b.h/2;
+      for(let i=0;i<44+(b.type===4?42:0);i++)spawnParticle(cx,cy,Math.random()*Math.PI*2,1+Math.random()*5.6,Math.random()<.72?"glitter":"bubble",colors[b.type]?.[1]);
+      // Para bricks especiais, adicionar sparkle PNG temporário
+      if(b.type>=4 && _goldSpkImg.complete && _goldSpkImg.naturalWidth>0){
+        particles.push({x:cx,y:cy,vx:0,vy:0,life:18,max:18,r:28,kind:"goldspk",col:"#C8A050",rot:0});
+      }
+    }
     function loop(ts){const dt=Math.min((ts-last)/16.67,2);last=ts; if(state==="intro"){const t=Math.min((ts-introStart)/1200,1); if(t<.08) popBurst(W*.48,H-142); ball.x=W*.48+68*t; ball.y=H-142-215*t+45*t*t; if(Math.random()<.75)spawnParticle(ball.x,ball.y,Math.random()*Math.PI*2,1+Math.random()*3,"bubble"); if(t>=1)launchAfterIntro();} else if(state==="play") update(dt); updateParticles(dt); draw(); if(state!=="idle") raf=requestAnimationFrame(loop);}
     function update(dt){ball.x+=ball.vx*dt;ball.y+=ball.vy*dt; if(ball.x<ball.r){ball.x=ball.r;ball.vx=Math.abs(ball.vx);} if(ball.x>W-ball.r){ball.x=W-ball.r;ball.vx=-Math.abs(ball.vx);} if(ball.y<ball.r+8){ball.y=ball.r+8;ball.vy=Math.abs(ball.vy);} if(ball.y>H+40){lives--;updateHud(); if(lives<=0)return finish(false); resetBall();state="intro";introStart=performance.now();}
       if(ball.y+ball.r>paddle.y&&ball.y-ball.r<paddle.y+paddle.h&&ball.x>paddle.x&&ball.x<paddle.x+paddle.w&&ball.vy>0){ _nextFace();const hit=(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2);ball.vx=hit*5.2;ball.vy=-Math.sqrt(Math.max(14,ball.speed*ball.speed-ball.vx*ball.vx));for(let i=0;i<12;i++)spawnParticle(ball.x,paddle.y,Math.PI*1.5+(Math.random()-.5),1+Math.random()*3,"glitter");}
@@ -206,7 +218,13 @@
       if(!bricks.length){level++;score+=150;updateHud(); if(level>3) finish(true); else {makeLevel();state="intro";introStart=performance.now();}}
     }
     function updateParticles(dt){particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.06*dt;p.life-=dt;p.rot+=.08*dt;});particles=particles.filter(p=>p.life>0); if(Math.random()<.35){bubbles.push({x:Math.random()*W,y:H+10,r:2+Math.random()*5,vy:.45+Math.random()*1.2,life:240});} bubbles.forEach(b=>{b.y-=b.vy*dt;b.life-=dt;});bubbles=bubbles.filter(b=>b.life>0&&b.y>-20);}
-    function finish(win){state="idle";cancelAnimationFrame(raf);unlockScroll();endModal.hidden=false;endIcon.innerHTML=win?"<img src='assets/img/icon-toast-glasses.png' alt=''>":"<img src='assets/img/tile-champagne.png' alt=''>";endTitle.textContent=win?"Brinde perfeito!":"A rolha escapou…";endText.textContent=win?`Você limpou tudo com ${score} pontos e muito glitter.`:`Você fez ${score} pontos. Mais uma rodada resolve esses champagne problems.`;}
+    function finish(win){
+      state="idle";cancelAnimationFrame(raf);unlockScroll();endModal.hidden=false;
+      endIcon.innerHTML=win?"<img src='assets/img/icon-toast-glasses.png' alt=''>":"<img src='assets/img/tile-champagne.png' alt=''>";
+      // Mostrar toast splash ou bottle side como fundo decorativo
+      if(win && _toastImg.complete && _toastImg.naturalWidth>0){
+        ctx.globalAlpha=.18; ctx.drawImage(_toastImg, W/2-120, H/2-140, 240, 240); ctx.globalAlpha=1;
+      }endTitle.textContent=win?"Brinde perfeito!":"A rolha escapou…";endText.textContent=win?`Você limpou tudo com ${score} pontos e muito glitter.`:`Você fez ${score} pontos. Mais uma rodada resolve esses champagne problems.`;}
     function drawBottle(t=0){
       ctx.save();ctx.translate(W*.39,H-120);ctx.rotate(-.72);
       if(_bottleImg.complete && _bottleImg.naturalWidth>0){
@@ -245,7 +263,12 @@
       _drawFace(ctx, pcx, pcy - pr*.15, pr);
 
       drawCork();
-      particles.forEach(p=>{const a=Math.max(0,p.life/p.max);ctx.globalAlpha=Math.min(1,a*1.4);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);if(p.kind==="bubble"){ctx.strokeStyle="rgba(255,255,255,.82)";ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.stroke();}else{ctx.fillStyle=p.col;ctx.beginPath();ctx.moveTo(0,-p.r*1.8);ctx.lineTo(p.r*.7,-p.r*.35);ctx.lineTo(p.r*1.8,0);ctx.lineTo(p.r*.7,p.r*.35);ctx.lineTo(0,p.r*1.8);ctx.lineTo(-p.r*.7,p.r*.35);ctx.lineTo(-p.r*1.8,0);ctx.lineTo(-p.r*.7,-p.r*.35);ctx.closePath();ctx.fill();}ctx.restore();ctx.globalAlpha=1;});
+      particles.forEach(p=>{const a=Math.max(0,p.life/p.max);ctx.globalAlpha=Math.min(1,a*1.4);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+        if(p.kind==="goldspk" && _goldSpkImg.complete && _goldSpkImg.naturalWidth>0){
+          ctx.drawImage(_goldSpkImg,-p.r,-p.r,p.r*2,p.r*2);
+        } else if(p.kind==="bubble"){ctx.strokeStyle="rgba(255,255,255,.82)";ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.stroke();}
+        else{ctx.fillStyle=p.col;ctx.beginPath();ctx.moveTo(0,-p.r*1.8);ctx.lineTo(p.r*.7,-p.r*.35);ctx.lineTo(p.r*1.8,0);ctx.lineTo(p.r*.7,p.r*.35);ctx.lineTo(0,p.r*1.8);ctx.lineTo(-p.r*.7,p.r*.35);ctx.lineTo(-p.r*1.8,0);ctx.lineTo(-p.r*.7,-p.r*.35);ctx.closePath();ctx.fill();}
+        ctx.restore();ctx.globalAlpha=1;});
       if(state==="intro"){ctx.fillStyle="rgba(90,60,30,.62)";ctx.font="600 13px Inter";ctx.textAlign="center";ctx.fillText("pop!",W*.5,H-220);}
     }
     function setPaddle(clientX){const r=canvas.getBoundingClientRect();const x=(clientX-r.left)/r.width*W;paddle.x=Math.max(18,Math.min(W-paddle.w-18,x-paddle.w/2));}

@@ -147,7 +147,7 @@
 
   <div class="conn-page">
     <div class="conn-header">
-      <p class="conn-header__eyebrow"><img src="assets/img/icon-key.png" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:middle;margin-right:.3em"> Segredo do dia</p>
+      <p class="conn-header__eyebrow"><img src="assets/img/icon-key.png" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:middle;margin-right:.3em;flex-shrink:0"> Segredo do dia</p>
       <img src="assets/img/icon-connections.png" alt="" style="width:3rem;height:3rem;object-fit:contain;display:block;margin:0 auto .5rem">
     <h1 class="conn-header__title">Conexões<br><em>do Casamento</em></h1>
       <p class="conn-header__sub">Encontre os 4 grupos de 4 palavras que se conectam.</p>
@@ -213,7 +213,8 @@
     </div>
   </div>
 
-  <div style="text-align:center;padding:1rem 0 0"><img src="assets/img/footer-flourish.png" alt="" style="max-width:420px;width:90%;opacity:.7"></div>
+  <div class="flourish-wrap" style="padding:1.5rem 0 0"><img src="assets/img/footer-flourish.png" alt="" style="max-width:440px;width:85%;display:inline-block"></div>
+  <div class="divider-wrap" style="padding:.5rem 0"><img src="assets/img/divider-terracota.png" alt="" style="max-width:200px;width:50%;display:inline-block;opacity:.45"></div>
   <footer class="footer">
     <div class="container footer__inner">
       <p class="footer__names" aria-label="Tiago e Gian">
@@ -395,7 +396,7 @@
       renderizarGrid();
       renderizarVidas();
       document.getElementById("btnEnviar").disabled = true;
-      setMsg('Correto! <img src="assets/img/icon-confetti-burst.png" alt="" style="width:1.2em;height:1.2em;object-fit:contain;vertical-align:middle">', "ok");
+      setMsg('Correto! <img src="assets/img/icon-confetti-burst.png" alt="" style="width:1.2em;height:1.2em;object-fit:contain;vertical-align:middle;flex-shrink:0">', "ok");
 
       if (resolvidos.length === 4) {
         setTimeout(() => mostrarResultado(true), 600);

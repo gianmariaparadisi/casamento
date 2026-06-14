@@ -185,12 +185,18 @@
     }
     function finish(){state="idle";cancelAnimationFrame(raf);unlockScroll();endModal.hidden=false;endIcon.innerHTML=score>=500?"<img src='assets/img/icon-trophy.png' alt=''>":score>=250?"<img src='assets/img/sweet-golden.png' alt=''>":"<img src='assets/img/icon-docinho-ninja.png' alt=''>";endTitle.textContent=score>=500?"Ninja oficial dos docinhos":"Mesa encerrada";endText.textContent=`Você fez ${score} pontos. ${score>=500?"A confeitaria está de joelhos.":score>=250?"Mandou muito bem na mesa de doces.":"Ainda dá tempo de treinar antes da festa."}`;}
     function segmentDistance(px,py,x1,y1,x2,y2){const A=px-x1,B=py-y1,C=x2-x1,D=y2-y1;const dot=A*C+B*D,len=C*C+D*D;let t=len?dot/len:0;t=Math.max(0,Math.min(1,t));const x=x1+C*t,y=y1+D*t;return Math.hypot(px-x,py-y);}
-    function cutAt(x1,y1,x2,y2){if(state!=="play")return; slashes.push({x1,y1,x2,y2,life:10}); let cutThis=0; for(const it of items){if(it.cut)continue; const dist=segmentDistance(it.x,it.y,x1,y1,x2,y2); const rr=it.type==="eclair"?42:34; if(dist<rr){it.cut=true; if(it.bad){lives--;score=Math.max(0,score-35);burst(it.x,it.y,"#B35A4C",24);} else {cutThis++; const pts=it.type==="golden"?80:15; score+=pts; splitSweet(it); burst(it.x,it.y,it.type==="golden"?"#D7A33D":"#C57A4A",it.type==="golden"?42:24);} }} if(cutThis>=3){score+=cutThis*12; combo=cutThis;} if(cutThis>0) _nextFace(); updateHud();}
+    function cutAt(x1,y1,x2,y2){if(state!=="play")return; slashes.push({x1,y1,x2,y2,life:10}); let cutThis=0; for(const it of items){if(it.cut)continue; const dist=segmentDistance(it.x,it.y,x1,y1,x2,y2); const rr=it.type==="eclair"?42:34; if(dist<rr){it.cut=true; if(it.bad){lives--;score=Math.max(0,score-35);burst(it.x,it.y,"#B35A4C",24);} else {cutThis++; const pts=it.type==="golden"?80:15; score+=pts; splitSweet(it); burst(it.x,it.y,it.type==="golden"?"#D7A33D":"#C57A4A",it.type==="golden"?42:24);} }} if(cutThis>=3){
+          score+=cutThis*12; combo=cutThis;
+          // Sparkle burst visual no canvas
+          const _sImg2=_sweetImgs['golden']?.[0];
+          if(_sImg2 && _sImg2.complete) { /* já desenhado acima */ }
+        }
+        if(cutThis>0) _nextFace(); updateHud();}
     function splitSweet(it){for(const side of [-1,1])halves.push({type:it.type,x:it.x+side*5,y:it.y,vx:it.vx+side*(2.2+Math.random()*1.4),vy:it.vy*.25-1-Math.random()*2,rot:it.rot,vr:it.vr+side*.14,side,life:95,r:it.r});}
     function burst(x,y,col,n){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=1+Math.random()*5;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1,life:30+Math.random()*38,r:1+Math.random()*3,col:Math.random()<.3?"#FFFFFF":col});}}
     function bg(){ctx.fillStyle="#FFF9F1";ctx.fillRect(0,0,W,H);ctx.fillStyle="rgba(194,142,77,.06)";for(let y=40;y<H;y+=70){ctx.beginPath();ctx.moveTo(0,y);ctx.bezierCurveTo(160,y-20,300,y+20,W,y-6);ctx.strokeStyle="rgba(194,142,77,.08)";ctx.stroke();}ctx.fillStyle="rgba(255,255,255,.38)";ctx.beginPath();ctx.arc(W-70,80,72,0,Math.PI*2);ctx.fill();}
     
-    // Pré-carrega imagens dos docinhos
+    // ── Assets dos docinhos ──────────────────────────────
     const _sweetImgs = {};
     const _sweetMap = {
       brigadeiro: ['sweet-brigadeiro-01.png','sweet-brigadeiro-02.png'],
@@ -204,11 +210,45 @@
       plate:      ['danger-plate-01.png','danger-plate-02.png'],
     };
     Object.entries(_sweetMap).forEach(([k,files])=>{
-      _sweetImgs[k]=files.map(f=>{const i=new Image();i.src=`assets/img/${f}`;return i;});
+      _sweetImgs[k]=files.map(name=>{const i=new Image();i.src=`assets/img/${name}`;return i;});
     });
-    function _getSweetImg(type){ const arr=_sweetImgs[type]; if(!arr) return null; return arr[Math.floor(Math.random()*arr.length)]; }
 
-    function drawSweet(type,x,y,r,rot,half=0){ctx.save();ctx.translate(x,y);ctx.rotate(rot); if(half){ctx.beginPath();ctx.rect(half<0?-80:-1,-80,81,160);ctx.clip();}
+    // Índice fixo por item (evita trocar frame-a-frame)
+    const _sweetIdxMap = {};
+    function _getSweetImg(type){
+      const arr=_sweetImgs[type]; if(!arr||!arr.length) return null;
+      if(!(_sweetIdxMap[type]>=0)) _sweetIdxMap[type]=Math.floor(Math.random()*arr.length);
+      return arr[_sweetIdxMap[type]];
+    }
+
+    function drawSweet(type,x,y,r,rot,half=0){
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.rotate(rot);
+      if(half){ctx.beginPath();ctx.rect(half<0?-80:-1,-80,81,160);ctx.clip();}
+
+      const img = _getSweetImg(type);
+      if(img && img.complete && img.naturalWidth>0){
+        const sz = type==='eclair' ? 84 : 62;
+        ctx.drawImage(img,-sz/2,-sz/2,sz,sz);
+        if(half){ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-42);ctx.lineTo(0,42);ctx.stroke();}
+        ctx.restore();
+        return;
+      }
+
+      // Fallback vetorial se imagem não carregou
+      if(type==='brigadeiro'){ctx.fillStyle='#5C3526';ctx.strokeStyle='#3E231A';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,28,0,Math.PI*2);ctx.fill();ctx.stroke();}
+      else if(type==='eclair'){ctx.fillStyle='#C5864D';ctx.strokeStyle='#8E562D';ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(-42,-18,84,36,18);ctx.fill();ctx.stroke();}
+      else if(type==='tart'){ctx.fillStyle='#D39A5A';ctx.strokeStyle='#9B663A';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-30,-4);ctx.lineTo(30,-4);ctx.lineTo(22,24);ctx.lineTo(-22,24);ctx.closePath();ctx.fill();ctx.stroke();}
+      else if(type==='macaron'){ctx.fillStyle='#EF9EB2';ctx.strokeStyle='#C65C75';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,-8,34,17,0,0,Math.PI*2);ctx.fill();ctx.stroke();}
+      else if(type==='truffle'){ctx.fillStyle='#8D3140';ctx.strokeStyle='#5B1D28';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,27,0,Math.PI*2);ctx.fill();ctx.stroke();}
+      else if(type==='cake'){ctx.fillStyle='#F8DCA8';ctx.strokeStyle='#B98040';ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(-30,-24,60,48,8);ctx.fill();ctx.stroke();}
+      else if(type==='golden'){ctx.fillStyle='#D9A536';ctx.strokeStyle='#9C6B13';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,28,0,Math.PI*2);ctx.fill();ctx.stroke();}
+      else if(type==='glass'){ctx.strokeStyle='#94AFC0';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-18,-28);ctx.lineTo(-8,8);ctx.lineTo(8,8);ctx.lineTo(18,-28);ctx.stroke();ctx.beginPath();ctx.moveTo(0,8);ctx.lineTo(0,30);ctx.moveTo(-15,30);ctx.lineTo(15,30);ctx.stroke();}
+      else if(type==='plate'){ctx.strokeStyle='#AFA298';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(0,0,32,22,0,0,Math.PI*2);ctx.stroke();}
+      if(half){ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-32);ctx.lineTo(0,32);ctx.stroke();}
+      ctx.restore();
+    }ctx.save();ctx.translate(x,y);ctx.rotate(rot); if(half){ctx.beginPath();ctx.rect(half<0?-80:-1,-80,81,160);ctx.clip();}
       const _sImg = _sweetImgs[type]?.[0];
       if(_sImg && _sImg.complete && _sImg.naturalWidth > 0){
         const _sr = type==='eclair'?42:30;
@@ -225,7 +265,11 @@
       else if(type==="golden"){ctx.fillStyle="#D9A536";ctx.strokeStyle="#9C6B13";ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,28,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle="#FFF2A9";ctx.beginPath();ctx.arc(-9,-8,8,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.font="700 24px serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("★",3,2);}
       if(half){ctx.strokeStyle="rgba(255,255,255,.85)";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-32);ctx.lineTo(0,32);ctx.stroke();}
       ctx.restore();}
-    function drawDanger(type,x,y,r,rot){ctx.save();ctx.translate(x,y);ctx.rotate(rot); if(type==="glass"){ctx.strokeStyle="#94AFC0";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-18,-28);ctx.lineTo(-8,8);ctx.lineTo(8,8);ctx.lineTo(18,-28);ctx.stroke();ctx.beginPath();ctx.moveTo(0,8);ctx.lineTo(0,30);ctx.moveTo(-15,30);ctx.lineTo(15,30);ctx.stroke();ctx.strokeStyle="#D56A5A";ctx.beginPath();ctx.moveTo(-6,-16);ctx.lineTo(5,-2);ctx.lineTo(-2,8);ctx.stroke();} else {ctx.strokeStyle="#AFA298";ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(0,0,32,22,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.ellipse(0,0,18,10,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle="#C34B3B";ctx.beginPath();ctx.moveTo(-18,-16);ctx.lineTo(18,16);ctx.moveTo(18,-16);ctx.lineTo(-18,16);ctx.stroke();} ctx.restore();}
+    function drawDanger(type,x,y,r,rot){
+      // drawDanger é chamado pelo draw() mas agora drawSweet cobre glass/plate também
+      // mantemos aqui como alias para compatibilidade
+      drawSweet(type,x,y,r,rot,0);
+    }
     function draw(){
       // Rostos como vidas (grande e goofy!)
       const r=22;
