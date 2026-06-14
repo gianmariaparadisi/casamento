@@ -447,12 +447,26 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
   gap: 2.5rem; margin-top: 2.5rem;
 }
+.desloc__item {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.desloc__icon {
+  width: 3.5rem; height: 3.5rem; object-fit: contain; margin-bottom: .9rem;
+}
 .desloc__head {
   font-family: var(--font-display); font-size: 1.2rem;
   font-weight: 400; margin-bottom: .6rem;
   color: var(--sage-dark);
 }
 .desloc__item p { font-size: .9rem; color: var(--text-muted); line-height: 1.75; }
+.desloc__item .btn { margin-top: 1.25rem; }
+
+/* Botão de destaque sage + bege, para CTAs secundárias importantes */
+.btn--sage-solid {
+  background: var(--sage); color: var(--bg-soft);
+  font-weight: 700; border: 1.5px solid var(--sage);
+}
+.btn--sage-solid:hover { background: var(--sage-dark); border-color: var(--sage-dark); }
 
 /* Photo pair between sections */
 .photo-pair {
@@ -532,6 +546,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   transition: border-color var(--transition), background var(--transition);
   user-select: none;
 }
+.rsvp__status-option img { width: 1.3rem; height: 1.3rem; object-fit: contain; flex-shrink: 0; }
 .rsvp__status-option input[type="radio"] { accent-color: var(--sage); }
 .rsvp__status-option:has(input:checked) {
   border-color: var(--sage); background: rgba(122,155,110,.08);
