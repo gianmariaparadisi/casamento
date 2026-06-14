@@ -10,12 +10,22 @@
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
     /* ─── MENU ──────────────────────────────────────── */
-    .jogos-hero { padding: 130px 5% 56px; text-align: center; }
-    .jogos-hero__key { width:3rem;height:3rem;margin:0 auto .75rem;display:block;color:var(--sage-dark);animation: key-wiggle 3s ease-in-out infinite; }
-    .jogos-hero__key svg { width:100%;height:100%; }
-    @keyframes key-wiggle { 0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)} }
-    .jogos-hero__title { font-family:var(--font-display);font-size:clamp(2rem,5vw,3.5rem);font-weight:300;margin-bottom:.75rem; }
-    .jogos-hero__sub { font-size:.9rem;color:var(--text-muted);max-width:440px;margin-inline:auto;line-height:1.75; }
+    .jogos-hero {
+      padding: 80px 0 0;
+      text-align: center;
+    }
+    .jogos-hero__img {
+      width: 100%;
+      max-width: 640px;
+      margin-inline: auto;
+      display: block;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      object-fit: cover;
+      max-height: 420px;
+    }
+    @media (max-width: 600px) {
+      .jogos-hero__img { max-height: 260px; border-radius: 0; }
+    }
     .jogos-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-top:2.5rem;max-width:860px;margin-inline:auto;justify-items:center; }
     .jogos-grid .jogo-card { width:100%; }
     @media(max-width:480px){
@@ -124,11 +134,9 @@
   <!-- ══ MENU ══ -->
   <div id="arena-menu">
     <div class="jogos-hero">
-      <span class="jogos-hero__key">
-        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="24" r="9"/><path d="M25 24h17M36 24v6M42 24v6"/></svg>
-      </span>
-      <h1 class="jogos-hero__title reveal">Você achou o segredo.</h1>
-      <p class="jogos-hero__sub reveal">Jogue, bata recordes e quem chegar ao topo pode ganhar um prêmio no dia do casamento.</p>
+      <img src="assets/img/gianetiagocarro.png"
+           alt="Gian e Tiago no carro"
+           class="jogos-hero__img reveal" />
     </div>
     <div class="container" style="padding-bottom:80px">
       <div class="jogos-grid">
