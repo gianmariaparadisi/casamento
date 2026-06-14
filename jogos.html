@@ -34,14 +34,19 @@
 
     /* ─── ARENAS ─────────────────────────────────────── */
     #arena-menu { display:block;padding:0 0 60px; }
-    #arena-flappy { display:none;min-height:100svh;flex-direction:column;align-items:center;padding-top:80px;overflow-x:hidden; }
+    #arena-flappy {
+      display:none; flex-direction:column; align-items:center;
+      padding: 80px 0 40px;
+      min-height: 100svh;
+      /* SEM overflow:hidden, SEM height:100% — isso causava o jogo sair da tela */
+    }
     .arena-header { width:100%;max-width:520px;margin-inline:auto;padding:0 5%;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between; }
     .arena-title { font-family:var(--font-display);font-size:1.5rem;font-weight:400; }
     .arena-score { font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dark);background:var(--bg-green);padding:.4rem .9rem;border-radius:20px;border:1px solid var(--line-green); }
     .arena-back { font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dark);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:none;padding:0;width:100%;max-width:520px;margin-inline:auto;display:block;padding:0 5%;margin-bottom:.5rem; }
 
     /* Canvas wrapper */
-    .canvas-wrap { position:relative;width:100%;max-width:480px;margin-inline:auto;padding:0; }
+    .canvas-wrap { position:relative;width:100%;max-width:420px;margin-inline:auto; }
     .canvas-wrap canvas { display:block;width:100%;border:2px solid var(--line-green);border-radius:var(--radius-lg);box-shadow:var(--shadow-green); }
 
     /* Overlay */
@@ -79,7 +84,7 @@
 
 
     /* overscroll suave */
-    html, body { overscroll-behavior: none; }
+    html, body { overscroll-behavior: none; } /* scroll lock gerenciado por JS */
   </style>
 </head>
 <body>
@@ -209,16 +214,18 @@
       <h2 class="arena-title" id="flappy-title">Flappy Gian 🐦</h2>
       <div class="arena-score">Canos: <span id="flappy-score">0</span></div>
     </div>
-    <div style="display:flex;gap:.5rem;justify-content:center;margin-bottom:.75rem">
+    <!-- Seletor de personagem -->
+    <div style="display:flex;gap:.75rem;justify-content:center;margin-bottom:1rem;align-items:center">
+      <span style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">Jogar como</span>
       <button class="fl-char-btn active" data-char="gian"
-        onclick="setFlappyPersonagem('gian');document.getElementById('flappy-title').textContent='Flappy Gian 🐦'"
-        style="font-size:.75rem;padding:.35rem .9rem;border-radius:20px;border:1.5px solid var(--line-green);background:var(--sage);color:white;cursor:pointer">
-        Gian
+        onclick="setFlappyPersonagem('gian')"
+        style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;font-weight:600;padding:.5rem 1.1rem;border-radius:999px;border:2px solid var(--sage);background:var(--sage);color:white;cursor:pointer;transition:all .15s">
+        <img src="assets/img/gianface01.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover"> Gian
       </button>
       <button class="fl-char-btn" data-char="tiago"
-        onclick="setFlappyPersonagem('tiago');document.getElementById('flappy-title').textContent='Flappy Tiago 🐦'"
-        style="font-size:.75rem;padding:.35rem .9rem;border-radius:20px;border:1.5px solid var(--line-green);background:var(--white);color:var(--sage-dark);cursor:pointer">
-        Tiago
+        onclick="setFlappyPersonagem('tiago')"
+        style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;font-weight:400;padding:.5rem 1.1rem;border-radius:999px;border:2px solid var(--line-green);background:var(--white);color:var(--sage-dark);cursor:pointer;transition:all .15s">
+        <img src="assets/img/tiagoface01.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover"> Tiago
       </button>
     </div>
     <div class="canvas-wrap">
