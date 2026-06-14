@@ -98,6 +98,108 @@
       .presentes__grid { grid-template-columns: 1fr; }
     }
 
+    /* ─── FILTRO POR FAIXA DE VALOR ─── */
+    .presentes__filtros {
+      display: flex; flex-wrap: wrap; gap: .6rem;
+      margin-top: 2.25rem; justify-content: center;
+    }
+    .presentes__filtro {
+      font-size: .8rem; font-weight: 500; color: var(--text-muted);
+      background: var(--white); border: 1.5px solid var(--line-green);
+      border-radius: 999px; padding: .5rem 1.1rem; cursor: pointer;
+      transition: background var(--transition), color var(--transition), border-color var(--transition);
+    }
+    .presentes__filtro:hover { border-color: var(--sage); color: var(--sage-dark); }
+    .presentes__filtro.active { background: var(--sage); color: var(--white); border-color: var(--sage); }
+    .presente__card.is-hidden { display: none; }
+
+    /* ─── VOTAÇÃO LUA DE MEL ─── */
+    .luademel {
+      margin-bottom: 3.5rem;
+    }
+    .luademel__header { text-align: center; max-width: 620px; margin: 0 auto 2rem; }
+    .luademel__eyebrow {
+      font-size: .75rem; letter-spacing: .25em; text-transform: uppercase;
+      color: var(--sage); margin-bottom: .6rem;
+    }
+    .luademel__title {
+      font-family: var(--font-display); font-size: clamp(1.6rem,3.5vw,2.4rem);
+      font-weight: 300; color: var(--text-main); margin-bottom: .6rem; line-height: 1.2;
+    }
+    .luademel__sub { font-size: .9rem; color: var(--text-muted); line-height: 1.75; }
+    .luademel__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.1rem;
+    }
+    .destino__card {
+      position: relative; overflow: hidden;
+      border: 1px solid var(--line-green); border-radius: var(--radius-lg);
+      background: var(--white); box-shadow: var(--shadow-green);
+      cursor: pointer; user-select: none;
+      transition: box-shadow var(--transition), transform var(--transition);
+      min-height: 220px;
+      display: flex; flex-direction: column; justify-content: flex-end;
+    }
+    .destino__card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+    .destino__card:active { transform: translateY(-1px) scale(.99); }
+    .destino__foto {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: 0;
+    }
+    .destino__foto-ph {
+      position: absolute; inset: 0; z-index: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 1rem; font-weight: 400;
+      color: rgba(255,255,255,.55); text-align: center; padding: 1rem;
+      background: linear-gradient(135deg, #C9DAC0, #8FAE82);
+    }
+    /* Barra de progresso vertical, preenche de baixo para cima */
+    .destino__fill {
+      position: absolute; left: 0; right: 0; bottom: 0; z-index: 1;
+      height: 0%;
+      background: linear-gradient(180deg, rgba(122,155,110,.0), rgba(80,107,69,.78));
+      transition: height .6s cubic-bezier(.22,.9,.3,1), background var(--transition);
+      pointer-events: none;
+    }
+    .destino__card.leader .destino__fill {
+      background: linear-gradient(180deg, rgba(212,140,58,.0), rgba(196,109,40,.85));
+    }
+    .destino__overlay {
+      position: relative; z-index: 2;
+      padding: 1rem .9rem .95rem;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.45) 70%);
+      color: #fff;
+      display: flex; flex-direction: column; gap: .35rem;
+    }
+    .destino__nome {
+      font-family: var(--font-display); font-size: 1.15rem; font-weight: 500;
+      line-height: 1.15; text-shadow: 0 1px 6px rgba(0,0,0,.35);
+    }
+    .destino__pct {
+      font-size: 1.5rem; font-weight: 600; line-height: 1;
+      font-family: var(--font-display);
+      text-shadow: 0 1px 8px rgba(0,0,0,.4);
+    }
+    .destino__votos { font-size: .72rem; opacity: .85; letter-spacing: .04em; }
+    .destino__btn {
+      margin-top: .4rem; align-self: flex-start;
+      font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+      color: #fff; background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.5); border-radius: 999px;
+      padding: .4rem .9rem;
+      transition: background var(--transition), transform var(--transition);
+    }
+    .destino__card:hover .destino__btn { background: rgba(255,255,255,.32); }
+    .destino__card.voted .destino__btn { background: rgba(255,255,255,.45); }
+    .destino__card.voting .destino__btn { transform: scale(.94); }
+
+    @media (max-width: 600px) {
+      .luademel__grid { grid-template-columns: repeat(2, 1fr); }
+      .destino__card { min-height: 160px; }
+      .destino__pct { font-size: 1.2rem; }
+    }
+
 
   </style>
 </head>
@@ -154,7 +256,90 @@
   <section class="section">
     <div class="container">
 
+      <!-- VOTAÇÃO: DESTINO DA LUA DE MEL -->
+      <div class="luademel">
+        <div class="luademel__header">
+          <p class="luademel__eyebrow reveal">Ajudem a decidir</p>
+          <h2 class="luademel__title reveal">Para onde vai a<br><em>lua de mel</em>?</h2>
+          <p class="luademel__sub reveal">
+            Estamos entre 6 destinos e adoraríamos a opinião de vocês! Clique no destino que acha que devemos escolher — pode votar quantas vezes quiser. A cor mostra quem está na frente.
+          </p>
+        </div>
+        <div class="luademel__grid" id="luademelGrid">
+          <div class="destino__card reveal" data-destino="Fernando de Noronha">
+            <div class="destino__foto-ph">Fernando de Noronha</div>
+            <div class="destino__fill"></div>
+            <div class="destino__overlay">
+              <span class="destino__pct">—</span>
+              <span class="destino__nome">Fernando de Noronha</span>
+              <span class="destino__votos"></span>
+              <span class="destino__btn">Votar</span>
+            </div>
+          </div>
+          <div class="destino__card reveal" data-destino="Tailândia">
+            <div class="destino__foto-ph">Tailândia</div>
+            <div class="destino__fill"></div>
+            <div class="destino__overlay">
+              <span class="destino__pct">—</span>
+              <span class="destino__nome">Tailândia</span>
+              <span class="destino__votos"></span>
+              <span class="destino__btn">Votar</span>
+            </div>
+          </div>
+          <div class="destino__card reveal" data-destino="Curaçao">
+            <div class="destino__foto-ph">Curaçao</div>
+            <div class="destino__fill"></div>
+            <div class="destino__overlay">
+              <span class="destino__pct">—</span>
+              <span class="destino__nome">Curaçao</span>
+              <span class="destino__votos"></span>
+              <span class="destino__btn">Votar</span>
+            </div>
+          </div>
+          <div class="destino__card reveal" data-destino="África do Sul">
+            <div class="destino__foto-ph">África do Sul</div>
+            <div class="destino__fill"></div>
+            <div class="destino__overlay">
+              <span class="destino__pct">—</span>
+              <span class="destino__nome">África do Sul</span>
+              <span class="destino__votos"></span>
+              <span class="destino__btn">Votar</span>
+            </div>
+          </div>
+          <div class="destino__card reveal" data-destino="Caribe">
+            <div class="destino__foto-ph">Caribe</div>
+            <div class="destino__fill"></div>
+            <div class="destino__overlay">
+              <span class="destino__pct">—</span>
+              <span class="destino__nome">Caribe</span>
+              <span class="destino__votos"></span>
+              <span class="destino__btn">Votar</span>
+            </div>
+          </div>
+          <div class="destino__card reveal" data-destino="Espanha (Maiorca)">
+            <div class="destino__foto-ph">Espanha · Maiorca</div>
+            <div class="destino__fill"></div>
+            <div class="destino__overlay">
+              <span class="destino__pct">—</span>
+              <span class="destino__nome">Espanha · Maiorca</span>
+              <span class="destino__votos"></span>
+              <span class="destino__btn">Votar</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <div class="luademel__header" style="margin-top:3.5rem">
+        <p class="luademel__eyebrow reveal">Mas se quiser</p>
+        <h2 class="luademel__title reveal">Lista de<br><em>presentes</em></h2>
+      </div>
+
+      <div class="presentes__filtros reveal" role="group" aria-label="Filtrar por faixa de valor">
+        <button class="presentes__filtro active" data-filtro="todos">Todos</button>
+        <button class="presentes__filtro" data-filtro="0-200">Até R$ 200</button>
+        <button class="presentes__filtro" data-filtro="200-400">R$ 200 – 400</button>
+        <button class="presentes__filtro" data-filtro="400-9999">A partir de R$ 400</button>
+      </div>
 
       <div class="presentes__grid" id="presentesGrid">
 
@@ -335,6 +520,99 @@
   </div>
 
   <script src="assets/js/app.js"></script>
+  <script>
+    /* ─── FILTRO DE PRESENTES POR FAIXA DE VALOR ─── */
+    (function () {
+      const filtros = document.querySelectorAll(".presentes__filtro");
+      const cards = document.querySelectorAll(".presente__card");
+      filtros.forEach(btn => {
+        btn.addEventListener("click", () => {
+          filtros.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const faixa = btn.dataset.filtro;
+          cards.forEach(card => {
+            if (card.classList.contains("presente__card--custom")) return; // sempre visível
+            if (faixa === "todos") { card.classList.remove("is-hidden"); return; }
+            const [min, max] = faixa.split("-").map(Number);
+            const valor = Number(card.dataset.valor || 0);
+            card.classList.toggle("is-hidden", !(valor >= min && valor <= max));
+          });
+        });
+      });
+    })();
+
+    /* ─── VOTAÇÃO: DESTINO DA LUA DE MEL ─── */
+    (function () {
+      const cards = Array.from(document.querySelectorAll(".destino__card"));
+      const cardByDestino = {};
+      cards.forEach(c => { cardByDestino[c.dataset.destino] = c; });
+
+      function aplicarResultados(destinos) {
+        if (!Array.isArray(destinos) || !destinos.length) return;
+
+        const total = destinos.reduce((s, d) => s + (d.votos || 0), 0);
+        let maiorVotos = -1;
+        destinos.forEach(d => { if (d.votos > maiorVotos) maiorVotos = d.votos; });
+
+        destinos.forEach(d => {
+          const card = cardByDestino[d.destino];
+          if (!card) return;
+
+          const pct = total > 0 ? Math.round((d.votos / total) * 1000) / 10 : 0;
+          const fill = card.querySelector(".destino__fill");
+          const pctEl = card.querySelector(".destino__pct");
+          const votosEl = card.querySelector(".destino__votos");
+
+          fill.style.height = pct + "%";
+          pctEl.textContent = pct.toFixed(1).replace(".0", "") + "%";
+          votosEl.textContent = d.votos === 1 ? "1 voto" : `${d.votos} votos`;
+
+          // Destaque para quem está na frente (apenas se já houver votos)
+          card.classList.toggle("leader", total > 0 && d.votos === maiorVotos && maiorVotos > 0);
+        });
+      }
+
+      async function carregarResultados() {
+        try {
+          const r = await fetch(`${API_URL}?action=luademel`);
+          const data = await r.json();
+          aplicarResultados(data.destinos);
+        } catch (err) {
+          // Sem conexão: mantém os "—" placeholders
+          console.warn("Não foi possível carregar os votos da lua de mel", err);
+        }
+      }
+
+      cards.forEach(card => {
+        card.addEventListener("click", async () => {
+          if (card.classList.contains("voting")) return; // evita spam de cliques simultâneos
+          card.classList.add("voting", "voted");
+
+          // Atualização otimista: soma +1 localmente antes da resposta do servidor
+          const destino = card.dataset.destino;
+          const votosEl = card.querySelector(".destino__votos");
+          const votosAtuaisTxt = (votosEl.textContent.match(/\d+/) || ["0"])[0];
+          const votosAtuais = parseInt(votosAtuaisTxt, 10) || 0;
+          votosEl.textContent = (votosAtuais + 1) === 1 ? "1 voto" : `${votosAtuais + 1} votos`;
+
+          setTimeout(() => card.classList.remove("voting"), 220);
+
+          try {
+            const r = await fetch(API_URL, {
+              method: "POST",
+              body: JSON.stringify({ action: "votarLuaDeMel", destino })
+            });
+            const data = await r.json();
+            if (data && data.destinos) aplicarResultados(data.destinos);
+          } catch (err) {
+            console.warn("Não foi possível registrar o voto", err);
+          }
+        });
+      });
+
+      carregarResultados();
+    })();
+  </script>
 
 </body>
 </html>
