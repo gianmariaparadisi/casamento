@@ -179,6 +179,7 @@
   const MAX_TENTATIVAS = 6;
   let PALAVRA = "";
   let LETRAS  = 0;
+  let VALIDAS = new Set();
   let tentativas = [];
   let tentativaAtual = [];
   let jogoFinalizado = false;
@@ -226,6 +227,14 @@
     }
     PALAVRA = json.palavra.toUpperCase().trim();
     LETRAS  = PALAVRA.length;
+    VALIDAS = new Set(
+      Array.isArray(json.validas)
+        ? json.validas.map(function(p) { return String(p).toUpperCase().trim(); })
+        : []
+    );
+    // Garante que a própria palavra do dia é sempre aceita,
+    // mesmo que por algum motivo não esteja na lista vinda da planilha.
+    VALIDAS.add(PALAVRA);
     document.getElementById("wordleDate").textContent =
       new Date().toLocaleDateString("pt-BR", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
     document.getElementById("wordleLoading").style.display = "none";
@@ -293,6 +302,12 @@
       if (tentativaAtual.length > 0) { tentativaAtual.pop(); renderizarAtual(); }
     } else if (k === "ENTER") {
       if (tentativaAtual.length < LETRAS) { setMsg("Palavra muito curta.", "erro"); shake(linha); return; }
+      var palpite = tentativaAtual.join("");
+      if (VALIDAS.size > 0 && !VALIDAS.has(palpite)) {
+        setMsg("Essa palavra não está na nossa lista.", "erro");
+        shake(linha);
+        return;
+      }
       confirmarTentativa();
     } else if (tentativaAtual.length < LETRAS) {
       tentativaAtual.push(k);
