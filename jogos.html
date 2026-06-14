@@ -36,8 +36,9 @@
     }
     .jogo-card { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:1.75rem 1.5rem;box-shadow:var(--shadow-green);cursor:pointer;transition:box-shadow var(--transition),transform var(--transition);text-align:center; }
     .jogo-card:hover { box-shadow:var(--shadow-lg);transform:translateY(-3px);border-color:var(--sage); }
-    .jogo-card__icon { width:2.75rem;height:2.75rem;margin:0 auto .75rem;display:block;color:var(--sage-dark); }
+    .jogo-card__icon { width:4.25rem;height:4.25rem;margin:0 auto .75rem;display:block;color:var(--sage-dark); }
     .jogo-card__icon svg { width:100%;height:100%; }
+    .jogo-card__icon img { width:100%;height:100%;object-fit:contain;display:block; }
     .jogo-card__title { font-family:var(--font-display);font-size:1.35rem;font-weight:400;margin-bottom:.35rem; }
     .jogo-card__desc { font-size:.82rem;color:var(--text-muted);line-height:1.6;margin-bottom:1rem; }
     .jogo-card__record { font-size:.72rem;color:var(--sage-dark);font-weight:500;background:var(--bg-green);padding:.3rem .65rem;border-radius:20px;display:inline-block;margin-bottom:.85rem; }
@@ -142,7 +143,7 @@
       <div class="jogos-grid">
         <!-- Snake do Tiago (página dedicada) -->
         <a href="snake.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6 6 2.7 6 6 2.7 6 6 6 6-2.7 6-6-2.7-6-6-6"/><circle cx="14" cy="14" r="1.6" fill="currentColor" stroke="none"/></svg></span>
+          <span class="jogo-card__icon"><img src="assets/img/icon-snake-mascot.png" alt="" loading="lazy"></span>
           <h2 class="jogo-card__title">Snake do Tiago</h2>
           <p class="jogo-card__desc">Guie o Tiago pelos hambúrgueres. Quanto mais ele come, mais rápido fica.</p>
           <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Clássico</p>
@@ -151,7 +152,7 @@
 
         <!-- Wordle do dia -->
         <a href="wordle.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="9" height="9" rx="1.5"/><rect x="19.5" y="6" width="9" height="9" rx="1.5" fill="currentColor" stroke="none"/><rect x="33" y="6" width="9" height="9" rx="1.5"/><rect x="6" y="19.5" width="9" height="9" rx="1.5"/><rect x="19.5" y="19.5" width="9" height="9" rx="1.5"/><rect x="33" y="19.5" width="9" height="9" rx="1.5" fill="currentColor" stroke="none"/><rect x="6" y="33" width="9" height="9" rx="1.5"/><rect x="19.5" y="33" width="9" height="9" rx="1.5"/><rect x="33" y="33" width="9" height="9" rx="1.5"/></svg></span>
+          <span class="jogo-card__icon"><img src="assets/img/icon-wordle-grid.png" alt="" loading="lazy"></span>
           <h2 class="jogo-card__title">Wordle do Casamento</h2>
           <p class="jogo-card__desc">Uma palavra nova a cada dia, relacionada ao nosso casamento. Você tem 6 tentativas.</p>
           <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Palavra do dia</p>
@@ -160,7 +161,7 @@
 
         <!-- Conexões do dia -->
         <a href="connect4.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12L24 24M24 24L36 12M24 24L12 36M24 24L36 36"/><circle cx="12" cy="12" r="4"/><circle cx="36" cy="12" r="4" fill="currentColor" stroke="none"/><circle cx="12" cy="36" r="4" fill="currentColor" stroke="none"/><circle cx="36" cy="36" r="4"/><circle cx="24" cy="24" r="4"/></svg></span>
+          <span class="jogo-card__icon"><img src="assets/img/icon-connections.png" alt="" loading="lazy"></span>
           <h2 class="jogo-card__title">Conexões</h2>
           <p class="jogo-card__desc">Encontre os 4 grupos de 4 palavras que se conectam. Inspirado no NYT Connections.</p>
           <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Desafio do dia</p>
@@ -170,7 +171,7 @@
 
         <!-- Docinho Ninja -->
         <a href="docinho-ninja.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="9"/><path d="M9 16l4 4-4 4M39 16l-4 4 4 4M9 32l4-4M39 32l-4-4"/></svg></span>
+          <span class="jogo-card__icon"><img src="assets/img/icon-docinho-ninja.png" alt="" loading="lazy"></span>
           <h2 class="jogo-card__title">Docinho Ninja</h2>
           <p class="jogo-card__desc">Corte brigadeiros, éclairs e macarons com o dedo. Cuidado com a taça quebrada.</p>
           <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Novo arcade</p>
@@ -179,7 +180,7 @@
 
         <!-- Champagne Problems -->
         <a href="champagne-breakout.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 6h10l2 10c1 5-2 9-7 9s-8-4-7-9z"/><path d="M24 25v13M17 38h14"/><circle cx="22" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="26" cy="17" r="1" fill="currentColor" stroke="none"/></svg></span>
+          <span class="jogo-card__icon"><img src="assets/img/tile-champagne.png" alt="" loading="lazy"></span>
           <h2 class="jogo-card__title">Champagne Problems</h2>
           <p class="jogo-card__desc">Rebata a rolha de champagne e quebre blocos dourados em 3 fases.</p>
           <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">3 fases</p>
@@ -188,7 +189,7 @@
 
         <!-- Wedding 2048 -->
         <a href="wedding-2048.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="29" r="10"/><path d="M19 19l5-9 5 9z"/><path d="M19 19h10l-5 6z"/></svg></span>
+          <span class="jogo-card__icon"><img src="assets/img/tile-anel.png" alt="" loading="lazy"></span>
           <h2 class="jogo-card__title">Wedding 2048</h2>
           <p class="jogo-card__desc">Junte anéis, bouquets, bolo e champagne até chegar ao para sempre.</p>
           <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Puzzle</p>
@@ -196,14 +197,14 @@
         </a>
 
         <div class="jogo-card reveal" onclick="entrarJogo('flappy')">
-          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 26c0-7 6-13 14-13 6 0 11 3 13 8l5 2-5 2c-1 5-6 9-13 9-4 0-7.5-1.5-10-4"/><path d="M19 19l3 3-3 3"/><circle cx="28" cy="18" r="1" fill="currentColor" stroke="none"/></svg></span>
+          <span class="jogo-card__icon"><img src="assets/img/icon-bird.png" alt="" loading="lazy"></span>
           <h2 class="jogo-card__title">Flappy Gian</h2>
           <p class="jogo-card__desc">Mantenha o Gian voando entre os canos. Cada cano é um ponto.</p>
           <p class="jogo-card__record" id="record-flappy-preview">Carregando…</p>
           <span class="btn btn--primary btn--sm">Jogar</span>
         </div>
         <a href="empilha-bolo.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6v6M20 6c0 2 2 2 2 4M24 6c0 2 2 2 2 4M28 6c0 2 2 2 2 4"/><rect x="10" y="18" width="28" height="9" rx="1.5"/><rect x="8" y="27" width="32" height="11" rx="1.5"/><path d="M10 22.5h28M8 32.5h32"/></svg></span>
+          <span class="jogo-card__icon"><img src="assets/img/tile-bolo.png" alt="" loading="lazy"></span>
           <h2 class="jogo-card__title">Empilha o Bolo</h2>
           <p class="jogo-card__desc">Versão confeitaria: glacê, partículas e pedaços de bolo caindo.</p>
           <p class="jogo-card__record" id="record-bolo-preview">Carregando…</p>
@@ -219,7 +220,7 @@
   <div id="arena-flappy">
     <button class="arena-back" onclick="voltarMenu()">← Voltar aos jogos</button>
     <div class="arena-header">
-      <h2 class="arena-title" id="flappy-title">Flappy Gian 🐦</h2>
+      <h2 class="arena-title" id="flappy-title">Flappy Gian</h2>
       <div class="arena-score">Canos: <span id="flappy-score">0</span></div>
     </div>
     <!-- Seletor de personagem -->

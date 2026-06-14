@@ -84,6 +84,7 @@
     /* RESULTADO */
     .conn-result { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:1.75rem;text-align:center;box-shadow:var(--shadow-green);margin-bottom:1.5rem; }
     .conn-result__icon { font-size:2.5rem;margin-bottom:.5rem; }
+    .conn-result__icon img { width:5.5rem;height:5.5rem;object-fit:contain;display:block;margin:0 auto; }
     .conn-result__title { font-family:var(--font-display);font-size:1.6rem;font-weight:300;margin-bottom:.4rem; }
     .conn-result__sub { font-size:.84rem;color:var(--text-muted);margin-bottom:1rem; }
 
@@ -446,7 +447,7 @@
     jogoFinalizado = true;
     document.getElementById("connGame").style.display = "none";
     document.getElementById("connResult").style.display = "block";
-    document.getElementById("connResultIcon").textContent = ganhou ? "🎉" : "💔";
+    document.getElementById("connResultIcon").innerHTML = ganhou ? "<img src='assets/img/icon-confetti-burst.png' alt=''>" : "<img src='assets/img/icon-heart-broken.png' alt=''>";
     document.getElementById("connResultTitle").textContent = ganhou ? "Incrível!" : "Quase lá!";
     document.getElementById("connResultSub").textContent = ganhou
       ? `Você achou todos os grupos!`

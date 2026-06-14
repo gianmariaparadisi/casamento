@@ -114,9 +114,7 @@
     .presente__card.is-hidden { display: none; }
 
     /* ─── VOTAÇÃO LUA DE MEL ─── */
-    .luademel {
-      margin-bottom: 3.5rem;
-    }
+    .luademel { margin-bottom: 3.5rem; }
     .luademel__header { text-align: center; max-width: 620px; margin: 0 auto 2rem; }
     .luademel__eyebrow {
       font-size: .75rem; letter-spacing: .25em; text-transform: uppercase;
@@ -129,7 +127,7 @@
     .luademel__sub { font-size: .9rem; color: var(--text-muted); line-height: 1.75; }
     .luademel__grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
       gap: 1.1rem;
     }
     .destino__card {
@@ -138,7 +136,7 @@
       background: var(--white); box-shadow: var(--shadow-green);
       cursor: pointer; user-select: none;
       transition: box-shadow var(--transition), transform var(--transition);
-      min-height: 220px;
+      min-height: 230px;
       display: flex; flex-direction: column; justify-content: flex-end;
     }
     .destino__card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
@@ -146,13 +144,6 @@
     .destino__foto {
       position: absolute; inset: 0; width: 100%; height: 100%;
       object-fit: cover; z-index: 0;
-    }
-    .destino__foto-ph {
-      position: absolute; inset: 0; z-index: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--font-display); font-size: 1rem; font-weight: 400;
-      color: rgba(255,255,255,.55); text-align: center; padding: 1rem;
-      background: linear-gradient(135deg, #C9DAC0, #8FAE82);
     }
     /* Barra de progresso vertical, preenche de baixo para cima */
     .destino__fill {
@@ -168,20 +159,20 @@
     .destino__overlay {
       position: relative; z-index: 2;
       padding: 1rem .9rem .95rem;
-      background: linear-gradient(180deg, transparent, rgba(0,0,0,.45) 70%);
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.5) 65%);
       color: #fff;
       display: flex; flex-direction: column; gap: .35rem;
     }
     .destino__nome {
       font-family: var(--font-display); font-size: 1.15rem; font-weight: 500;
-      line-height: 1.15; text-shadow: 0 1px 6px rgba(0,0,0,.35);
+      line-height: 1.15; text-shadow: 0 1px 6px rgba(0,0,0,.4);
     }
     .destino__pct {
       font-size: 1.5rem; font-weight: 600; line-height: 1;
       font-family: var(--font-display);
-      text-shadow: 0 1px 8px rgba(0,0,0,.4);
+      text-shadow: 0 1px 8px rgba(0,0,0,.45);
     }
-    .destino__votos { font-size: .72rem; opacity: .85; letter-spacing: .04em; }
+    .destino__votos { font-size: .72rem; opacity: .9; letter-spacing: .04em; }
     .destino__btn {
       margin-top: .4rem; align-self: flex-start;
       font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
@@ -196,7 +187,7 @@
 
     @media (max-width: 600px) {
       .luademel__grid { grid-template-columns: repeat(2, 1fr); }
-      .destino__card { min-height: 160px; }
+      .destino__card { min-height: 170px; }
       .destino__pct { font-size: 1.2rem; }
     }
 
@@ -262,12 +253,12 @@
           <p class="luademel__eyebrow reveal">Ajudem a decidir</p>
           <h2 class="luademel__title reveal">Para onde vai a<br><em>lua de mel</em>?</h2>
           <p class="luademel__sub reveal">
-            Estamos entre 6 destinos e adoraríamos a opinião de vocês! Clique no destino que acha que devemos escolher — pode votar quantas vezes quiser. A cor mostra quem está na frente.
+            Estamos entre 5 destinos e adoraríamos a opinião de vocês! Clique no destino que acha que devemos escolher — pode votar quantas vezes quiser. A cor mostra quem está na frente.
           </p>
         </div>
         <div class="luademel__grid" id="luademelGrid">
           <div class="destino__card reveal" data-destino="Fernando de Noronha">
-            <div class="destino__foto-ph">Fernando de Noronha</div>
+            <img class="destino__foto" src="assets/img/noronha.png" alt="Fernando de Noronha">
             <div class="destino__fill"></div>
             <div class="destino__overlay">
               <span class="destino__pct">—</span>
@@ -277,7 +268,7 @@
             </div>
           </div>
           <div class="destino__card reveal" data-destino="Tailândia">
-            <div class="destino__foto-ph">Tailândia</div>
+            <img class="destino__foto" src="assets/img/tailandia.png" alt="Tailândia">
             <div class="destino__fill"></div>
             <div class="destino__overlay">
               <span class="destino__pct">—</span>
@@ -286,18 +277,8 @@
               <span class="destino__btn">Votar</span>
             </div>
           </div>
-          <div class="destino__card reveal" data-destino="Curaçao">
-            <div class="destino__foto-ph">Curaçao</div>
-            <div class="destino__fill"></div>
-            <div class="destino__overlay">
-              <span class="destino__pct">—</span>
-              <span class="destino__nome">Curaçao</span>
-              <span class="destino__votos"></span>
-              <span class="destino__btn">Votar</span>
-            </div>
-          </div>
           <div class="destino__card reveal" data-destino="África do Sul">
-            <div class="destino__foto-ph">África do Sul</div>
+            <img class="destino__foto" src="assets/img/africa.png" alt="África do Sul">
             <div class="destino__fill"></div>
             <div class="destino__overlay">
               <span class="destino__pct">—</span>
@@ -307,7 +288,7 @@
             </div>
           </div>
           <div class="destino__card reveal" data-destino="Caribe">
-            <div class="destino__foto-ph">Caribe</div>
+            <img class="destino__foto" src="assets/img/caribe.png" alt="Caribe">
             <div class="destino__fill"></div>
             <div class="destino__overlay">
               <span class="destino__pct">—</span>
@@ -317,7 +298,7 @@
             </div>
           </div>
           <div class="destino__card reveal" data-destino="Espanha (Maiorca)">
-            <div class="destino__foto-ph">Espanha · Maiorca</div>
+            <img class="destino__foto" src="assets/img/maiorca.png" alt="Espanha · Maiorca">
             <div class="destino__fill"></div>
             <div class="destino__overlay">
               <span class="destino__pct">—</span>
@@ -463,7 +444,7 @@
         <!-- Card personalizado -->
         <article class="presente__card presente__card--custom reveal">
           <div class="presente__foto-ph" style="background:linear-gradient(135deg,#D4E5CC,#EBF0E6)">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--sage-dark)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/><path d="M7 7l-2-2M19 19l-2-2M7 17l-2 2M19 5l-2 2"/></svg>
+            <img src="assets/img/icon-gift-box.png" alt="" style="width:64px;height:64px;object-fit:contain">
           </div>
           <div class="presente__body">
             <h3 class="presente__nome">Presente personalizado</h3>

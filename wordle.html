@@ -95,6 +95,7 @@
     /* RESULTADO */
     .wordle-result { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:1.75rem;text-align:center;box-shadow:var(--shadow-green);margin-top:1.5rem; }
     .wordle-result__icon { font-size:2.5rem;margin-bottom:.5rem; }
+    .wordle-result__icon img { width:5.5rem;height:5.5rem;object-fit:contain;display:block;margin:0 auto; }
     .wordle-result__title { font-family:var(--font-display);font-size:1.6rem;font-weight:300;margin-bottom:.4rem; }
     .wordle-result__sub { font-size:.84rem;color:var(--text-muted);margin-bottom:1rem; }
     .wordle-result__share { margin-top: .5rem; }
@@ -434,7 +435,7 @@
   function mostrarResultado(ganhou, msg) {
     document.getElementById("wordleGame").style.display   = "none";
     document.getElementById("wordleResult").style.display = "block";
-    document.getElementById("resultIcon").textContent  = ganhou ? "🎉" : "💔";
+    document.getElementById("resultIcon").innerHTML  = ganhou ? "<img src='assets/img/icon-confetti-burst.png' alt=''>" : "<img src='assets/img/icon-heart-broken.png' alt=''>";
     document.getElementById("resultTitle").textContent = ganhou ? msg : "Quase!";
     document.getElementById("resultWord").textContent  = ganhou
       ? "Você acertou em " + tentativas.length + " tentativa" + (tentativas.length > 1 ? "s" : "") + "!"

@@ -30,6 +30,7 @@
     /* Overlay */
     .game-overlay { position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(240,245,232,.93);border-radius:var(--radius-lg);text-align:center;padding:2rem;backdrop-filter:blur(3px); }
     .go-icon { font-size:2.5rem;margin-bottom:.75rem; }
+    .go-icon img { width:4.5rem;height:4.5rem;object-fit:contain;display:block;margin:0 auto; }
     .go-title { font-family:var(--font-display);font-size:1.9rem;font-weight:300;margin-bottom:.4rem; }
     .go-sub { font-size:.9rem;color:var(--sage-dark);margin-bottom:1.25rem;line-height:1.5; }
     .go-btns { display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center; }
@@ -56,6 +57,8 @@
     .top10__item--silver{background:#F5F5F5;border-color:#C0C0C0;}
     .top10__item--bronze{background:#FFF2EC;border-color:#CD7F32;}
     .top10__pos { font-family:var(--font-display);font-size:1.2rem;font-weight:500;width:28px;text-align:center;flex-shrink:0;color:var(--text-muted); }
+    .top10__pos img { width:24px;height:24px;object-fit:contain;display:block;margin:0 auto; }
+    .top10__title img { width:1.4rem;height:1.4rem;object-fit:contain;vertical-align:-.3rem;margin-right:.4rem; }
     .top10__name { flex:1;font-size:.92rem;font-weight:500; }
     .top10__pts { font-size:.85rem;font-weight:600;color:var(--sage-dark);background:var(--bg-green);padding:.25rem .65rem;border-radius:20px; }
     .top10__empty,.top10__loading { text-align:center;padding:1.5rem;font-size:.85rem;color:var(--text-muted);font-style:italic; }
@@ -259,7 +262,7 @@
   }
 
   /* ── SNAKE ─────────────────────────────────────────────── */
-  const SN_COLS = 22, SN_ROWS = 22;
+  const SN_COLS = 14, SN_ROWS = 14;
   let snCtx = null, snCell = 0;
   let snRaf = null, snScore = 0, snBest = 0;
   let snDir = {x:1,y:0}, snNext = {x:1,y:0};
@@ -275,7 +278,7 @@
     const canvas = document.getElementById("snake-canvas");
     if (!canvas) return;
     const W = canvas.parentElement.clientWidth || 480;
-    const size = Math.min(W, 480);
+    const size = Math.min(W, 520);
     snCell = size / SN_COLS;
     snCtx = setupCanvas("snake-canvas", size, size);
     if (!snCtx) return;
@@ -294,7 +297,7 @@
     document.getElementById("snake-best").textContent = snBest || "—";
 
     snDrawStatic();
-    showOverlay("🐍","Snake do Tiago","Guie o Tiago pelos hambúrgueres",[{label:"Começar",fn:"startSnake()"}]);
+    showOverlay("<img src='assets/img/icon-snake-mascot.png' alt=''>","Snake do Tiago","Guie o Tiago pelos hambúrgueres",[{label:"Começar",fn:"startSnake()"}]);
   }
 
   function startSnake() {
@@ -386,7 +389,7 @@
     const msgs = snScore>=20?["Lenda! O Tiago está satisfeito.","Gian vai ficar com ciúmes do recorde."]:
                  snScore>=10?["Bom apetite!",snScore+" hambúrgueres. Impressionante."]:
                  snScore>=4 ?["Quase cheio...",snScore+" hambúrgueres desta vez."]:["O Tiago ficou com fome.","Tenta de novo!"];
-    showOverlay("😵","Game Over!",`${snScore} hambúrguer${snScore!==1?"es":""} · ${msgs[0]}`,[
+    showOverlay("<img src='assets/img/icon-snake-gameover.png' alt=''>","Game Over!",`${snScore} hambúrguer${snScore!==1?"es":""} · ${msgs[0]}`,[
       {label:"Jogar de novo",fn:"startSnake()"},{label:"Voltar aos jogos",fn:"location.href='jogos.html'"}
     ]);
     setTimeout(() => {
@@ -523,7 +526,7 @@
       const r=await fetch(SNAKE_API,{method:"POST",body:JSON.stringify({action:"score",jogo,nome,pontos:pts})});
       const j=await r.json();
       if(j.sucesso){
-        if(me){me.style.color="var(--sage-dark)";me.textContent="Recorde salvo! 🏆";}
+        if(me){me.style.color="var(--sage-dark)";me.textContent="Recorde salvo! ";me.insertAdjacentHTML("beforeend","<img src='assets/img/icon-trophy.png' alt=''>");}
         if(btn){btn.disabled=true;btn.textContent="Salvo ✓";}
         if(ni)ni.disabled=true;
         carregarTop10Snake();
@@ -536,14 +539,14 @@
 
   async function carregarTop10Snake(){
     const el=document.getElementById("snake-top10"); if(!el) return;
-    el.innerHTML=`<h3 class="top10__title">🏆 Top 10 — Snake</h3><p class="top10__loading">Carregando…</p>`;
+    el.innerHTML=`<h3 class="top10__title"><img src='assets/img/icon-trophy.png' alt=''> Top 10 — Snake</h3><p class="top10__loading">Carregando…</p>`;
     try{
       const r=await fetch(`${SNAKE_API}?action=top10&jogo=snake`);
       const d=await r.json();
-      if(!d?.lista?.length){el.innerHTML=`<h3 class="top10__title">🏆 Top 10 — Snake</h3><p class="top10__empty">Nenhum recorde. Seja o primeiro!</p>`;return;}
-      const m=["🥇","🥈","🥉"],cs=["top10__item--gold","top10__item--silver","top10__item--bronze"];
-      el.innerHTML=`<h3 class="top10__title">🏆 Top 10 — Snake</h3><ul class="top10__list">${d.lista.map((it,i)=>`<li class="top10__item ${cs[i]||""}"><span class="top10__pos">${m[i]||(i+1)}</span><span class="top10__name">${escJ(it.nome)}</span><span class="top10__pts">${it.pontos} pts</span></li>`).join("")}</ul>`;
-    } catch{el.innerHTML=`<h3 class="top10__title">🏆 Top 10 — Snake</h3><p class="top10__empty">Não foi possível carregar.</p>`;}
+      if(!d?.lista?.length){el.innerHTML=`<h3 class="top10__title"><img src='assets/img/icon-trophy.png' alt=''> Top 10 — Snake</h3><p class="top10__empty">Nenhum recorde. Seja o primeiro!</p>`;return;}
+      const m=["<img src='assets/img/icon-medal-gold.png' alt=''>","<img src='assets/img/icon-medal-silver.png' alt=''>","<img src='assets/img/icon-medal-bronze.png' alt=''>"],cs=["top10__item--gold","top10__item--silver","top10__item--bronze"];
+      el.innerHTML=`<h3 class="top10__title"><img src='assets/img/icon-trophy.png' alt=''> Top 10 — Snake</h3><ul class="top10__list">${d.lista.map((it,i)=>`<li class="top10__item ${cs[i]||""}"><span class="top10__pos">${m[i]||(i+1)}</span><span class="top10__name">${escJ(it.nome)}</span><span class="top10__pts">${it.pontos} pts</span></li>`).join("")}</ul>`;
+    } catch{el.innerHTML=`<h3 class="top10__title"><img src='assets/img/icon-trophy.png' alt=''> Top 10 — Snake</h3><p class="top10__empty">Não foi possível carregar.</p>`;}
   }
 
   resetSnake();
