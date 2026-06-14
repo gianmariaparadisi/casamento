@@ -111,6 +111,48 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .nav__hamburger { display: none; flex-direction: column; gap: 5px; padding: 4px; }
 .nav__hamburger span { display: block; width: 24px; height: 1.5px; background: var(--text-main); transition: var(--transition); }
 
+/* Dropdown "Mais" */
+.nav__dropdown { position: relative; }
+.nav__dropdown-toggle {
+  font-size: .75rem; font-weight: 500; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--text-muted);
+  display: flex; align-items: center; gap: .3rem;
+  transition: color var(--transition); background: none; border: none; cursor: pointer;
+}
+.nav__dropdown-toggle:hover { color: var(--sage-dark); }
+.nav__dropdown-toggle svg { transition: transform var(--transition); }
+.nav__dropdown-menu {
+  position: absolute; top: calc(100% + .75rem); left: 50%; transform: translateX(-50%) translateY(-6px);
+  background: var(--white); border: 1px solid var(--line-green); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg); padding: .5rem; min-width: 180px;
+  display: flex; flex-direction: column; gap: .15rem;
+  opacity: 0; pointer-events: none; transition: opacity var(--transition), transform var(--transition);
+  z-index: 110;
+}
+.nav__dropdown:hover .nav__dropdown-menu,
+.nav__dropdown:focus-within .nav__dropdown-menu {
+  opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0);
+}
+.nav__dropdown:hover .nav__dropdown-toggle svg { transform: rotate(180deg); }
+.nav__dropdown-menu a {
+  display: block; padding: .6rem .9rem; border-radius: var(--radius);
+  font-size: .78rem; font-weight: 500; letter-spacing: .04em;
+  text-transform: none; color: var(--text-main);
+  transition: background var(--transition), color var(--transition);
+}
+.nav__dropdown-menu a:hover { background: var(--bg-green); color: var(--sage-dark); }
+
+@media (max-width: 900px) {
+  .nav__dropdown-menu {
+    position: static; transform: none; opacity: 1; pointer-events: auto;
+    box-shadow: none; border: none; padding: 0 0 0 1rem; margin-top: .5rem;
+    display: none; min-width: 0;
+  }
+  .nav__dropdown.open .nav__dropdown-menu { display: flex; }
+  .nav__dropdown-toggle { font-size: .95rem; letter-spacing: normal; text-transform: none; }
+  .nav__dropdown-menu a { font-size: .85rem; padding: .4rem 0; }
+}
+
 /* ── 6. BUTTONS ─────────────────────────────────────────── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
