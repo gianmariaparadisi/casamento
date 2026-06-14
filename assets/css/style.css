@@ -1070,3 +1070,46 @@ canvas {
 
 /* ── Spin para loading hourglass ── */
 @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+/* ── Logo fixes ─────────────────────────────────────── */
+/* Nav: fundo claro → usa multiply para fundo preto sumir */
+.nav__logo-wrap img.site-logo--mono {
+  mix-blend-mode: multiply;
+  filter: brightness(0.55) saturate(1.1);
+  opacity: .85;
+}
+/* Footer: fundo escuro → usa _light (screen) */
+.footer__names img.site-logo--footer {
+  mix-blend-mode: screen;
+  filter: brightness(1.8) saturate(0.7);
+  opacity: .88;
+}
+/* Hero: fundo foto escuro → usa _light (screen) */
+.hero__title img.site-logo--hero {
+  mix-blend-mode: screen;
+  filter: brightness(1.7) saturate(0.75) hue-rotate(5deg);
+}
+
+/* ── Centralização universal de dividers/flourish/ícones ── */
+.divider-wrap,
+.flourish-wrap,
+.section-icon-wrap {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+.divider-wrap img,
+.flourish-wrap img,
+.section-icon-wrap img {
+  display: inline-block;
+  margin: 0 auto;
+}
+
+/* ── Footer centralizado ── */
+.footer__inner {
+  text-align: center;
+}
+.footer__names {
+  font-size: 0;
+  text-align: center;
+}
