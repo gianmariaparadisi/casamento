@@ -92,6 +92,18 @@
     <h1 class="game-title">Docinho Ninja</h1>
     <p class="game-sub">Corte docinhos desenhados à mão — nada de emoji apagado. Quando corta, o docinho realmente se parte.</p>
     <div class="hud"><div class="hud__pill">Score: <strong id="score">0</strong></div><div class="hud__pill">Vidas: <strong id="lives">3</strong></div><div class="hud__pill">Tempo: <strong id="time">30</strong>s</div></div>
+
+    <div class="_char-sel" style="display:flex;gap:.75rem;justify-content:center;align-items:center;margin:.75rem 0 .5rem">
+      <span style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">Jogar como</span>
+      <button class="_char-btn" data-char="gian" onclick="setPersonagem('gian')"
+        style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;font-weight:600;padding:.45rem 1rem;border-radius:999px;border:2px solid var(--sage);background:var(--sage);color:white;cursor:pointer;transition:all .15s">
+        <img src="assets/img/gianface01.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover"> Gian
+      </button>
+      <button class="_char-btn" data-char="tiago" onclick="setPersonagem('tiago')"
+        style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;font-weight:400;padding:.45rem 1rem;border-radius:999px;border:2px solid var(--line-green);background:var(--white);color:var(--sage-dark);cursor:pointer;transition:all .15s">
+        <img src="assets/img/tiagoface01.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover"> Tiago
+      </button>
+    </div>
     <section class="game-panel ninja-wrap">
       <canvas id="gameCanvas" width="620" height="760"></canvas>
       <div class="modal" id="startModal"><div class="modal__card"><div class="modal__icon">🍰</div><h2 class="modal__title">Corte os docinhos</h2><p class="modal__text">Arraste o dedo/mouse para cortar. Evite taças quebradas e pratos vazios.</p><button class="game-btn game-btn--main" id="startBtn">Começar</button></div></div>
@@ -102,8 +114,42 @@
   </main>
   <script>
 
-    function lockScroll() { document.documentElement.classList.add("game-locked"); document.body.classList.add("game-locked"); }
-    function unlockScroll() { document.documentElement.classList.remove("game-locked"); document.body.classList.remove("game-locked"); }
+    let _ninjaScrollY=0;
+    function lockScroll(){_ninjaScrollY=window.scrollY;document.body.style.overflow="hidden";document.body.style.touchAction="none";}
+    function unlockScroll(){document.body.style.overflow="";document.body.style.touchAction="";window.scrollTo(0,_ninjaScrollY);}
+
+    // ── Faces Gian & Tiago ──────────────────────────────
+    const _GIAN_F=[], _TIAGO_F=[];
+    for(let i=1;i<=7;i++){
+      const g=new Image(); g.loaded=false; g.onload=()=>{g.loaded=true;};
+      g.src=`assets/img/gianface${String(i).padStart(2,'0')}.png`; _GIAN_F.push(g);
+      const t=new Image(); t.loaded=false; t.onload=()=>{t.loaded=true;};
+      t.src=`assets/img/tiagoface${String(i).padStart(2,'0')}.png`; _TIAGO_F.push(t);
+    }
+    let _personagem = "gian";
+    let _faceIdx = 0;
+    function _faces(){ return _personagem==="tiago" ? _TIAGO_F : _GIAN_F; }
+    function _nextFace(){ let ni; do{ ni=Math.floor(Math.random()*7); }while(ni===_faceIdx && 7>1); _faceIdx=ni; }
+    function _drawFace(ctx,cx,cy,r){
+      const img=_faces()[_faceIdx];
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.clip();
+      if(img && img.loaded){ ctx.drawImage(img,cx-r,cy-r,r*2,r*2); }
+      else { ctx.fillStyle=_personagem==="tiago"?"#B87B3E":"#7A9B6E"; ctx.fill(); }
+      ctx.restore();
+    }
+
+    function setPersonagem(p){
+      _personagem=p;
+      document.querySelectorAll('._char-btn').forEach(b=>{
+        const on=b.dataset.char===p;
+        b.style.background=on?'var(--sage)':'var(--white)';
+        b.style.color=on?'white':'var(--sage-dark)';
+        b.style.borderColor=on?'var(--sage)':'var(--line-green)';
+        b.style.fontWeight=on?'600':'400';
+      });
+    }
+
 
 
     const SCORE_API = (typeof API_URL !== "undefined") ? API_URL : "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
@@ -146,7 +192,7 @@
     }
     function finish(){state="idle";cancelAnimationFrame(raf);unlockScroll();endModal.hidden=false;endIcon.textContent=score>=500?"🏆":"🍰";endTitle.textContent=score>=500?"Ninja oficial dos docinhos":"Mesa encerrada";endText.textContent=`Você fez ${score} pontos. ${score>=500?"A confeitaria está de joelhos.":score>=250?"Mandou muito bem na mesa de doces.":"Ainda dá tempo de treinar antes da festa."}`;}
     function segmentDistance(px,py,x1,y1,x2,y2){const A=px-x1,B=py-y1,C=x2-x1,D=y2-y1;const dot=A*C+B*D,len=C*C+D*D;let t=len?dot/len:0;t=Math.max(0,Math.min(1,t));const x=x1+C*t,y=y1+D*t;return Math.hypot(px-x,py-y);}
-    function cutAt(x1,y1,x2,y2){if(state!=="play")return; slashes.push({x1,y1,x2,y2,life:10}); let cutThis=0; for(const it of items){if(it.cut)continue; const dist=segmentDistance(it.x,it.y,x1,y1,x2,y2); const rr=it.type==="eclair"?42:34; if(dist<rr){it.cut=true; if(it.bad){lives--;score=Math.max(0,score-35);burst(it.x,it.y,"#B35A4C",24);} else {cutThis++; const pts=it.type==="golden"?80:15; score+=pts; splitSweet(it); burst(it.x,it.y,it.type==="golden"?"#D7A33D":"#C57A4A",it.type==="golden"?42:24);} }} if(cutThis>=3){score+=cutThis*12; combo=cutThis;} updateHud();}
+    function cutAt(x1,y1,x2,y2){if(state!=="play")return; slashes.push({x1,y1,x2,y2,life:10}); let cutThis=0; for(const it of items){if(it.cut)continue; const dist=segmentDistance(it.x,it.y,x1,y1,x2,y2); const rr=it.type==="eclair"?42:34; if(dist<rr){it.cut=true; if(it.bad){lives--;score=Math.max(0,score-35);burst(it.x,it.y,"#B35A4C",24);} else {cutThis++; const pts=it.type==="golden"?80:15; score+=pts; splitSweet(it); burst(it.x,it.y,it.type==="golden"?"#D7A33D":"#C57A4A",it.type==="golden"?42:24);} }} if(cutThis>=3){score+=cutThis*12; combo=cutThis;} if(cutThis>0) _nextFace(); updateHud();}
     function splitSweet(it){for(const side of [-1,1])halves.push({type:it.type,x:it.x+side*5,y:it.y,vx:it.vx+side*(2.2+Math.random()*1.4),vy:it.vy*.25-1-Math.random()*2,rot:it.rot,vr:it.vr+side*.14,side,life:95,r:it.r});}
     function burst(x,y,col,n){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=1+Math.random()*5;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1,life:30+Math.random()*38,r:1+Math.random()*3,col:Math.random()<.3?"#FFFFFF":col});}}
     function bg(){ctx.fillStyle="#FFF9F1";ctx.fillRect(0,0,W,H);ctx.fillStyle="rgba(194,142,77,.06)";for(let y=40;y<H;y+=70){ctx.beginPath();ctx.moveTo(0,y);ctx.bezierCurveTo(160,y-20,300,y+20,W,y-6);ctx.strokeStyle="rgba(194,142,77,.08)";ctx.stroke();}ctx.fillStyle="rgba(255,255,255,.38)";ctx.beginPath();ctx.arc(W-70,80,72,0,Math.PI*2);ctx.fill();}
@@ -161,7 +207,19 @@
       if(half){ctx.strokeStyle="rgba(255,255,255,.85)";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-32);ctx.lineTo(0,32);ctx.stroke();}
       ctx.restore();}
     function drawDanger(type,x,y,r,rot){ctx.save();ctx.translate(x,y);ctx.rotate(rot); if(type==="glass"){ctx.strokeStyle="#94AFC0";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-18,-28);ctx.lineTo(-8,8);ctx.lineTo(8,8);ctx.lineTo(18,-28);ctx.stroke();ctx.beginPath();ctx.moveTo(0,8);ctx.lineTo(0,30);ctx.moveTo(-15,30);ctx.lineTo(15,30);ctx.stroke();ctx.strokeStyle="#D56A5A";ctx.beginPath();ctx.moveTo(-6,-16);ctx.lineTo(5,-2);ctx.lineTo(-2,8);ctx.stroke();} else {ctx.strokeStyle="#AFA298";ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(0,0,32,22,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.ellipse(0,0,18,10,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle="#C34B3B";ctx.beginPath();ctx.moveTo(-18,-16);ctx.lineTo(18,16);ctx.moveTo(18,-16);ctx.lineTo(-18,16);ctx.stroke();} ctx.restore();}
-    function draw(){bg(); items.forEach(it=>it.bad?drawDanger(it.type,it.x,it.y,it.r,it.rot):drawSweet(it.type,it.x,it.y,it.r,it.rot)); halves.forEach(h=>drawSweet(h.type,h.x,h.y,h.r,h.rot,h.side)); particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life/60);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}); slashes.forEach(s=>{ctx.globalAlpha=s.life/10;ctx.strokeStyle="#FFFFFF";ctx.lineWidth=7;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(s.x1,s.y1);ctx.lineTo(s.x2,s.y2);ctx.stroke();ctx.strokeStyle="#D4A03B";ctx.lineWidth=2;ctx.stroke();ctx.globalAlpha=1;}); if(combo>=3){ctx.fillStyle="rgba(141,92,38,.7)";ctx.font="700 24px Inter";ctx.textAlign="center";ctx.fillText(`COMBO ×${combo}`,W/2,82);}}
+    function draw(){
+      // Rostos como vidas (grande e goofy!)
+      const r=22;
+      for(let i=0;i<lives;i++){
+        _drawFace(ctx, W - 30 - i*(r*2+6), 44, r);
+      }
+      // Rosto ninja no canto — muda a cada corte
+      _drawFace(ctx, 38, 44, 30);
+      // Bandana ninja
+      ctx.save(); ctx.fillStyle="rgba(50,50,50,.75)";
+      ctx.beginPath(); ctx.roundRect(8,20,60,14,4); ctx.fill();
+      ctx.restore();
+      bg(); items.forEach(it=>it.bad?drawDanger(it.type,it.x,it.y,it.r,it.rot):drawSweet(it.type,it.x,it.y,it.r,it.rot)); halves.forEach(h=>drawSweet(h.type,h.x,h.y,h.r,h.rot,h.side)); particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life/60);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}); slashes.forEach(s=>{ctx.globalAlpha=s.life/10;ctx.strokeStyle="#FFFFFF";ctx.lineWidth=7;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(s.x1,s.y1);ctx.lineTo(s.x2,s.y2);ctx.stroke();ctx.strokeStyle="#D4A03B";ctx.lineWidth=2;ctx.stroke();ctx.globalAlpha=1;}); if(combo>=3){ctx.fillStyle="rgba(141,92,38,.7)";ctx.font="700 24px Inter";ctx.textAlign="center";ctx.fillText(`COMBO ×${combo}`,W/2,82);}}
     let drawing=false,px=0,py=0;
     function pos(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)/r.width*W,y:(t.clientY-r.top)/r.height*H};}
     function down(e){if(state!=="play")return;drawing=true;const p=pos(e);px=p.x;py=p.y;}
