@@ -62,15 +62,7 @@
 
     .snake-back { display:block;text-align:center;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dark);text-decoration:underline;text-underline-offset:3px;margin-top:1.5rem; }
 
-    /* ─── MOBILE: trava rolagem da página durante o jogo ─────── */
     html, body { overscroll-behavior: none; }
-    @media (max-width: 640px) {
-      html.game-locked, body.game-locked {
-        overflow: hidden;
-        height: 100%;
-        touch-action: none;
-      }
-    }
   </style>
 </head>
 <body>
@@ -122,6 +114,18 @@
       </div>
     </div>
 
+    <!-- Seletor de personagem -->
+    <div style="display:flex;gap:.75rem;justify-content:center;margin-bottom:.85rem;align-items:center">
+      <span style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">Jogar como</span>
+      <button class="sn-char-btn" data-char="tiago" onclick="setSnakePersonagem('tiago')"
+        style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;font-weight:600;padding:.5rem 1.1rem;border-radius:999px;border:2px solid var(--sage);background:var(--sage);color:white;cursor:pointer;transition:all .15s">
+        <img src="assets/img/tiagoface01.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover"> Tiago
+      </button>
+      <button class="sn-char-btn" data-char="gian" onclick="setSnakePersonagem('gian')"
+        style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;font-weight:400;padding:.5rem 1.1rem;border-radius:999px;border:2px solid var(--line-green);background:var(--white);color:var(--sage-dark);cursor:pointer;transition:all .15s">
+        <img src="assets/img/gianface01.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover"> Gian
+      </button>
+    </div>
     <div class="canvas-wrap">
       <canvas id="snake-canvas" tabindex="0"></canvas>
     </div>
@@ -169,13 +173,16 @@
   "use strict";
 
   /* Trava/destrava rolagem da página (mobile) durante o jogo. */
+  let _snScrollY = 0;
   function lockScroll() {
-    document.documentElement.classList.add("game-locked");
-    document.body.classList.add("game-locked");
+    _snScrollY = window.scrollY;
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
   }
   function unlockScroll() {
-    document.documentElement.classList.remove("game-locked");
-    document.body.classList.remove("game-locked");
+    document.body.style.overflow = "";
+    document.body.style.touchAction = "";
+    window.scrollTo(0, _snScrollY);
   }
 
 
@@ -197,16 +204,21 @@
     return ctx;
   }
 
-  // Faces — 7 variações do Tiago, trocam a cada hambúrguer comido
-  const TIAGO_FACES = [];
+  // Faces — 7 variações de cada, trocam a cada hambúrguer comido
+  const SN_GIAN_FACES = [], SN_TIAGO_FACES = [];
   for (let i = 1; i <= 7; i++) {
-    const img = new Image();
-    img.loaded = false;
-    img.onload = () => { img.loaded = true; };
-    img.src = `assets/img/tiago${String(i).padStart(2,"0")}.png`;
-    TIAGO_FACES.push(img);
+    const gi = new Image(); gi.loaded = false;
+    gi.onload = () => { gi.loaded = true; };
+    gi.src = `assets/img/gianface${String(i).padStart(2,"0")}.png`;
+    SN_GIAN_FACES.push(gi);
+    const ti = new Image(); ti.loaded = false;
+    ti.onload = () => { ti.loaded = true; };
+    ti.src = `assets/img/tiagoface${String(i).padStart(2,"0")}.png`;
+    SN_TIAGO_FACES.push(ti);
   }
+  let snPersonagem = "tiago"; // default: snake do tiago
   let snFaceIdx = 0;
+  function snFaces() { return snPersonagem === "gian" ? SN_GIAN_FACES : SN_TIAGO_FACES; }
 
   function drawFace(ctx, img, ok, x, y, size, fallbackColor, fallbackEmoji) {
     ctx.save();
@@ -273,7 +285,7 @@
     snBody = [{x:5,y:11},{x:4,y:11},{x:3,y:11}];
     snVisual = snBody.map(s => ({x:s.x, y:s.y}));
     snFood = snNewFood();
-    snFaceIdx = Math.floor(Math.random() * TIAGO_FACES.length);
+    snFaceIdx = Math.floor(Math.random() * snFaces().length);
     document.getElementById("snake-score").textContent = "0";
     document.getElementById("snake-postgame").style.display = "none";
 
@@ -293,7 +305,7 @@
     snBody = [{x:5,y:11},{x:4,y:11},{x:3,y:11}];
     snVisual = snBody.map(s => ({x:s.x, y:s.y}));
     snFood = snNewFood();
-    snFaceIdx = Math.floor(Math.random() * TIAGO_FACES.length);
+    snFaceIdx = Math.floor(Math.random() * snFaces().length);
     document.getElementById("snake-score").textContent = "0";
     document.getElementById("snake-postgame").style.display = "none";
     hideOverlay();
@@ -350,7 +362,7 @@
       snFood = snNewFood();
       // Troca a "cara" do Tiago a cada hambúrguer — efeito goofy
       let novoIdx;
-      do { novoIdx = Math.floor(Math.random() * TIAGO_FACES.length); } while (novoIdx === snFaceIdx && TIAGO_FACES.length > 1);
+      do { novoIdx = Math.floor(Math.random() * snFaces().length); } while (novoIdx === snFaceIdx && snFaces().length > 1);
       snFaceIdx = novoIdx;
       if (snScore % 4 === 0) snSpeed = Math.max(60, snSpeed - 9);
     } else {
@@ -419,8 +431,11 @@
         ctx.fillStyle = "#506B45";
         ctx.beginPath(); ctx.roundRect(x,y,w,w,6); ctx.fill();
         ctx.strokeStyle = "#2A3E22"; ctx.lineWidth = 1.2; ctx.stroke();
-        const face = TIAGO_FACES[snFaceIdx];
-        drawFace(ctx, face, face.loaded, x, y, w, "#506B45", "😄");
+        const face = snFaces()[snFaceIdx];
+        /* Rosto grande e goofy — ultrapassa levemente a célula */
+        const faceSize = w * 1.4;
+        const faceOff = (faceSize - w) / 2;
+        drawFace(ctx, face, face.loaded, x - faceOff, y - faceOff, faceSize, "#506B45", "😄");
       } else {
         const t = i / visual.length;
         ctx.fillStyle = i%2===0 ? "#7A9B6E" : "#A8C49A";
@@ -472,6 +487,20 @@
   }
   window.snakeDirInput = snakeDirInput;
   window.startSnake = startSnake;
+
+  window.setSnakePersonagem = function(p) {
+    snPersonagem = p;
+    document.querySelectorAll(".sn-char-btn").forEach(b => {
+      const active = b.dataset.char === p;
+      b.style.background  = active ? "var(--sage)" : "var(--white)";
+      b.style.color       = active ? "white" : "var(--sage-dark)";
+      b.style.borderColor = active ? "var(--sage)" : "var(--line-green)";
+      b.style.fontWeight  = active ? "600" : "400";
+    });
+    const title = document.querySelector(".snake-header__title");
+    if (title) title.innerHTML = `Snake<br><em>do ${p === "gian" ? "Gian" : "Tiago"}</em>`;
+    resetSnake();
+  };
 
   // Resize: reconstrói o canvas mantendo o jogo
   window.addEventListener("resize", () => {
