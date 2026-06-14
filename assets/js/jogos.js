@@ -11,6 +11,16 @@ const JOGOS_API = typeof API_URL !== "undefined"
 
 const DPR = Math.min(window.devicePixelRatio || 1, 3);
 
+/* Trava/destrava rolagem da página (mobile) durante o jogo. */
+function lockScroll() {
+  document.documentElement.classList.add("game-locked");
+  document.body.classList.add("game-locked");
+}
+function unlockScroll() {
+  document.documentElement.classList.remove("game-locked");
+  document.body.classList.remove("game-locked");
+}
+
 /* helper: configura canvas para alta resolução */
 function setupCanvas(id, w, h) {
   const c = document.getElementById(id);
@@ -37,7 +47,7 @@ function ch(id) {
 /* ══════════════════════════════════════════════════════════
    NAVEGAÇÃO
 ══════════════════════════════════════════════════════════ */
-const ARENAS = ["menu","flappy","bolo","docinhos","look"];
+const ARENAS = ["menu","flappy","look"];
 
 function entrarJogo(jogo) {
   ARENAS.forEach(id => {
@@ -48,13 +58,11 @@ function entrarJogo(jogo) {
   if (target) target.style.display = "block";
   window.scrollTo({ top: 0, behavior: "instant" });
   if (jogo === "flappy")   resetFlappy();
-  if (jogo === "bolo")     resetBolo();
-  if (jogo === "docinhos") resetDocinhos();
   if (jogo === "look")     initLook();
 }
 
 function voltarMenu() {
-  pararFlappy(); pararBolo(); pararDocinhos();
+  pararFlappy();
   ARENAS.forEach(id => {
     const el = document.getElementById("arena-" + id);
     if (el) el.style.display = "none";
@@ -70,9 +78,15 @@ function voltarMenu() {
    IMAGENS DAS CARAS
 ══════════════════════════════════════════════════════════ */
 let imgGianOk = false;
-const IMG_GIAN = new Image();
-IMG_GIAN.onload = () => { imgGianOk = true; };
-IMG_GIAN.src = "assets/img/gian-face.png";
+const GIAN_FACES = [];
+for (let i = 1; i <= 7; i++) {
+  const img = new Image();
+  img.loaded = false;
+  img.onload = () => { img.loaded = true; if (i === 1) imgGianOk = true; };
+  img.src = `assets/img/gian${String(i).padStart(2,"0")}.png`;
+  GIAN_FACES.push(img);
+}
+let flFaceIdx = 0;
 
 function drawFace(ctx, img, ok, x, y, size, fallbackColor, fallbackEmoji) {
   ctx.save();
@@ -144,14 +158,16 @@ function startFlappy() {
   flAlive=false;
   if(flRaf){cancelAnimationFrame(flRaf);flRaf=null;}
   flScore=0; flBirdY=flH/2; flBirdVY=0; flPipes=[]; flTick=0;
+  flFaceIdx = Math.floor(Math.random()*GIAN_FACES.length);
   const sc=document.getElementById("flappy-score"); if(sc) sc.textContent="0";
   const pg=document.getElementById("flappy-postgame"); if(pg) pg.style.display="none";
   hideOverlay("flappy");
   flAlive=true; flStarted=true;
+  lockScroll();
   flRaf=requestAnimationFrame(flLoop);
 }
 
-function pararFlappy(){flAlive=false;flStarted=false;if(flRaf){cancelAnimationFrame(flRaf);flRaf=null;}}
+function pararFlappy(){flAlive=false;flStarted=false;if(flRaf){cancelAnimationFrame(flRaf);flRaf=null;}unlockScroll();}
 
 function flTap(){if(!flStarted){startFlappy();return;}if(flAlive)flBirdVY=FL_FLAP;}
 
@@ -167,7 +183,10 @@ function flLoop() {
   flPipes=flPipes.filter(p=>p.x>-FL_PIPE_W);
   flPipes.forEach(p=>{
     if(!p.scored&&p.x+FL_PIPE_W<flW*.22){p.scored=true;flScore++;
-      const sc=document.getElementById("flappy-score");if(sc)sc.textContent=flScore;}
+      const sc=document.getElementById("flappy-score");if(sc)sc.textContent=flScore;
+      let novoIdx; do { novoIdx = Math.floor(Math.random()*GIAN_FACES.length); } while(novoIdx===flFaceIdx && GIAN_FACES.length>1);
+      flFaceIdx = novoIdx;
+    }
   });
   const bR=20, bX=flW*.22;
   if(flBirdY+bR>flH-28||flBirdY-bR<0) return flGameOver();
@@ -209,7 +228,8 @@ function flDraw() {
   ctx.save();
   ctx.translate(bX,flBirdY);
   ctx.rotate(Math.min(Math.max(flBirdVY*.038,-.5),.9));
-  drawFace(ctx,IMG_GIAN,imgGianOk,-bSize/2,-bSize/2,bSize,"#B87B3E","😊");
+  const face = GIAN_FACES[flFaceIdx];
+  drawFace(ctx,face,face.loaded,-bSize/2,-bSize/2,bSize,"#B87B3E","😊");
   ctx.fillStyle="rgba(156,102,49,.65)";
   ctx.beginPath();ctx.ellipse(-7,7+Math.sin(flTick*.25)*4,11,5,.3,0,Math.PI*2);ctx.fill();
   ctx.restore();
@@ -217,6 +237,7 @@ function flDraw() {
 
 function flGameOver(){
   flAlive=false;if(flRaf){cancelAnimationFrame(flRaf);flRaf=null;}
+  unlockScroll();
   flDraw();
   const msgs=flScore>=15?["O Gian virou pombo de competição!","Recorde lendário."]:
               flScore>=8?["O Gian voou bem hoje.","Consegue bater esse recorde?"]:
@@ -236,276 +257,6 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(!fc)return;
   fc.addEventListener("touchstart",e=>{e.preventDefault();flTap();},{passive:false});
   fc.addEventListener("click",()=>flTap());
-});
-
-/* ══════════════════════════════════════════════════════════
-   EMPILHA O BOLO
-══════════════════════════════════════════════════════════ */
-let boCtx=null, boW=0, boH=0;
-let boRaf=null, boState="idle", boScore=0, boSpeed=0;
-let boLayers=[], boMoving=null, boParts=[];
-const BO_LH=34, BO_BASE=280;
-const BO_COLS=[
-  {f:"#F2D4C0",s:"#C8885A"},{f:"#E8C8D8",s:"#B86080"},
-  {f:"#F5E8C0",s:"#C8A840"},{f:"#D8E8D0",s:"#689858"},
-  {f:"#E0D0F0",s:"#8060B8"},{f:"#F0D8C0",s:"#B87840"},
-];
-
-function resetBolo(){
-  pararBolo();
-  const canvas=document.getElementById("bolo-canvas"); if(!canvas) return;
-  const W=canvas.parentElement.clientWidth||440;
-  boW=Math.min(W,440); boH=Math.round(boW*1.15);
-  boCtx=setupCanvas("bolo-canvas",boW,boH); if(!boCtx) return;
-  const FLOOR=boH-52;
-  boLayers=[{x:boW/2-BO_BASE/2,w:BO_BASE,y:FLOOR,ci:0}];
-  boMoving={x:0,w:BO_BASE,dir:1,ci:1};
-  boSpeed=2.0;boScore=0;boParts=[];boState="start";
-  const sc=document.getElementById("bolo-score");if(sc)sc.textContent="0 andares";
-  const pg=document.getElementById("bolo-postgame");if(pg)pg.style.display="none";
-  boDraw();
-  showOverlay("bolo","🎂","Empilha o Bolo","Toque no momento certo · Espaço ou clique",[{label:"Começar",fn:"startBolo()"}]);
-}
-
-function startBolo(){
-  const canvas=document.getElementById("bolo-canvas"); if(!canvas) return;
-  const FLOOR=boH-52;
-  boLayers=[{x:boW/2-BO_BASE/2,w:BO_BASE,y:FLOOR,ci:0}];
-  boMoving={x:0,w:BO_BASE,dir:1,ci:1};
-  boSpeed=2.0;boScore=0;boParts=[];boState="playing";
-  const sc=document.getElementById("bolo-score");if(sc)sc.textContent="0 andares";
-  const pg=document.getElementById("bolo-postgame");if(pg)pg.style.display="none";
-  hideOverlay("bolo");
-  boRaf=requestAnimationFrame(boLoop);
-}
-
-function pararBolo(){boState="idle";if(boRaf){cancelAnimationFrame(boRaf);boRaf=null;}}
-
-function boAction(){
-  if(boState==="start"||boState==="over"){startBolo();return;}
-  if(boState!=="playing") return;
-  const top=boLayers[boLayers.length-1];
-  const newY=top.y-BO_LH;
-  const left=Math.max(boMoving.x,top.x);
-  const right=Math.min(boMoving.x+boMoving.w,top.x+top.w);
-  const overlap=right-left;
-  if(overlap<=3){
-    boState="over";
-    boSpawnParts(boMoving.x,newY,boMoving.w,BO_COLS[boMoving.ci%BO_COLS.length]);
-    boDraw();
-    const msgs=boScore>=15?["A confeiteira está emocionada.","Esse bolo já pode entrar na recepção."]:
-                boScore>=8?["Quase um bolo real.","Mas ainda cabe mais glacê."]:
-                boScore>=4?["Um bolo razoável.","A tia aprovou."]:["A confeiteira está chorando.","Mas de casamento é assim."];
-    showOverlay("bolo","🎂","Fim!",`${boScore} andar${boScore!==1?"es":""} · ${msgs[0]}`,[
-      {label:"Jogar de novo",fn:"startBolo()"},{label:"Voltar",fn:"voltarMenu()"}
-    ]);
-    setTimeout(()=>{const pg=document.getElementById("bolo-postgame");if(pg)pg.style.display="block";carregarTop10("bolo");},300);
-    return;
-  }
-  const cut=boMoving.w-overlap;
-  if(cut>2) boSpawnParts(boMoving.x<top.x?boMoving.x:boMoving.x+overlap,newY,Math.abs(cut),BO_COLS[boMoving.ci%BO_COLS.length]);
-  boLayers.push({x:left,w:overlap,y:newY,ci:boMoving.ci});
-  boScore++;
-  const sc=document.getElementById("bolo-score");if(sc)sc.textContent=boScore+(boScore===1?" andar":" andares");
-  const nw=overlap;
-  const sx=boScore%2===0?-nw:boW+nw;
-  boMoving={x:sx,w:nw,dir:boScore%2===0?1:-1,ci:boMoving.ci+1};
-  boSpeed=Math.min(5.2,2.0+boScore*.14);
-  if(boScore>=6) boLayers.forEach(l=>{l.y+=BO_LH;});
-}
-
-function boSpawnParts(x,y,w,col){
-  for(let i=0;i<10;i++) boParts.push({x:x+Math.random()*w,y,vx:(Math.random()-.5)*3.5,vy:Math.random()*-2.5-1,a:1,f:col.f,r:3+Math.random()*5});
-}
-
-function boLoop(){
-  if(boState!=="playing") return;
-  boMoving.x+=boMoving.dir*boSpeed;
-  if(boMoving.x+boMoving.w>boW+18) boMoving.dir=-1;
-  if(boMoving.x<-18) boMoving.dir=1;
-  boParts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.16;p.a-=.038;});
-  boParts=boParts.filter(p=>p.a>0);
-  boDraw();
-  boRaf=requestAnimationFrame(boLoop);
-}
-
-function boDraw(){
-  const ctx=boCtx; if(!ctx) return;
-  ctx.fillStyle="#F8F4EE"; ctx.fillRect(0,0,boW,boH);
-  ctx.strokeStyle="rgba(180,140,100,.07)"; ctx.lineWidth=1;
-  for(let x=40;x<boW;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,boH);ctx.stroke();}
-  // Plate
-  const FLOOR=boH-52;
-  ctx.fillStyle="#C8A878"; ctx.strokeStyle="#A08858"; ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.ellipse(boW/2,FLOOR+26,BO_BASE/2+18,14,0,0,Math.PI*2);ctx.fill();ctx.stroke();
-  ctx.fillStyle="#D8B888";ctx.beginPath();ctx.ellipse(boW/2,FLOOR+22,BO_BASE/2+16,11,0,0,Math.PI*2);ctx.fill();
-  // Layers
-  boLayers.forEach((l,i)=>boDrawLayer(ctx,l.x,l.y,l.w,BO_LH,BO_COLS[l.ci%BO_COLS.length],i===boLayers.length-1));
-  if(boState==="playing"&&boMoving){
-    const ty=boLayers[boLayers.length-1].y-BO_LH;
-    boDrawLayer(ctx,boMoving.x,ty,boMoving.w,BO_LH,BO_COLS[boMoving.ci%BO_COLS.length],false);
-    const top=boLayers[boLayers.length-1];
-    ctx.strokeStyle="rgba(107,39,55,.12)";ctx.lineWidth=1;ctx.setLineDash([3,4]);
-    ctx.beginPath();ctx.moveTo(top.x,ty-2);ctx.lineTo(top.x,ty-16);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(top.x+top.w,ty-2);ctx.lineTo(top.x+top.w,ty-16);ctx.stroke();
-    ctx.setLineDash([]);
-  }
-  boParts.forEach(p=>{ctx.globalAlpha=p.a;ctx.fillStyle=p.f;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();});
-  ctx.globalAlpha=1;
-  if(boScore>=8&&boLayers.length>=2){
-    const top=boLayers[boLayers.length-1];
-    ctx.font=Math.round(boW*.045)+"px serif";ctx.textAlign="center";
-    ctx.fillText("💍",top.x+top.w/2,top.y-18);
-  }
-}
-
-function boDrawLayer(ctx,x,y,w,h,col,top){
-  if(w<=0)return;
-  ctx.fillStyle=col.f;ctx.strokeStyle=col.s;ctx.lineWidth=1.2;
-  ctx.beginPath();ctx.roundRect(x,y,w,h,top?[5,5,2,2]:2);ctx.fill();ctx.stroke();
-  ctx.fillStyle="#FFF8F4";ctx.beginPath();ctx.roundRect(x+2,y+1,w-4,7,[3,3,0,0]);ctx.fill();
-  if(w>36){ctx.fillStyle=col.s;const sp=Math.min(26,w/4);for(let fx=x+sp;fx<x+w-7;fx+=sp){ctx.beginPath();ctx.arc(fx,y+h/2+3,1.8,0,Math.PI*2);ctx.fill();}}
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-  const bc=document.getElementById("bolo-canvas");
-  if(!bc)return;
-  bc.addEventListener("click",()=>boAction());
-  bc.addEventListener("touchend",e=>{e.preventDefault();boAction();},{passive:false});
-});
-document.addEventListener("keydown",e=>{
-  if(document.getElementById("arena-bolo")?.style.display==="none")return;
-  if(e.key===" "){e.preventDefault();boAction();}
-});
-
-/* ══════════════════════════════════════════════════════════
-   PEGA OS DOCINHOS
-══════════════════════════════════════════════════════════ */
-let dcCtx=null, dcW=0, dcH=0, dcFloor=0;
-let dcRaf=null, dcState="idle", dcScore=0, dcTime=0;
-let dcItems=[], dcPopups=[], dcBasket={x:0}, dcMouseX=0;
-let dcLastTs=0, dcSpawnT=0, dcSecT=0;
-const DC_BW=70, DC_BH=26;
-const DC_DOCES=[{e:"🍫",p:2},{e:"🧁",p:3},{e:"🍬",p:3},{e:"🥐",p:2},{e:"🍡",p:4},{e:"🍩",p:2},{e:"✨",p:5}];
-const DC_BAD=[{e:"🧾",p:-3},{e:"👵",p:-2},{e:"🥂",p:-1},{e:"😤",p:-3}];
-
-function resetDocinhos(){
-  pararDocinhos();
-  const canvas=document.getElementById("docinhos-canvas"); if(!canvas) return;
-  const W=canvas.parentElement.clientWidth||440;
-  dcW=Math.min(W,440); dcH=Math.round(dcW*1.1);
-  dcCtx=setupCanvas("docinhos-canvas",dcW,dcH); if(!dcCtx) return;
-  dcFloor=dcH-18;
-  dcScore=0;dcTime=45;dcItems=[];dcPopups=[];dcBasket={x:dcW/2-DC_BW/2};dcMouseX=dcW/2;
-  dcSpawnT=0;dcSecT=0;dcLastTs=0;dcState="start";
-  const sc=document.getElementById("docinhos-score");if(sc)sc.textContent="0 pts";
-  const tm=document.getElementById("docinhos-time");if(tm)tm.textContent="45s";
-  const pg=document.getElementById("docinhos-postgame");if(pg)pg.style.display="none";
-  dcDraw();
-  showOverlay("docinhos","🍬","Pega os Docinhos","45 segundos · Salve os docinhos!",[{label:"Começar",fn:"startDocinhos()"}]);
-}
-
-function startDocinhos(){
-  dcScore=0;dcTime=45;dcItems=[];dcPopups=[];dcSpawnT=0;dcSecT=0;dcLastTs=0;dcState="playing";
-  const sc=document.getElementById("docinhos-score");if(sc)sc.textContent="0 pts";
-  const tm=document.getElementById("docinhos-time");if(tm)tm.textContent="45s";
-  const pg=document.getElementById("docinhos-postgame");if(pg)pg.style.display="none";
-  hideOverlay("docinhos");
-  dcRaf=requestAnimationFrame(dcLoop);
-}
-
-function pararDocinhos(){dcState="idle";if(dcRaf){cancelAnimationFrame(dcRaf);dcRaf=null;}}
-
-function dcLoop(ts){
-  if(dcState!=="playing") return;
-  dcRaf=requestAnimationFrame(dcLoop);
-  if(!dcLastTs) dcLastTs=ts;
-  const dt=Math.min(ts-dcLastTs,50); dcLastTs=ts;
-  dcSecT+=dt;
-  if(dcSecT>=1000){dcSecT-=1000;dcTime--;const tm=document.getElementById("docinhos-time");if(tm)tm.textContent=dcTime+"s";}
-  if(dcTime<=0){
-    dcState="over"; dcDraw();
-    const msgs=dcScore>=50?["Pati Piva teria orgulho.","A mesa de doces está impoluta."]:
-                dcScore>=30?["Você salvou a confeitaria!","Os convidados ficaram felizes."]:
-                dcScore>=14?["A mesa sobreviveu.","Quase tudo salvo."]:
-                            ["Os brigadeiros pediram demissão.","Tenta de novo!"];
-    showOverlay("docinhos","🎉","Tempo!",`${dcScore} pts · ${msgs[0]}`,[
-      {label:"Jogar de novo",fn:"startDocinhos()"},{label:"Voltar",fn:"voltarMenu()"}
-    ]);
-    setTimeout(()=>{const pg=document.getElementById("docinhos-postgame");if(pg)pg.style.display="block";carregarTop10("docinhos");},300);
-    return;
-  }
-  dcSpawnT+=dt;
-  const rate=Math.max(550,1350-(45-dcTime)*16);
-  if(dcSpawnT>rate){
-    dcSpawnT=0;
-    const bad=Math.random()<.22;
-    const pool=bad?DC_BAD:DC_DOCES;
-    const item=pool[Math.floor(Math.random()*pool.length)];
-    const spd=1.6+Math.random()*1.2+(45-dcTime)*.035;
-    dcItems.push({...item,x:22+Math.random()*(dcW-44),y:-24,vy:spd,bad});
-  }
-  dcBasket.x+=(dcMouseX-DC_BW/2-dcBasket.x)*.2;
-  dcBasket.x=Math.max(0,Math.min(dcW-DC_BW,dcBasket.x));
-  const bL=dcBasket.x, bR=dcBasket.x+DC_BW, bT=dcFloor-DC_BH;
-  dcItems=dcItems.filter(it=>{
-    it.y+=it.vy;
-    if(it.y+13>=bT&&it.y-13<dcFloor&&it.x>bL-10&&it.x<bR+10){
-      dcScore+=it.p;
-      const sc=document.getElementById("docinhos-score");if(sc)sc.textContent=dcScore+" pts";
-      dcPopups.push({x:it.x,y:bT-10,t:(it.p>0?"+":"")+it.p,c:it.p>0?"#3A7A28":"#9B2828",a:1,vy:-1.1});
-      return false;
-    }
-    return it.y<dcH+30;
-  });
-  dcPopups=dcPopups.filter(p=>{p.y+=p.vy;p.a-=.024;return p.a>0;});
-  dcDraw();
-}
-
-function dcDraw(){
-  const ctx=dcCtx; if(!ctx) return;
-  ctx.fillStyle="#F8F4EE"; ctx.fillRect(0,0,dcW,dcH);
-  ctx.fillStyle="#E8DFD0"; ctx.fillRect(0,dcFloor-3,dcW,dcH-dcFloor+3);
-  ctx.fillStyle="#D4C8B0"; ctx.fillRect(0,dcFloor-3,dcW,3);
-  const fs=Math.round(dcW*.062);
-  ctx.font=fs+"px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
-  dcItems.forEach(it=>{
-    ctx.globalAlpha=1; ctx.fillText(it.e,it.x,it.y);
-    if(it.bad){ctx.fillStyle="rgba(180,50,50,.1)";ctx.beginPath();ctx.arc(it.x,it.y,fs*.6,0,Math.PI*2);ctx.fill();}
-  });
-  const bx=dcBasket.x, by=dcFloor-DC_BH;
-  ctx.globalAlpha=.1; ctx.fillStyle="#504030";
-  ctx.beginPath();ctx.ellipse(bx+DC_BW/2,dcFloor+3,DC_BW/2,5,0,0,Math.PI*2);ctx.fill();
-  ctx.globalAlpha=1;
-  const gr=ctx.createLinearGradient(bx,by,bx,by+DC_BH);
-  gr.addColorStop(0,"#E8D8A8");gr.addColorStop(1,"#C8B080");
-  ctx.fillStyle=gr; ctx.strokeStyle="#A89060"; ctx.lineWidth=1.2;
-  ctx.beginPath();
-  ctx.moveTo(bx+7,by);ctx.lineTo(bx+DC_BW-7,by);
-  ctx.quadraticCurveTo(bx+DC_BW,by,bx+DC_BW,by+9);
-  ctx.lineTo(bx+DC_BW-3,by+DC_BH);ctx.lineTo(bx+3,by+DC_BH);
-  ctx.lineTo(bx,by+9);ctx.quadraticCurveTo(bx,by,bx+7,by);
-  ctx.closePath();ctx.fill();ctx.stroke();
-  ctx.fillStyle="rgba(255,248,220,.5)"; ctx.fillRect(bx+7,by+3,DC_BW-14,5);
-  ctx.fillStyle="#A89060"; ctx.font=Math.round(dcW*.024)+"px serif";
-  ctx.fillText("✿",bx+DC_BW/2,by+DC_BH/2+1);
-  dcPopups.forEach(p=>{ctx.globalAlpha=p.a;ctx.fillStyle=p.c;ctx.font="bold "+Math.round(dcW*.036)+"px Georgia";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(p.t,p.x,p.y);});
-  ctx.globalAlpha=1;
-  if(dcTime<=10&&dcState==="playing"){ctx.fillStyle=`rgba(155,40,40,${.08+Math.sin(Date.now()/180)*.04})`;ctx.fillRect(0,0,dcW,dcH);}
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-  const dc=document.getElementById("docinhos-canvas");
-  if(!dc) return;
-  dc.addEventListener("mousemove",e=>{const r=dc.getBoundingClientRect();dcMouseX=(e.clientX-r.left)*(dcW/r.width);});
-  dc.addEventListener("touchmove",e=>{e.preventDefault();const r=dc.getBoundingClientRect();dcMouseX=(e.touches[0].clientX-r.left)*(dcW/r.width);},{passive:false});
-  dc.addEventListener("touchend",e=>{e.preventDefault();if(dcState==="start"||dcState==="over")startDocinhos();},{passive:false});
-  dc.addEventListener("click",()=>{if(dcState==="start"||dcState==="over")startDocinhos();});
-});
-document.addEventListener("keydown",e=>{
-  if(document.getElementById("arena-docinhos")?.style.display==="none")return;
-  if(e.key==="ArrowLeft") dcMouseX=Math.max(DC_BW/2,dcMouseX-28);
-  if(e.key==="ArrowRight") dcMouseX=Math.min(dcW-DC_BW/2,dcMouseX+28);
 });
 
 /* ══════════════════════════════════════════════════════════
@@ -710,7 +461,7 @@ async function carregarTop10(jogo){
 }
 
 async function carregarPreviewRecorde(){
-  for(const j of["flappy","bolo","docinhos"]){
+  for(const j of["flappy","bolo"]){
     const el=document.getElementById("record-"+j+"-preview"); if(!el) continue;
     try{
       const r=await fetch(`${JOGOS_API}?action=top10&jogo=${j}`);
