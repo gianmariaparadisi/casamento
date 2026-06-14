@@ -334,11 +334,11 @@ function selecionarConvidado(item, todosDaBusca) {
         <div class="rsvp__status" role="group" aria-labelledby="statusLabel">
           <label class="rsvp__status-option">
             <input type="radio" name="statusRsvp" value="SIM" checked />
-            ✓ Confirmo presença
+            <img src="assets/img/icon-check-decorative.png" alt=""> Confirmo presença
           </label>
           <label class="rsvp__status-option">
             <input type="radio" name="statusRsvp" value="NAO" />
-            ✕ Não poderei comparecer
+            <img src="assets/img/icon-cancel-decorative.png" alt=""> Não poderei comparecer
           </label>
         </div>
       </div>
