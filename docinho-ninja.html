@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docinho Ninja — Tiago e Gian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+
+    :root{
+      --game-gold:#C8A050;
+      --game-gold-soft:#F4E1B8;
+      --game-ink:#15120D;
+      --game-wine:#6B2737;
+      --game-blush:#F3DED2;
+    }
+    body.game-page{
+      background:
+        radial-gradient(circle at top left, rgba(200,160,80,.16), transparent 36rem),
+        radial-gradient(circle at 85% 20%, rgba(122,155,110,.18), transparent 30rem),
+        var(--bg-main);
+      min-height:100svh;
+    }
+    .game-main{padding:118px 0 72px;}
+    .game-shell{width:92%;max-width:980px;margin-inline:auto;}
+    .game-back{display:inline-flex;align-items:center;gap:.45rem;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-dark);margin-bottom:1.25rem;text-decoration:underline;text-underline-offset:4px;}
+    .game-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1.5rem;align-items:end;margin-bottom:1.25rem;}
+    .game-kicker{font-size:.74rem;letter-spacing:.28em;text-transform:uppercase;color:var(--sage);margin-bottom:.35rem;}
+    .game-title{font-family:var(--font-display);font-size:clamp(2.45rem,7vw,4.7rem);font-weight:300;line-height:1;color:var(--text-main);}
+    .game-sub{max-width:560px;color:var(--text-muted);font-size:.95rem;line-height:1.8;margin-top:.9rem;}
+    .game-statbar{display:flex;gap:.55rem;flex-wrap:wrap;justify-content:flex-end;}
+    .game-stat{background:rgba(255,255,255,.72);border:1px solid var(--line-green);border-radius:999px;padding:.48rem .8rem;box-shadow:var(--shadow);font-size:.74rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--sage-dark);white-space:nowrap;}
+    .game-board-card{position:relative;background:rgba(255,255,255,.62);border:1px solid var(--line-green);border-radius:var(--radius-lg);box-shadow:var(--shadow-green);padding:clamp(.7rem,2vw,1rem);overflow:hidden;}
+    .game-board-card::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,0));pointer-events:none;}
+    .canvas-frame{position:relative;z-index:1;width:100%;max-width:520px;margin-inline:auto;}
+    canvas.game-canvas{display:block;width:100%;touch-action:none;border-radius:calc(var(--radius-lg) - 3px);border:1px solid rgba(80,107,69,.28);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);background:#111;}
+    .game-actions{position:relative;z-index:1;display:flex;gap:.65rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;}
+    .game-overlay{position:absolute;z-index:5;inset:clamp(.7rem,2vw,1rem);display:flex;align-items:center;justify-content:center;text-align:center;border-radius:calc(var(--radius-lg) - 3px);background:rgba(244,241,235,.93);backdrop-filter:blur(6px);padding:2rem;}
+    .game-overlay[hidden]{display:none;}
+    .overlay-card{max-width:430px;}
+    .overlay-icon{font-size:3.2rem;margin-bottom:.85rem;}
+    .overlay-title{font-family:var(--font-display);font-size:clamp(2rem,6vw,3.2rem);font-weight:300;line-height:1.05;margin-bottom:.65rem;}
+    .overlay-text{color:var(--text-muted);font-size:.94rem;line-height:1.75;margin-bottom:1.25rem;}
+    .overlay-buttons{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
+    .score-panel{margin-top:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .save-card,.top-card{background:rgba(255,255,255,.7);border:1px solid var(--line-green);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:1.15rem;}
+    .score-panel h3{font-family:var(--font-display);font-size:1.35rem;font-weight:400;margin-bottom:.65rem;}
+    .save-row{display:flex;gap:.55rem;}
+    .save-row input{min-width:0;flex:1;background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:.78rem .85rem;font:inherit;color:var(--text-main);}
+    .save-msg{font-size:.78rem;color:var(--text-muted);min-height:1.3rem;margin-top:.45rem;}
+    .top-list{list-style:none;margin:0;padding:0;display:grid;gap:.42rem;}
+    .top-list li{display:flex;align-items:center;gap:.7rem;background:var(--bg-main);border:1px solid var(--line);border-radius:var(--radius);padding:.55rem .65rem;font-size:.84rem;}
+    .top-pos{width:1.8rem;font-family:var(--font-display);font-size:1.1rem;color:var(--terracotta);text-align:center;}
+    .top-name{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .top-pts{font-weight:700;color:var(--sage-dark);}
+    @media(max-width:720px){
+      .game-main{padding-top:100px;}
+      .game-hero{grid-template-columns:1fr;align-items:start;}
+      .game-statbar{justify-content:flex-start;}
+      .score-panel{grid-template-columns:1fr;}
+      .save-row{flex-direction:column;}
+      .save-row .btn{width:100%;}
+    }
+
+
+  </style>
+</head>
+<body class="game-page">
+
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">Tiago e Gian</a>
+      <nav class="nav__links" id="navLinks">
+        <a href="index.html#evento">O Dia</a>
+        <a href="index.html#cerimonia">Local & Orientações</a>
+        <a href="presentes.html">Presentes</a>
+        <a href="jogos.html" class="nav__key" aria-label="Segredo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3"/></svg>
+        </a>
+        <a href="index.html#rsvp" class="nav__cta">Confirmar presença</a>
+      </nav>
+      <button class="nav__hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+
+  <main class="game-main">
+    <div class="game-shell">
+      <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
+      <section class="game-hero">
+        <div>
+          <p class="game-kicker">arcade da mesa de doces</p>
+          <h1 class="game-title">Docinho Ninja</h1>
+          <p class="game-sub">Corte brigadeiros, éclairs e macarons com o dedo. Mas cuidado: taça quebrada, prato vazio e champagne derramado tiram vidas.</p>
+        </div>
+        <div class="game-statbar" aria-live="polite">
+          <span class="game-stat">Score: <strong id="score">0</strong></span>
+          <span class="game-stat">Tempo: <strong id="time">30s</strong></span>
+          <span class="game-stat">Vidas: <strong id="lives">♥♥♥</strong></span>
+          <span class="game-stat">Best: <strong id="best">0</strong></span>
+        </div>
+      </section>
+      <section class="game-board-card">
+        <div class="canvas-frame">
+          <canvas id="gameCanvas" class="game-canvas" aria-label="Docinho Ninja" tabindex="0"></canvas>
+        </div>
+        <div id="overlay" class="game-overlay">
+          <div class="overlay-card">
+            <div class="overlay-icon">🍬</div>
+            <h2 class="overlay-title">Docinho Ninja</h2>
+            <p class="overlay-text">Arraste o dedo ou o mouse para fatiar os docinhos. Combos de 3 ou mais valem bônus.</p>
+            <div class="overlay-buttons">
+              <button class="btn btn--primary" id="startBtn">Começar</button>
+              <a class="btn btn--outline" href="jogos.html">Voltar</a>
+            </div>
+          </div>
+        </div>
+        <div class="game-actions">
+          <button class="btn btn--outline" id="pauseBtn">Pausar</button>
+          <button class="btn btn--outline" id="restartBtn">Recomeçar</button>
+        </div>
+      </section>
+      <section class="score-panel">
+        <div class="save-card">
+          <h3>Salvar recorde</h3>
+          <div class="save-row">
+            <input id="playerName" maxlength="30" placeholder="Seu nome" autocomplete="name" />
+            <button class="btn btn--primary btn--sm" id="saveScoreBtn">Salvar</button>
+          </div>
+          <p class="save-msg" id="saveMsg"></p>
+        </div>
+        <div class="top-card">
+          <h3>Top 10</h3>
+          <ol class="top-list" id="topList"></ol>
+        </div>
+      </section>
+    </div>
+  </main>
+
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__names">Tiago e Gian</p>
+      <p class="footer__date">12 · 12 · 2026</p>
+      <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script>
+
+"use strict";
+const GAME_KEY = "docinho-ninja";
+window.currentGameScore = 0;
+const DPR = Math.min(window.devicePixelRatio || 1, 3);
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const scoreEl = document.getElementById("score");
+const timeEl = document.getElementById("time");
+const livesEl = document.getElementById("lives");
+const bestEl = document.getElementById("best");
+const overlay = document.getElementById("overlay");
+const startBtn = document.getElementById("startBtn");
+const restartBtn = document.getElementById("restartBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+let W=440,H=560, raf=null, running=false, paused=false, score=0, lives=3, timeLeft=30, last=0, spawnAcc=0, elapsed=0;
+let objects=[], particles=[], slash=[], pointerDown=false, swipeHits=0;
+const sweets=[
+  {emoji:"🍫",name:"Brigadeiro",pts:10},{emoji:"🧁",name:"Mini bolo",pts:10},{emoji:"🍰",name:"Tortinha",pts:12},
+  {emoji:"🥐",name:"Éclair",pts:12},{emoji:"🍬",name:"Trufa",pts:10},{emoji:"🍡",name:"Macaron",pts:15}
+];
+const dangers=[{emoji:"🥂",name:"Taça quebrada"},{emoji:"🍽️",name:"Prato vazio"},{emoji:"🍾",name:"Champagne derramado"}];
+function resize(){
+  const max = Math.min(520, canvas.parentElement.clientWidth || 440);
+  W=max; H=Math.round(max*1.18);
+  canvas.width=W*DPR; canvas.height=H*DPR; canvas.style.width=W+"px"; canvas.style.height=H+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  draw();
+}
+window.addEventListener("resize", resize, {passive:true});
+function best(){return Number(localStorage.getItem("docinhoNinjaBest")||0);}
+function setBest(v){localStorage.setItem("docinhoNinjaBest", String(v)); bestEl.textContent=String(v);}
+function showOverlay(icon,title,text,primary="Começar"){
+  overlay.hidden=false;
+  overlay.innerHTML=`<div class="overlay-card"><div class="overlay-icon">${icon}</div><h2 class="overlay-title">${title}</h2><p class="overlay-text">${text}</p><div class="overlay-buttons"><button class="btn btn--primary" id="overlayPrimary">${primary}</button><a class="btn btn--outline" href="jogos.html">Voltar</a></div></div>`;
+  document.getElementById("overlayPrimary").addEventListener("click", startGame);
+}
+function hideOverlay(){overlay.hidden=true;}
+function reset(){
+  score=0; lives=3; timeLeft=30; elapsed=0; spawnAcc=0; objects=[]; particles=[]; slash=[]; pointerDown=false; swipeHits=0; paused=false;
+  window.currentGameScore=0; updateHud(); draw();
+}
+function startGame(){
+  reset(); running=true; hideOverlay(); last=performance.now(); if(raf) cancelAnimationFrame(raf); raf=requestAnimationFrame(loop);
+}
+function endGame(reason="Tempo encerrado"){
+  running=false; if(raf) cancelAnimationFrame(raf); raf=null; window.currentGameScore=score;
+  if(score>best()) setBest(score);
+  const msg = score>=650 ? "Ninja oficial da mesa de doces. Alguém avisa a confeitaria." : score>=330 ? "Você já pode ficar responsável pelos docinhos da festa." : "Ainda dá tempo de treinar antes da festa.";
+  showOverlay("🏆", reason, `${score} pontos. ${msg}`, "Jogar de novo");
+}
+function updateHud(){scoreEl.textContent=score; timeEl.textContent=Math.ceil(timeLeft)+"s"; livesEl.textContent="♥".repeat(lives)+"♡".repeat(3-lives); bestEl.textContent=best();}
+function spawn(){
+  const danger = Math.random() < Math.min(.18,.08+elapsed*.002);
+  const base = danger ? dangers[Math.floor(Math.random()*dangers.length)] : sweets[Math.floor(Math.random()*sweets.length)];
+  const golden = !danger && Math.random()<.07;
+  const r = golden ? 27 : 24 + Math.random()*6;
+  objects.push({
+    x: 45 + Math.random()*(W-90), y:H+45, vx:(Math.random()-.5)*3.1, vy:-(8.5+Math.random()*4.2),
+    g:.18+Math.random()*.035, r, rot:Math.random()*6.28, vr:(Math.random()-.5)*.11, sliced:false, danger, golden,
+    emoji: golden?"✨":base.emoji, pts: golden?50:(base.pts||0), name:base.name
+  });
+}
+function distToSegment(px,py,x1,y1,x2,y2){
+  const dx=x2-x1, dy=y2-y1, len=dx*dx+dy*dy || 1;
+  const t=Math.max(0,Math.min(1,((px-x1)*dx+(py-y1)*dy)/len));
+  const x=x1+t*dx, y=y1+t*dy;
+  return Math.hypot(px-x,py-y);
+}
+function sliceBetween(a,b){
+  for(const o of objects){
+    if(o.sliced) continue;
+    if(distToSegment(o.x,o.y,a.x,a.y,b.x,b.y) < o.r+12){
+      o.sliced=true; swipeHits++;
+      if(o.danger){ lives--; burst(o.x,o.y,"#9C2731",18,"✦"); if(navigator.vibrate) navigator.vibrate(60); if(lives<=0){updateHud(); return endGame("A taça quebrou…");} }
+      else { score += o.pts; burst(o.x,o.y,o.golden?"#C8A050":"#B87B3E",22,o.golden?"✨":"•"); }
+      updateHud();
+    }
+  }
+}
+function burst(x,y,color,n,char){
+  for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-.5)*7,vy:(Math.random()-.5)*7,life:.8+Math.random()*.35,color,char,size:10+Math.random()*12});
+}
+function comboFinish(){
+  if(swipeHits>=3){ const bonus=swipeHits*12; score+=bonus; burst(W/2,H*.28,"#C8A050",26,"+"+bonus); updateHud(); }
+  swipeHits=0;
+}
+function pos(e){
+  const rect=canvas.getBoundingClientRect(); const p=e.touches?e.touches[0]:e;
+  return {x:(p.clientX-rect.left)*(W/rect.width), y:(p.clientY-rect.top)*(H/rect.height), t:performance.now()};
+}
+canvas.addEventListener("pointerdown",e=>{e.preventDefault(); if(!running){startGame();return;} pointerDown=true; swipeHits=0; slash=[pos(e)]; canvas.setPointerCapture?.(e.pointerId);});
+canvas.addEventListener("pointermove",e=>{if(!pointerDown||!running||paused)return; const p=pos(e); const lastP=slash[slash.length-1]; slash.push(p); if(slash.length>10) slash.shift(); if(lastP) sliceBetween(lastP,p);});
+canvas.addEventListener("pointerup",e=>{pointerDown=false; comboFinish();});
+canvas.addEventListener("pointercancel",()=>{pointerDown=false; comboFinish();});
+function loop(ts){
+  if(!running) return; const dt=Math.min(33, ts-last)/16.67; last=ts;
+  if(!paused){
+    elapsed += dt/60; timeLeft -= dt/60; spawnAcc += dt;
+    const interval=Math.max(20, 44 - elapsed*.65);
+    while(spawnAcc>interval){spawn(); spawnAcc-=interval;}
+    objects.forEach(o=>{o.x+=o.vx*dt; o.y+=o.vy*dt; o.vy+=o.g*dt; o.rot+=o.vr*dt;});
+    objects=objects.filter(o=>!o.sliced && o.y < H+90 && o.x>-80 && o.x<W+80);
+    particles.forEach(p=>{p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=.08*dt; p.life-=.025*dt;});
+    particles=particles.filter(p=>p.life>0);
+    slash=slash.filter(p=>ts-p.t<190);
+    if(timeLeft<=0){updateHud(); draw(); return endGame("Tempo encerrado");}
+    updateHud();
+  }
+  draw(); raf=requestAnimationFrame(loop);
+}
+function drawBackground(){
+  const grad=ctx.createLinearGradient(0,0,0,H); grad.addColorStop(0,"#14100B"); grad.addColorStop(.52,"#2A241A"); grad.addColorStop(1,"#F4E1B8"); ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="rgba(255,255,255,.05)"; for(let i=0;i<24;i++){const x=(i*67+elapsed*9)%W; const y=(i*97)%H; ctx.beginPath(); ctx.arc(x,y,1.2+(i%3),0,Math.PI*2); ctx.fill();}
+  ctx.fillStyle="rgba(244,225,184,.13)"; ctx.fillRect(0,H-72,W,72); ctx.fillStyle="rgba(200,160,80,.25)"; ctx.fillRect(0,H-72,W,1);
+}
+function draw(){
+  ctx.clearRect(0,0,W,H); drawBackground();
+  for(const o of objects){
+    ctx.save(); ctx.translate(o.x,o.y); ctx.rotate(o.rot);
+    ctx.shadowColor=o.golden?"rgba(200,160,80,.9)":o.danger?"rgba(160,30,48,.8)":"rgba(0,0,0,.25)"; ctx.shadowBlur=o.golden?20:8;
+    ctx.fillStyle=o.danger?"rgba(107,39,55,.85)":o.golden?"rgba(200,160,80,.82)":"rgba(255,255,255,.18)";
+    ctx.beginPath(); ctx.arc(0,0,o.r+7,0,Math.PI*2); ctx.fill();
+    ctx.font=Math.round(o.r*1.45)+"px serif"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(o.emoji,0,2);
+    ctx.restore();
+  }
+  for(const p of particles){ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.color; ctx.font=p.size+"px serif"; ctx.textAlign="center"; ctx.fillText(p.char,p.x,p.y); ctx.globalAlpha=1;}
+  if(slash.length>1){
+    ctx.lineCap="round"; ctx.lineJoin="round"; ctx.lineWidth=10; ctx.strokeStyle="rgba(255,255,255,.18)"; ctx.beginPath(); slash.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.stroke();
+    ctx.lineWidth=3; ctx.strokeStyle="#F4E1B8"; ctx.stroke();
+  }
+  if(paused){ctx.fillStyle="rgba(244,241,235,.72)";ctx.fillRect(0,0,W,H);ctx.fillStyle="#2A2820";ctx.font="42px Georgia";ctx.textAlign="center";ctx.fillText("Pausa",W/2,H/2);}
+}
+startBtn.addEventListener("click", startGame);
+restartBtn.addEventListener("click", startGame);
+pauseBtn.addEventListener("click",()=>{ if(!running)return; paused=!paused; pauseBtn.textContent=paused?"Continuar":"Pausar"; });
+document.addEventListener("keydown",e=>{ if(e.key===" "){e.preventDefault(); if(!running) startGame(); else {paused=!paused; pauseBtn.textContent=paused?"Continuar":"Pausar";}}});
+resize(); setBest(best()); updateHud();
+
+const GAME_API = (typeof API_URL !== "undefined")
+  ? API_URL
+  : "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
+function escGame(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");}
+function setSaveMsg(text, ok){const el=document.getElementById("saveMsg"); if(el){el.textContent=text; el.style.color=ok?"var(--sage-dark)":"var(--terracotta)";}}
+async function saveRemoteScore(){
+  const input=document.getElementById("playerName");
+  const btn=document.getElementById("saveScoreBtn");
+  const nome=(input?.value||"").trim();
+  const pontos=Math.max(0, Math.round(window.currentGameScore||0));
+  if(!nome){setSaveMsg("Coloque seu nome para salvar no placar.", false); input?.focus(); return;}
+  if(!pontos){setSaveMsg("Jogue uma partida antes de salvar.", false); return;}
+  btn.disabled=true; btn.textContent="Salvando…";
+  try{
+    const resp=await fetch(GAME_API,{method:"POST",body:JSON.stringify({action:"score",jogo:GAME_KEY,nome,pontos})});
+    const json=await resp.json();
+    if(!json?.sucesso) throw new Error("API sem sucesso");
+    setSaveMsg("Recorde salvo! 🏆", true);
+    btn.textContent="Salvo ✓";
+    input.disabled=true;
+    loadTop10();
+  }catch(err){
+    btn.disabled=false; btn.textContent="Salvar";
+    setSaveMsg("Não conseguimos salvar agora. Tente novamente.", false);
+  }
+}
+async function loadTop10(){
+  const el=document.getElementById("topList"); if(!el) return;
+  el.innerHTML='<li><span class="top-name">Carregando placar…</span></li>';
+  try{
+    const resp=await fetch(`${GAME_API}?action=top10&jogo=${encodeURIComponent(GAME_KEY)}`);
+    const data=await resp.json();
+    const list=data?.lista||[];
+    if(!list.length){el.innerHTML='<li><span class="top-name">Seja o primeiro no placar.</span></li>';return;}
+    const medals=["🥇","🥈","🥉"];
+    el.innerHTML=list.slice(0,10).map((it,i)=>`<li><span class="top-pos">${medals[i]||i+1}</span><span class="top-name">${escGame(it.nome)}</span><span class="top-pts">${Number(it.pontos)||0} pts</span></li>`).join("");
+  }catch(err){ el.innerHTML='<li><span class="top-name">Placar indisponível por enquanto.</span></li>'; }
+}
+document.getElementById("saveScoreBtn")?.addEventListener("click", saveRemoteScore);
+loadTop10();
+
+  </script>
+</body>
+</html>
