@@ -37,7 +37,7 @@ function ch(id) {
 /* ══════════════════════════════════════════════════════════
    NAVEGAÇÃO
 ══════════════════════════════════════════════════════════ */
-const ARENAS = ["menu","snake","flappy","bolo","docinhos","look"];
+const ARENAS = ["menu","flappy","bolo","docinhos","look"];
 
 function entrarJogo(jogo) {
   ARENAS.forEach(id => {
@@ -47,7 +47,6 @@ function entrarJogo(jogo) {
   const target = document.getElementById("arena-" + jogo);
   if (target) target.style.display = "block";
   window.scrollTo({ top: 0, behavior: "instant" });
-  if (jogo === "snake")    resetSnake();
   if (jogo === "flappy")   resetFlappy();
   if (jogo === "bolo")     resetBolo();
   if (jogo === "docinhos") resetDocinhos();
@@ -55,7 +54,7 @@ function entrarJogo(jogo) {
 }
 
 function voltarMenu() {
-  pararSnake(); pararFlappy(); pararBolo(); pararDocinhos();
+  pararFlappy(); pararBolo(); pararDocinhos();
   ARENAS.forEach(id => {
     const el = document.getElementById("arena-" + id);
     if (el) el.style.display = "none";
@@ -70,10 +69,7 @@ function voltarMenu() {
 /* ══════════════════════════════════════════════════════════
    IMAGENS DAS CARAS
 ══════════════════════════════════════════════════════════ */
-let imgTiagoOk = false, imgGianOk = false;
-const IMG_TIAGO = new Image();
-IMG_TIAGO.onload = () => { imgTiagoOk = true; };
-IMG_TIAGO.src = "assets/img/tiago-face.png";
+let imgGianOk = false;
 const IMG_GIAN = new Image();
 IMG_GIAN.onload = () => { imgGianOk = true; };
 IMG_GIAN.src = "assets/img/gian-face.png";
@@ -116,172 +112,6 @@ function showOverlay(jogo, icon, title, sub, btns) {
 function hideOverlay(jogo) {
   const ov = document.querySelector("#arena-" + jogo + " .game-overlay");
   if (ov) ov.style.display = "none";
-}
-
-/* ══════════════════════════════════════════════════════════
-   SNAKE DO TIAGO
-══════════════════════════════════════════════════════════ */
-const SN_COLS = 20, SN_ROWS = 20;
-let snCtx = null, snCell = 0;
-let snRaf = null, snScore = 0, snDir = {x:1,y:0}, snNext = {x:1,y:0};
-let snBody = [], snFood = {x:10,y:10}, snAlive = false, snSpeed = 155, snLast = 0;
-
-function resetSnake() {
-  snAlive = false;
-  if (snRaf) { cancelAnimationFrame(snRaf); snRaf = null; }
-
-  const canvas = document.getElementById("snake-canvas");
-  if (!canvas) return;
-  const W = canvas.parentElement.clientWidth || 480;
-  const size = Math.min(W, 480);
-  snCell = size / SN_COLS;
-  snCtx = setupCanvas("snake-canvas", size, size);
-  if (!snCtx) return;
-
-  snScore = 0; snSpeed = 155; snLast = 0;
-  snDir = {x:1,y:0}; snNext = {x:1,y:0};
-  snBody = [{x:5,y:10},{x:4,y:10},{x:3,y:10}];
-  snFood = snNewFood();
-  const sc = document.getElementById("snake-score");
-  if (sc) sc.textContent = "0";
-  const pg = document.getElementById("snake-postgame");
-  if (pg) pg.style.display = "none";
-  snDraw();
-  showOverlay("snake","🐍","Snake do Tiago","Guie o Tiago pelos hambúrgueres",[{label:"Começar",fn:"startSnake()"}]);
-}
-
-function startSnake() {
-  snAlive = false;
-  if (snRaf) { cancelAnimationFrame(snRaf); snRaf = null; }
-  snScore = 0; snSpeed = 155; snLast = 0;
-  snDir = {x:1,y:0}; snNext = {x:1,y:0};
-  snBody = [{x:5,y:10},{x:4,y:10},{x:3,y:10}];
-  snFood = snNewFood();
-  const sc = document.getElementById("snake-score");
-  if (sc) sc.textContent = "0";
-  const pg = document.getElementById("snake-postgame");
-  if (pg) pg.style.display = "none";
-  hideOverlay("snake");
-  snAlive = true;
-  snRaf = requestAnimationFrame(snFrame);
-}
-
-function pararSnake() {
-  snAlive = false;
-  if (snRaf) { cancelAnimationFrame(snRaf); snRaf = null; }
-}
-
-function snNewFood() {
-  let p;
-  do { p = {x: Math.floor(Math.random()*SN_COLS), y: Math.floor(Math.random()*SN_ROWS)}; }
-  while (snBody.some(s => s.x===p.x && s.y===p.y));
-  return p;
-}
-
-function snFrame(ts) {
-  if (!snAlive) return;
-  snRaf = requestAnimationFrame(snFrame);
-  if (!snLast) snLast = ts;
-  if (ts - snLast < snSpeed) return;
-  snLast = ts;
-  snDir = {...snNext};
-  const head = {x: snBody[0].x + snDir.x, y: snBody[0].y + snDir.y};
-  if (head.x<0||head.x>=SN_COLS||head.y<0||head.y>=SN_ROWS||snBody.some(s=>s.x===head.x&&s.y===head.y)) {
-    snAlive = false;
-    if (snRaf) { cancelAnimationFrame(snRaf); snRaf = null; }
-    snDraw();
-    const msgs = snScore>=20?["Lenda! O Tiago está satisfeito.","Gian vai ficar com ciúmes do recorde."]:
-                 snScore>=10?["Bom apetite!",snScore+" hambúrgueres. Impressionante."]:
-                 snScore>=4 ?["Quase cheio...",snScore+" hambúrgueres desta vez."]:["O Tiago ficou com fome.","Tenta de novo!"];
-    showOverlay("snake","😵","Game Over!",`${snScore} hambúrgueres · ${msgs[0]}`,[
-      {label:"Jogar de novo",fn:"startSnake()"},{label:"Voltar",fn:"voltarMenu()"}
-    ]);
-    setTimeout(()=>{const pg=document.getElementById("snake-postgame");if(pg)pg.style.display="block";carregarTop10("snake");},300);
-    return;
-  }
-  snBody.unshift(head);
-  if (head.x===snFood.x && head.y===snFood.y) {
-    snScore++;
-    const sc=document.getElementById("snake-score"); if(sc) sc.textContent=snScore;
-    snFood = snNewFood();
-    if (snScore%4===0) snSpeed = Math.max(60, snSpeed - 10);
-  } else snBody.pop();
-  snDraw();
-}
-
-function snDraw() {
-  const ctx = snCtx; if (!ctx) return;
-  const C = snCell, W = SN_COLS*C, H = SN_ROWS*C;
-
-  ctx.fillStyle = "#F0F5E8"; ctx.fillRect(0,0,W,H);
-
-  // Subtle grid
-  ctx.strokeStyle = "rgba(160,185,140,.15)"; ctx.lineWidth = 0.5;
-  for (let c=0;c<=SN_COLS;c++){ctx.beginPath();ctx.moveTo(c*C,0);ctx.lineTo(c*C,H);ctx.stroke();}
-  for (let r=0;r<=SN_ROWS;r++){ctx.beginPath();ctx.moveTo(0,r*C);ctx.lineTo(W,r*C);ctx.stroke();}
-
-  // Food — hamburger
-  ctx.save();
-  ctx.translate(snFood.x*C + C/2, snFood.y*C + C/2);
-  const fc = C * 0.38;
-  ctx.fillStyle = "#D4935A"; ctx.beginPath(); ctx.ellipse(0,-fc*.8,fc,fc*.55,0,Math.PI,0); ctx.fill();
-  ctx.fillStyle = "#F0DCA0"; ctx.beginPath(); ctx.ellipse(-fc*.3,-fc*.9,fc*.22,fc*.12,.3,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(fc*.3,-fc*.9,fc*.22,fc*.12,-.3,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle = "#7A4A2A"; ctx.fillRect(-fc,fc*.0,fc*2,fc*.35);
-  ctx.fillStyle = "#5A8A40"; ctx.fillRect(-fc*1.05,fc*.3,fc*2.1,fc*.28);
-  ctx.fillStyle = "#E0A870"; ctx.beginPath(); ctx.ellipse(0,fc*.65,fc,fc*.35,0,0,Math.PI*2); ctx.fill();
-  ctx.restore();
-
-  // Snake body
-  snBody.forEach((seg, i) => {
-    const x = seg.x*C + 2, y = seg.y*C + 2, w = C-4;
-    if (i === 0) {
-      ctx.fillStyle = "#506B45";
-      ctx.beginPath(); ctx.roundRect(x,y,w,w,5); ctx.fill();
-      ctx.strokeStyle = "#2A3E22"; ctx.lineWidth = 1.2; ctx.stroke();
-      drawFace(ctx, IMG_TIAGO, imgTiagoOk, x, y, w, "#506B45", "😄");
-    } else {
-      const t = i / snBody.length;
-      ctx.fillStyle = i%2===0 ? "#7A9B6E" : "#A8C49A";
-      ctx.globalAlpha = Math.max(0.3, 1 - t * 0.55);
-      ctx.beginPath(); ctx.roundRect(x,y,w,w,4); ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-  });
-}
-
-document.addEventListener("keydown", e => {
-  if (document.getElementById("arena-snake")?.style.display === "none") return;
-  const dirs = {ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},
-    w:{x:0,y:-1},s:{x:0,y:1},a:{x:-1,y:0},d:{x:1,y:0},
-    W:{x:0,y:-1},S:{x:0,y:1},A:{x:-1,y:0},D:{x:1,y:0}};
-  if (dirs[e.key]) { const d=dirs[e.key]; if(d.x!==-snDir.x||d.y!==-snDir.y)snNext=d; e.preventDefault(); }
-});
-
-// Touch swipe for snake
-let snTouchX = 0, snTouchY = 0;
-document.addEventListener("DOMContentLoaded", () => {
-  const sc = document.getElementById("snake-canvas");
-  if (!sc) return;
-  sc.addEventListener("touchstart", e => { snTouchX=e.touches[0].clientX; snTouchY=e.touches[0].clientY; }, {passive:true});
-  sc.addEventListener("touchend", e => {
-    if (!snAlive) return;
-    const dx = e.changedTouches[0].clientX - snTouchX;
-    const dy = e.changedTouches[0].clientY - snTouchY;
-    if (Math.abs(dx)<8&&Math.abs(dy)<8) return;
-    if (Math.abs(dx)>Math.abs(dy)) {
-      const d = dx>0?{x:1,y:0}:{x:-1,y:0};
-      if(d.x!==-snDir.x||d.y!==-snDir.y) snNext=d;
-    } else {
-      const d = dy>0?{x:0,y:1}:{x:0,y:-1};
-      if(d.x!==-snDir.x||d.y!==-snDir.y) snNext=d;
-    }
-  }, {passive:true});
-});
-
-function snakeDirInput(dir) {
-  const m={UP:{x:0,y:-1},DOWN:{x:0,y:1},LEFT:{x:-1,y:0},RIGHT:{x:1,y:0}};
-  const d=m[dir]; if(d&&(d.x!==-snDir.x||d.y!==-snDir.y)) snNext=d;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -847,7 +677,7 @@ async function salvarScore(jogo){
   const me=document.getElementById(jogo+"-save-msg");
   const btn=ni?.nextElementSibling;
   const nome=(ni?.value||"").trim();
-  const ptMap={snake:snScore,flappy:flScore,bolo:boScore,docinhos:dcScore};
+  const ptMap={flappy:flScore,bolo:boScore,docinhos:dcScore};
   const pts=ptMap[jogo]||0;
   if(!nome){if(me){me.style.color="var(--terracotta)";me.textContent="Informe seu nome.";}if(ni)ni.focus();return;}
   if(btn){btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';}
@@ -880,7 +710,7 @@ async function carregarTop10(jogo){
 }
 
 async function carregarPreviewRecorde(){
-  for(const j of["snake","flappy","bolo","docinhos"]){
+  for(const j of["flappy","bolo","docinhos"]){
     const el=document.getElementById("record-"+j+"-preview"); if(!el) continue;
     try{
       const r=await fetch(`${JOGOS_API}?action=top10&jogo=${j}`);
