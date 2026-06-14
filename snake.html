@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snake do Tiago — Tiago e Gian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { background: var(--bg-main); }
+
+    .snake-page { max-width: 520px; margin-inline: auto; padding: 100px 16px 80px; }
+
+    .snake-header { text-align:center;margin-bottom:1.25rem; }
+    .snake-header__eyebrow { font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--sage);margin-bottom:.4rem; }
+    .snake-header__title { font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--text-main);margin-bottom:.25rem; }
+    .snake-header__sub { font-size:.82rem;color:var(--text-muted);line-height:1.6; }
+
+    .snake-score-bar { display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-bottom:1rem; }
+    .snake-score-item { text-align:center; }
+    .snake-score-item__label { font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted); }
+    .snake-score-item__value { font-family:var(--font-display);font-size:1.8rem;font-weight:500;color:var(--sage-dark); }
+
+    .canvas-wrap { position:relative;width:100%;max-width:480px;margin-inline:auto; }
+    .canvas-wrap canvas { display:block;width:100%;border:2px solid var(--line-green);border-radius:var(--radius-lg);box-shadow:var(--shadow-green);touch-action:none; }
+
+    /* Overlay */
+    .game-overlay { position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(240,245,232,.93);border-radius:var(--radius-lg);text-align:center;padding:2rem;backdrop-filter:blur(3px); }
+    .go-icon { font-size:2.5rem;margin-bottom:.75rem; }
+    .go-title { font-family:var(--font-display);font-size:1.9rem;font-weight:300;margin-bottom:.4rem; }
+    .go-sub { font-size:.9rem;color:var(--sage-dark);margin-bottom:1.25rem;line-height:1.5; }
+    .go-btns { display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center; }
+
+    /* D-pad mobile */
+    .dpad { display:grid;grid-template-columns:repeat(3,60px);grid-template-rows:repeat(3,60px);gap:6px;margin:1.25rem auto 0;justify-content:center; }
+    .dpad button { width:60px;height:60px;border-radius:var(--radius);background:var(--white);border:1.5px solid var(--line-green);font-size:1.3rem;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;color:var(--sage-dark); }
+    .dpad button:active { background:var(--bg-green); }
+    @media(min-width:640px){ .dpad{ display:none; } }
+
+    .snake-hint { text-align:center;font-size:.78rem;color:var(--text-muted);margin-top:.75rem; }
+
+    /* Postgame */
+    .postgame { width:100%;max-width:480px;margin-inline:auto;padding-top:1.5rem; }
+    .save-form { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow-green);margin-bottom:1.5rem; }
+    .save-form h3 { font-family:var(--font-display);font-size:1.3rem;font-weight:400;margin-bottom:.75rem; }
+    .save-form__row { display:flex;gap:.6rem; }
+    .save-form__row .rsvp__input { flex:1; }
+    .save-form__msg { font-size:.8rem;margin-top:.5rem; }
+    .top10__title { font-family:var(--font-display);font-size:1.35rem;font-weight:400;margin-bottom:1rem; }
+    .top10__list { list-style:none; }
+    .top10__item { display:flex;align-items:center;gap:1rem;padding:.7rem 1rem;border-radius:var(--radius);margin-bottom:.4rem;background:var(--bg-main);border:1px solid var(--line); }
+    .top10__item--gold{background:#FFF8E7;border-color:#E8C84A;}
+    .top10__item--silver{background:#F5F5F5;border-color:#C0C0C0;}
+    .top10__item--bronze{background:#FFF2EC;border-color:#CD7F32;}
+    .top10__pos { font-family:var(--font-display);font-size:1.2rem;font-weight:500;width:28px;text-align:center;flex-shrink:0;color:var(--text-muted); }
+    .top10__name { flex:1;font-size:.92rem;font-weight:500; }
+    .top10__pts { font-size:.85rem;font-weight:600;color:var(--sage-dark);background:var(--bg-green);padding:.25rem .65rem;border-radius:20px; }
+    .top10__empty,.top10__loading { text-align:center;padding:1.5rem;font-size:.85rem;color:var(--text-muted);font-style:italic; }
+
+    .snake-back { display:block;text-align:center;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dark);text-decoration:underline;text-underline-offset:3px;margin-top:1.5rem; }
+  </style>
+</head>
+<body>
+
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">Tiago e Gian</a>
+      <nav class="nav__links" id="navLinks">
+        <a href="index.html#evento">O Dia</a>
+        <a href="index.html#cerimonia">Local & Orientações</a>
+        <a href="presentes.html">Presentes</a>
+        <a href="jogos.html" class="nav__key" aria-label="Segredo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3"/></svg>
+        </a>
+        <a href="index.html#rsvp" class="nav__cta">Confirmar presença</a>
+      </nav>
+      <button class="nav__hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="snake-page">
+    <div class="snake-header">
+      <p class="snake-header__eyebrow">🗝️ Segredo do dia</p>
+      <h1 class="snake-header__title">Snake<br><em>do Tiago</em></h1>
+      <p class="snake-header__sub">Guie o Tiago pelos hambúrgueres. Quanto mais ele come, mais rápido fica.</p>
+    </div>
+
+    <div class="snake-score-bar">
+      <div class="snake-score-item">
+        <div class="snake-score-item__label">Hambúrgueres</div>
+        <div class="snake-score-item__value" id="snake-score">0</div>
+      </div>
+      <div class="snake-score-item">
+        <div class="snake-score-item__label">Recorde</div>
+        <div class="snake-score-item__value" id="snake-best">—</div>
+      </div>
+    </div>
+
+    <div class="canvas-wrap">
+      <canvas id="snake-canvas" tabindex="0"></canvas>
+    </div>
+
+    <div class="dpad">
+      <div></div><button onclick="snakeDirInput('UP')" aria-label="Cima">↑</button><div></div>
+      <button onclick="snakeDirInput('LEFT')" aria-label="Esquerda">←</button>
+      <div style="opacity:.15">·</div>
+      <button onclick="snakeDirInput('RIGHT')" aria-label="Direita">→</button>
+      <div></div><button onclick="snakeDirInput('DOWN')" aria-label="Baixo">↓</button><div></div>
+    </div>
+
+    <p class="snake-hint">Use as setas, WASD, arraste no celular ou os botões acima.</p>
+
+    <div id="snake-postgame" class="postgame" style="display:none">
+      <div class="save-form">
+        <h3>Salvar seu recorde</h3>
+        <div class="save-form__row">
+          <input type="text" id="snake-nome" class="rsvp__input" placeholder="Seu nome" maxlength="30" autocomplete="name"/>
+          <button class="btn btn--primary btn--sm" onclick="salvarScore('snake')">Salvar</button>
+        </div>
+        <p class="save-form__msg" id="snake-save-msg"></p>
+      </div>
+      <div id="snake-top10"></div>
+    </div>
+
+    <a href="jogos.html" class="snake-back">← Voltar aos jogos</a>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__names">Tiago e Gian</p>
+      <p class="footer__date">12 · 12 · 2026</p>
+      <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script>
+  /* ══════════════════════════════════════════════════════════
+     SNAKE DO TIAGO — página dedicada
+     Canvas em alta resolução (devicePixelRatio), movimento
+     contínuo interpolado para sensação mais fluida.
+  ══════════════════════════════════════════════════════════ */
+  "use strict";
+
+  const SNAKE_API = typeof API_URL !== "undefined"
+    ? API_URL
+    : "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+
+  const DPR = Math.min(window.devicePixelRatio || 1, 3);
+
+  function setupCanvas(id, w, h) {
+    const c = document.getElementById(id);
+    if (!c) return null;
+    c.width  = w * DPR;
+    c.height = h * DPR;
+    c.style.width  = w + "px";
+    c.style.height = h + "px";
+    const ctx = c.getContext("2d");
+    ctx.scale(DPR, DPR);
+    return ctx;
+  }
+
+  // Faces
+  let imgTiagoOk = false;
+  const IMG_TIAGO = new Image();
+  IMG_TIAGO.onload = () => { imgTiagoOk = true; };
+  IMG_TIAGO.src = "assets/img/tiago-face.png";
+
+  function drawFace(ctx, img, ok, x, y, size, fallbackColor, fallbackEmoji) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+    ctx.clip();
+    if (ok) {
+      ctx.drawImage(img, x, y, size, size);
+    } else {
+      ctx.fillStyle = fallbackColor;
+      ctx.fill();
+      ctx.restore();
+      ctx.save();
+      ctx.font = Math.round(size * 0.55) + "px serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(fallbackEmoji, x + size / 2, y + size / 2);
+    }
+    ctx.restore();
+  }
+
+  // Overlay
+  function showOverlay(icon, title, sub, btns) {
+    const wrap = document.querySelector(".canvas-wrap");
+    if (!wrap) return;
+    let ov = wrap.querySelector(".game-overlay");
+    if (!ov) { ov = document.createElement("div"); ov.className = "game-overlay"; wrap.appendChild(ov); }
+    ov.innerHTML = `
+      <div class="go-icon">${icon}</div>
+      <div class="go-title">${title}</div>
+      <div class="go-sub">${sub}</div>
+      <div class="go-btns">${btns.map(b => `<button class="btn btn--primary" onclick="${b.fn}">${b.label}</button>`).join("")}</div>`;
+    ov.style.display = "flex";
+  }
+  function hideOverlay() {
+    const ov = document.querySelector(".game-overlay");
+    if (ov) ov.style.display = "none";
+  }
+
+  /* ── SNAKE ─────────────────────────────────────────────── */
+  const SN_COLS = 22, SN_ROWS = 22;
+  let snCtx = null, snCell = 0;
+  let snRaf = null, snScore = 0, snBest = 0;
+  let snDir = {x:1,y:0}, snNext = {x:1,y:0};
+  let snBody = [], snFood = {x:10,y:10}, snAlive = false;
+  let snSpeed = 145, snLast = 0;
+  // Posições interpoladas para movimento fluido
+  let snVisual = [];
+
+  function resetSnake() {
+    snAlive = false;
+    if (snRaf) { cancelAnimationFrame(snRaf); snRaf = null; }
+
+    const canvas = document.getElementById("snake-canvas");
+    if (!canvas) return;
+    const W = canvas.parentElement.clientWidth || 480;
+    const size = Math.min(W, 480);
+    snCell = size / SN_COLS;
+    snCtx = setupCanvas("snake-canvas", size, size);
+    if (!snCtx) return;
+
+    snScore = 0; snSpeed = 145; snLast = 0;
+    snDir = {x:1,y:0}; snNext = {x:1,y:0};
+    snBody = [{x:5,y:11},{x:4,y:11},{x:3,y:11}];
+    snVisual = snBody.map(s => ({x:s.x, y:s.y}));
+    snFood = snNewFood();
+    document.getElementById("snake-score").textContent = "0";
+    document.getElementById("snake-postgame").style.display = "none";
+
+    const best = localStorage.getItem("snakeBest");
+    snBest = best ? parseInt(best, 10) : 0;
+    document.getElementById("snake-best").textContent = snBest || "—";
+
+    snDrawStatic();
+    showOverlay("🐍","Snake do Tiago","Guie o Tiago pelos hambúrgueres",[{label:"Começar",fn:"startSnake()"}]);
+  }
+
+  function startSnake() {
+    snAlive = false;
+    if (snRaf) { cancelAnimationFrame(snRaf); snRaf = null; }
+    snScore = 0; snSpeed = 145; snLast = 0;
+    snDir = {x:1,y:0}; snNext = {x:1,y:0};
+    snBody = [{x:5,y:11},{x:4,y:11},{x:3,y:11}];
+    snVisual = snBody.map(s => ({x:s.x, y:s.y}));
+    snFood = snNewFood();
+    document.getElementById("snake-score").textContent = "0";
+    document.getElementById("snake-postgame").style.display = "none";
+    hideOverlay();
+    snAlive = true;
+    snLast = 0;
+    snRaf = requestAnimationFrame(snFrame);
+  }
+
+  function snNewFood() {
+    let p;
+    do { p = {x: Math.floor(Math.random()*SN_COLS), y: Math.floor(Math.random()*SN_ROWS)}; }
+    while (snBody.some(s => s.x===p.x && s.y===p.y));
+    return p;
+  }
+
+  // Loop com interpolação: o corpo "lógico" avança a cada snSpeed ms,
+  // mas a posição visual de cada segmento é suavizada a cada frame.
+  function snFrame(ts) {
+    if (!snAlive) return;
+    snRaf = requestAnimationFrame(snFrame);
+    if (!snLast) snLast = ts;
+    const elapsed = ts - snLast;
+
+    if (elapsed >= snSpeed) {
+      snLast = ts;
+      snStep();
+    }
+
+    // Interpolação suave das posições visuais em direção às lógicas
+    const t = Math.min(1, (ts - snLast) / snSpeed);
+    snVisual = snBody.map((seg, i) => {
+      const prev = snVisual[i] || seg;
+      return {
+        x: prev.x + (seg.x - prev.x) * Math.min(1, t * 0.55 + 0.45),
+        y: prev.y + (seg.y - prev.y) * Math.min(1, t * 0.55 + 0.45)
+      };
+    });
+
+    snDrawFrame(t);
+  }
+
+  function snStep() {
+    snDir = {...snNext};
+    const head = {x: snBody[0].x + snDir.x, y: snBody[0].y + snDir.y};
+    if (head.x<0||head.x>=SN_COLS||head.y<0||head.y>=SN_ROWS||snBody.some(s=>s.x===head.x&&s.y===head.y)) {
+      return snGameOver();
+    }
+    snBody.unshift(head);
+    snVisual.unshift({x: snVisual[0]?.x ?? head.x, y: snVisual[0]?.y ?? head.y});
+    if (head.x===snFood.x && head.y===snFood.y) {
+      snScore++;
+      document.getElementById("snake-score").textContent = snScore;
+      snFood = snNewFood();
+      if (snScore % 4 === 0) snSpeed = Math.max(60, snSpeed - 9);
+    } else {
+      snBody.pop();
+      snVisual.pop();
+    }
+  }
+
+  function snGameOver() {
+    snAlive = false;
+    if (snRaf) { cancelAnimationFrame(snRaf); snRaf = null; }
+    snDrawFrame(0);
+
+    if (snScore > snBest) {
+      snBest = snScore;
+      localStorage.setItem("snakeBest", String(snBest));
+    }
+    document.getElementById("snake-best").textContent = snBest || "—";
+
+    const msgs = snScore>=20?["Lenda! O Tiago está satisfeito.","Gian vai ficar com ciúmes do recorde."]:
+                 snScore>=10?["Bom apetite!",snScore+" hambúrgueres. Impressionante."]:
+                 snScore>=4 ?["Quase cheio...",snScore+" hambúrgueres desta vez."]:["O Tiago ficou com fome.","Tenta de novo!"];
+    showOverlay("😵","Game Over!",`${snScore} hambúrguer${snScore!==1?"es":""} · ${msgs[0]}`,[
+      {label:"Jogar de novo",fn:"startSnake()"},{label:"Voltar aos jogos",fn:"location.href='jogos.html'"}
+    ]);
+    setTimeout(() => {
+      document.getElementById("snake-postgame").style.display = "block";
+      carregarTop10Snake();
+    }, 300);
+  }
+
+  function snDrawStatic() {
+    snVisual = snBody.map(s => ({x:s.x, y:s.y}));
+    snDrawFrame(0);
+  }
+
+  function snDrawFrame() {
+    const ctx = snCtx; if (!ctx) return;
+    const C = snCell, W = SN_COLS*C, H = SN_ROWS*C;
+
+    ctx.fillStyle = "#F0F5E8"; ctx.fillRect(0,0,W,H);
+
+    // Grid
+    ctx.strokeStyle = "rgba(160,185,140,.15)"; ctx.lineWidth = 0.5;
+    for (let c=0;c<=SN_COLS;c++){ctx.beginPath();ctx.moveTo(c*C,0);ctx.lineTo(c*C,H);ctx.stroke();}
+    for (let r=0;r<=SN_ROWS;r++){ctx.beginPath();ctx.moveTo(0,r*C);ctx.lineTo(W,r*C);ctx.stroke();}
+
+    // Food — hamburger
+    ctx.save();
+    ctx.translate(snFood.x*C + C/2, snFood.y*C + C/2);
+    const fc = C * 0.38;
+    ctx.fillStyle = "#D4935A"; ctx.beginPath(); ctx.ellipse(0,-fc*.8,fc,fc*.55,0,Math.PI,0); ctx.fill();
+    ctx.fillStyle = "#F0DCA0"; ctx.beginPath(); ctx.ellipse(-fc*.3,-fc*.9,fc*.22,fc*.12,.3,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(fc*.3,-fc*.9,fc*.22,fc*.12,-.3,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#7A4A2A"; ctx.fillRect(-fc,fc*.0,fc*2,fc*.35);
+    ctx.fillStyle = "#5A8A40"; ctx.fillRect(-fc*1.05,fc*.3,fc*2.1,fc*.28);
+    ctx.fillStyle = "#E0A870"; ctx.beginPath(); ctx.ellipse(0,fc*.65,fc,fc*.35,0,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+
+    // Snake body — usa posições visuais interpoladas
+    const visual = snVisual.length ? snVisual : snBody;
+    visual.forEach((seg, i) => {
+      const x = seg.x*C + 2, y = seg.y*C + 2, w = C-4;
+      if (i === 0) {
+        ctx.fillStyle = "#506B45";
+        ctx.beginPath(); ctx.roundRect(x,y,w,w,6); ctx.fill();
+        ctx.strokeStyle = "#2A3E22"; ctx.lineWidth = 1.2; ctx.stroke();
+        drawFace(ctx, IMG_TIAGO, imgTiagoOk, x, y, w, "#506B45", "😄");
+      } else {
+        const t = i / visual.length;
+        ctx.fillStyle = i%2===0 ? "#7A9B6E" : "#A8C49A";
+        ctx.globalAlpha = Math.max(0.35, 1 - t * 0.5);
+        ctx.beginPath(); ctx.roundRect(x,y,w,w,5); ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    });
+  }
+
+  // Teclado
+  document.addEventListener("keydown", e => {
+    const dirs = {ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},
+      w:{x:0,y:-1},s:{x:0,y:1},a:{x:-1,y:0},d:{x:1,y:0},
+      W:{x:0,y:-1},S:{x:0,y:1},A:{x:-1,y:0},D:{x:1,y:0}};
+    if (dirs[e.key]) {
+      const d=dirs[e.key];
+      if(d.x!==-snDir.x||d.y!==-snDir.y) snNext=d;
+      e.preventDefault();
+    }
+    if (e.key === " " && !snAlive) startSnake();
+  });
+
+  // Touch swipe
+  let snTouchX = 0, snTouchY = 0;
+  const snCanvasEl = document.getElementById("snake-canvas");
+  snCanvasEl.addEventListener("touchstart", e => {
+    snTouchX = e.touches[0].clientX; snTouchY = e.touches[0].clientY;
+  }, {passive:true});
+  snCanvasEl.addEventListener("touchend", e => {
+    if (!snAlive) return;
+    const dx = e.changedTouches[0].clientX - snTouchX;
+    const dy = e.changedTouches[0].clientY - snTouchY;
+    if (Math.abs(dx)<8 && Math.abs(dy)<8) return;
+    if (Math.abs(dx)>Math.abs(dy)) {
+      const d = dx>0?{x:1,y:0}:{x:-1,y:0};
+      if(d.x!==-snDir.x||d.y!==-snDir.y) snNext=d;
+    } else {
+      const d = dy>0?{x:0,y:1}:{x:0,y:-1};
+      if(d.x!==-snDir.x||d.y!==-snDir.y) snNext=d;
+    }
+  }, {passive:true});
+
+  function snakeDirInput(dir) {
+    const m={UP:{x:0,y:-1},DOWN:{x:0,y:1},LEFT:{x:-1,y:0},RIGHT:{x:1,y:0}};
+    const d=m[dir];
+    if (d && (d.x!==-snDir.x||d.y!==-snDir.y)) snNext=d;
+    if (!snAlive) startSnake();
+  }
+  window.snakeDirInput = snakeDirInput;
+  window.startSnake = startSnake;
+
+  // Resize: reconstrói o canvas mantendo o jogo
+  window.addEventListener("resize", () => {
+    if (snAlive) return; // evita resetar durante a partida
+    resetSnake();
+  });
+
+  /* ── PLACAR (compartilhado com a API do site) ────────────── */
+  function escJ(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+  window.salvarScore = async function(jogo){
+    const ni=document.getElementById(jogo+"-nome");
+    const me=document.getElementById(jogo+"-save-msg");
+    const btn=ni?.nextElementSibling;
+    const nome=(ni?.value||"").trim();
+    const pts = jogo === "snake" ? snScore : 0;
+    if(!nome){if(me){me.style.color="var(--terracotta)";me.textContent="Informe seu nome.";}if(ni)ni.focus();return;}
+    if(btn){btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';}
+    try{
+      const r=await fetch(SNAKE_API,{method:"POST",body:JSON.stringify({action:"score",jogo,nome,pontos:pts})});
+      const j=await r.json();
+      if(j.sucesso){
+        if(me){me.style.color="var(--sage-dark)";me.textContent="Recorde salvo! 🏆";}
+        if(btn){btn.disabled=true;btn.textContent="Salvo ✓";}
+        if(ni)ni.disabled=true;
+        carregarTop10Snake();
+      } else throw new Error();
+    } catch{
+      if(btn){btn.disabled=false;btn.textContent="Salvar";}
+      if(me){me.style.color="var(--terracotta)";me.textContent="Não conseguimos salvar. Tente novamente.";}
+    }
+  };
+
+  async function carregarTop10Snake(){
+    const el=document.getElementById("snake-top10"); if(!el) return;
+    el.innerHTML=`<h3 class="top10__title">🏆 Top 10 — Snake</h3><p class="top10__loading">Carregando…</p>`;
+    try{
+      const r=await fetch(`${SNAKE_API}?action=top10&jogo=snake`);
+      const d=await r.json();
+      if(!d?.lista?.length){el.innerHTML=`<h3 class="top10__title">🏆 Top 10 — Snake</h3><p class="top10__empty">Nenhum recorde. Seja o primeiro!</p>`;return;}
+      const m=["🥇","🥈","🥉"],cs=["top10__item--gold","top10__item--silver","top10__item--bronze"];
+      el.innerHTML=`<h3 class="top10__title">🏆 Top 10 — Snake</h3><ul class="top10__list">${d.lista.map((it,i)=>`<li class="top10__item ${cs[i]||""}"><span class="top10__pos">${m[i]||(i+1)}</span><span class="top10__name">${escJ(it.nome)}</span><span class="top10__pts">${it.pontos} pts</span></li>`).join("")}</ul>`;
+    } catch{el.innerHTML=`<h3 class="top10__title">🏆 Top 10 — Snake</h3><p class="top10__empty">Não foi possível carregar.</p>`;}
+  }
+
+  resetSnake();
+  </script>
+</body>
+</html>

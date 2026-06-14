@@ -25,7 +25,7 @@
 
     /* ─── ARENAS ─────────────────────────────────────── */
     #arena-menu { display:block;padding:0 0 60px; }
-    #arena-snake,#arena-flappy,#arena-bolo,#arena-docinhos,#arena-look { display:none;min-height:100svh;flex-direction:column;align-items:center;padding-top:80px; }
+    #arena-flappy,#arena-bolo,#arena-docinhos,#arena-look { display:none;min-height:100svh;flex-direction:column;align-items:center;padding-top:80px; }
     .arena-header { width:100%;max-width:520px;margin-inline:auto;padding:0 5%;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between; }
     .arena-title { font-family:var(--font-display);font-size:1.5rem;font-weight:400; }
     .arena-score { font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dark);background:var(--bg-green);padding:.4rem .9rem;border-radius:20px;border:1px solid var(--line-green); }
@@ -127,7 +127,14 @@
     </div>
     <div class="container" style="padding-bottom:80px">
       <div class="jogos-grid">
-        <!-- Snake oculto por ora — não aparece no menu -->
+        <!-- Snake do Tiago (página dedicada) -->
+        <a href="snake.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
+          <span class="jogo-card__emoji">🐍</span>
+          <h2 class="jogo-card__title">Snake do Tiago</h2>
+          <p class="jogo-card__desc">Guie o Tiago pelos hambúrgueres. Quanto mais ele come, mais rápido fica.</p>
+          <p class="jogo-card__record" style="background:var(--bg-green);color:var(--sage-dark)">Clássico 🐍</p>
+          <span class="btn btn--primary btn--sm">Jogar</span>
+        </a>
 
         <!-- Wordle do dia -->
         <a href="wordle.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
@@ -169,36 +176,6 @@
           <span class="btn btn--primary btn--sm">Jogar</span>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- ══ SNAKE (oculto, mas ainda funcional) ══ -->
-  <div id="arena-snake">
-    <button class="arena-back" onclick="voltarMenu()">← Voltar aos jogos</button>
-    <div class="arena-header">
-      <h2 class="arena-title">Snake do Tiago 🐍</h2>
-      <div class="arena-score">Hambúrgueres: <span id="snake-score">0</span></div>
-    </div>
-    <div class="canvas-wrap">
-      <canvas id="snake-canvas" tabindex="0"></canvas>
-    </div>
-    <div class="dpad">
-      <div></div><button onclick="snakeDirInput('UP')" aria-label="Cima">↑</button><div></div>
-      <button onclick="snakeDirInput('LEFT')" aria-label="Esq">←</button>
-      <div style="opacity:.15">·</div>
-      <button onclick="snakeDirInput('RIGHT')" aria-label="Dir">→</button>
-      <div></div><button onclick="snakeDirInput('DOWN')" aria-label="Baixo">↓</button><div></div>
-    </div>
-    <div id="snake-postgame" class="postgame" style="display:none">
-      <div class="save-form">
-        <h3>Salvar seu recorde</h3>
-        <div class="save-form__row">
-          <input type="text" id="snake-nome" class="rsvp__input" placeholder="Seu nome" maxlength="30" autocomplete="name"/>
-          <button class="btn btn--primary btn--sm" onclick="salvarScore('snake')">Salvar</button>
-        </div>
-        <p class="save-form__msg" id="snake-save-msg"></p>
-      </div>
-      <div id="snake-top10"></div>
     </div>
   </div>
 
