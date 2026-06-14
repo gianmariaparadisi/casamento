@@ -12,13 +12,24 @@
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
     .pad-hero {
-      padding: 140px 5% 80px;
-      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a40 16%, #2e1b5e 28%, #7b2d5e 40%, #c85a7a 52%, #e8886a 64%, #f5a84b 74%, #f9cc6e 84%, #fde8a0 91%, #b8d4ef 97%, #ddeeff 100%);
+      padding: 128px 5% 64px;
+      background: linear-gradient(180deg, #0a0a0a 0%, #1a1a40 18%, #2e1b5e 32%, #7b2d5e 46%, #c85a7a 60%, #e8886a 73%, #f5a84b 86%, #fde8a0 100%);
       text-align: center; color: #f0e6d8; position: relative; overflow: hidden;
     }
     .pad-hero::before { content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.16) 0%,transparent 62%); }
     .pad-hero__eyebrow { font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,190,120,.7);margin-bottom:.85rem;position:relative; }
-    .pad-hero__title { font-family:var(--font-display);font-size:clamp(2.5rem,6vw,5rem);font-weight:300;line-height:1.05;margin-bottom:1rem;color:#f5e8d8;position:relative; }
+    .pad-hero__title {
+      font-family:var(--font-display);
+      font-size:clamp(2.35rem,6vw,4.8rem);
+      font-weight:600;
+      line-height:1;
+      margin-bottom:0;
+      color:#f5e8d8;
+      position:relative;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-style:normal;
+    }
     .pad-hero__sub { font-size:.95rem;color:rgba(255,220,180,.7);max-width:480px;margin-inline:auto;line-height:1.85;position:relative; }
 
     .pad-section { padding:4rem 5%; }
@@ -54,6 +65,8 @@
     .traje-foto { border-radius:var(--radius);overflow:hidden;aspect-ratio:2/3;background:var(--bg-main);display:flex;align-items:center;justify-content:center; }
     .traje-foto img { width:100%;height:100%;object-fit:contain;display:block; }
     @media(max-width:600px){
+      .pad-hero { padding: 96px 5% 42px; }
+      .pad-hero__title { font-size:clamp(2rem,11vw,3rem); letter-spacing:.08em; }
       .trajes-fotos { grid-template-columns:repeat(3,1fr); }
       .trajes-fotos--3 { grid-template-columns:repeat(3,1fr); }
     }
@@ -87,7 +100,7 @@
   </header>
 
   <div class="pad-hero">
-    <h1 class="pad-hero__title reveal">Queridos<br><em>padrinhos</em></h1>
+    <h1 class="pad-hero__title reveal">PADRINHOS</h1>
   </div>
 
   <!-- CRONOGRAMA -->
@@ -186,18 +199,6 @@
     </div>
   </div>
 
-  <!-- CONTATO -->
-  <div class="pad-section pad-section--alt" style="text-align:center">
-    <p class="pad-section__eyebrow reveal">IV.</p>
-    <h2 class="pad-section__title reveal">Fale com a gente</h2>
-    <div class="pad-cards" style="max-width:560px">
-      <div class="pad-card reveal">
-        <span class="pad-card__icon">📱</span>
-        <h3 class="pad-card__title">Assessoria</h3>
-        <p class="pad-card__text">Para questões logísticas do dia:<br><strong>Bruno Arruda</strong><br><strong>(14) 99189-8540</strong></p>
-      </div>
-    </div>
-  </div>
 
   <footer class="footer">
     <div class="container footer__inner">
