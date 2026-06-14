@@ -127,7 +127,19 @@
     <p class="game-sub">Junte os símbolos do casamento até formar dois noivos. Agora com movimento real dos tiles na direção do swipe.</p>
     <div class="hud"><div class="hud__pill">Score: <strong id="score">0</strong></div><div class="hud__pill">Melhor: <strong id="best">0</strong></div><div class="hud__pill">Meta: <strong>dois noivos</strong></div></div>
     <section class="game-panel board-wrap">
-      <div class="board" id="board" aria-label="Wedding 2048"></div>
+  
+    <div class="_char-sel" style="display:flex;gap:.75rem;justify-content:center;align-items:center;margin:.75rem 0 .5rem">
+      <span style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">Jogar como</span>
+      <button class="_char-btn" data-char="gian" onclick="set2048Personagem('gian')"
+        style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;font-weight:600;padding:.45rem 1rem;border-radius:999px;border:2px solid var(--sage);background:var(--sage);color:white;cursor:pointer;transition:all .15s">
+        <img src="assets/img/gianface01.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover"> Gian
+      </button>
+      <button class="_char-btn" data-char="tiago" onclick="set2048Personagem('tiago')"
+        style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;font-weight:400;padding:.45rem 1rem;border-radius:999px;border:2px solid var(--line-green);background:var(--white);color:var(--sage-dark);cursor:pointer;transition:all .15s">
+        <img src="assets/img/tiagoface01.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover"> Tiago
+      </button>
+    </div>
+    <div class="board" id="board" aria-label="Wedding 2048"></div>
       <div class="modal" id="startModal"><div class="modal__card"><div class="modal__icon">💍</div><h2 class="modal__title">Junte até o fim</h2><p class="modal__text">Anel vira bouquet, bouquet vira bolo… e dois noivos fecham o jogo.</p><button class="game-btn game-btn--main" id="startBtn">Começar</button></div></div>
       <div class="modal" id="endModal" hidden><div class="modal__card"><div class="modal__icon" id="endIcon">✨</div><h2 class="modal__title" id="endTitle">Fim!</h2><p class="modal__text" id="endText"></p><button class="game-btn game-btn--main" id="againBtn">Jogar de novo</button><div class="save-box"><div class="save-box__row"><input class="save-input" id="playerName" placeholder="Seu nome" maxlength="22"/><button class="game-btn" id="saveBtn">Salvar</button></div><p class="save-msg" id="saveMsg"></p></div></div></div>
     </section>
@@ -139,6 +151,38 @@
   <script>
 
     function lockScroll() { document.documentElement.classList.add("game-locked"); document.body.classList.add("game-locked"); }
+
+    // ── Faces Gian & Tiago ──────────────────────────────
+    const _GIAN_F=[], _TIAGO_F=[];
+    for(let i=1;i<=7;i++){
+      const g=new Image(); g.loaded=false; g.onload=()=>{g.loaded=true;};
+      g.src=`assets/img/gianface${String(i).padStart(2,'0')}.png`; _GIAN_F.push(g);
+      const t=new Image(); t.loaded=false; t.onload=()=>{t.loaded=true;};
+      t.src=`assets/img/tiagoface${String(i).padStart(2,'0')}.png`; _TIAGO_F.push(t);
+    }
+    let _personagem = "gian";
+    let _faceIdx = 0;
+    function _faces(){ return _personagem==="tiago" ? _TIAGO_F : _GIAN_F; }
+    function _nextFace(){ let ni; do{ ni=Math.floor(Math.random()*7); }while(ni===_faceIdx && 7>1); _faceIdx=ni; }
+    function _drawFace(ctx,cx,cy,r){
+      const img=_faces()[_faceIdx];
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.clip();
+      if(img && img.loaded){ ctx.drawImage(img,cx-r,cy-r,r*2,r*2); }
+      else { ctx.fillStyle=_personagem==="tiago"?"#B87B3E":"#7A9B6E"; ctx.fill(); }
+      ctx.restore();
+    }
+
+    function setPersonagem(p){
+      _personagem=p;
+      document.querySelectorAll('._char-btn').forEach(b=>{
+        const on=b.dataset.char===p;
+        b.style.background=on?'var(--sage)':'var(--white)';
+        b.style.color=on?'white':'var(--sage-dark)';
+        b.style.borderColor=on?'var(--sage)':'var(--line-green)';
+        b.style.fontWeight=on?'600':'400';
+      });
+    }
     function unlockScroll() { document.documentElement.classList.remove("game-locked"); document.body.classList.remove("game-locked"); }
 
 
@@ -171,10 +215,35 @@
     const scoreEl=document.getElementById("score"), bestEl=document.getElementById("best");
     const startModal=document.getElementById("startModal"), endModal=document.getElementById("endModal");
     const endIcon=document.getElementById("endIcon"), endTitle=document.getElementById("endTitle"), endText=document.getElementById("endText");
-    const tileDefs=[
-      {icon:"💍",label:"Anel"},{icon:"💐",label:"Bouquet"},{icon:"🎂",label:"Bolo"},{icon:"🍾",label:"Champagne"},
-      {icon:"✈️",label:"Lua de mel"},{icon:"⛪",label:"Altar"},{icon:"🤵",label:"Noivo"},{icon:"✨",label:"Fim"}
-    ];
+    // Personagem: gian ou tiago — altera tiles de noivo
+    let _2048personagem = "gian";
+    function _2048TileDefs(){
+      const noivo = _2048personagem === "tiago"
+        ? `<img src="assets/img/tiagoface0${1+Math.floor(Math.random()*3)}.png" style="width:60%;height:60%;object-fit:cover;border-radius:50%;margin-bottom:.15rem">`
+        : `<img src="assets/img/gianface0${1+Math.floor(Math.random()*3)}.png" style="width:60%;height:60%;object-fit:cover;border-radius:50%;margin-bottom:.15rem">`;
+      const ambos = `<div style="display:flex;gap:3px;justify-content:center">`
+        + `<img src="assets/img/tiagoface01.png" style="width:35%;height:35%;object-fit:cover;border-radius:50%">`
+        + `<img src="assets/img/gianface01.png" style="width:35%;height:35%;object-fit:cover;border-radius:50%">`
+        + `</div>`;
+      return [
+        {icon:"💍",label:"Anel"},{icon:"💐",label:"Bouquet"},
+        {icon:"🎂",label:"Bolo"},{icon:"🍾",label:"Champagne"},
+        {icon:"✈️",label:"Lua de mel"},{icon:"⛪",label:"Altar"},
+        {icon:noivo,label:_2048personagem==="tiago"?"Tiago":"Gian",isHtml:true},
+        {icon:ambos,label:"Para sempre ✨",isHtml:true}
+      ];
+    }
+    function set2048Personagem(p){
+      _2048personagem=p;
+      document.querySelectorAll("._char-btn").forEach(b=>{
+        const on=b.dataset.char===p;
+        b.style.background=on?"var(--sage)":"var(--white)";
+        b.style.color=on?"white":"var(--sage-dark)";
+        b.style.borderColor=on?"var(--sage)":"var(--line-green)";
+        b.style.fontWeight=on?"600":"400";
+      });
+      reset();
+    }
     let tiles=[], nextId=1, score=0, best=Number(localStorage.getItem("w2048best")||0), history=null, busy=false, won=false;
     bestEl.textContent=best;
     function cellPos(r,c){
@@ -185,11 +254,18 @@
       return {x:c*(size+gap),y:r*(size+gap),size};
     }
     function makeTileEl(t, extra=""){
-      const p=cellPos(t.r,t.c), def=tileDefs[Math.min(t.level,tileDefs.length-1)];
+      const p=cellPos(t.r,t.c);
+      const defs=_2048TileDefs();
+      const def=defs[Math.min(t.level,defs.length-1)];
       const el=document.createElement("div");
       el.className=`tile l${Math.min(t.level,7)} ${extra}`;
       el.style.setProperty("--x",p.x+"px"); el.style.setProperty("--y",p.y+"px");
-      el.innerHTML=`<div class="tile__icon">${def.icon}</div><div class="tile__label">${def.label}</div>`;
+      // Tiles de noivo/para sempre usam img real
+      if(def.isHtml){
+        el.innerHTML=`<div class="tile__icon" style="font-size:0">${def.icon}</div><div class="tile__label">${def.label}</div>`;
+      } else {
+        el.innerHTML=`<div class="tile__icon">${def.icon}</div><div class="tile__label">${def.label}</div>`;
+      }
       return el;
     }
     function renderStable(mergedIds=[], newId=null){
