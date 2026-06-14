@@ -94,6 +94,18 @@
     <p class="game-sub">A rolha estoura da garrafa e vira a bolinha. Quebre os blocos com glitter, bolhas e caos elegante.</p>
     <div class="hud"><div class="hud__pill">Score: <strong id="score">0</strong></div><div class="hud__pill">Vidas: <strong id="lives">3</strong></div><div class="hud__pill">Nível: <strong id="level">1</strong></div></div>
     <section class="game-panel breakout-wrap">
+
+    <div class="_char-sel" style="display:flex;gap:.75rem;justify-content:center;align-items:center;margin:.75rem 0 .5rem">
+      <span style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">Jogar como</span>
+      <button class="_char-btn" data-char="gian" onclick="setPersonagem('gian')"
+        style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;font-weight:600;padding:.45rem 1rem;border-radius:999px;border:2px solid var(--sage);background:var(--sage);color:white;cursor:pointer;transition:all .15s">
+        <img src="assets/img/gianface01.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover"> Gian
+      </button>
+      <button class="_char-btn" data-char="tiago" onclick="setPersonagem('tiago')"
+        style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;font-weight:400;padding:.45rem 1rem;border-radius:999px;border:2px solid var(--line-green);background:var(--white);color:var(--sage-dark);cursor:pointer;transition:all .15s">
+        <img src="assets/img/tiagoface01.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover"> Tiago
+      </button>
+    </div>
       <canvas id="gameCanvas" width="620" height="760"></canvas>
       <div class="modal" id="startModal"><div class="modal__card"><div class="modal__icon">🍾</div><h2 class="modal__title">Estourar o champagne</h2><p class="modal__text">Segure e arraste a raquete. A tampa da garrafa vira a bolinha depois do estouro.</p><button class="game-btn game-btn--main" id="startBtn">Começar</button></div></div>
       <div class="modal" id="endModal" hidden><div class="modal__card"><div class="modal__icon" id="endIcon">🥂</div><h2 class="modal__title" id="endTitle">Brinde perfeito</h2><p class="modal__text" id="endText"></p><button class="game-btn game-btn--main" id="againBtn">Jogar de novo</button><div class="save-box"><div class="save-box__row"><input class="save-input" id="playerName" placeholder="Seu nome" maxlength="22"/><button class="game-btn" id="saveBtn">Salvar</button></div><p class="save-msg" id="saveMsg"></p></div></div></div>
@@ -103,8 +115,42 @@
   </main>
   <script>
 
-    function lockScroll() { document.documentElement.classList.add("game-locked"); document.body.classList.add("game-locked"); }
-    function unlockScroll() { document.documentElement.classList.remove("game-locked"); document.body.classList.remove("game-locked"); }
+    let _champScrollY=0;
+    function lockScroll(){_champScrollY=window.scrollY;document.body.style.overflow="hidden";document.body.style.touchAction="none";}
+    function unlockScroll(){document.body.style.overflow="";document.body.style.touchAction="";window.scrollTo(0,_champScrollY);}
+
+    // ── Faces Gian & Tiago ──────────────────────────────
+    const _GIAN_F=[], _TIAGO_F=[];
+    for(let i=1;i<=7;i++){
+      const g=new Image(); g.loaded=false; g.onload=()=>{g.loaded=true;};
+      g.src=`assets/img/gianface${String(i).padStart(2,'0')}.png`; _GIAN_F.push(g);
+      const t=new Image(); t.loaded=false; t.onload=()=>{t.loaded=true;};
+      t.src=`assets/img/tiagoface${String(i).padStart(2,'0')}.png`; _TIAGO_F.push(t);
+    }
+    let _personagem = "gian";
+    let _faceIdx = 0;
+    function _faces(){ return _personagem==="tiago" ? _TIAGO_F : _GIAN_F; }
+    function _nextFace(){ let ni; do{ ni=Math.floor(Math.random()*7); }while(ni===_faceIdx && 7>1); _faceIdx=ni; }
+    function _drawFace(ctx,cx,cy,r){
+      const img=_faces()[_faceIdx];
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.clip();
+      if(img && img.loaded){ ctx.drawImage(img,cx-r,cy-r,r*2,r*2); }
+      else { ctx.fillStyle=_personagem==="tiago"?"#B87B3E":"#7A9B6E"; ctx.fill(); }
+      ctx.restore();
+    }
+
+    function setPersonagem(p){
+      _personagem=p;
+      document.querySelectorAll('._char-btn').forEach(b=>{
+        const on=b.dataset.char===p;
+        b.style.background=on?'var(--sage)':'var(--white)';
+        b.style.color=on?'white':'var(--sage-dark)';
+        b.style.borderColor=on?'var(--sage)':'var(--line-green)';
+        b.style.fontWeight=on?'600':'400';
+      });
+    }
+
 
 
     const SCORE_API = (typeof API_URL !== "undefined") ? API_URL : "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
@@ -155,7 +201,7 @@
     function brickBurst(b){const cx=b.x+b.w/2, cy=b.y+b.h/2; for(let i=0;i<44+(b.type===4?42:0);i++)spawnParticle(cx,cy,Math.random()*Math.PI*2,1+Math.random()*5.6,Math.random()<.72?"glitter":"bubble",colors[b.type]?.[1]);}
     function loop(ts){const dt=Math.min((ts-last)/16.67,2);last=ts; if(state==="intro"){const t=Math.min((ts-introStart)/1200,1); if(t<.08) popBurst(W*.48,H-142); ball.x=W*.48+68*t; ball.y=H-142-215*t+45*t*t; if(Math.random()<.75)spawnParticle(ball.x,ball.y,Math.random()*Math.PI*2,1+Math.random()*3,"bubble"); if(t>=1)launchAfterIntro();} else if(state==="play") update(dt); updateParticles(dt); draw(); if(state!=="idle") raf=requestAnimationFrame(loop);}
     function update(dt){ball.x+=ball.vx*dt;ball.y+=ball.vy*dt; if(ball.x<ball.r){ball.x=ball.r;ball.vx=Math.abs(ball.vx);} if(ball.x>W-ball.r){ball.x=W-ball.r;ball.vx=-Math.abs(ball.vx);} if(ball.y<ball.r+8){ball.y=ball.r+8;ball.vy=Math.abs(ball.vy);} if(ball.y>H+40){lives--;updateHud(); if(lives<=0)return finish(false); resetBall();state="intro";introStart=performance.now();}
-      if(ball.y+ball.r>paddle.y&&ball.y-ball.r<paddle.y+paddle.h&&ball.x>paddle.x&&ball.x<paddle.x+paddle.w&&ball.vy>0){const hit=(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2);ball.vx=hit*5.2;ball.vy=-Math.sqrt(Math.max(14,ball.speed*ball.speed-ball.vx*ball.vx));for(let i=0;i<12;i++)spawnParticle(ball.x,paddle.y,Math.PI*1.5+(Math.random()-.5),1+Math.random()*3,"glitter");}
+      if(ball.y+ball.r>paddle.y&&ball.y-ball.r<paddle.y+paddle.h&&ball.x>paddle.x&&ball.x<paddle.x+paddle.w&&ball.vy>0){ _nextFace();const hit=(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2);ball.vx=hit*5.2;ball.vy=-Math.sqrt(Math.max(14,ball.speed*ball.speed-ball.vx*ball.vx));for(let i=0;i<12;i++)spawnParticle(ball.x,paddle.y,Math.PI*1.5+(Math.random()-.5),1+Math.random()*3,"glitter");}
       for(let i=bricks.length-1;i>=0;i--){const b=bricks[i]; if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h){const px=ball.x-ball.vx*dt, py=ball.y-ball.vy*dt; if(px<b.x||px>b.x+b.w)ball.vx*=-1; else ball.vy*=-1; b.hits--; brickBurst(b); score += b.type===4?55: b.type===5?70:20; if(b.hits<=0)bricks.splice(i,1); updateHud(); break;}}
       if(!bricks.length){level++;score+=150;updateHud(); if(level>3) finish(true); else {makeLevel();state="intro";introStart=performance.now();}}
     }
@@ -167,7 +213,16 @@
       ctx.fillStyle="rgba(255,255,255,.25)";for(const b of bubbles){ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.strokeStyle="rgba(255,255,255,.65)";ctx.stroke();}
       bricks.forEach(b=>{const g=ctx.createLinearGradient(b.x,b.y,b.x,b.y+b.h);g.addColorStop(0,colors[b.type][0]);g.addColorStop(1,colors[b.type][1]);ctx.fillStyle=g;ctx.strokeStyle="rgba(110,70,30,.22)";ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,9);ctx.fill();ctx.stroke();ctx.fillStyle="rgba(255,255,255,.38)";ctx.beginPath();ctx.roundRect(b.x+5,b.y+4,b.w-10,5,3);ctx.fill(); if(b.hits>1){ctx.fillStyle="rgba(70,35,20,.35)";ctx.font="700 14px Inter";ctx.textAlign="center";ctx.fillText("×2",b.x+b.w/2,b.y+19);} });
       drawBottle(); ctx.fillStyle="rgba(122,83,41,.18)";ctx.beginPath();ctx.ellipse(W/2,H-46,190,20,0,0,Math.PI*2);ctx.fill();
-      const pg=ctx.createLinearGradient(paddle.x,paddle.y,paddle.x,paddle.y+paddle.h);pg.addColorStop(0,"#FFFFFF");pg.addColorStop(1,"#D9B675");ctx.fillStyle=pg;ctx.strokeStyle="#B48842";ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(paddle.x,paddle.y,paddle.w,paddle.h,999);ctx.fill();ctx.stroke();
+      // Rosto grande como raquete!
+      const pcx = paddle.x + paddle.w/2;
+      const pcy = paddle.y + paddle.h/2;
+      const pr  = paddle.h * 1.8; // bem maior que o paddle
+      _drawFace(ctx, pcx, pcy, pr);
+      // Borda dourada
+      ctx.save(); ctx.strokeStyle="#B48842"; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.arc(pcx, pcy, pr+1.5, 0, Math.PI*2); ctx.stroke();
+      ctx.restore();
+
       drawCork();
       particles.forEach(p=>{const a=Math.max(0,p.life/p.max);ctx.globalAlpha=Math.min(1,a*1.4);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);if(p.kind==="bubble"){ctx.strokeStyle="rgba(255,255,255,.82)";ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.stroke();}else{ctx.fillStyle=p.col;ctx.beginPath();ctx.moveTo(0,-p.r*1.8);ctx.lineTo(p.r*.7,-p.r*.35);ctx.lineTo(p.r*1.8,0);ctx.lineTo(p.r*.7,p.r*.35);ctx.lineTo(0,p.r*1.8);ctx.lineTo(-p.r*.7,p.r*.35);ctx.lineTo(-p.r*1.8,0);ctx.lineTo(-p.r*.7,-p.r*.35);ctx.closePath();ctx.fill();}ctx.restore();ctx.globalAlpha=1;});
       if(state==="intro"){ctx.fillStyle="rgba(90,60,30,.62)";ctx.font="600 13px Inter";ctx.textAlign="center";ctx.fillText("pop!",W*.5,H-220);}
