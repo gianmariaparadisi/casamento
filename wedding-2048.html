@@ -108,15 +108,7 @@
     .legend span{border-radius:999px;padding:.36rem .45rem;font-size:.65rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center;border:1px solid rgba(90,50,20,.16);box-shadow:0 4px 12px rgba(80,50,20,.07);}
     @media(max-width:520px){.board{--gap:8px;border-radius:16px}.tile,.cell{border-radius:12px}.legend{grid-template-columns:repeat(2,1fr)}}
 
-    /* ─── MOBILE: trava rolagem da página durante o jogo ─────── */
-    html, body { overscroll-behavior: none; }
-    @media (max-width: 640px) {
-      html.game-locked, body.game-locked {
-        overflow: hidden;
-        height: 100%;
-        touch-action: none;
-      }
-    }
+
   </style>
 </head>
 <body class="game-page">
@@ -150,7 +142,8 @@
   </main>
   <script>
 
-    function lockScroll() { document.documentElement.classList.add("game-locked"); document.body.classList.add("game-locked"); }
+    let _w2ScrollY=0;
+    function lockScroll(){_w2ScrollY=window.scrollY;document.body.style.overflow="hidden";document.body.style.touchAction="none";}
 
     // ── Faces Gian & Tiago ──────────────────────────────
     const _GIAN_F=[], _TIAGO_F=[];
@@ -183,7 +176,7 @@
         b.style.fontWeight=on?'600':'400';
       });
     }
-    function unlockScroll() { document.documentElement.classList.remove("game-locked"); document.body.classList.remove("game-locked"); }
+    function unlockScroll(){document.body.style.overflow="";document.body.style.touchAction="";window.scrollTo(0,_w2ScrollY);}
 
 
     const SCORE_API = (typeof API_URL !== "undefined") ? API_URL : "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
