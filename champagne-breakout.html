@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Champagne Breakout — Tiago e Gian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+
+    :root{
+      --game-gold:#C8A050;
+      --game-gold-soft:#F4E1B8;
+      --game-ink:#15120D;
+      --game-wine:#6B2737;
+      --game-blush:#F3DED2;
+    }
+    body.game-page{
+      background:
+        radial-gradient(circle at top left, rgba(200,160,80,.16), transparent 36rem),
+        radial-gradient(circle at 85% 20%, rgba(122,155,110,.18), transparent 30rem),
+        var(--bg-main);
+      min-height:100svh;
+    }
+    .game-main{padding:118px 0 72px;}
+    .game-shell{width:92%;max-width:980px;margin-inline:auto;}
+    .game-back{display:inline-flex;align-items:center;gap:.45rem;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-dark);margin-bottom:1.25rem;text-decoration:underline;text-underline-offset:4px;}
+    .game-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1.5rem;align-items:end;margin-bottom:1.25rem;}
+    .game-kicker{font-size:.74rem;letter-spacing:.28em;text-transform:uppercase;color:var(--sage);margin-bottom:.35rem;}
+    .game-title{font-family:var(--font-display);font-size:clamp(2.45rem,7vw,4.7rem);font-weight:300;line-height:1;color:var(--text-main);}
+    .game-sub{max-width:560px;color:var(--text-muted);font-size:.95rem;line-height:1.8;margin-top:.9rem;}
+    .game-statbar{display:flex;gap:.55rem;flex-wrap:wrap;justify-content:flex-end;}
+    .game-stat{background:rgba(255,255,255,.72);border:1px solid var(--line-green);border-radius:999px;padding:.48rem .8rem;box-shadow:var(--shadow);font-size:.74rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--sage-dark);white-space:nowrap;}
+    .game-board-card{position:relative;background:rgba(255,255,255,.62);border:1px solid var(--line-green);border-radius:var(--radius-lg);box-shadow:var(--shadow-green);padding:clamp(.7rem,2vw,1rem);overflow:hidden;}
+    .game-board-card::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,0));pointer-events:none;}
+    .canvas-frame{position:relative;z-index:1;width:100%;max-width:520px;margin-inline:auto;}
+    canvas.game-canvas{display:block;width:100%;touch-action:none;border-radius:calc(var(--radius-lg) - 3px);border:1px solid rgba(80,107,69,.28);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);background:#111;}
+    .game-actions{position:relative;z-index:1;display:flex;gap:.65rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;}
+    .game-overlay{position:absolute;z-index:5;inset:clamp(.7rem,2vw,1rem);display:flex;align-items:center;justify-content:center;text-align:center;border-radius:calc(var(--radius-lg) - 3px);background:rgba(244,241,235,.93);backdrop-filter:blur(6px);padding:2rem;}
+    .game-overlay[hidden]{display:none;}
+    .overlay-card{max-width:430px;}
+    .overlay-icon{font-size:3.2rem;margin-bottom:.85rem;}
+    .overlay-title{font-family:var(--font-display);font-size:clamp(2rem,6vw,3.2rem);font-weight:300;line-height:1.05;margin-bottom:.65rem;}
+    .overlay-text{color:var(--text-muted);font-size:.94rem;line-height:1.75;margin-bottom:1.25rem;}
+    .overlay-buttons{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;}
+    .score-panel{margin-top:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .save-card,.top-card{background:rgba(255,255,255,.7);border:1px solid var(--line-green);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:1.15rem;}
+    .score-panel h3{font-family:var(--font-display);font-size:1.35rem;font-weight:400;margin-bottom:.65rem;}
+    .save-row{display:flex;gap:.55rem;}
+    .save-row input{min-width:0;flex:1;background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:.78rem .85rem;font:inherit;color:var(--text-main);}
+    .save-msg{font-size:.78rem;color:var(--text-muted);min-height:1.3rem;margin-top:.45rem;}
+    .top-list{list-style:none;margin:0;padding:0;display:grid;gap:.42rem;}
+    .top-list li{display:flex;align-items:center;gap:.7rem;background:var(--bg-main);border:1px solid var(--line);border-radius:var(--radius);padding:.55rem .65rem;font-size:.84rem;}
+    .top-pos{width:1.8rem;font-family:var(--font-display);font-size:1.1rem;color:var(--terracotta);text-align:center;}
+    .top-name{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .top-pts{font-weight:700;color:var(--sage-dark);}
+    @media(max-width:720px){
+      .game-main{padding-top:100px;}
+      .game-hero{grid-template-columns:1fr;align-items:start;}
+      .game-statbar{justify-content:flex-start;}
+      .score-panel{grid-template-columns:1fr;}
+      .save-row{flex-direction:column;}
+      .save-row .btn{width:100%;}
+    }
+
+
+  </style>
+</head>
+<body class="game-page">
+
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">Tiago e Gian</a>
+      <nav class="nav__links" id="navLinks">
+        <a href="index.html#evento">O Dia</a>
+        <a href="index.html#cerimonia">Local & Orientações</a>
+        <a href="presentes.html">Presentes</a>
+        <a href="jogos.html" class="nav__key" aria-label="Segredo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3"/></svg>
+        </a>
+        <a href="index.html#rsvp" class="nav__cta">Confirmar presença</a>
+      </nav>
+      <button class="nav__hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+
+  <main class="game-main">
+    <div class="game-shell">
+      <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
+      <section class="game-hero">
+        <div>
+          <p class="game-kicker">brinde arcade</p>
+          <h1 class="game-title">Champagne Breakout</h1>
+          <p class="game-sub">Rebata a rolha de champagne, quebre os blocos dourados e colete power-ups. São 3 fases: clássico, coração e arco de casamento.</p>
+        </div>
+        <div class="game-statbar" aria-live="polite">
+          <span class="game-stat">Score: <strong id="score">0</strong></span>
+          <span class="game-stat">Fase: <strong id="level">1</strong></span>
+          <span class="game-stat">Vidas: <strong id="lives">♥♥♥</strong></span>
+          <span class="game-stat">Best: <strong id="best">0</strong></span>
+        </div>
+      </section>
+      <section class="game-board-card">
+        <div class="canvas-frame"><canvas id="gameCanvas" class="game-canvas" aria-label="Champagne Breakout" tabindex="0"></canvas></div>
+        <div id="overlay" class="game-overlay">
+          <div class="overlay-card">
+            <div class="overlay-icon">🍾</div>
+            <h2 class="overlay-title">Champagne Breakout</h2>
+            <p class="overlay-text">Arraste a raquete para rebater a rolha. Quebre tudo sem deixar a rolha escapar.</p>
+            <div class="overlay-buttons"><button class="btn btn--primary" id="startBtn">Estourar o champagne</button><a class="btn btn--outline" href="jogos.html">Voltar</a></div>
+          </div>
+        </div>
+        <div class="game-actions">
+          <button class="btn btn--outline" id="pauseBtn">Pausar</button>
+          <button class="btn btn--outline" id="restartBtn">Recomeçar</button>
+        </div>
+      </section>
+      <section class="score-panel">
+        <div class="save-card">
+          <h3>Salvar recorde</h3>
+          <div class="save-row"><input id="playerName" maxlength="30" placeholder="Seu nome" autocomplete="name" /><button class="btn btn--primary btn--sm" id="saveScoreBtn">Salvar</button></div>
+          <p class="save-msg" id="saveMsg"></p>
+        </div>
+        <div class="top-card"><h3>Top 10</h3><ol class="top-list" id="topList"></ol></div>
+      </section>
+    </div>
+  </main>
+
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__names">Tiago e Gian</p>
+      <p class="footer__date">12 · 12 · 2026</p>
+      <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script>
+
+"use strict";
+const GAME_KEY="champagne-breakout";
+window.currentGameScore=0;
+const DPR=Math.min(window.devicePixelRatio||1,3);
+const canvas=document.getElementById("gameCanvas"), ctx=canvas.getContext("2d");
+const scoreEl=document.getElementById("score"), levelEl=document.getElementById("level"), livesEl=document.getElementById("lives"), bestEl=document.getElementById("best"), overlay=document.getElementById("overlay"), pauseBtn=document.getElementById("pauseBtn");
+let W=480,H=590,raf=null,running=false,paused=false,last=0,score=0,lives=3,level=1,balls=[],blocks=[],powerups=[],particles=[],paddle={x:0,y:0,w:112,h:16},multiUntil=0,wideUntil=0,slowUntil=0;
+function resize(){const max=Math.min(520,canvas.parentElement.clientWidth||480);W=max;H=Math.round(max*1.18);canvas.width=W*DPR;canvas.height=H*DPR;canvas.style.width=W+"px";canvas.style.height=H+"px";ctx.setTransform(DPR,0,0,DPR,0,0);paddle.y=H-46;paddle.x=Math.max(16,Math.min(W-paddle.w-16,paddle.x||W/2-paddle.w/2));draw();}
+window.addEventListener("resize",resize,{passive:true});
+function best(){return Number(localStorage.getItem("champagneBreakoutBest")||0);} function setBest(v){localStorage.setItem("champagneBreakoutBest",String(v));bestEl.textContent=v;}
+function updateHud(){scoreEl.textContent=score;levelEl.textContent=level;livesEl.textContent="♥".repeat(lives)+"♡".repeat(3-lives);bestEl.textContent=best();window.currentGameScore=score;}
+function rounded(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function showOverlay(icon,title,text,primary="Estourar o champagne"){overlay.hidden=false;overlay.innerHTML=`<div class="overlay-card"><div class="overlay-icon">${icon}</div><h2 class="overlay-title">${title}</h2><p class="overlay-text">${text}</p><div class="overlay-buttons"><button class="btn btn--primary" id="overlayPrimary">${primary}</button><a class="btn btn--outline" href="jogos.html">Voltar</a></div></div>`;document.getElementById("overlayPrimary").addEventListener("click",startGame);} function hideOverlay(){overlay.hidden=true;}
+function makeBall(){return {x:W/2,y:H-78,vx:(Math.random()>.5?1:-1)*3.3,vy:-5.2,r:9,stuck:false};}
+function addBlock(x,y,w,h,type="normal"){
+  const hp=type==="strong"?2:1; blocks.push({x,y,w,h,type,hp,max:hp});
+}
+function createLevel(n){blocks=[];powerups=[];particles=[];const cols=8,gap=7,bw=(W-40-(cols-1)*gap)/cols,bh=22,top=74;
+  if(n===1){for(let r=0;r<5;r++)for(let c=0;c<cols;c++){const type=(r===1&&c%3===0)?"strong":(r===3&&c%4===1)?"sparkle":(r===0&&c===4)?"gold":"normal";addBlock(20+c*(bw+gap),top+r*(bh+gap),bw,bh,type);}}
+  if(n===2){const map=["01100110","11111111","11111111","01111110","00111100","00011000"];map.forEach((row,r)=>[...row].forEach((v,c)=>{if(v==="1"){const type=(r===1&&c%2===0)?"strong":(r===3&&c===3)?"sparkle":(r===0&&c===2)?"gold":"heart";addBlock(20+c*(bw+gap),top+r*(bh+gap),bw,bh,type);}}));}
+  if(n===3){for(let r=0;r<7;r++)for(let c=0;c<cols;c++){const center=(cols-1)/2;const d=Math.abs(c-center);const should=(r<3&&d<=r+1)||(r>=3&&d>=2&&d<=3.5); if(should){const type=(r===0||r===6)?"gold":(c===1||c===6)?"strong":(r===4&&c===3)?"sparkle":"ring";addBlock(20+c*(bw+gap),top+r*(bh+gap),bw,bh,type);}}}
+}
+function resetAll(){score=0;lives=3;level=1;paused=false;wideUntil=slowUntil=multiUntil=0;paddle={x:W/2-56,y:H-46,w:112,h:16};balls=[makeBall()];createLevel(level);updateHud();draw();}
+function startGame(){resetAll();running=true;hideOverlay();last=performance.now();if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);}
+function restartLevel(){balls=[makeBall()];paddle.x=W/2-paddle.w/2;}
+function endGame(title="A rolha escapou…"){running=false;if(raf)cancelAnimationFrame(raf);raf=null;if(score>best())setBest(score);const text=score>=1200?"Brinde perfeito. Essa partida merece champagne de verdade.":score>=600?"Belo brinde. Os blocos sentiram.":"A rolha escapou, mas a festa continua.";showOverlay("🍾",title,`${score} pontos. ${text}`,"Jogar de novo");}
+function victory(){running=false;if(raf)cancelAnimationFrame(raf);raf=null;if(score>best())setBest(score);showOverlay("🥂","Brinde perfeito!",`${score} pontos. Você zerou as 3 fases do champagne.`,"Jogar de novo");}
+function burst(x,y,color,n=12){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*6,vy:(Math.random()-.5)*6,life:1,color,r:2+Math.random()*3});}
+function spawnPower(x,y){const types=["wide","slow","multi","life","bonus"]; if(Math.random()<.26) powerups.push({x,y,type:types[Math.floor(Math.random()*types.length)],vy:2.1,size:22});}
+function hitBlock(b){b.hp--; if(b.hp>0){score+=7;burst(b.x+b.w/2,b.y+b.h/2,"#F4E1B8",6);return false;} score += b.type==="gold"?50:b.type==="strong"?25:10; if(b.type==="sparkle"){score+=explode(b);} burst(b.x+b.w/2,b.y+b.h/2,b.type==="gold"?"#C8A050":"#F4E1B8",16); spawnPower(b.x+b.w/2,b.y+b.h/2); return true;}
+function explode(block){let bonus=0; for(const b of blocks){if(b!==block && Math.hypot((b.x+b.w/2)-(block.x+block.w/2),(b.y+b.h/2)-(block.y+block.h/2))<70){b.hp=0;bonus+=15;burst(b.x+b.w/2,b.y+b.h/2,"#C8A050",10);}} return bonus;}
+function nextLevel(){level++; if(level>3)return victory(); createLevel(level); balls=[makeBall()]; paddle.x=W/2-paddle.w/2; paused=true; updateHud(); showOverlay("✨",`Fase ${level}`,level===2?"Agora em formato de coração.":"Agora no arco dos noivos.","Continuar"); document.getElementById("overlayPrimary").onclick=()=>{hideOverlay();paused=false;last=performance.now(); if(!running){running=true;raf=requestAnimationFrame(loop);}};}
+function applyPower(p){if(p.type==="wide"){paddle.w=Math.min(W*.42,paddle.w+34);wideUntil=performance.now()+9000;} if(p.type==="slow"){slowUntil=performance.now()+7500;} if(p.type==="multi"){const base=balls[0]||makeBall(); balls.push({...base,vx:-Math.abs(base.vx)-1,vy:-Math.abs(base.vy)}, {...base,vx:Math.abs(base.vx)+1,vy:-Math.abs(base.vy)});} if(p.type==="life"){lives=Math.min(5,lives+1);} if(p.type==="bonus"){score+=100; burst(p.x,p.y,"#C8A050",20);} updateHud();}
+function movePaddle(clientX){const rect=canvas.getBoundingClientRect(); const x=(clientX-rect.left)*(W/rect.width); paddle.x=Math.max(12,Math.min(W-paddle.w-12,x-paddle.w/2));}
+canvas.addEventListener("pointermove",e=>{e.preventDefault();movePaddle(e.clientX);});canvas.addEventListener("pointerdown",e=>{e.preventDefault(); if(!running)startGame(); movePaddle(e.clientX);});
+document.addEventListener("keydown",e=>{if(e.key==="ArrowLeft")paddle.x=Math.max(12,paddle.x-32); if(e.key==="ArrowRight")paddle.x=Math.min(W-paddle.w-12,paddle.x+32); if(e.key===" "){e.preventDefault(); if(!running)startGame(); else {paused=!paused; pauseBtn.textContent=paused?"Continuar":"Pausar";}}});
+function loop(ts){if(!running)return;const dt=Math.min(33,ts-last)/16.67;last=ts;if(!paused){const now=performance.now(); if(wideUntil && now>wideUntil){paddle.w=Math.max(112,paddle.w-34);wideUntil=0;} const slow=slowUntil&&now<slowUntil?.72:1;
+  for(const ball of balls){ball.x+=ball.vx*dt*slow;ball.y+=ball.vy*dt*slow;if(ball.x<ball.r){ball.x=ball.r;ball.vx=Math.abs(ball.vx);} if(ball.x>W-ball.r){ball.x=W-ball.r;ball.vx=-Math.abs(ball.vx);} if(ball.y<ball.r+8){ball.y=ball.r+8;ball.vy=Math.abs(ball.vy);} if(ball.y>H+50){ball.dead=true;}
+    if(ball.y+ball.r>=paddle.y && ball.y-ball.r<=paddle.y+paddle.h && ball.x>=paddle.x && ball.x<=paddle.x+paddle.w && ball.vy>0){const hit=(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2);ball.vx=hit*5.8;ball.vy=-Math.abs(ball.vy)-.08;ball.y=paddle.y-ball.r-1;burst(ball.x,ball.y,"#F4E1B8",8);}
+    for(const b of blocks){if(b.hp<=0)continue; if(ball.x+ball.r>b.x && ball.x-ball.r<b.x+b.w && ball.y+ball.r>b.y && ball.y-ball.r<b.y+b.h){const prevY=ball.y-ball.vy*dt*slow; if(prevY<b.y || prevY>b.y+b.h) ball.vy*=-1; else ball.vx*=-1; hitBlock(b); break;}}
+  }
+  balls=balls.filter(b=>!b.dead); if(!balls.length){lives--; if(lives<=0){updateHud();return endGame();} restartLevel();}
+  blocks=blocks.filter(b=>b.hp>0); if(!blocks.length){updateHud();return nextLevel();}
+  powerups.forEach(p=>{p.y+=p.vy*dt;if(p.y+p.size>paddle.y && p.x>paddle.x && p.x<paddle.x+paddle.w){p.hit=true;applyPower(p);}}); powerups=powerups.filter(p=>!p.hit&&p.y<H+40);
+  particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.08*dt;p.life-=.025*dt;});particles=particles.filter(p=>p.life>0); updateHud();}
+ draw(); raf=requestAnimationFrame(loop);}
+function blockColor(b){if(b.type==="gold")return ["#F4E1B8","#C8A050"]; if(b.type==="strong")return ["#B87B3E","#6B2737"]; if(b.type==="sparkle")return ["#EBF0E6","#7A9B6E"]; if(b.type==="heart")return ["#F3DED2","#B87B3E"]; if(b.type==="ring")return ["#FFFFFF","#C8A050"]; return ["#F8F4EE","#C8A050"];}
+function draw(){ctx.clearRect(0,0,W,H);const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,"#09070A");g.addColorStop(.62,"#17120D");g.addColorStop(1,"#BFA05F");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle="rgba(244,225,184,.06)";for(let i=0;i<38;i++){ctx.beginPath();ctx.arc((i*43)%W,(i*89)%H,1+(i%4),0,Math.PI*2);ctx.fill();}
+  for(const b of blocks){const [a,c]=blockColor(b);const gr=ctx.createLinearGradient(b.x,b.y,b.x,b.y+b.h);gr.addColorStop(0,a);gr.addColorStop(1,c);ctx.fillStyle=gr;ctx.strokeStyle="rgba(255,255,255,.32)";ctx.lineWidth=1;rounded(b.x,b.y,b.w,b.h,6);ctx.fill();ctx.stroke();if(b.hp>1){ctx.fillStyle="rgba(255,255,255,.75)";ctx.font="12px Inter, sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("×2",b.x+b.w/2,b.y+b.h/2);}}
+  ctx.fillStyle="rgba(244,225,184,.18)";rounded(paddle.x,paddle.y,paddle.w,paddle.h,9);ctx.fill();ctx.strokeStyle="#F4E1B8";ctx.stroke();ctx.fillStyle="#C8A050";ctx.fillRect(paddle.x+10,paddle.y+3,paddle.w-20,2);
+  for(const ball of balls){ctx.shadowBlur=16;ctx.shadowColor="#F4E1B8";ctx.fillStyle="#F8E8B8";ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle="#8B5A2B";ctx.fillRect(ball.x-4,ball.y-8,8,16);}
+  const labels={wide:"↔",slow:"⏱",multi:"✦",life:"♥",bonus:"+"}; for(const p of powerups){ctx.fillStyle="rgba(244,241,235,.92)";ctx.beginPath();ctx.arc(p.x,p.y,p.size/2,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#C8A050";ctx.stroke();ctx.fillStyle="#506B45";ctx.font="18px serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(labels[p.type],p.x,p.y+1);} 
+  for(const p of particles){ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}
+  if(paused){ctx.fillStyle="rgba(244,241,235,.72)";ctx.fillRect(0,0,W,H);ctx.fillStyle="#2A2820";ctx.font="42px Georgia";ctx.textAlign="center";ctx.fillText("Pausa",W/2,H/2);}}
+document.getElementById("startBtn")?.addEventListener("click",startGame);document.getElementById("restartBtn").addEventListener("click",startGame);pauseBtn.addEventListener("click",()=>{if(!running)return;paused=!paused;pauseBtn.textContent=paused?"Continuar":"Pausar";});resize();setBest(best());resetAll();showOverlay("🍾","Champagne Breakout","Arraste a raquete para rebater a rolha. Quebre tudo sem deixar a rolha escapar.","Estourar o champagne");
+
+const GAME_API = (typeof API_URL !== "undefined")
+  ? API_URL
+  : "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
+function escGame(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");}
+function setSaveMsg(text, ok){const el=document.getElementById("saveMsg"); if(el){el.textContent=text; el.style.color=ok?"var(--sage-dark)":"var(--terracotta)";}}
+async function saveRemoteScore(){
+  const input=document.getElementById("playerName");
+  const btn=document.getElementById("saveScoreBtn");
+  const nome=(input?.value||"").trim();
+  const pontos=Math.max(0, Math.round(window.currentGameScore||0));
+  if(!nome){setSaveMsg("Coloque seu nome para salvar no placar.", false); input?.focus(); return;}
+  if(!pontos){setSaveMsg("Jogue uma partida antes de salvar.", false); return;}
+  btn.disabled=true; btn.textContent="Salvando…";
+  try{
+    const resp=await fetch(GAME_API,{method:"POST",body:JSON.stringify({action:"score",jogo:GAME_KEY,nome,pontos})});
+    const json=await resp.json();
+    if(!json?.sucesso) throw new Error("API sem sucesso");
+    setSaveMsg("Recorde salvo! 🏆", true);
+    btn.textContent="Salvo ✓";
+    input.disabled=true;
+    loadTop10();
+  }catch(err){
+    btn.disabled=false; btn.textContent="Salvar";
+    setSaveMsg("Não conseguimos salvar agora. Tente novamente.", false);
+  }
+}
+async function loadTop10(){
+  const el=document.getElementById("topList"); if(!el) return;
+  el.innerHTML='<li><span class="top-name">Carregando placar…</span></li>';
+  try{
+    const resp=await fetch(`${GAME_API}?action=top10&jogo=${encodeURIComponent(GAME_KEY)}`);
+    const data=await resp.json();
+    const list=data?.lista||[];
+    if(!list.length){el.innerHTML='<li><span class="top-name">Seja o primeiro no placar.</span></li>';return;}
+    const medals=["🥇","🥈","🥉"];
+    el.innerHTML=list.slice(0,10).map((it,i)=>`<li><span class="top-pos">${medals[i]||i+1}</span><span class="top-name">${escGame(it.nome)}</span><span class="top-pts">${Number(it.pontos)||0} pts</span></li>`).join("");
+  }catch(err){ el.innerHTML='<li><span class="top-name">Placar indisponível por enquanto.</span></li>'; }
+}
+document.getElementById("saveScoreBtn")?.addEventListener("click", saveRemoteScore);
+loadTop10();
+
+  </script>
+</body>
+</html>
