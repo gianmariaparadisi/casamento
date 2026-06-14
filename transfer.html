@@ -48,6 +48,42 @@
     .transfer__sucesso-icon { font-size:2.5rem;margin-bottom:.75rem; }
     .transfer__sucesso h3 { font-family:var(--font-display);font-size:1.7rem;font-weight:300;margin-bottom:.5rem; }
     .transfer__sucesso p { font-size:.9rem;color:var(--text-muted);line-height:1.7; }
+
+
+    .transfer-search__row { display:flex;gap:.75rem;align-items:center; }
+    .transfer-search__row .rsvp__input { flex:1; }
+    @media(max-width:600px){ .transfer-search__row{flex-direction:column;align-items:stretch;} }
+
+    .transfer__resultados { margin-top:1rem; }
+    .transfer-convidado__card { display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--line-green); }
+    .transfer-convidado__card:last-child { border-bottom:none; }
+    .transfer-convidado__nome { font-size:.95rem;font-weight:600;color:var(--text-main);margin-bottom:.2rem; }
+    .transfer-convidado__meta { font-size:.78rem;color:var(--text-muted);line-height:1.45; }
+    .transfer__badge { display:inline-flex;align-items:center;border-radius:999px;padding:.18rem .55rem;font-size:.72rem;font-weight:600;background:var(--bg-green);color:var(--sage-dark);border:1px solid var(--line-green);margin-left:.35rem;white-space:nowrap; }
+    .transfer__badge--vazio { background:var(--bg-soft);color:var(--text-muted);border-color:var(--line); }
+
+    .transfer-editor__head { padding:.9rem 1rem;background:var(--bg-green);border:1px solid var(--line-green);border-radius:var(--radius);margin-bottom:1.25rem; }
+    .transfer-editor__head p { font-size:.86rem;color:var(--sage-dark);line-height:1.55; }
+    .transfer-editor__voltar { font-size:.75rem;color:var(--sage);text-decoration:underline;margin-top:.35rem;background:none;border:none;cursor:pointer;padding:0; }
+
+    .transfer-member { border:1px solid var(--line-green);border-radius:var(--radius);padding:1rem;margin-bottom:.85rem;background:var(--white); }
+    .transfer-member.is-active { background:var(--bg-green);border-color:var(--sage); }
+    .transfer-member__top { display:flex;gap:.7rem;align-items:flex-start;margin-bottom:.75rem; }
+    .transfer-member__check { margin-top:.2rem;accent-color:var(--sage); }
+    .transfer-member__name { font-size:.9rem;font-weight:600;color:var(--text-main);line-height:1.4; }
+    .transfer-member__hint { font-size:.76rem;color:var(--text-muted);margin-top:.1rem; }
+    .transfer-member__options { display:grid;gap:.45rem;margin-left:1.65rem; }
+    .transfer-member__option { display:flex;gap:.5rem;align-items:flex-start;font-size:.84rem;color:var(--text-muted);line-height:1.45; }
+    .transfer-member__option input { margin-top:.12rem;accent-color:var(--sage); }
+    .transfer-member:not(.is-active) .transfer-member__options { opacity:.48; }
+
+    .transfer__actions { display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem; }
+    .transfer__actions .btn--primary { flex:1;min-width:180px; }
+
+    .transfer__sucesso-lista { margin-top:1.25rem;text-align:left;background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:1rem; }
+    .transfer__sucesso-lista p { display:flex;justify-content:space-between;gap:.75rem;font-size:.82rem;color:var(--text-muted);padding:.4rem 0;border-bottom:1px solid var(--line); }
+    .transfer__sucesso-lista p:last-child { border-bottom:none; }
+    .transfer__sucesso-lista strong { color:var(--text-main); }
   </style>
 </head>
 <body>
@@ -114,66 +150,20 @@
 
       <div class="transfer__form-wrap reveal" id="transferFormWrap">
         <h2 class="transfer__form-title">Tenho interesse</h2>
-        <p class="transfer__form-sub">Preencha abaixo e te avisamos quando formarmos um grupo do seu trecho. Sem compromisso por enquanto!</p>
+        <p class="transfer__form-sub">
+          Busque seu nome como no convite. Não precisa validar celular: a ideia é registrar o interesse por pessoa, inclusive para outros membros do seu grupo, se você quiser.
+        </p>
 
-        <div id="transferForm">
-          <div class="rsvp__field">
-            <label class="rsvp__label" for="transferNome">Seu nome</label>
-            <input type="text" id="transferNome" class="rsvp__input" placeholder="Como você aparece no convite" autocomplete="name" />
+        <div id="transferBusca">
+          <label class="rsvp__label" for="transferNomeBusca">Digite seu nome</label>
+          <div class="transfer-search__row">
+            <input type="text" id="transferNomeBusca" class="rsvp__input" placeholder="Ex: Tiago" autocomplete="name" aria-label="Nome do convidado" />
+            <button class="btn btn--primary" id="btnBuscarTransfer" type="button" onclick="buscarTransfer()">Buscar</button>
           </div>
-
-          <div class="rsvp__field" style="margin-top:1.25rem">
-            <span class="rsvp__label">Qual trecho?</span>
-            <div class="trecho__options" style="margin-top:.6rem" role="radiogroup">
-              <label class="trecho__option">
-                <input type="radio" name="trecho" value="campinas" />
-                <div>
-                  <div class="trecho__option-label">Campinas ↔ Limeira</div>
-                  <div class="trecho__option-sub">ida e volta</div>
-                </div>
-              </label>
-              <label class="trecho__option">
-                <input type="radio" name="trecho" value="sao_paulo" />
-                <div>
-                  <div class="trecho__option-label">São Paulo ↔ Limeira</div>
-                  <div class="trecho__option-sub">ida e volta</div>
-                </div>
-              </label>
-              <label class="trecho__option">
-                <input type="radio" name="trecho" value="ambos" />
-                <div>
-                  <div class="trecho__option-label">Tenho interesse nos dois</div>
-                  <div class="trecho__option-sub">me coloca nos dois grupos</div>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div class="rsvp__field" style="margin-top:1.25rem">
-            <label class="rsvp__label" for="transferPessoas">Quantas pessoas (incluindo você)?</label>
-            <input type="number" id="transferPessoas" class="rsvp__input" placeholder="1" min="1" max="20" inputmode="numeric" style="max-width:120px" />
-            <p class="rsvp__hint">Inclua todos que viriam junto com você.</p>
-          </div>
-
-          <div class="rsvp__field" style="margin-top:1.25rem">
-            <label class="rsvp__label" for="transferTel">WhatsApp (para avisar quando tiver grupo)</label>
-            <input type="tel" id="transferTel" class="rsvp__input" placeholder="(11) 99999-0000" autocomplete="tel" inputmode="tel" />
-          </div>
-
-          <div id="transferErro" style="margin-top:.75rem"></div>
-
-          <button class="btn btn--primary" type="button" style="margin-top:1.25rem;width:100%" onclick="enviarInteresseTransfer()">
-            Quero fazer parte do grupo
-          </button>
+          <p class="rsvp__hint" id="transferHint">Digite seu nome como ele aparece no convite.</p>
         </div>
 
-        <div id="transferSucesso" style="display:none">
-          <div class="transfer__sucesso">
-            <div class="transfer__sucesso-icon">🚌</div>
-            <h3>Interesse registrado!</h3>
-            <p>Ótimo! Vamos te avisar pelo WhatsApp quando tivermos um grupo formado do seu trecho.<br>Qualquer dúvida: <a href="mailto:casamento.tiagoegian@gmail.com" style="color:var(--sage-dark)">casamento.tiagoegian@gmail.com</a></p>
-          </div>
-        </div>
+        <div id="transferResultado" class="transfer__resultados"></div>
       </div>
 
     </div>
@@ -193,51 +183,367 @@
 
   <script src="assets/js/app.js"></script>
   <script>
-    const TRANSFER_API = "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+    const TRANSFER_API = (typeof API_URL !== "undefined")
+      ? API_URL
+      : "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
 
-    window.enviarInteresseTransfer = async function() {
-      const nome     = (document.getElementById("transferNome")?.value || "").trim();
-      const trechoEl = document.querySelector('input[name="trecho"]:checked');
-      const trecho   = trechoEl ? trechoEl.value : "";
-      const pessoas  = (document.getElementById("transferPessoas")?.value || "").trim();
-      const tel      = (document.getElementById("transferTel")?.value || "").trim();
-      const erroDiv  = document.getElementById("transferErro");
+    let transferSelecionado = null;
+    let transferGrupo = [];
+    let transferInteresses = new Map();
 
-      erroDiv.innerHTML = "";
+    function tEsc(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function normalizarTrecho(valor) {
+      const raw = String(valor || "").trim();
+      const v = raw
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[\s-]+/g, "_");
+
+      if (!v || ["nao", "nao_tenho", "sem", "sem_interesse", "nenhum", "remover", "remove", "cancelar"].includes(v)) return "";
+      if (v.includes("ambos") || v.includes("dois")) return "ambos";
+      if (v.includes("campinas")) return "campinas";
+      if (v.includes("sao_paulo") || v === "sp" || v.includes("sampa") || v.includes("sao paulo")) return "sao_paulo";
+      return raw;
+    }
+
+    function rotuloTrecho(valor) {
+      const v = normalizarTrecho(valor);
+      if (v === "campinas") return "Campinas ↔ Limeira";
+      if (v === "sao_paulo") return "São Paulo ↔ Limeira";
+      if (v === "ambos") return "Interesse nos dois trechos";
+      return "Sem interesse registrado";
+    }
+
+    function interesseDoItem(item) {
+      return normalizarTrecho(
+        item?.transfer ||
+        item?.trechoTransfer ||
+        item?.transferTrecho ||
+        item?.trecho_transfer ||
+        item?.interesseTransfer ||
+        item?.statusTransfer ||
+        ""
+      );
+    }
+
+    function chavePessoa(pessoa) {
+      return String(pessoa?.rowId || pessoa?.nome || "").trim();
+    }
+
+    function setTransferHint(msg, tipo) {
+      const hint = document.getElementById("transferHint");
+      if (!hint) return;
+      hint.textContent = msg;
+      hint.style.color = tipo === "erro" ? "var(--terracotta)" : "var(--sage)";
+    }
+
+    window.buscarTransfer = async function() {
+      const input = document.getElementById("transferNomeBusca");
+      const nome = (input?.value || "").trim();
+      const btn = document.getElementById("btnBuscarTransfer");
+      const resultado = document.getElementById("transferResultado");
 
       if (!nome) {
-        erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Informe seu nome.</p>`;
-        document.getElementById("transferNome")?.focus(); return;
-      }
-      if (!trecho) {
-        erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Selecione o trecho desejado.</p>`; return;
-      }
-      if (!pessoas || isNaN(pessoas) || Number(pessoas) < 1) {
-        erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Informe quantas pessoas.</p>`;
-        document.getElementById("transferPessoas")?.focus(); return;
-      }
-      if (!tel || tel.replace(/\D/g, "").length < 8) {
-        erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Informe um WhatsApp válido.</p>`;
-        document.getElementById("transferTel")?.focus(); return;
+        setTransferHint("Digite seu nome para buscar.", "info");
+        input?.focus();
+        return;
       }
 
-      const btn = document.querySelector('#transferForm .btn--primary');
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Enviando…';
+      btn.innerHTML = '<span class="spinner"></span>';
+      resultado.innerHTML = "";
 
       try {
-        await fetch(TRANSFER_API, {
-          method: "POST",
-          body: JSON.stringify({ action: "transfer", nome, trecho, pessoas: Number(pessoas), tel })
-        });
-        document.getElementById("transferForm").style.display = "none";
-        document.getElementById("transferSucesso").style.display = "block";
-      } catch {
+        // Mesma busca da confirmação de presença do index.
+        const resp = await fetch(`${TRANSFER_API}?nome=${encodeURIComponent(nome)}`);
+        const dados = await resp.json();
+        const lista = Array.isArray(dados) ? dados : (dados ? [dados] : []);
+
         btn.disabled = false;
-        btn.textContent = "Quero fazer parte do grupo";
-        erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Não conseguimos registrar. Tente novamente ou escreva para casamento.tiagoegian@gmail.com</p>`;
+        btn.textContent = "Buscar";
+
+        if (!lista.length) {
+          resultado.innerHTML = `
+            <p class="rsvp__msg rsvp__msg--info">
+              Não encontramos esse nome. Tente pelo primeiro nome ou sobrenome.<br>
+              Se continuar difícil, fale com a assessoria: <strong>(14) 99189-8540</strong>.
+            </p>`;
+          return;
+        }
+
+        setTransferHint(`Encontramos ${lista.length > 1 ? lista.length + " nomes" : "1 nome"}. Selecione o seu.`, "info");
+        resultado.innerHTML = "";
+
+        lista.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "transfer-convidado__card";
+          const interesseInicial = interesseDoItem(item);
+          card.innerHTML = `
+            <div>
+              <p class="transfer-convidado__nome">
+                ${tEsc(item.nome)}
+                ${interesseInicial ? `<span class="transfer__badge">${tEsc(rotuloTrecho(interesseInicial))}</span>` : ""}
+              </p>
+              <p class="transfer-convidado__meta">
+                ${item.grupo ? `Grupo: ${tEsc(item.grupo)}` : "Convidado individual"}
+                ${item.status ? ` · RSVP: ${tEsc(item.status)}` : ""}
+              </p>
+            </div>
+            <button class="btn btn--outline btn--sm" type="button">Selecionar</button>`;
+          card.querySelector("button").addEventListener("click", () => selecionarTransferConvidado(item, lista));
+          resultado.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error(err);
+        btn.disabled = false;
+        btn.textContent = "Buscar";
+        resultado.innerHTML = `
+          <p class="rsvp__msg rsvp__msg--erro">
+            Não conseguimos buscar agora. Tente novamente ou escreva para
+            <a href="mailto:casamento.tiagoegian@gmail.com" style="color:var(--terracotta-hover)">casamento.tiagoegian@gmail.com</a>.
+          </p>`;
       }
     };
+
+    async function selecionarTransferConvidado(item, todosDaBusca) {
+      transferSelecionado = item;
+
+      const mesmoGrupo = item.grupo
+        ? (todosDaBusca || []).filter(p => p.grupo === item.grupo)
+        : [item];
+
+      const porChave = new Map();
+      [item, ...mesmoGrupo].forEach(p => porChave.set(chavePessoa(p), p));
+      transferGrupo = Array.from(porChave.values());
+
+      // Selecionado primeiro; demais em ordem alfabética.
+      transferGrupo.sort((a, b) => {
+        if (a.rowId === item.rowId) return -1;
+        if (b.rowId === item.rowId) return 1;
+        return String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR");
+      });
+
+      transferInteresses = new Map();
+      transferGrupo.forEach(p => transferInteresses.set(chavePessoa(p), interesseDoItem(p)));
+
+      await carregarInteressesTransfer(transferGrupo);
+      renderizarEditorTransfer();
+    }
+
+    async function carregarInteressesTransfer(pessoas) {
+      try {
+        const rowIds = pessoas.map(p => p.rowId).filter(Boolean).join(",");
+        const nomes = pessoas.map(p => p.nome).filter(Boolean);
+        const url = `${TRANSFER_API}?action=transferBusca&rowIds=${encodeURIComponent(rowIds)}&nomes=${encodeURIComponent(JSON.stringify(nomes))}`;
+        const resp = await fetch(url);
+        const json = await resp.json();
+
+        const registros = Array.isArray(json)
+          ? json
+          : (json.registros || json.transfer || json.interesses || json.lista || []);
+
+        registros.forEach(reg => {
+          const key = String(reg.rowId || reg.nome || "").trim();
+          if (!key) return;
+          transferInteresses.set(key, normalizarTrecho(reg.trecho || reg.transfer || reg.interesse || reg.status || ""));
+        });
+      } catch (err) {
+        // Se o Apps Script ainda não tiver a busca na aba Transfer, a página continua funcionando
+        // para novos registros; só não pré-preenche interesses antigos.
+        console.warn("Interesses anteriores de transfer não carregados.", err);
+      }
+    }
+
+    function renderizarEditorTransfer() {
+      const resultado = document.getElementById("transferResultado");
+      const nomeSelecionado = transferSelecionado?.nome || "";
+      const temGrupo = transferGrupo.length > 1;
+
+      resultado.innerHTML = `
+        <div class="transfer-editor__head">
+          <p>
+            Registrando transfer para: <strong>${tEsc(nomeSelecionado)}</strong><br>
+            ${temGrupo
+              ? "Você também pode atualizar o interesse de outras pessoas do mesmo grupo. Cada pessoa fica em uma linha própria na aba Transfer."
+              : "Convidado individual encontrado."}
+          </p>
+          <button type="button" class="transfer-editor__voltar" onclick="voltarBuscaTransfer()">← Buscar outro nome</button>
+        </div>
+
+        <div class="rsvp__field">
+          <span class="rsvp__label">Quem você quer atualizar?</span>
+          <p class="rsvp__hint" style="margin-bottom:.8rem">
+            Marque as pessoas que deseja alterar. Para tirar o interesse, escolha “sem interesse / remover”.
+          </p>
+          <div id="transferMembros">
+            ${transferGrupo.map((p, i) => renderPessoaTransfer(p, i === 0)).join("")}
+          </div>
+        </div>
+
+        <div id="transferErro" style="margin-top:.75rem"></div>
+
+        <div class="transfer__actions">
+          <button class="btn btn--primary" type="button" id="btnSalvarTransfer" onclick="salvarTransfer()">Salvar alterações</button>
+          <button class="btn btn--outline" type="button" onclick="voltarBuscaTransfer()">Voltar</button>
+        </div>
+      `;
+
+      document.querySelectorAll('input[name="transferAtualizar"]').forEach(check => {
+        check.addEventListener("change", () => atualizarEstadoPessoaTransfer(check));
+        atualizarEstadoPessoaTransfer(check);
+      });
+    }
+
+    function renderPessoaTransfer(pessoa, selecionadoPrincipal) {
+      const key = chavePessoa(pessoa);
+      const interesse = transferInteresses.get(key) || "";
+      const checked = selecionadoPrincipal ? "checked" : "";
+      const badgeClass = interesse ? "transfer__badge" : "transfer__badge transfer__badge--vazio";
+      const radioName = `trecho_${String(key).replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+      const opcoes = [
+        ["campinas", "Campinas ↔ Limeira", "ida e volta"],
+        ["sao_paulo", "São Paulo ↔ Limeira", "ida e volta"],
+        ["ambos", "Tenho interesse nos dois", "me coloca nos dois grupos"],
+        ["", "Sem interesse / remover", "limpa meu interesse na aba Transfer"]
+      ];
+
+      return `
+        <div class="transfer-member" data-key="${tEsc(key)}">
+          <label class="transfer-member__top">
+            <input class="transfer-member__check" type="checkbox" name="transferAtualizar" value="${tEsc(key)}" ${checked} />
+            <span>
+              <span class="transfer-member__name">
+                ${tEsc(pessoa.nome)}
+                <span class="${badgeClass}">${tEsc(rotuloTrecho(interesse))}</span>
+              </span>
+              <span class="transfer-member__hint">${selecionadoPrincipal ? "Você" : "Membro do grupo"}</span>
+            </span>
+          </label>
+          <div class="transfer-member__options">
+            ${opcoes.map(([value, label, sub]) => `
+              <label class="transfer-member__option">
+                <input type="radio" name="${tEsc(radioName)}" value="${tEsc(value)}" data-key="${tEsc(key)}" ${normalizarTrecho(value) === interesse ? "checked" : ""} />
+                <span><strong>${tEsc(label)}</strong><br><small>${tEsc(sub)}</small></span>
+              </label>
+            `).join("")}
+          </div>
+        </div>`;
+    }
+
+    function atualizarEstadoPessoaTransfer(check) {
+      const card = check.closest(".transfer-member");
+      if (!card) return;
+      card.classList.toggle("is-active", check.checked);
+      card.querySelectorAll('input[type="radio"]').forEach(r => { r.disabled = !check.checked; });
+    }
+
+    window.salvarTransfer = async function() {
+      const erroDiv = document.getElementById("transferErro");
+      const btn = document.getElementById("btnSalvarTransfer");
+      erroDiv.innerHTML = "";
+
+      const selecionados = Array.from(document.querySelectorAll('input[name="transferAtualizar"]:checked'));
+      if (!selecionados.length) {
+        erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Marque pelo menos uma pessoa para atualizar.</p>`;
+        return;
+      }
+
+      const registros = selecionados.map(check => {
+        const key = check.value;
+        const pessoa = transferGrupo.find(p => chavePessoa(p) === key) || {};
+        const escolhido = document.querySelector(`input[type="radio"][data-key="${CSS.escape(key)}"]:checked`);
+        return {
+          rowId: pessoa.rowId || "",
+          nome: pessoa.nome || "",
+          grupo: pessoa.grupo || transferSelecionado?.grupo || "",
+          trecho: escolhido ? normalizarTrecho(escolhido.value) : ""
+        };
+      });
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Salvando…';
+
+      try {
+        const principal = registros.find(r => String(r.rowId) === String(transferSelecionado?.rowId)) || registros[0];
+        const resp = await fetch(TRANSFER_API, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "transfer",
+            modo: "por_convidado",
+            origem: "transfer.html",
+
+            // Compatibilidade com o formato antigo:
+            nome: principal?.nome || transferSelecionado?.nome || "",
+            rowId: principal?.rowId || transferSelecionado?.rowId || "",
+            trecho: principal?.trecho || "",
+            pessoas: registros.filter(r => r.trecho).length,
+            tel: "",
+
+            // Novo formato, um registro por convidado:
+            registros: registros,
+            grupoRowIds: registros.map(r => r.rowId),
+            grupoNomes: registros.map(r => r.nome),
+            grupoTrechos: registros.map(r => r.trecho)
+          })
+        });
+
+        let json = null;
+        try { json = await resp.json(); } catch (_) {}
+        if (json && json.sucesso === false) throw new Error(json.erro || "erro");
+
+        mostrarSucessoTransfer(registros);
+      } catch (err) {
+        console.error(err);
+        btn.disabled = false;
+        btn.textContent = "Salvar alterações";
+        erroDiv.innerHTML = `
+          <p class="rsvp__msg rsvp__msg--erro">
+            Não conseguimos registrar. Tente novamente ou escreva para
+            <a href="mailto:casamento.tiagoegian@gmail.com" style="color:var(--terracotta-hover)">casamento.tiagoegian@gmail.com</a>.
+          </p>`;
+      }
+    };
+
+    function mostrarSucessoTransfer(registros) {
+      const resultado = document.getElementById("transferResultado");
+      resultado.innerHTML = `
+        <div class="transfer__sucesso">
+          <div class="transfer__sucesso-icon">🚌</div>
+          <h3>Interesse atualizado!</h3>
+          <p>Registramos as alterações de transfer abaixo.</p>
+          <div class="transfer__sucesso-lista">
+            ${registros.map(r => `<p><strong>${tEsc(r.nome)}</strong><span>${tEsc(rotuloTrecho(r.trecho))}</span></p>`).join("")}
+          </div>
+          <button class="btn btn--outline" type="button" style="margin-top:1.25rem" onclick="voltarBuscaTransfer()">Buscar outro nome</button>
+        </div>`;
+      document.getElementById("transferBusca")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    window.voltarBuscaTransfer = function() {
+      transferSelecionado = null;
+      transferGrupo = [];
+      transferInteresses = new Map();
+      const resultado = document.getElementById("transferResultado");
+      if (resultado) resultado.innerHTML = "";
+      const input = document.getElementById("transferNomeBusca");
+      if (input) { input.value = ""; input.focus(); }
+      setTransferHint("Digite seu nome como ele aparece no convite.", "info");
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("transferNomeBusca")?.addEventListener("keydown", e => {
+        if (e.key === "Enter") window.buscarTransfer();
+      });
+    });
+
   </script>
 </body>
 </html>
