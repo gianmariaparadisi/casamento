@@ -107,6 +107,16 @@
     .legend{max-width:620px;margin:1rem auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:.38rem;}
     .legend span{border-radius:999px;padding:.36rem .45rem;font-size:.65rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center;border:1px solid rgba(90,50,20,.16);box-shadow:0 4px 12px rgba(80,50,20,.07);}
     @media(max-width:520px){.board{--gap:8px;border-radius:16px}.tile,.cell{border-radius:12px}.legend{grid-template-columns:repeat(2,1fr)}}
+
+    /* ─── MOBILE: trava rolagem da página durante o jogo ─────── */
+    html, body { overscroll-behavior: none; }
+    @media (max-width: 640px) {
+      html.game-locked, body.game-locked {
+        overflow: hidden;
+        height: 100%;
+        touch-action: none;
+      }
+    }
   </style>
 </head>
 <body class="game-page">
@@ -127,6 +137,10 @@
     <section class="top10"><h3>Top 10</h3><ol id="topList"></ol></section>
   </main>
   <script>
+
+    function lockScroll() { document.documentElement.classList.add("game-locked"); document.body.classList.add("game-locked"); }
+    function unlockScroll() { document.documentElement.classList.remove("game-locked"); document.body.classList.remove("game-locked"); }
+
 
     const SCORE_API = (typeof API_URL !== "undefined") ? API_URL : "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
     function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));}
@@ -249,11 +263,12 @@
       return false;
     }
     function showEnd(win){
+      unlockScroll();
       endModal.hidden=false; endIcon.textContent=win?"🤵‍♂️🤵":"🥂"; endTitle.textContent=win?"Dois noivos. Fim perfeito!":"Acabaram os movimentos";
       endText.textContent=win?`Você chegou ao fim com ${score} pontos.`:`Você fez ${score} pontos. Dá para tentar uma progressão mais limpa.`;
     }
-    document.getElementById("startBtn").onclick=()=>{startModal.hidden=true;reset();};
-    document.getElementById("newBtn").onclick=reset; document.getElementById("againBtn").onclick=reset;
+    document.getElementById("startBtn").onclick=()=>{startModal.hidden=true;reset();lockScroll();};
+    document.getElementById("newBtn").onclick=()=>{reset();lockScroll();}; document.getElementById("againBtn").onclick=()=>{reset();lockScroll();};
     document.getElementById("undoBtn").onclick=()=>restoreState(history);
     document.getElementById("saveBtn").onclick=()=>saveScore(GAME_KEY,document.getElementById("playerName").value,score,document.getElementById("saveMsg"));
     window.addEventListener("resize",()=>renderStable());

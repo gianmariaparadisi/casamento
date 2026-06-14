@@ -61,6 +61,16 @@
     .top10__empty,.top10__loading { text-align:center;padding:1.5rem;font-size:.85rem;color:var(--text-muted);font-style:italic; }
 
     .snake-back { display:block;text-align:center;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-dark);text-decoration:underline;text-underline-offset:3px;margin-top:1.5rem; }
+
+    /* ─── MOBILE: trava rolagem da página durante o jogo ─────── */
+    html, body { overscroll-behavior: none; }
+    @media (max-width: 640px) {
+      html.game-locked, body.game-locked {
+        overflow: hidden;
+        height: 100%;
+        touch-action: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -158,6 +168,17 @@
   ══════════════════════════════════════════════════════════ */
   "use strict";
 
+  /* Trava/destrava rolagem da página (mobile) durante o jogo. */
+  function lockScroll() {
+    document.documentElement.classList.add("game-locked");
+    document.body.classList.add("game-locked");
+  }
+  function unlockScroll() {
+    document.documentElement.classList.remove("game-locked");
+    document.body.classList.remove("game-locked");
+  }
+
+
   const SNAKE_API = typeof API_URL !== "undefined"
     ? API_URL
     : "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
@@ -176,11 +197,16 @@
     return ctx;
   }
 
-  // Faces
-  let imgTiagoOk = false;
-  const IMG_TIAGO = new Image();
-  IMG_TIAGO.onload = () => { imgTiagoOk = true; };
-  IMG_TIAGO.src = "assets/img/tiago-face.png";
+  // Faces — 7 variações do Tiago, trocam a cada hambúrguer comido
+  const TIAGO_FACES = [];
+  for (let i = 1; i <= 7; i++) {
+    const img = new Image();
+    img.loaded = false;
+    img.onload = () => { img.loaded = true; };
+    img.src = `assets/img/tiago${String(i).padStart(2,"0")}.png`;
+    TIAGO_FACES.push(img);
+  }
+  let snFaceIdx = 0;
 
   function drawFace(ctx, img, ok, x, y, size, fallbackColor, fallbackEmoji) {
     ctx.save();
@@ -247,6 +273,7 @@
     snBody = [{x:5,y:11},{x:4,y:11},{x:3,y:11}];
     snVisual = snBody.map(s => ({x:s.x, y:s.y}));
     snFood = snNewFood();
+    snFaceIdx = Math.floor(Math.random() * TIAGO_FACES.length);
     document.getElementById("snake-score").textContent = "0";
     document.getElementById("snake-postgame").style.display = "none";
 
@@ -266,9 +293,11 @@
     snBody = [{x:5,y:11},{x:4,y:11},{x:3,y:11}];
     snVisual = snBody.map(s => ({x:s.x, y:s.y}));
     snFood = snNewFood();
+    snFaceIdx = Math.floor(Math.random() * TIAGO_FACES.length);
     document.getElementById("snake-score").textContent = "0";
     document.getElementById("snake-postgame").style.display = "none";
     hideOverlay();
+    lockScroll();
     snAlive = true;
     snLast = 0;
     snRaf = requestAnimationFrame(snFrame);
@@ -319,6 +348,10 @@
       snScore++;
       document.getElementById("snake-score").textContent = snScore;
       snFood = snNewFood();
+      // Troca a "cara" do Tiago a cada hambúrguer — efeito goofy
+      let novoIdx;
+      do { novoIdx = Math.floor(Math.random() * TIAGO_FACES.length); } while (novoIdx === snFaceIdx && TIAGO_FACES.length > 1);
+      snFaceIdx = novoIdx;
       if (snScore % 4 === 0) snSpeed = Math.max(60, snSpeed - 9);
     } else {
       snBody.pop();
@@ -329,6 +362,7 @@
   function snGameOver() {
     snAlive = false;
     if (snRaf) { cancelAnimationFrame(snRaf); snRaf = null; }
+    unlockScroll();
     snDrawFrame(0);
 
     if (snScore > snBest) {
@@ -385,7 +419,8 @@
         ctx.fillStyle = "#506B45";
         ctx.beginPath(); ctx.roundRect(x,y,w,w,6); ctx.fill();
         ctx.strokeStyle = "#2A3E22"; ctx.lineWidth = 1.2; ctx.stroke();
-        drawFace(ctx, IMG_TIAGO, imgTiagoOk, x, y, w, "#506B45", "😄");
+        const face = TIAGO_FACES[snFaceIdx];
+        drawFace(ctx, face, face.loaded, x, y, w, "#506B45", "😄");
       } else {
         const t = i / visual.length;
         ctx.fillStyle = i%2===0 ? "#7A9B6E" : "#A8C49A";

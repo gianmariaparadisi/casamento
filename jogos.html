@@ -98,6 +98,16 @@
     .look-btn-clear:hover { color:#C8A050;border-color:#C8A050; }
     .look-back { font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,160,80,.6);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:none;padding:14px 18px 0;display:block;width:100%; }
     @media(max-width:480px){ .look-item-btn{width:58px;} .look-item-btn svg{width:58px;height:44px;} .look-stage{width:130px;} }
+
+    /* ─── MOBILE: trava rolagem da página durante o jogo ─────── */
+    html, body { overscroll-behavior: none; }
+    @media (max-width: 640px) {
+      html.game-locked, body.game-locked {
+        overflow: hidden;
+        height: 100%;
+        touch-action: none;
+      }
+    }
   </style>
 </head>
 <body>

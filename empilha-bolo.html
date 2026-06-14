@@ -104,6 +104,16 @@
       .save-row .cake-btn{width:100%;}
       .cake-card{padding:22px 18px;}
     }
+
+    /* ─── MOBILE: trava rolagem da página durante o jogo ─────── */
+    html, body { overscroll-behavior: none; }
+    @media (max-width: 640px) {
+      html.game-locked, body.game-locked {
+        overflow: hidden;
+        height: 100%;
+        touch-action: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -194,6 +204,10 @@
 
   <script>
     "use strict";
+
+    function lockScroll() { document.documentElement.classList.add("game-locked"); document.body.classList.add("game-locked"); }
+    function unlockScroll() { document.documentElement.classList.remove("game-locked"); document.body.classList.remove("game-locked"); }
+
     const JOGOS_API = "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
     const DPR = Math.min(window.devicePixelRatio || 1, 3);
     const canvas = document.getElementById("cakeCanvas");
@@ -282,6 +296,7 @@
     function startGame(){
       hideOverlay();
       initGame();
+      lockScroll();
       state = "playing";
       tapHelper.classList.add("show");
       lastTs = performance.now();
@@ -368,6 +383,7 @@
 
     function endGame(){
       state = "over";
+      unlockScroll();
       tapHelper.classList.remove("show");
       cancelAnimationFrame(raf);
       const msg = score >= 180 ? "Bolo monumental. A confeitaria pediu seu contato." : score >= 90 ? "Bolo bonito, alto e perigosamente instável." : score >= 35 ? "Tem bolo. Não está reto, mas tem charme." : "O bolo ficou minimalista. Quase conceitual.";

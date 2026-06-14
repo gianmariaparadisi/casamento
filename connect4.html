@@ -30,6 +30,10 @@
     .conn-solved-group__title { font-family:var(--font-display);font-size:1.1rem;font-weight:400; }
     .conn-solved-group__words { font-size:.78rem;opacity:.85;margin-top:2px; }
 
+    .conn-gabarito { margin-top:1.25rem; }
+    .conn-gabarito__title { font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);text-align:center;margin-bottom:.75rem; }
+    .conn-solved-group__check { font-size:.68rem;font-weight:700;letter-spacing:.05em;opacity:.8;margin-top:2px; }
+
     /* GRID DE PALAVRAS */
     .conn-grid {
       display:grid;
@@ -93,6 +97,16 @@
 
     @media(max-width:400px){
       .conn-word { font-size:.9rem;min-height:46px;padding:7px 2px; }
+    }
+
+    /* ─── MOBILE: trava rolagem da página durante o jogo ─────── */
+    html, body { overscroll-behavior: none; }
+    @media (max-width: 640px) {
+      html.game-locked, body.game-locked {
+        overflow: hidden;
+        height: 100%;
+        touch-action: none;
+      }
     }
   </style>
 </head>
@@ -174,6 +188,10 @@
         <h2 class="conn-result__title" id="connResultTitle"></h2>
         <p class="conn-result__sub" id="connResultSub"></p>
         <button class="btn btn--outline-green btn--sm" onclick="compartilharConn()">Compartilhar resultado</button>
+      </div>
+      <div class="conn-gabarito">
+        <p class="conn-gabarito__title">Gabarito de hoje</p>
+        <div class="conn-solved" id="connGabarito"></div>
       </div>
       <div style="text-align:center;margin-top:1rem">
         <a href="jogos.html" class="btn btn--outline btn--sm">← Voltar aos jogos</a>
@@ -428,6 +446,23 @@
     document.getElementById("connResultSub").textContent = ganhou
       ? `Você achou todos os grupos!`
       : `Acertou ${resolvidos.length} de 4 grupos.`;
+
+    // Gabarito completo — sempre mostrado, com indicação do que você acertou
+    const gab = document.getElementById("connGabarito");
+    if (gab) {
+      gab.innerHTML = "";
+      grupos.forEach((g, i) => {
+        const div = document.createElement("div");
+        div.className = `conn-solved-group ${CORES[i]}`;
+        const acertou = resolvidos.includes(i);
+        div.innerHTML = `
+          <div class="conn-solved-group__label">${g.titulo}</div>
+          <div class="conn-solved-group__words">${g.palavras.join(" · ")}</div>
+          <div class="conn-solved-group__check">${acertou ? "✓ Você acertou" : "Não foi desta vez"}</div>
+        `;
+        gab.appendChild(div);
+      });
+    }
   }
 
   window.compartilharConn = function() {
