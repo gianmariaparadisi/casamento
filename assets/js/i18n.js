@@ -18,6 +18,40 @@
     return url.pathname + (url.search ? url.search : "") + url.hash;
   }
 
+  function isInternalLink(href) {
+    if (!href) return false;
+    if (href.startsWith("#")) return false; // âncora na mesma página, preserva idioma naturalmente
+    if (href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("javascript:")) return false;
+    if (/^[a-z][a-z0-9+.-]*:/i.test(href) && !href.startsWith("http")) return false; // outros esquemas
+    if (/^https?:\/\//i.test(href)) {
+      // só propaga para links do próprio site
+      try {
+        const u = new URL(href, window.location.href);
+        return u.origin === window.location.origin;
+      } catch (e) { return false; }
+    }
+    return true; // relativo (ex: index.html, transfer.html)
+  }
+
+  function propagateLangToLinks() {
+    if (getLang() !== "it") return;
+    document.querySelectorAll("a[href]").forEach(a => {
+      if (a.id === "langToggle") return;
+      const href = a.getAttribute("href");
+      if (!isInternalLink(href)) return;
+      try {
+        const u = new URL(href, window.location.href);
+        u.searchParams.set("lang", "it");
+        // mantém o link relativo/curto quando possível
+        if (!/^https?:\/\//i.test(href)) {
+          a.setAttribute("href", u.pathname.split("/").pop() + (u.search || "") + (u.hash || ""));
+        } else {
+          a.setAttribute("href", u.toString());
+        }
+      } catch (e) { /* ignora hrefs inválidos */ }
+    });
+  }
+
   function applyTranslations(lang) {
     if (lang !== "it") return; // PT é o padrão, nada a fazer
 
@@ -48,6 +82,7 @@
   function initLangToggle() {
     const lang = getLang();
     applyTranslations(lang);
+    propagateLangToLinks();
 
     // Adiciona o botão de troca de idioma no nav, se ainda não existir
     const nav = document.getElementById("navLinks");
