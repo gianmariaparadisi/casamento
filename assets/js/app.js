@@ -312,6 +312,12 @@ window.buscar = async function() {
 /* ══════════════════════════════════════════════════════════
    6. RSVP — SELEÇÃO + FORMULÁRIO
 ══════════════════════════════════════════════════════════ */
+window.toggleGrupoContato = function(rowId, checked) {
+  const el = document.getElementById("contato_" + rowId);
+  if (!el) return;
+  el.classList.toggle("oculto", !checked);
+};
+
 function selecionarConvidado(item, todosDaBusca) {
   convidadoSelecionado = item;
   const resultado = document.getElementById("rsvp-resultado");
@@ -337,9 +343,9 @@ function selecionarConvidado(item, todosDaBusca) {
 
       ${semTelefone ? `
       <div class="rsvp__field">
-        <label class="rsvp__label" for="telefoneCad"><img src="assets/img/icon-luggage-tag.png" alt="" class="rsvp__label-icon"> Seu telefone (WhatsApp)</label>
+        <label class="rsvp__label" for="telefoneCad"><img src="assets/img/icon-luggage-tag.png" alt="" class="rsvp__label-icon"> ${window.I18N.t("Seu telefone (WhatsApp)","Il tuo telefono (WhatsApp)")} <span style="color:var(--text-muted);font-weight:400">(${window.I18N.t("opcional","opzionale")})</span></label>
         <input type="tel" id="telefoneCad" class="rsvp__input" placeholder="(11) 99999-0000" inputmode="tel" autocomplete="tel" oninput="window.delightsSetInputCheck(this, this.value.replace(/\\D/g,'').length >= 10)" />
-        <p class="rsvp__hint">Não encontramos um telefone cadastrado para você. Informe para facilitar o contato.</p>
+        <p class="rsvp__hint">${window.I18N.t("Não encontramos um telefone cadastrado para você. Se quiser, informe para facilitar o contato — não é obrigatório.","Non abbiamo trovato un telefono registrato per te. Se vuoi, indicalo per facilitare il contatto — non è obbligatorio.")}</p>
       </div>
       ` : `
       <div class="rsvp__field">
@@ -376,7 +382,7 @@ function selecionarConvidado(item, todosDaBusca) {
         <div class="grupo__lista" id="grupoLista">
           ${grupo.map(p => `
             <label class="grupo__membro">
-              <input type="checkbox" name="grupo" value="${escHtml(p.rowId)}" data-nome="${escHtml(p.nome)}" />
+              <input type="checkbox" name="grupo" value="${escHtml(p.rowId)}" data-nome="${escHtml(p.nome)}" onchange="window.toggleGrupoContato('${escHtml(p.rowId)}', this.checked)" />
               <img class="grupo__membro-avatar" src="assets/img/${avatarParaNome(p.nome)}" alt="">
               <span class="grupo__membro-nome">${escHtml(p.nome)}</span>
               <div class="rsvp__status rsvp__status--sm" role="group" style="margin-top:.35rem;margin-left:.25rem">
@@ -388,6 +394,13 @@ function selecionarConvidado(item, todosDaBusca) {
                   <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="NAO" />
                   <img src="assets/img/icon-cancel-decorative.png" alt=""> Não poderá comparecer
                 </label>
+              </div>
+              <div class="grupo__membro-contato oculto" id="contato_${escHtml(p.rowId)}" style="margin-top:.5rem;margin-left:.25rem;width:100%;display:flex;flex-direction:column;gap:.4rem">
+                <p style="font-size:.72rem;color:var(--text-muted);margin:0">
+                  ${window.I18N.t(`Telefone e e-mail de ${escHtml(p.nome.split(" ")[0])}`, `Telefono ed e-mail di ${escHtml(p.nome.split(" ")[0])}`)} <em>(${window.I18N.t("opcional","opzionale")})</em> — ${window.I18N.t("se deixar em branco, você ficará como responsável pelo contato dessa pessoa.","se lasci vuoto, rimarrai responsabile del contatto per questa persona.")}
+                </p>
+                <input type="tel" class="rsvp__input rsvp__input--sm" placeholder="${window.I18N.t("Telefone (opcional)","Telefono (opzionale)")}" inputmode="tel" autocomplete="tel" data-grupo-tel="${escHtml(p.rowId)}" />
+                <input type="email" class="rsvp__input rsvp__input--sm" placeholder="${window.I18N.t("E-mail (opcional)","E-mail (opzionale)")}" autocomplete="email" data-grupo-email="${escHtml(p.rowId)}" />
               </div>
               ${p.status ? `<span class="grupo__membro-status">${escHtml(p.status)}</span>` : ""}
             </label>
@@ -437,13 +450,32 @@ window.confirmar = async function() {
     return;
   }
 
-  // Membros do grupo selecionados — cada um com seu próprio status
+  // Telefone/e-mail opcionais por membro do grupo: se preenchidos, validar formato básico
+  const camposEmailGrupo = document.querySelectorAll('[data-grupo-email]');
+  for (const input of camposEmailGrupo) {
+    const val = (input.value || "").trim();
+    if (val && !val.includes("@")) {
+      erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Verifique o e-mail informado para o seu grupo (ou deixe em branco).</p>`;
+      input.focus();
+      return;
+    }
+  }
+
+  // Membros do grupo selecionados — cada um com seu próprio status, e telefone/email opcionais
   const grupoChecks = document.querySelectorAll('input[name="grupo"]:checked');
   const grupoRowIds = Array.from(grupoChecks).map(c => c.value);
   const grupoNomes  = Array.from(grupoChecks).map(c => c.dataset.nome);
   const grupoStatuses = grupoRowIds.map(rowId => {
     const radioChecked = document.querySelector(`input[name="grupoStatus_${rowId}"]:checked`);
     return radioChecked ? radioChecked.value : "SIM";
+  });
+  const grupoTelefones = grupoRowIds.map(rowId => {
+    const input = document.querySelector(`[data-grupo-tel="${rowId}"]`);
+    return (input?.value || "").trim();
+  });
+  const grupoEmails = grupoRowIds.map(rowId => {
+    const input = document.querySelector(`[data-grupo-email="${rowId}"]`);
+    return (input?.value || "").trim();
   });
 
   btnConf.disabled = true;
@@ -461,9 +493,11 @@ window.confirmar = async function() {
         telefoneCad:   telefoneCad,
         email:         email,
         status:        status,
-        grupoRowIds:   grupoRowIds,
-        grupoNomes:    grupoNomes,
-        grupoStatuses: grupoStatuses
+        grupoRowIds:    grupoRowIds,
+        grupoNomes:     grupoNomes,
+        grupoStatuses:  grupoStatuses,
+        grupoTelefones: grupoTelefones,
+        grupoEmails:    grupoEmails
       })
     });
 
