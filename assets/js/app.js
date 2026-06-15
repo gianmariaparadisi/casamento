@@ -38,6 +38,19 @@ let convidadoSelecionado = null; // { nome, telefone, rowId, grupo: [] }
    UTILS — MÁSCARA DE TELEFONE
    Esconde os últimos 4 dígitos, exibe o restante
 ══════════════════════════════════════════════════════════ */
+// Traduz os valores de status vindos da planilha (PT) para italiano quando ?lang=it
+function traduzirStatus(status) {
+  if (!status) return status;
+  if (!(window.I18N && window.I18N.lang === "it")) return status;
+  const map = {
+    "Confirmado": "Confermato",
+    "Pendente Confirmação": "In attesa di conferma",
+    "Pendente": "In attesa",
+    "Não compareceu": "Non presente"
+  };
+  return map[status] || status;
+}
+
 function mascararTelefone(tel) {
   if (!tel || tel === "****") return null;
   // Remove tudo que não é dígito
@@ -274,11 +287,11 @@ window.buscar = async function() {
 
     const lista = Array.isArray(dados) ? dados : [dados];
     resultado.classList.remove("oculto");
-    resultado.innerHTML = `<p class="rsvp__hint" style="margin-bottom:.75rem">Encontramos ${lista.length > 1 ? lista.length + " nomes" : "1 nome"}. Selecione o seu:</p>`;
+    resultado.innerHTML = `<p class="rsvp__hint" style="margin-bottom:.75rem">${window.I18N.t("Encontramos","Abbiamo trovato")} ${lista.length > 1 ? lista.length + window.I18N.t(" nomes"," nomi") : window.I18N.t("1 nome","1 nome")}. ${window.I18N.t("Selecione o seu:","Seleziona il tuo:")}</p>`;
 
     lista.forEach(item => {
       const statusLabel = item.status
-        ? `<span class="convidado__badge ${item.status === "Confirmado" ? "convidado__badge--sim" : "convidado__badge--nao"}">${item.status}</span>`
+        ? `<span class="convidado__badge ${item.status === "Confirmado" ? "convidado__badge--sim" : "convidado__badge--nao"}">${escHtml(traduzirStatus(item.status))}</span>`
         : "";
       const telMascarado = mascararTelefone(item.telefone);
       const card = document.createElement("div");
@@ -289,9 +302,9 @@ window.buscar = async function() {
           <p class="convidado__nome">${escHtml(item.nome)} ${statusLabel}</p>
           ${telMascarado
             ? `<p class="convidado__tel">Tel: ${escHtml(telMascarado)}</p>`
-            : `<p class="convidado__tel"><em style="color:var(--sage)">Telefone não cadastrado</em></p>`}
+            : `<p class="convidado__tel"><em style="color:var(--sage)">${window.I18N.t("Telefone não cadastrado","Telefono non registrato")}</em></p>`}
         </div>
-        <button class="btn btn--outline btn--sm" type="button">Selecionar</button>`;
+        <button class="btn btn--outline btn--sm" type="button">${window.I18N.t("Selecionar","Seleziona")}</button>`;
       card.querySelector("button").addEventListener("click", () => selecionarConvidado(item, lista));
       resultado.appendChild(card);
     });
@@ -334,10 +347,10 @@ function selecionarConvidado(item, todosDaBusca) {
         <img src="assets/img/${avatarParaNome(item.nome)}" alt="" style="width:2.25rem;height:2.25rem;object-fit:contain;flex-shrink:0">
         <div>
           <p style="font-size:.85rem;color:var(--sage-dark)">
-            Confirmando: <strong>${escHtml(item.nome)}</strong>
+            ${window.I18N.t("Confirmando","Confermando")}: <strong>${escHtml(item.nome)}</strong>
             ${telMascarado ? "· Tel: " + escHtml(telMascarado) : ""}
           </p>
-          <button type="button" style="font-size:.75rem;color:var(--sage);text-decoration:underline;margin-top:.25rem;background:none;border:none;cursor:pointer" onclick="voltarBusca()">← Buscar outro nome</button>
+          <button type="button" style="font-size:.75rem;color:var(--sage);text-decoration:underline;margin-top:.25rem;background:none;border:none;cursor:pointer" onclick="voltarBusca()">${window.I18N.t("← Buscar outro nome","← Cerca un altro nome")}</button>
         </div>
       </div>
 
@@ -356,29 +369,29 @@ function selecionarConvidado(item, todosDaBusca) {
       `}
 
       <div class="rsvp__field">
-        <label class="rsvp__label" for="emailRsvp"><img src="assets/img/icon-envelope.png" alt="" class="rsvp__label-icon"> Seu e-mail</label>
+        <label class="rsvp__label" for="emailRsvp"><img src="assets/img/icon-envelope.png" alt="" class="rsvp__label-icon"> ${window.I18N.t("Seu e-mail","La tua e-mail")}</label>
         <input type="email" id="emailRsvp" class="rsvp__input" placeholder="seuemail@exemplo.com" autocomplete="email" />
-        <p class="rsvp__hint">Enviaremos a confirmação e o link para alterar depois, se precisar.</p>
+        <p class="rsvp__hint">${window.I18N.t("Enviaremos a confirmação e o link para alterar depois, se precisar.","Ti invieremo la conferma e il link per modificarla in seguito, se necessario.")}</p>
       </div>
 
       <div class="rsvp__field">
-        <span class="rsvp__label" id="statusLabel">Sua presença</span>
+        <span class="rsvp__label" id="statusLabel">${window.I18N.t("Sua presença","La tua presenza")}</span>
         <div class="rsvp__status" role="group" aria-labelledby="statusLabel">
           <label class="rsvp__status-option">
             <input type="radio" name="statusRsvp" value="SIM" checked />
-            <img src="assets/img/icon-check-decorative.png" alt=""> Confirmo presença
+            <img src="assets/img/icon-check-decorative.png" alt=""> ${window.I18N.t("Confirmo presença","Confermo la presenza")}
           </label>
           <label class="rsvp__status-option">
             <input type="radio" name="statusRsvp" value="NAO" />
-            <img src="assets/img/icon-cancel-decorative.png" alt=""> Não poderei comparecer
+            <img src="assets/img/icon-cancel-decorative.png" alt=""> ${window.I18N.t("Não poderei comparecer","Non potrò essere presente")}
           </label>
         </div>
       </div>
 
       ${temGrupo ? `
       <div class="rsvp__field">
-        <span class="rsvp__label">Confirmar também para o seu grupo?</span>
-        <p class="rsvp__hint" style="margin-bottom:.6rem">Você pode confirmar para os outros do seu grupo agora, ou deixar que cada um confirme individualmente.</p>
+        <span class="rsvp__label">${window.I18N.t("Confirmar também para o seu grupo?","Confermare anche per il tuo gruppo?")}</span>
+        <p class="rsvp__hint" style="margin-bottom:.6rem">${window.I18N.t("Você pode confirmar para os outros do seu grupo agora, ou deixar que cada um confirme individualmente.","Puoi confermare anche per gli altri del tuo gruppo ora, oppure lasciare che ognuno confermi individualmente.")}</p>
         <div class="grupo__lista" id="grupoLista">
           ${grupo.map(p => `
             <label class="grupo__membro">
@@ -388,11 +401,11 @@ function selecionarConvidado(item, todosDaBusca) {
               <div class="rsvp__status rsvp__status--sm" role="group" style="margin-top:.35rem;margin-left:.25rem">
                 <label class="rsvp__status-option rsvp__status-option--sm" style="font-size:.8rem">
                   <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="SIM" checked />
-                  <img src="assets/img/icon-check-decorative.png" alt=""> Confirmado
+                  <img src="assets/img/icon-check-decorative.png" alt=""> ${window.I18N.t("Confirmado","Confermato")}
                 </label>
                 <label class="rsvp__status-option rsvp__status-option--sm" style="font-size:.8rem">
                   <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="NAO" />
-                  <img src="assets/img/icon-cancel-decorative.png" alt=""> Não poderá comparecer
+                  <img src="assets/img/icon-cancel-decorative.png" alt=""> ${window.I18N.t("Não poderá comparecer","Non potrà essere presente")}
                 </label>
               </div>
               <div class="grupo__membro-contato oculto" id="contato_${escHtml(p.rowId)}" style="margin-top:.5rem;margin-left:.25rem;width:100%;display:flex;flex-direction:column;gap:.4rem">
@@ -402,7 +415,7 @@ function selecionarConvidado(item, todosDaBusca) {
                 <input type="tel" class="rsvp__input rsvp__input--sm" placeholder="${window.I18N.t("Telefone (opcional)","Telefono (opzionale)")}" inputmode="tel" autocomplete="tel" data-grupo-tel="${escHtml(p.rowId)}" />
                 <input type="email" class="rsvp__input rsvp__input--sm" placeholder="${window.I18N.t("E-mail (opcional)","E-mail (opzionale)")}" autocomplete="email" data-grupo-email="${escHtml(p.rowId)}" />
               </div>
-              ${p.status ? `<span class="grupo__membro-status">${escHtml(p.status)}</span>` : ""}
+              ${p.status ? `<span class="grupo__membro-status">${escHtml(traduzirStatus(p.status))}</span>` : ""}
             </label>
           `).join("")}
         </div>
@@ -412,8 +425,8 @@ function selecionarConvidado(item, todosDaBusca) {
       <div id="rsvpErro"></div>
 
       <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.25rem">
-        <button class="btn btn--primary" type="button" id="btnConfirmar" onclick="confirmar()">Confirmar</button>
-        <button class="btn btn--outline" type="button" onclick="voltarBusca()">Voltar</button>
+        <button class="btn btn--primary" type="button" id="btnConfirmar" onclick="confirmar()">${window.I18N.t("Confirmar","Confermare")}</button>
+        <button class="btn btn--outline" type="button" onclick="voltarBusca()">${window.I18N.t("Voltar","Indietro")}</button>
       </div>
     </div>
   `;
@@ -435,17 +448,17 @@ window.confirmar = async function() {
   erroDiv.innerHTML = "";
 
   if (!semTelefone && ultimos4.length !== 4) {
-    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Digite os 4 últimos dígitos do telefone.</p>`;
+    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">${window.I18N.t("Digite os 4 últimos dígitos do telefone.","Inserisci le ultime 4 cifre del telefono.")}</p>`;
     document.getElementById("ultimos4")?.focus();
     return;
   }
   if (semTelefone && telefoneCad && telefoneCad.replace(/\D/g, "").length < 8) {
-    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Digite um telefone válido.</p>`;
+    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">${window.I18N.t("Digite um telefone válido.","Inserisci un telefono valido.")}</p>`;
     document.getElementById("telefoneCad")?.focus();
     return;
   }
   if (!email || !email.includes("@")) {
-    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Digite um e-mail válido.</p>`;
+    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">${window.I18N.t("Digite um e-mail válido.","Inserisci un&#39;e-mail valida.")}</p>`;
     document.getElementById("emailRsvp")?.focus();
     return;
   }
@@ -455,7 +468,7 @@ window.confirmar = async function() {
   for (const input of camposEmailGrupo) {
     const val = (input.value || "").trim();
     if (val && !val.includes("@")) {
-      erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Verifique o e-mail informado para o seu grupo (ou deixe em branco).</p>`;
+      erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">${window.I18N.t("Verifique o e-mail informado para o seu grupo (ou deixe em branco).","Controlla l&#39;e-mail inserita per il tuo gruppo (o lasciala vuota).")}</p>`;
       input.focus();
       return;
     }
@@ -479,7 +492,7 @@ window.confirmar = async function() {
   });
 
   btnConf.disabled = true;
-  btnConf.innerHTML = '<span class="spinner"></span> Enviando…';
+  btnConf.innerHTML = `<span class="spinner"></span> ${window.I18N.t('Enviando…','Invio…')}`;
 
   try {
     const resp = await fetch(API_URL, {
@@ -497,7 +510,8 @@ window.confirmar = async function() {
         grupoNomes:     grupoNomes,
         grupoStatuses:  grupoStatuses,
         grupoTelefones: grupoTelefones,
-        grupoEmails:    grupoEmails
+        grupoEmails:    grupoEmails,
+        lang:           (window.I18N && window.I18N.lang) || "pt"
       })
     });
 
@@ -507,11 +521,11 @@ window.confirmar = async function() {
       mostrarSucessoRsvp(email, status, grupoNomes);
     } else if (json.erro === "telefone_incorreto") {
       btnConf.disabled = false;
-      btnConf.textContent = "Confirmar";
+      btnConf.textContent = window.I18N.t("Confirmar","Confermare");
       erroDiv.innerHTML = `
         <p class="rsvp__msg rsvp__msg--erro">
-          Os últimos 4 dígitos não conferem.<br>
-          Verifique e tente novamente, ou escreva para
+          ${window.I18N.t("Os últimos 4 dígitos não conferem.","Le ultime 4 cifre non corrispondono.")}<br>
+          ${window.I18N.t("Verifique e tente novamente, ou escreva para","Controlla e riprova, oppure scrivi a")}
           <a href="mailto:${EMAIL_CONTATO}" style="color:var(--terracotta-hover)">${EMAIL_CONTATO}</a>.
         </p>`;
     } else {
@@ -521,10 +535,10 @@ window.confirmar = async function() {
   } catch (err) {
     console.error(err);
     btnConf.disabled = false;
-    btnConf.textContent = "Confirmar";
+    btnConf.textContent = window.I18N.t("Confirmar","Confermare");
     erroDiv.innerHTML = `
       <p class="rsvp__msg rsvp__msg--erro">
-        Não conseguimos registrar. Tente novamente ou escreva para
+        ${window.I18N.t("Não conseguimos registrar. Tente novamente ou escreva para","Non siamo riusciti a registrare. Riprova o scrivi a")}
         <a href="mailto:${EMAIL_CONTATO}" style="color:var(--terracotta-hover)">${EMAIL_CONTATO}</a>.
       </p>`;
   }
@@ -537,7 +551,7 @@ function mostrarSucessoRsvp(email, status, grupoNomes) {
   const resultado  = document.getElementById("rsvp-resultado");
   const confirmado = status === "SIM";
   const grupoMsg   = grupoNomes?.length
-    ? `<p class="mt-2" style="font-size:.85rem;color:var(--sage-dark)">Confirmado também para: <strong>${grupoNomes.map(escHtml).join(", ")}</strong></p>`
+    ? `<p class="mt-2" style="font-size:.85rem;color:var(--sage-dark)">${window.I18N.t("Confirmado também para","Confermato anche per")}: <strong>${grupoNomes.map(escHtml).join(", ")}</strong></p>`
     : "";
 
   const urlSite = encodeURIComponent(window.location.origin + (window.location.pathname.replace("index.html","")) + "#rsvp");
@@ -547,36 +561,36 @@ function mostrarSucessoRsvp(email, status, grupoNomes) {
   resultado.innerHTML = `
     <div class="rsvp__sucesso">
       <div class="rsvp__sucesso-icon">${confirmado ? "<img src='assets/img/icon-heart-full.png' alt=''>" : "<img src='assets/img/icon-rsvp-envelope.png' alt=''>"}</div>
-      <h3>${confirmado ? "Presença confirmada!" : "Recebemos sua resposta."}</h3>
-      <p>${confirmado ? "Mal podemos esperar para te ver lá!" : "Sentiremos sua falta. Obrigado por avisar."}</p>
+      <h3>${confirmado ? window.I18N.t("Presença confirmada!","Presenza confermata!") : window.I18N.t("Recebemos sua resposta.","Abbiamo ricevuto la tua risposta.")}</h3>
+      <p>${confirmado ? window.I18N.t("Mal podemos esperar para te ver lá!","Non vediamo l&#39;ora di vederti lì!") : window.I18N.t("Sentiremos sua falta. Obrigado por avisar.","Ci mancherai. Grazie per averci avvisato.")}</p>
       ${grupoMsg}
 
       <p class="mt-2">
-        Confirmação enviada para:<br>
+        ${window.I18N.t("Confirmação enviada para","Conferma inviata a")}:<br>
         <span class="rsvp__email-destaque">${escHtml(email)}</span>
       </p>
 
       <p class="mt-2" style="font-size:.82rem;color:var(--text-muted)">
-        O e-mail inclui um link para <strong>alterar sua confirmação</strong> até ${DATA_LIMITE_ALTERACAO}.
+        ${window.I18N.t(`O e-mail inclui um link para <strong>alterar sua confirmação</strong> até ${DATA_LIMITE_ALTERACAO}.`, `L&#39;e-mail include un link per <strong>modificare la tua conferma</strong> entro il ${DATA_LIMITE_ALTERACAO}.`)}
       </p>
 
       <!-- Reenvio -->
       <div style="margin-top:1.5rem;padding:1.25rem;background:var(--bg-soft);border-radius:var(--radius);border:1px solid var(--line);text-align:left">
-        <p style="font-size:.82rem;font-weight:600;color:var(--text-main);margin-bottom:.5rem">Não recebeu o e-mail?</p>
-        <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:.75rem">Confira spam e promoções. Se ainda assim não chegou, corrija o endereço e reenvie:</p>
+        <p style="font-size:.82rem;font-weight:600;color:var(--text-main);margin-bottom:.5rem">${window.I18N.t("Não recebeu o e-mail?","Non hai ricevuto l&#39;e-mail?")}</p>
+        <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:.75rem">${window.I18N.t("Confira spam e promoções. Se ainda assim não chegou, corrija o endereço e reenvie:","Controlla spam e promozioni. Se ancora non è arrivata, correggi l&#39;indirizzo e invia di nuovo:")}</p>
         <div class="renvio__form" id="renvioForm">
           <input type="email" id="emailRenvio" class="rsvp__input" placeholder="${escHtml(email)}" value="${escHtml(email)}" />
-          <button class="btn btn--outline btn--sm" type="button" id="btnRenvio" onclick="reenviarEmail()">Reenviar</button>
+          <button class="btn btn--outline btn--sm" type="button" id="btnRenvio" onclick="reenviarEmail()">${window.I18N.t("Reenviar","Invia di nuovo")}</button>
         </div>
         <p id="renvioMsg" style="font-size:.78rem;margin-top:.5rem"></p>
       </div>
 
       <!-- Compartilhar para grupo -->
       <div style="margin-top:1.5rem;text-align:left">
-        <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:.5rem">Tem alguém do seu grupo que ainda não confirmou?</p>
+        <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:.5rem">${window.I18N.t("Tem alguém do seu grupo que ainda não confirmou?","C&#39;è qualcuno del tuo gruppo che non ha ancora confermato?")}</p>
         <a href="${linkWpp}" target="_blank" rel="noopener" class="whatsapp-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.374 0 0 5.373 0 12c0 2.117.554 4.103 1.523 5.83L.057 23.999l6.304-1.654A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.373l-.359-.213-3.721.976.993-3.63-.234-.374A9.818 9.818 0 012.182 12C2.182 6.579 6.578 2.182 12 2.182c5.42 0 9.818 4.397 9.818 9.818 0 5.42-4.398 9.818-9.818 9.818z"/></svg>
-          Compartilhar link de confirmação
+          ${window.I18N.t("Compartilhar link de confirmação","Condividi il link di conferma")}
         </a>
       </div>
     </div>
@@ -635,7 +649,7 @@ window.reenviarEmail = async function() {
   const btn        = document.getElementById("btnRenvio");
 
   if (!email || !email.includes("@")) {
-    msgEl.textContent = "Digite um e-mail válido.";
+    msgEl.textContent = window.I18N.t("Digite um e-mail válido.","Inserisci un&#39;e-mail valida.");
     msgEl.style.color = "var(--terracotta)";
     return;
   }
@@ -650,25 +664,26 @@ window.reenviarEmail = async function() {
         action:   "reenviarEmail",
         nome:     convidadoSelecionado?.nome || "",
         rowId:    convidadoSelecionado?.rowId || "",
-        email:    email
+        email:    email,
+        lang:     (window.I18N && window.I18N.lang) || "pt"
       })
     });
     const json = await resp.json();
 
     btn.disabled = false;
-    btn.textContent = "Reenviar";
+    btn.textContent = window.I18N.t("Reenviar","Invia di nuovo");
 
     if (json.sucesso) {
-      msgEl.textContent = `E-mail enviado para ${email}. Verifique também spam.`;
+      msgEl.textContent = `${window.I18N.t("E-mail enviado para","E-mail inviata a")} ${email}. ${window.I18N.t("Verifique também spam.","Controlla anche lo spam.")}`;
       msgEl.style.color = "var(--sage-dark)";
     } else {
-      msgEl.textContent = "Não conseguimos reenviar. Escreva para " + EMAIL_CONTATO;
+      msgEl.textContent = window.I18N.t("Não conseguimos reenviar. Escreva para ","Non siamo riusciti a inviare di nuovo. Scrivi a ") + EMAIL_CONTATO;
       msgEl.style.color = "var(--terracotta)";
     }
   } catch {
     btn.disabled = false;
-    btn.textContent = "Reenviar";
-    msgEl.textContent = "Erro ao reenviar. Tente novamente.";
+    btn.textContent = window.I18N.t("Reenviar","Invia di nuovo");
+    msgEl.textContent = window.I18N.t("Erro ao reenviar. Tente novamente.","Errore durante l&#39;invio. Riprova.");
     msgEl.style.color = "var(--terracotta)";
   }
 };
@@ -695,7 +710,7 @@ window.reenviarEmail = async function() {
 
   box.innerHTML = `
     <div id="rsvp-busca">
-      <p class="rsvp__hint" style="margin-bottom:1rem;color:var(--sage-dark)">Verificando seu link…</p>
+      <p class="rsvp__hint" style="margin-bottom:1rem;color:var(--sage-dark)">${window.I18N.t("Verificando seu link…","Verifica del link in corso…")}</p>
     </div>
     <div id="rsvp-resultado"></div>
   `;
@@ -706,15 +721,15 @@ window.reenviarEmail = async function() {
       if (!json.sucesso) {
         document.getElementById("rsvp-busca").innerHTML = `
           <p class="rsvp__msg rsvp__msg--erro">
-            Link inválido ou expirado.<br>
-            Busque seu nome abaixo ou escreva para
+            ${window.I18N.t("Link inválido ou expirado.","Link non valido o scaduto.")}<br>
+            ${window.I18N.t("Busque seu nome abaixo ou escreva para","Cerca il tuo nome qui sotto o scrivi a")}
             <a href="mailto:${EMAIL_CONTATO}">${EMAIL_CONTATO}</a>.
           </p>
           <div style="margin-top:1rem">
-            <label for="nomeBusca" class="rsvp__label">Buscar pelo nome</label>
+            <label for="nomeBusca" class="rsvp__label">${window.I18N.t("Buscar pelo nome","Cerca per nome")}</label>
             <div class="rsvp__row">
               <input type="text" id="nomeBusca" class="rsvp__input" placeholder="Ex: Gian" />
-              <button class="btn btn--primary" onclick="buscar()">Buscar</button>
+              <button class="btn btn--primary" onclick="buscar()">${window.I18N.t("Buscar","Cerca")}</button>
             </div>
           </div>`;
         return;
@@ -723,39 +738,39 @@ window.reenviarEmail = async function() {
       convidadoSelecionado = { nome: json.nome, rowId: rowId, telefone: json.telefone, token: token };
       document.getElementById("rsvp-busca").innerHTML = `
         <p class="rsvp__msg rsvp__msg--ok">
-          ✓ Link válido. Altere sua confirmação abaixo.<br>
-          <small>Prazo para alteração: <strong>${DATA_LIMITE_ALTERACAO}</strong></small>
+          ✓ ${window.I18N.t("Link válido. Altere sua confirmação abaixo.","Link valido. Modifica la tua conferma qui sotto.")}<br>
+          <small>${window.I18N.t("Prazo para alteração","Termine per la modifica")}: <strong>${DATA_LIMITE_ALTERACAO}</strong></small>
         </p>`;
       const resultado = document.getElementById("rsvp-resultado");
       resultado.classList.remove("oculto");
       mostrarFormAlteracao(json, resultado);
     })
     .catch(() => {
-      document.getElementById("rsvp-busca").innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Erro ao verificar link. Tente novamente.</p>`;
+      document.getElementById("rsvp-busca").innerHTML = `<p class="rsvp__msg rsvp__msg--erro">${window.I18N.t("Erro ao verificar link. Tente novamente.","Errore durante la verifica del link. Riprova.")}</p>`;
     });
 })();
 
 function mostrarFormAlteracao(json, resultado) {
   resultado.innerHTML = `
     <div class="rsvp__form" id="rsvpForm">
-      <p style="font-size:.9rem;color:var(--text-muted)">Alterando confirmação de: <strong>${escHtml(json.nome)}</strong></p>
+      <p style="font-size:.9rem;color:var(--text-muted)">${window.I18N.t("Alterando confirmação de","Modifica della conferma di")}: <strong>${escHtml(json.nome)}</strong></p>
       <div class="rsvp__field">
-        <label class="rsvp__label" for="emailRsvp">Confirme seu e-mail</label>
+        <label class="rsvp__label" for="emailRsvp">${window.I18N.t("Confirme seu e-mail","Confermi la tua e-mail")}</label>
         <input type="email" id="emailRsvp" class="rsvp__input" placeholder="seuemail@exemplo.com" autocomplete="email" />
       </div>
       <div class="rsvp__field">
-        <span class="rsvp__label">Nova confirmação</span>
+        <span class="rsvp__label">${window.I18N.t("Nova confirmação","Nuova conferma")}</span>
         <div class="rsvp__status">
           <label class="rsvp__status-option">
-            <input type="radio" name="statusRsvp" value="SIM" checked /> ✓ Confirmo presença
+            <input type="radio" name="statusRsvp" value="SIM" checked /> ✓ ${window.I18N.t("Confirmo presença","Confermo la presenza")}
           </label>
           <label class="rsvp__status-option">
-            <input type="radio" name="statusRsvp" value="NAO" /> ✕ Não poderei comparecer
+            <input type="radio" name="statusRsvp" value="NAO" /> ✕ ${window.I18N.t("Não poderei comparecer","Non potrò essere presente")}
           </label>
         </div>
       </div>
       <div id="rsvpErro"></div>
-      <button class="btn btn--primary" type="button" id="btnConfirmar" onclick="confirmarAlteracao()">Salvar alteração</button>
+      <button class="btn btn--primary" type="button" id="btnConfirmar" onclick="confirmarAlteracao()">${window.I18N.t("Salvar alteração","Salva modifica")}</button>
     </div>`;
 }
 
@@ -768,12 +783,12 @@ window.confirmarAlteracao = async function() {
 
   erroDiv.innerHTML = "";
   if (!email || !email.includes("@")) {
-    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Digite seu e-mail.</p>`;
+    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">${window.I18N.t("Digite seu e-mail.","Inserisci la tua e-mail.")}</p>`;
     return;
   }
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Salvando…';
+  btn.innerHTML = `<span class="spinner"></span> ${window.I18N.t('Salvando…','Salvataggio…')}`;
 
   try {
     const resp = await fetch(API_URL, {
@@ -785,7 +800,8 @@ window.confirmarAlteracao = async function() {
         token:  convidadoSelecionado.token,
         email:  email,
         status: status,
-        semTelefone: true
+        semTelefone: true,
+        lang: (window.I18N && window.I18N.lang) || "pt"
       })
     });
     const json = await resp.json();
@@ -796,8 +812,8 @@ window.confirmarAlteracao = async function() {
     }
   } catch {
     btn.disabled = false;
-    btn.textContent = "Salvar alteração";
-    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Não conseguimos salvar. Tente novamente.</p>`;
+    btn.textContent = window.I18N.t("Salvar alteração","Salva modifica");
+    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">${window.I18N.t("Não conseguimos salvar. Tente novamente.","Non siamo riusciti a salvare. Riprova.")}</p>`;
   }
 };
 
@@ -930,34 +946,34 @@ function renderizarModalPresente(nome, valor, desc) {
   const isEmail  = isPixEmailChave(pixCode);
 
   conteudo.innerHTML = `
-    <p class="modal__eyebrow">Presente</p>
+    <p class="modal__eyebrow">${window.I18N.t("Presente","Regalo")}</p>
     <img src="assets/img/icon-gift-box.png" alt="" class="modal__icon-hero">
     <h2 class="modal__titulo" id="modalTitulo">${escHtml(nome)}</h2>
     <p class="modal__valor">R$ ${escHtml(valor)}</p>
     <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem">${escHtml(desc)}</p>
 
     <div class="pix__box">
-      <p class="pix__label"><img src="assets/img/icon-pix.png" alt="">${isEmail ? "Chave Pix (e-mail)" : "Pix copia-e-cola"}</p>
+      <p class="pix__label"><img src="assets/img/icon-pix.png" alt="">${isEmail ? window.I18N.t("Chave Pix (e-mail)","Chiave Pix (e-mail)") : window.I18N.t("Pix copia-e-cola","Pix copia e incolla")}</p>
       <p class="pix__code" id="pixCode">${escHtml(pixCode)}</p>
-      <button class="btn btn--outline-green btn--sm" type="button" onclick="copiarPix()">${isEmail ? "Copiar chave" : "Copiar código Pix"}</button>
+      <button class="btn btn--outline-green btn--sm" type="button" onclick="copiarPix()">${isEmail ? window.I18N.t("Copiar chave","Copia chiave") : window.I18N.t("Copiar código Pix","Copia codice Pix")}</button>
     </div>
 
     <div class="modal__form" id="presenteForm">
       <div class="modal__field">
-        <label class="modal__label" for="presenteNome">Seu nome</label>
-        <input type="text" id="presenteNome" class="modal__input" autocomplete="name" placeholder="Como prefere ser chamado(a)" />
+        <label class="modal__label" for="presenteNome">${window.I18N.t("Seu nome","Il tuo nome")}</label>
+        <input type="text" id="presenteNome" class="modal__input" autocomplete="name" placeholder="${window.I18N.t("Como prefere ser chamado(a)","Come preferisci essere chiamato/a")}" />
       </div>
       <div class="modal__field">
-        <label class="modal__label" for="presenteEmail"><img src="assets/img/icon-envelope.png" alt="" class="modal__label-icon">Seu e-mail</label>
+        <label class="modal__label" for="presenteEmail"><img src="assets/img/icon-envelope.png" alt="" class="modal__label-icon">${window.I18N.t("Seu e-mail","La tua e-mail")}</label>
         <input type="email" id="presenteEmail" class="modal__input" autocomplete="email" placeholder="seuemail@exemplo.com" />
       </div>
       <div class="modal__field">
-        <label class="modal__label" for="presenteMensagem"><img src="assets/img/icon-rsvp-envelope.png" alt="" class="modal__label-icon">Mensagem (opcional)</label>
-        <textarea id="presenteMensagem" class="modal__textarea" placeholder="Deixe uma mensagem para os noivos…"></textarea>
+        <label class="modal__label" for="presenteMensagem"><img src="assets/img/icon-rsvp-envelope.png" alt="" class="modal__label-icon">${window.I18N.t("Mensagem (opcional)","Messaggio (opzionale)")}</label>
+        <textarea id="presenteMensagem" class="modal__textarea" placeholder="${window.I18N.t("Deixe uma mensagem para os noivos…","Lascia un messaggio per gli sposi…")}"></textarea>
       </div>
       <div id="presenteErro"></div>
       <button class="btn btn--terra" type="button" id="btnPresente" onclick="enviarPresente('${escAttr(nome)}','${escAttr(valor)}')">
-        Já fiz o Pix <img src="assets/img/icon-heart-full.png" alt="" class="modal__icon-inline" style="margin-right:0;margin-left:.25rem">
+        ${window.I18N.t("Já fiz o Pix","Ho già fatto il Pix")} <img src="assets/img/icon-heart-full.png" alt="" class="modal__icon-inline" style="margin-right:0;margin-left:.25rem">
       </button>
     </div>
   `;
@@ -1003,42 +1019,42 @@ window.enviarPresente = async function(nome, valor) {
 
   erroDiv.innerHTML = "";
   if (!nomeRem) {
-    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Informe seu nome.</p>`;
+    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">${window.I18N.t("Informe seu nome.","Inserisci il tuo nome.")}</p>`;
     document.getElementById("presenteNome")?.focus();
     return;
   }
   if (!email || !email.includes("@")) {
-    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Digite um e-mail válido.</p>`;
+    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">${window.I18N.t("Digite um e-mail válido.","Inserisci un&#39;e-mail valida.")}</p>`;
     document.getElementById("presenteEmail")?.focus();
     return;
   }
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Registrando…';
+  btn.innerHTML = `<span class="spinner"></span> ${window.I18N.t('Registrando…','Registrazione…')}`;
 
   try {
     const resp = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ action: "gift", nome: nomeRem, email, presente: nome, valor, mensagem })
+      body: JSON.stringify({ action: "gift", nome: nomeRem, email, presente: nome, valor, mensagem, lang: (window.I18N && window.I18N.lang) || "pt" })
     });
     const json = await resp.json();
     if (json.sucesso) {
       document.getElementById("modalConteudo").innerHTML = `
         <div class="modal__sucesso">
           <div class="modal__sucesso-icon"><img src="assets/img/icon-gift-box.png" alt=""></div>
-          <h3>Presente registrado!</h3>
-          <p>Obrigado, ${escHtml(nomeRem)}!<br>Enviamos uma cópia para <strong>${escHtml(email)}</strong>.</p>
+          <h3>${window.I18N.t("Presente registrado!","Regalo registrato!")}</h3>
+          <p>${window.I18N.t("Obrigado","Grazie")}, ${escHtml(nomeRem)}!<br>${window.I18N.t("Enviamos uma cópia para","Abbiamo inviato una copia a")} <strong>${escHtml(email)}</strong>.</p>
           <p class="mt-2" style="font-size:.95rem;font-weight:600;color:var(--sage-dark);background:var(--bg-green);border:1px solid var(--line-green);border-radius:var(--radius);padding:.85rem 1rem;display:flex;align-items:center;gap:.6rem;justify-content:center;text-align:left">
             <img src="assets/img/icon-envelope.png" alt="" style="width:2rem;height:2rem;object-fit:contain;flex-shrink:0">
-            Não chegou? Confira spam e promoções.
+            ${window.I18N.t("Não chegou? Confira spam e promoções.","Non è arrivata? Controlla spam e promozioni.")}
           </p>
         </div>`;
       celebrarConfirmacao();
     } else { throw new Error(json.erro); }
   } catch {
     btn.disabled = false;
-    btn.innerHTML = "Já fiz o Pix <img src='assets/img/icon-heart-full.png' alt='' class='modal__icon-inline' style='margin-right:0;margin-left:.25rem'>";
-    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Não conseguimos registrar. Tente novamente.</p>`;
+    btn.innerHTML = `${window.I18N.t("Já fiz o Pix","Ho già fatto il Pix")} <img src='assets/img/icon-heart-full.png' alt='' class='modal__icon-inline' style='margin-right:0;margin-left:.25rem'>`;
+    erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">${window.I18N.t("Não conseguimos registrar. Tente novamente.","Non siamo riusciti a registrare. Riprova.")}</p>`;
   }
 };
 
