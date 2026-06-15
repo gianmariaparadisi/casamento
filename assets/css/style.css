@@ -162,6 +162,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   transition: background var(--transition), color var(--transition), border-color var(--transition);
   cursor: pointer;
 }
+.btn img { width: 1.1rem; height: 1.1rem; object-fit: contain; flex-shrink: 0; }
 .btn--primary { background: var(--sage); color: var(--white); }
 .btn--primary:hover { background: var(--sage-dark); }
 .btn--terra { background: var(--terracotta); color: var(--white); }
@@ -751,10 +752,11 @@ details[open] .faq__question::after { transform: rotate(45deg); }
 .modal__sucesso { text-align: center; padding: 1rem 0; }
 .modal__sucesso-icon { font-size: 2rem; margin-bottom: .75rem; }
 .modal__sucesso-icon img { width: 4.5rem; height: 4.5rem; object-fit: contain; display: block; margin: 0 auto; }
-.modal__icon-inline { width: 1.2rem; height: 1.2rem; object-fit: contain; vertical-align: -.22rem; margin-right: .35rem; }
-.modal__icon-hero { width: 3.5rem; height: 3.5rem; object-fit: contain; display: block; margin: 0 auto .5rem; }
-.modal__label-icon { width: 1.1rem; height: 1.1rem; object-fit: contain; vertical-align: -.2rem; margin-right: .25rem; }
-.pix__label img { width: 1.1rem; height: 1.1rem; object-fit: contain; vertical-align: -.2rem; margin-right: .3rem; }
+.btn .modal__icon-inline, .modal__icon-inline { width: 1.2rem; height: 1.2rem; object-fit: contain; vertical-align: -.22rem; margin-right: .35rem; }
+.modal__icon-hero { width: 5.5rem; height: 5.5rem; object-fit: contain; display: block; margin: 0 auto .75rem; }
+.modal__label-icon { width: 2.6rem; height: 2.6rem; object-fit: contain; display: block; margin-bottom: .3rem; }
+.pix__label img { width: 2.6rem; height: 2.6rem; object-fit: contain; display: block; margin: 0 auto .3rem; }
+.pix__label { display: flex; flex-direction: column; align-items: center; }
 .modal__sucesso h3 {
   font-family: var(--font-display); font-size: 1.5rem;
   font-weight: 400; margin-bottom: .5rem;
@@ -857,6 +859,7 @@ details[open] .faq__question::after { transform: rotate(45deg); }
   filter: sepia(15%) saturate(88%) brightness(97%) contrast(104%);
   transition: filter .4s ease;
 }
+.site-img--top { object-position: 50% 20%; }
 /* Ilustrações (desenho da fazenda, logo) — sem filtro fotográfico */
 .site-img--ilustracao {
   filter: none;
