@@ -520,6 +520,9 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   outline: none; border-color: var(--sage);
   box-shadow: 0 0 0 3px rgba(122,155,110,.18);
 }
+.rsvp__input--sm {
+  padding: .5rem .75rem; font-size: .82rem; flex: none; width: 100%;
+}
 .rsvp__hint { margin-top: .55rem; font-size: .78rem; color: var(--text-muted); }
 
 /* Convidado card */
