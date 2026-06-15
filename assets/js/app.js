@@ -400,7 +400,7 @@ function selecionarConvidado(item, todosDaBusca) {
               <span class="grupo__membro-nome">${escHtml(p.nome)}</span>
               <div class="rsvp__status rsvp__status--sm" role="group" style="margin-top:.35rem;margin-left:.25rem">
                 <label class="rsvp__status-option rsvp__status-option--sm" style="font-size:.8rem">
-                  <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="SIM" checked />
+                  <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="SIM" />
                   <img src="assets/img/icon-check-decorative.png" alt=""> ${window.I18N.t("Confirmado","Confermato")}
                 </label>
                 <label class="rsvp__status-option rsvp__status-option--sm" style="font-size:.8rem">
@@ -474,13 +474,24 @@ window.confirmar = async function() {
     }
   }
 
-  // Membros do grupo selecionados — cada um com seu próprio status, e telefone/email opcionais
+  // Membros do grupo selecionados — cada um precisa ter um status escolhido
   const grupoChecks = document.querySelectorAll('input[name="grupo"]:checked');
+  for (const check of grupoChecks) {
+    const rowId = check.value;
+    const radioChecked = document.querySelector(`input[name="grupoStatus_${rowId}"]:checked`);
+    if (!radioChecked) {
+      erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">${window.I18N.t("Escolha a presença de","Scegli la presenza di")} ${escHtml(check.dataset.nome)}.</p>`;
+      document.querySelector(`input[name="grupoStatus_${rowId}"]`)?.focus();
+      return;
+    }
+  }
+
+  // Membros do grupo selecionados — cada um com seu próprio status, e telefone/email opcionais
   const grupoRowIds = Array.from(grupoChecks).map(c => c.value);
   const grupoNomes  = Array.from(grupoChecks).map(c => c.dataset.nome);
   const grupoStatuses = grupoRowIds.map(rowId => {
     const radioChecked = document.querySelector(`input[name="grupoStatus_${rowId}"]:checked`);
-    return radioChecked ? radioChecked.value : "SIM";
+    return radioChecked.value;
   });
   const grupoTelefones = grupoRowIds.map(rowId => {
     const input = document.querySelector(`[data-grupo-tel="${rowId}"]`);
