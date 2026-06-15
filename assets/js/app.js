@@ -327,8 +327,22 @@ window.buscar = async function() {
 ══════════════════════════════════════════════════════════ */
 window.toggleGrupoContato = function(rowId, checked) {
   const el = document.getElementById("contato_" + rowId);
-  if (!el) return;
-  el.classList.toggle("oculto", !checked);
+  if (el) el.classList.toggle("oculto", !checked);
+
+  if (!checked) {
+    // Desmarcou o checkbox: limpa o status escolhido (Confirmado / Não poderá comparecer)
+    document.querySelectorAll(`input[name="grupoStatus_${rowId}"]`).forEach(r => { r.checked = false; });
+  }
+};
+
+window.marcarGrupoCheckbox = function(rowId) {
+  // Ao escolher um status (Confirmado / Não poderá comparecer), marca
+  // automaticamente o checkbox dessa pessoa, se ainda não estiver marcado.
+  const checkbox = document.querySelector(`input[name="grupo"][value="${rowId}"]`);
+  if (checkbox && !checkbox.checked) {
+    checkbox.checked = true;
+    window.toggleGrupoContato(rowId, true);
+  }
 };
 
 function selecionarConvidado(item, todosDaBusca) {
@@ -400,11 +414,11 @@ function selecionarConvidado(item, todosDaBusca) {
               <span class="grupo__membro-nome">${escHtml(p.nome)}</span>
               <div class="rsvp__status rsvp__status--sm" role="group" style="margin-top:.35rem;margin-left:.25rem">
                 <label class="rsvp__status-option rsvp__status-option--sm" style="font-size:.8rem">
-                  <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="SIM" />
+                  <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="SIM" onchange="window.marcarGrupoCheckbox('${escHtml(p.rowId)}')" />
                   <img src="assets/img/icon-check-decorative.png" alt=""> ${window.I18N.t("Confirmado","Confermato")}
                 </label>
                 <label class="rsvp__status-option rsvp__status-option--sm" style="font-size:.8rem">
-                  <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="NAO" />
+                  <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="NAO" onchange="window.marcarGrupoCheckbox('${escHtml(p.rowId)}')" />
                   <img src="assets/img/icon-cancel-decorative.png" alt=""> ${window.I18N.t("Não poderá comparecer","Non potrà essere presente")}
                 </label>
               </div>
