@@ -947,7 +947,8 @@ window.enviarPresente = async function(nome, valor) {
           <div class="modal__sucesso-icon"><img src="assets/img/icon-gift-box.png" alt=""></div>
           <h3>Presente registrado!</h3>
           <p>Obrigado, ${escHtml(nomeRem)}!<br>Enviamos uma cópia para <strong>${escHtml(email)}</strong>.</p>
-          <p class="mt-2" style="font-size:.78rem;color:var(--sage)">
+          <p class="mt-2" style="font-size:.95rem;font-weight:600;color:var(--sage-dark);background:var(--bg-green);border:1px solid var(--line-green);border-radius:var(--radius);padding:.85rem 1rem;display:flex;align-items:center;gap:.6rem;justify-content:center;text-align:left">
+            <img src="assets/img/icon-envelope.png" alt="" style="width:2rem;height:2rem;object-fit:contain;flex-shrink:0">
             Não chegou? Confira spam e promoções.
           </p>
         </div>`;
