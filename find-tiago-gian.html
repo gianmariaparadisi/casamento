@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Find Tiago & Gian — Tiago e Gian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="assets/css/style.css"/>
+  <style>
+    body.game-page{min-height:100svh;background:linear-gradient(180deg,#FBF7EF,#F2E7D7 60%,#EFE1D0);color:#2A2820;}
+    .game-nav{position:sticky;top:0;z-index:30;background:rgba(251,247,239,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(216,205,188,.75);}
+    .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:14px 0;}
+    .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.86rem;color:#6C6258;}
+    .game-back{font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:#766553;text-decoration:underline;text-underline-offset:4px;}
+    .game-shell{width:94%;max-width:900px;margin:0 auto;padding:24px 0 80px;}
+    .game-kicker{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:#A47845;text-align:center;margin-bottom:.35rem;}
+    .game-title{font-family:var(--font-display);font-size:clamp(1.8rem,6vw,3.4rem);font-weight:300;text-align:center;margin-bottom:.45rem;}
+    .game-sub{max-width:480px;margin:0 auto .9rem;text-align:center;color:#6C6258;font-size:.87rem;line-height:1.6;}
+
+    /* HUD */
+    .hud{display:flex;gap:.55rem;justify-content:center;flex-wrap:wrap;margin:.6rem auto .8rem;}
+    .hud__pill{background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.85);border-radius:999px;padding:.38rem .78rem;font-size:.73rem;letter-spacing:.07em;text-transform:uppercase;color:#665B4D;}
+    .hud__pill strong{color:#2A2820;font-weight:600;}
+
+    /* Scene selector */
+    .scene-tabs{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:.85rem;}
+    .scene-tab{padding:.38rem .82rem;border-radius:999px;border:1.5px solid rgba(216,205,188,.9);background:rgba(255,255,255,.7);font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6C6258;cursor:pointer;transition:all .15s;}
+    .scene-tab.active{background:var(--sage);color:#fff;border-color:var(--sage);}
+
+    /* Game area */
+    .game-area{display:grid;grid-template-columns:1fr 200px;gap:1rem;align-items:start;}
+    @media(max-width:680px){.game-area{grid-template-columns:1fr;}}
+
+    /* Scene canvas */
+    .scene-wrap{position:relative;border-radius:18px;overflow:hidden;box-shadow:0 16px 60px rgba(82,57,34,.15);cursor:crosshair;user-select:none;}
+    .scene-wrap img.scene-img{display:block;width:100%;border-radius:18px;}
+    .hint-glow{position:absolute;pointer-events:none;width:120px;height:120px;transform:translate(-50%,-50%);opacity:0;transition:opacity .3s;z-index:5;}
+    .hint-glow.show{opacity:1;}
+    .magnifier-cursor{position:absolute;pointer-events:none;width:56px;height:56px;transform:translate(-50%,-50%);z-index:8;display:none;}
+    .found-marker{position:absolute;width:36px;height:36px;transform:translate(-50%,-50%);z-index:6;pointer-events:none;animation:foundPop .5s ease;}
+
+    /* Checklist */
+    .checklist{background:rgba(255,255,255,.65);border:1px solid rgba(216,205,188,.9);border-radius:16px;padding:.8rem .65rem;box-shadow:0 8px 28px rgba(82,57,34,.09);}
+    .checklist h3{font-family:var(--font-display);font-size:1rem;font-weight:400;text-align:center;margin-bottom:.6rem;}
+    .check-item{position:relative;border-radius:10px;border:1.5px solid rgba(216,205,188,.9);background:#fff;padding:.42rem .5rem;margin-bottom:.38rem;display:flex;align-items:center;gap:.4rem;transition:all .2s;}
+    .check-item img.ci-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:.3;pointer-events:none;}
+    .check-item img.ci-icon{width:30px;height:30px;object-fit:contain;flex-shrink:0;position:relative;z-index:1;}
+    .check-item span{font-size:.72rem;font-weight:600;color:#6C6258;position:relative;z-index:1;flex:1;}
+    .check-item.found{background:rgba(235,240,230,.7);border-color:var(--sage);}
+    .check-item.found span{color:var(--sage-dark);text-decoration:line-through;}
+    .check-item img.ci-check{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:18px;height:18px;object-fit:contain;display:none;z-index:2;}
+    .check-item.found img.ci-check{display:block;}
+    .hint-btn-wrap{display:flex;justify-content:center;margin-top:.6rem;}
+    .hint-btn{display:flex;align-items:center;gap:.35rem;padding:.42rem .9rem;border-radius:999px;border:1.5px solid rgba(200,160,80,.4);background:rgba(255,248,220,.6);color:#7A5822;font-size:.7rem;font-weight:600;cursor:pointer;transition:all .15s;}
+    .hint-btn img{width:20px;height:20px;object-fit:contain;}
+    .hint-btn:hover{background:rgba(255,248,220,.95);}
+    .hint-count{font-size:.65rem;color:#A47845;text-align:center;margin-top:.3rem;}
+
+    /* Modals */
+    .modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:rgba(251,247,239,.9);backdrop-filter:blur(8px);}
+    .modal[hidden]{display:none;}
+    .modal__card{width:min(94%,440px);background:rgba(255,255,255,.95);border:1px solid rgba(216,205,188,.95);border-radius:22px;padding:1.7rem;text-align:center;box-shadow:0 22px 70px rgba(82,57,34,.18);}
+    .modal__icon img{width:5rem;height:5rem;object-fit:contain;display:block;margin:0 auto .65rem;}
+    .modal__title{font-family:var(--font-display);font-size:2rem;font-weight:300;margin-bottom:.45rem;}
+    .modal__text{color:#6C6258;font-size:.88rem;line-height:1.65;margin-bottom:.9rem;}
+    .btn-row{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
+    .game-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(180,137,70,.35);background:#fff;color:#5A4C3D;padding:.72rem 1.3rem;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 8px 24px rgba(110,80,45,.09);cursor:pointer;transition:all .15s;gap:.4rem;}
+    .game-btn:hover{transform:translateY(-1px);background:#FFF9EF;}
+    .game-btn--main{background:linear-gradient(135deg,#D6B167,#B98538);color:white;border-color:transparent;}
+    .save-box{margin-top:.9rem;background:rgba(255,255,255,.6);border:1px solid rgba(216,205,188,.8);border-radius:14px;padding:.8rem;}
+    .save-box__row{display:flex;gap:.5rem;}
+    .save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.95);border-radius:999px;background:#fff;padding:.65rem .88rem;font:inherit;font-size:.88rem;outline:none;}
+    .save-msg{font-size:.74rem;color:#6C6258;margin-top:.35rem;min-height:1em;}
+    .top10{margin-top:1rem;background:rgba(255,255,255,.42);border:1px solid rgba(216,205,188,.75);border-radius:14px;padding:.8rem;}
+    .top10 h3{font-family:var(--font-display);font-size:1.1rem;font-weight:400;margin-bottom:.4rem;text-align:center;}
+    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.28rem;}
+    .top10 li{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.6);border-radius:10px;padding:.42rem .6rem;font-size:.83rem;}
+    .top10 .pos{font-family:var(--font-display);font-size:.95rem;width:1.3rem;text-align:center;color:#A47845;}
+    .top10 .name{flex:1;font-weight:500;}.top10 .pts{font-weight:700;color:#7B4B22;}
+    @media(max-width:480px){.save-box__row{flex-direction:column}.game-btn{width:100%}}
+    @keyframes foundPop{0%{transform:translate(-50%,-50%) scale(0) rotate(-90deg)}60%{transform:translate(-50%,-50%) scale(1.3) rotate(10deg)}100%{transform:translate(-50%,-50%) scale(1) rotate(0)}}
+    @keyframes hintPulse{0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
+  </style>
+</head>
+<body class="game-page">
+  <nav class="game-nav"><div class="game-nav__inner">
+    <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
+    <div class="game-brand">Tiago & Gian</div>
+  </div></nav>
+
+  <main class="game-shell">
+    <p class="game-kicker">Objeto Escondido</p>
+    <h1 class="game-title">Find Tiago & Gian</h1>
+    <p class="game-sub">Encontre todos os itens escondidos na cena. Use as dicas se precisar!</p>
+
+    <div class="hud">
+      <div class="hud__pill">Encontrados: <strong id="foundCount">0</strong> / <strong id="totalCount">0</strong></div>
+      <div class="hud__pill">⏱ <strong id="timerEl">0</strong>s</div>
+      <div class="hud__pill">Cliques: <strong id="clickCount">0</strong></div>
+    </div>
+
+    <div class="scene-tabs" id="sceneTabs"></div>
+
+    <div class="game-area">
+      <div class="scene-wrap" id="sceneWrap" onclick="handleSceneClick(event)">
+        <img class="scene-img" id="sceneImg" src="" alt="Cena">
+        <img class="hint-glow" id="hintGlow" src="assets/img/find-hint-glow.png" alt="">
+        <img class="magnifier-cursor" id="magnifier" src="assets/img/find-magnifier.png" alt="">
+      </div>
+      <div class="checklist" id="checklist">
+        <h3>Encontre:</h3>
+        <div id="checkItems"></div>
+        <div class="hint-btn-wrap">
+          <button class="hint-btn" onclick="useHint()">
+            <img src="assets/img/find-hint-star.png" alt=""> Dica
+          </button>
+        </div>
+        <p class="hint-count" id="hintCount">3 dicas disponíveis</p>
+      </div>
+    </div>
+
+    <section class="top10" style="max-width:480px;margin:1.5rem auto 0"><h3>Top 10</h3><ol id="topList"></ol></section>
+  </main>
+
+  <!-- Start modal -->
+  <div class="modal" id="startModal">
+    <div class="modal__card">
+      <div class="modal__icon"><img src="assets/img/find-magnifier.png" alt=""></div>
+      <h2 class="modal__title">Find Tiago & Gian</h2>
+      <p class="modal__text">Encontre os itens escondidos em cada cena do casamento. Clique no objeto quando encontrar! Você tem 3 dicas por cena.</p>
+      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startFind()">🔍 Começar</button></div>
+    </div>
+  </div>
+
+  <!-- Win modal -->
+  <div class="modal" id="winModal" hidden>
+    <div class="modal__card">
+      <div class="modal__icon"><img src="assets/img/find-complete-scene.png" alt=""></div>
+      <h2 class="modal__title" id="winTitle">Tudo encontrado!</h2>
+      <p class="modal__text" id="winText"></p>
+      <div class="btn-row" style="margin-bottom:.7rem">
+        <button class="game-btn" onclick="nextScene()">Próxima cena →</button>
+        <button class="game-btn game-btn--main" onclick="document.getElementById('winModal').hidden=true">Ver placar</button>
+      </div>
+      <div class="save-box">
+        <div class="save-box__row">
+          <input class="save-input" id="playerName" placeholder="Seu nome" maxlength="22"/>
+          <button class="game-btn" onclick="doSave()">Salvar</button>
+        </div>
+        <p class="save-msg" id="saveMsg"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+    const GAME_KEY = "find-tiago-gian";
+
+    // Scenes with hidden object positions (percentages of image width/height)
+    const SCENES = [
+      {id:"farm",      name:"Fazenda",     img:"scene-farm.png",
+       objects:[
+         {id:"rings",     name:"Alianças",    x:18,y:32, r:4.5},
+         {id:"bouquet",   name:"Buquê",       x:67,y:45, r:5},
+         {id:"champagne", name:"Champagne",   x:82,y:28, r:4},
+         {id:"tiago",     name:"Tiago",       x:35,y:72, r:5.5},
+         {id:"gian",      name:"Gian",        x:55,y:60, r:5.5},
+         {id:"cat",       name:"Gatinho",     x:91,y:80, r:4},
+       ]},
+      {id:"ceremony",  name:"Cerimônia",   img:"scene-ceremony.png",
+       objects:[
+         {id:"rings",     name:"Alianças",    x:48,y:22, r:4},
+         {id:"bouquet",   name:"Buquê",       x:25,y:65, r:5},
+         {id:"bowtie",    name:"Gravata",     x:72,y:55, r:4},
+         {id:"tiago",     name:"Tiago",       x:40,y:78, r:5},
+         {id:"gian",      name:"Gian",        x:60,y:78, r:5},
+         {id:"key",       name:"Chave",       x:88,y:35, r:3.5},
+       ]},
+      {id:"reception", name:"Recepção",    img:"scene-reception.png",
+       objects:[
+         {id:"champagne", name:"Champagne",   x:20,y:40, r:4.5},
+         {id:"macaron",   name:"Macaron",     x:78,y:58, r:4},
+         {id:"camera",    name:"Câmera",      x:55,y:28, r:4},
+         {id:"bouquet",   name:"Buquê",       x:30,y:72, r:5},
+         {id:"gian",      name:"Gian",        x:65,y:80, r:5},
+         {id:"tiago",     name:"Tiago",       x:45,y:68, r:5},
+       ]},
+      {id:"italy",     name:"Itália",      img:"scene-italy.png",
+       objects:[
+         {id:"passport",  name:"Passaporte",  x:62,y:44, r:4},
+         {id:"camera",    name:"Câmera",      x:28,y:32, r:4},
+         {id:"cat",       name:"Gatinho",     x:85,y:75, r:4.5},
+         {id:"suitcase",  name:"Malinha",     x:18,y:68, r:5},
+         {id:"macaron",   name:"Macaron",     x:72,y:25, r:3.5},
+         {id:"bowtie",    name:"Gravata",     x:48,y:82, r:4},
+       ]},
+      {id:"honeymoon", name:"Lua de Mel",  img:"scene-honeymoon.png",
+       objects:[
+         {id:"rings",     name:"Alianças",    x:50,y:30, r:4},
+         {id:"champagne", name:"Champagne",   x:78,y:45, r:4.5},
+         {id:"suitcase",  name:"Malinha",     x:22,y:62, r:5},
+         {id:"camera",    name:"Câmera",      x:65,y:72, r:4},
+         {id:"gian",      name:"Gian",        x:38,y:78, r:5},
+         {id:"tiago",     name:"Tiago",       x:55,y:80, r:5},
+       ]},
+    ];
+
+    let curSceneIdx=0, foundSet=new Set(), clicks=0, hints=3, timerSec=0, timerInt=null, totalScore=0, finalScore=0;
+    let hintTarget=null, hintTimeout=null;
+
+    function startFind(){
+      document.getElementById('startModal').hidden=true;
+      loadScene(0);
+      loadTop10();
+    }
+
+    function loadScene(idx){
+      curSceneIdx=idx; foundSet=new Set(); clicks=0; hints=3;
+      timerSec=0; clearInterval(timerInt);
+      timerInt=setInterval(()=>{ timerSec++; document.getElementById('timerEl').textContent=timerSec; },1000);
+      const scene=SCENES[idx];
+      document.getElementById('sceneImg').src='assets/img/'+scene.img;
+      renderSceneTabs();
+      renderChecklist();
+      clearMarkers();
+      updateHud();
+    }
+
+    function renderSceneTabs(){
+      const tabs=document.getElementById('sceneTabs');
+      tabs.innerHTML=SCENES.map((s,i)=>`<button class="scene-tab ${i===curSceneIdx?'active':''}" onclick="loadScene(${i})">${s.name}</button>`).join('');
+    }
+
+    function renderChecklist(){
+      const scene=SCENES[curSceneIdx];
+      document.getElementById('totalCount').textContent=scene.objects.length;
+      document.getElementById('hintCount').textContent=`${hints} dica${hints===1?'':'s'} disponível${hints===1?'':'is'}`;
+      document.getElementById('checkItems').innerHTML=scene.objects.map(obj=>`
+        <div class="check-item ${foundSet.has(obj.id)?'found':''}" id="ci_${obj.id}">
+          <img class="ci-frame" src="assets/img/find-object-frame.png" alt="">
+          <img class="ci-icon" src="assets/img/find-${obj.id}.png" alt="${obj.name}" onerror="this.src='assets/img/find-rings.png'">
+          <span>${obj.name}</span>
+          <img class="ci-check" src="assets/img/find-star-burst.png" alt="✓">
+        </div>`).join('');
+    }
+
+    function updateHud(){
+      document.getElementById('foundCount').textContent=foundSet.size;
+      document.getElementById('clickCount').textContent=clicks;
+    }
+
+    function clearMarkers(){
+      document.querySelectorAll('.found-marker').forEach(m=>m.remove());
+      const g=document.getElementById('hintGlow');
+      g.classList.remove('show');
+    }
+
+    function handleSceneClick(e){
+      if(e.target.classList.contains('found-marker')) return;
+      const wrap=document.getElementById('sceneWrap');
+      const rect=wrap.getBoundingClientRect();
+      const xPct=((e.clientX-rect.left)/rect.width)*100;
+      const yPct=((e.clientY-rect.top)/rect.height)*100;
+      clicks++;
+      updateHud();
+
+      const scene=SCENES[curSceneIdx];
+      let hit=false;
+      for(const obj of scene.objects){
+        if(foundSet.has(obj.id)) continue;
+        const dx=xPct-obj.x, dy=yPct-obj.y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<=obj.r){
+          foundObject(obj, xPct, yPct);
+          hit=true; break;
+        }
+      }
+      if(!hit) showMissFlash(e.clientX-rect.left,e.clientY-rect.top,wrap);
+    }
+
+    function foundObject(obj, xPct, yPct){
+      foundSet.add(obj.id);
+      // Mark on scene
+      const wrap=document.getElementById('sceneWrap');
+      const marker=document.createElement('img');
+      marker.className='found-marker';
+      marker.src='assets/img/find-star-burst.png';
+      marker.style.left=xPct+'%'; marker.style.top=yPct+'%';
+      wrap.appendChild(marker);
+      // Update checklist
+      const ci=document.getElementById(`ci_${obj.id}`);
+      if(ci){
+        ci.classList.add('found');
+        ci.querySelector('img.ci-frame').src='assets/img/find-object-frame-found.png';
+      }
+      // Sparkle
+      burstFoundEffect(wrap, xPct, yPct);
+      updateHud();
+      if(foundSet.size>=SCENES[curSceneIdx].objects.length){
+        setTimeout(()=>sceneComplete(),600);
+      }
+    }
+
+    function burstFoundEffect(wrap,xPct,yPct){
+      const sp=document.createElement('img');
+      sp.src='assets/img/find-star-burst.png';
+      const rect=wrap.getBoundingClientRect();
+      sp.style.cssText=`position:fixed;left:${rect.left+rect.width*xPct/100}px;top:${rect.top+rect.height*yPct/100}px;width:80px;height:80px;transform:translate(-50%,-50%);pointer-events:none;z-index:200;animation:foundPop .5s ease forwards`;
+      document.body.appendChild(sp);
+      setTimeout(()=>sp.remove(),600);
+      if(window.delightsHeartFlash) window.delightsHeartFlash(
+        rect.left+rect.width*xPct/100,
+        rect.top+rect.height*yPct/100,
+        {count:8, spread:50}
+      );
+    }
+
+    function showMissFlash(x,y,wrap){
+      const el=document.createElement('div');
+      el.style.cssText=`position:absolute;left:${x}px;top:${y}px;width:32px;height:32px;border-radius:50%;border:2px solid rgba(181,66,58,.6);transform:translate(-50%,-50%);animation:missRing .5s ease forwards;pointer-events:none;z-index:5`;
+      wrap.appendChild(el);
+      setTimeout(()=>el.remove(),550);
+    }
+
+    function useHint(){
+      if(hints<=0) return;
+      const scene=SCENES[curSceneIdx];
+      const unfound=scene.objects.filter(o=>!foundSet.has(o.id));
+      if(!unfound.length) return;
+      hints--;
+      document.getElementById('hintCount').textContent=`${hints} dica${hints===1?'':'s'} disponível${hints===1?'':'is'}`;
+      const target=unfound[Math.floor(Math.random()*unfound.length)];
+      const glow=document.getElementById('hintGlow');
+      glow.style.left=target.x+'%'; glow.style.top=target.y+'%';
+      glow.classList.add('show');
+      glow.style.animation='hintPulse 1s ease infinite';
+      clearTimeout(hintTimeout);
+      hintTimeout=setTimeout(()=>{glow.classList.remove('show');glow.style.animation='';},2500);
+    }
+
+    function sceneComplete(){
+      clearInterval(timerInt);
+      const bonus = hints*50 + Math.max(0,300-(clicks*5)) + Math.max(0,600-timerSec*2);
+      const pts = 500 + bonus;
+      totalScore += pts; finalScore=totalScore;
+      document.getElementById('winTitle').textContent='Tudo encontrado! ⭐';
+      document.getElementById('winText').textContent=
+        `Cena: ${SCENES[curSceneIdx].name} | ${timerSec}s | ${clicks} cliques | +${pts} pontos | Total: ${totalScore}`;
+      document.getElementById('winModal').hidden=false;
+      if(window.confettiBurst) confettiBurst({count:30,hearts:true});
+    }
+
+    function nextScene(){
+      document.getElementById('winModal').hidden=true;
+      const next=(curSceneIdx+1)%SCENES.length;
+      loadScene(next);
+    }
+
+    async function doSave(){
+      const name=(document.getElementById('playerName').value||'').trim().slice(0,22);
+      const msg=document.getElementById('saveMsg');
+      if(!name){msg.textContent='Coloque seu nome!';return;}
+      msg.textContent='Salvando...';
+      try{
+        await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});
+        msg.textContent='Salvo! ⭐'; loadTop10();
+      }catch(e){msg.textContent='Erro ao salvar.';}
+    }
+
+    async function loadTop10(){
+      const list=document.getElementById('topList');
+      if(!list) return;
+      list.innerHTML='<li><span class="name">Carregando...</span></li>';
+      try{
+        const r=await fetch(`${API}?action=top10&jogo=${GAME_KEY}`);
+        const d=await r.json(); const arr=d.lista||[];
+        if(!arr.length){list.innerHTML='<li><span class="name">Seja o primeiro!</span></li>';return;}
+        list.innerHTML=arr.map((it,i)=>`<li><span class="pos">${i+1}</span><span class="name">${esc(it.nome)}</span><span class="pts">${it.pontos} pts</span></li>`).join('');
+      }catch(e){list.innerHTML='<li><span class="name">Placar indisponível.</span></li>';}
+    }
+
+    function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+
+    const st=document.createElement('style');
+    st.textContent='@keyframes missRing{0%{opacity:.9;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.2)}}';
+    document.head.appendChild(st);
+  </script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/delights.js"></script>
+</body>
+</html>

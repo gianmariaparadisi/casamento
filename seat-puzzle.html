@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Is This Seat Taken? — Tiago e Gian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="assets/css/style.css"/>
+  <style>
+    body.game-page{min-height:100svh;background:linear-gradient(180deg,#FBF7EF,#F0E5D4 65%,#EAD9C4);color:#2A2820;}
+    .game-nav{position:sticky;top:0;z-index:30;background:rgba(251,247,239,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(216,205,188,.75);}
+    .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:14px 0;}
+    .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.86rem;color:#6C6258;}
+    .game-back{font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:#766553;text-decoration:underline;}
+    .game-shell{width:92%;max-width:940px;margin:0 auto;padding:24px 0 80px;}
+    .game-kicker{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:#A47845;text-align:center;margin-bottom:.35rem;}
+    .game-title{font-family:var(--font-display);font-size:clamp(1.8rem,6vw,3.2rem);font-weight:300;text-align:center;margin-bottom:.45rem;}
+    .game-sub{max-width:500px;margin:0 auto .9rem;text-align:center;color:#6C6258;font-size:.87rem;line-height:1.6;}
+
+    /* Puzzle layout */
+    .puzzle-layout{display:grid;grid-template-columns:1fr 220px;gap:1.2rem;align-items:start;}
+    @media(max-width:700px){.puzzle-layout{grid-template-columns:1fr;}}
+
+    /* Background */
+    .bg-selector{display:flex;gap:.5rem;justify-content:center;margin-bottom:.8rem;}
+    .bg-btn{padding:.32rem .7rem;border-radius:999px;border:1.5px solid rgba(216,205,188,.9);background:rgba(255,255,255,.7);font-size:.7rem;font-weight:600;text-transform:uppercase;cursor:pointer;letter-spacing:.07em;transition:all .15s;}
+    .bg-btn.active{background:var(--sage);color:#fff;border-color:var(--sage);}
+
+    /* Tables area */
+    .tables-area{position:relative;border-radius:18px;overflow:hidden;box-shadow:0 14px 50px rgba(82,57,34,.14);min-height:420px;}
+    .tables-area__bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;}
+    .tables-grid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;padding:1.2rem;}
+    .table-card{background:rgba(255,255,255,.82);border:1.5px solid rgba(216,205,188,.9);border-radius:16px;padding:.8rem;box-shadow:0 6px 22px rgba(82,57,34,.08);transition:all .22s;}
+    .table-card.satisfied{border-color:var(--sage);background:rgba(235,240,230,.82);}
+    .table-card__header{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;}
+    .table-card__header img{width:28px;height:28px;object-fit:contain;}
+    .table-card__name{font-family:var(--font-display);font-size:.95rem;font-weight:500;}
+    .seats-row{display:flex;flex-wrap:wrap;gap:.4rem;min-height:52px;border-radius:10px;background:rgba(255,255,255,.5);border:1.5px dashed rgba(216,205,188,.8);padding:.4rem;transition:background .15s;}
+    .seats-row.drag-over{background:rgba(235,240,230,.75);border-color:var(--sage);}
+    .seat-guest{display:flex;flex-direction:column;align-items:center;width:50px;cursor:grab;user-select:none;position:relative;}
+    .seat-guest img.sg-avatar{width:40px;height:40px;object-fit:contain;border-radius:50%;border:2px solid rgba(216,205,188,.9);background:#fff;}
+    .seat-guest span{font-size:.54rem;text-align:center;color:#6C6258;line-height:1.1;margin-top:.15rem;font-weight:600;}
+    .seat-guest:hover img.sg-avatar{border-color:var(--sage);}
+    .table-status{font-size:.66rem;color:#6C6258;text-align:right;margin-top:.35rem;font-weight:600;}
+    .table-status.ok{color:var(--sage-dark);}
+    .table-status.warn{color:#B5423A;}
+
+    /* Guest pool */
+    .guest-pool{background:rgba(255,255,255,.65);border:1px solid rgba(216,205,188,.9);border-radius:16px;padding:.8rem;box-shadow:0 8px 28px rgba(82,57,34,.09);}
+    .guest-pool h3{font-family:var(--font-display);font-size:1rem;font-weight:400;text-align:center;margin-bottom:.6rem;}
+    .pool-guests{display:flex;flex-direction:column;gap:.35rem;}
+
+    /* Rules */
+    .rules-panel{margin-top:.8rem;background:rgba(255,255,255,.65);border:1px solid rgba(216,205,188,.9);border-radius:14px;padding:.75rem;}
+    .rules-panel h4{font-family:var(--font-display);font-size:.9rem;font-weight:400;text-align:center;margin-bottom:.5rem;color:#6C6258;}
+    .rule-row{display:flex;align-items:center;gap:.4rem;font-size:.7rem;color:#6C6258;margin-bottom:.32rem;}
+    .rule-row img{width:20px;height:20px;object-fit:contain;flex-shrink:0;}
+
+    /* Score badge */
+    .score-badge{text-align:center;padding:.5rem;font-size:.78rem;color:#6C6258;margin-top:.6rem;}
+    .score-badge strong{font-family:var(--font-display);font-size:1.35rem;color:#C8A050;display:block;}
+
+    /* Btns */
+    .puzzle-btns{display:flex;gap:.55rem;justify-content:center;margin-top:.85rem;flex-wrap:wrap;}
+    .game-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(180,137,70,.35);background:#fff;color:#5A4C3D;padding:.68rem 1.2rem;font-size:.73rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 8px 22px rgba(110,80,45,.08);cursor:pointer;transition:all .15s;gap:.35rem;}
+    .game-btn:hover{transform:translateY(-1px);background:#FFF9EF;}
+    .game-btn--main{background:linear-gradient(135deg,#D6B167,#B98538);color:white;border-color:transparent;}
+    .modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:rgba(251,247,239,.9);backdrop-filter:blur(8px);}
+    .modal[hidden]{display:none;}
+    .modal__card{width:min(94%,430px);background:rgba(255,255,255,.95);border:1px solid rgba(216,205,188,.95);border-radius:22px;padding:1.7rem;text-align:center;box-shadow:0 22px 70px rgba(82,57,34,.18);}
+    .modal__icon img{width:5rem;height:5rem;object-fit:contain;display:block;margin:0 auto .6rem;}
+    .modal__title{font-family:var(--font-display);font-size:1.9rem;font-weight:300;margin-bottom:.45rem;}
+    .modal__text{color:#6C6258;font-size:.87rem;line-height:1.65;margin-bottom:.9rem;}
+    .btn-row{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
+    .save-box{margin-top:.85rem;background:rgba(255,255,255,.6);border:1px solid rgba(216,205,188,.8);border-radius:13px;padding:.75rem;}
+    .save-box__row{display:flex;gap:.45rem;}
+    .save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.95);border-radius:999px;background:#fff;padding:.62rem .85rem;font:inherit;font-size:.87rem;outline:none;}
+    .save-msg{font-size:.73rem;color:#6C6258;margin-top:.3rem;}
+    .top10{margin-top:1rem;background:rgba(255,255,255,.42);border:1px solid rgba(216,205,188,.75);border-radius:13px;padding:.8rem;}
+    .top10 h3{font-family:var(--font-display);font-size:1.1rem;font-weight:400;margin-bottom:.4rem;text-align:center;}
+    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.26rem;}
+    .top10 li{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.6);border-radius:10px;padding:.4rem .58rem;font-size:.82rem;}
+    .top10 .pos{font-family:var(--font-display);font-size:.95rem;width:1.2rem;text-align:center;color:#A47845;}
+    .top10 .name{flex:1;font-weight:500;}.top10 .pts{font-weight:700;color:#7B4B22;}
+    @media(max-width:480px){.save-box__row{flex-direction:column}.game-btn{width:100%}}
+    @keyframes seatPop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+    @keyframes tableSat{0%{box-shadow:0 6px 22px rgba(82,57,34,.08)}50%{box-shadow:0 0 0 4px rgba(122,155,110,.4)}100%{box-shadow:0 6px 22px rgba(82,57,34,.08)}}
+  </style>
+</head>
+<body class="game-page">
+  <nav class="game-nav"><div class="game-nav__inner">
+    <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
+    <div class="game-brand">Tiago & Gian</div>
+  </div></nav>
+
+  <main class="game-shell">
+    <p class="game-kicker">Puzzle Social</p>
+    <h1 class="game-title">Is This Seat Taken?</h1>
+    <p class="game-sub">Arranje os convidados nas mesas respeitando as restrições. ❤️ = juntos, ✗ = separados.</p>
+
+    <div class="bg-selector">
+      <button class="bg-btn active" onclick="setBg('reception')">Salão</button>
+      <button class="bg-btn" onclick="setBg('garden')">Jardim</button>
+    </div>
+
+    <div class="puzzle-layout">
+      <!-- Tables -->
+      <div>
+        <div class="tables-area" id="tablesArea">
+          <img class="tables-area__bg" id="tablesAreaBg" src="assets/img/seat-bg-reception.png" alt="">
+          <div class="tables-grid" id="tablesGrid"></div>
+        </div>
+        <div class="puzzle-btns">
+          <button class="game-btn" onclick="resetPuzzle()">🔄 Recomeçar</button>
+          <button class="game-btn game-btn--main" onclick="checkSolution()">✓ Verificar arranjo</button>
+        </div>
+        <div class="score-badge">Pontuação atual: <strong id="liveScore">0</strong></div>
+      </div>
+
+      <!-- Guest pool + rules -->
+      <div>
+        <div class="guest-pool">
+          <h3>Convidados</h3>
+          <div class="pool-guests" id="poolGuests"></div>
+        </div>
+        <div class="rules-panel" id="rulesPanel">
+          <h4>Regras da mesa</h4>
+          <div id="rulesList"></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="top10" style="max-width:480px;margin:1.5rem auto 0"><h3>Top 10</h3><ol id="topList"></ol></section>
+  </main>
+
+  <!-- Start modal -->
+  <div class="modal" id="startModal">
+    <div class="modal__card">
+      <div class="modal__icon"><img src="assets/img/seat-table-round.png" alt=""></div>
+      <h2 class="modal__title">Is This Seat Taken?</h2>
+      <p class="modal__text">Arranje os convidados nas mesas! Cada um tem preferências — alguns querem sentar juntos, outros precisam ficar separados. Resolva todas as restrições para máxima pontuação.</p>
+      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startSeat()">🪑 Começar</button></div>
+    </div>
+  </div>
+
+  <!-- Result modal -->
+  <div class="modal" id="resultModal" hidden>
+    <div class="modal__card">
+      <div class="modal__icon" id="resultIcon"><img src="assets/img/seat-success-burst.png" alt=""></div>
+      <h2 class="modal__title" id="resultTitle">Mesa resolvida!</h2>
+      <p class="modal__text" id="resultText"></p>
+      <div class="btn-row" style="margin-bottom:.7rem">
+        <button class="game-btn" onclick="resetPuzzle()">↩ Tentar de novo</button>
+        <button class="game-btn game-btn--main" onclick="nextPuzzle()">Próximo ➜</button>
+      </div>
+      <div class="save-box">
+        <div class="save-box__row">
+          <input class="save-input" id="playerName" placeholder="Seu nome" maxlength="22"/>
+          <button class="game-btn" onclick="doSave()">Salvar</button>
+        </div>
+        <p class="save-msg" id="saveMsg"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+    const GAME_KEY = "seat-puzzle";
+
+    const GUESTS = [
+      {id:"groom-a",  name:"Tiago",    img:"guest-groom-a.png"},
+      {id:"groom-b",  name:"Gian",     img:"guest-groom-b.png"},
+      {id:"grandma",  name:"Vovó",     img:"guest-grandma.png"},
+      {id:"grandpa",  name:"Vovô",     img:"guest-grandpa.png"},
+      {id:"aunt",     name:"Tia",      img:"guest-aunt.png"},
+      {id:"uncle",    name:"Tio",      img:"guest-uncle.png"},
+      {id:"cousin",   name:"Primo/a",  img:"guest-cousin.png"},
+      {id:"friend",   name:"Amigo/a",  img:"guest-friend.png"},
+      {id:"bestman",  name:"Padrinho", img:"guest-bestman.png"},
+      {id:"bridesmaid",name:"Madrinha",img:"guest-bridesmaid.png"},
+    ];
+
+    const PUZZLES = [
+      { // Easy – 3 tables of 4
+        tables:[
+          {id:"mesa1",name:"Mesa 1 — Família",   img:"seat-table-round.png", max:4},
+          {id:"mesa2",name:"Mesa 2 — Amigos",    img:"seat-table-round.png", max:4},
+          {id:"mesa3",name:"Mesa 3 — Especial",  img:"seat-table-long.png",  max:4},
+        ],
+        guests:["groom-a","groom-b","grandma","grandpa","aunt","uncle","bestman","bridesmaid","cousin","friend"],
+        rules:[
+          {type:"together",a:"groom-a",b:"groom-b",  label:"Tiago e Gian juntos",    icon:"hint-couple.png"},
+          {type:"together",a:"grandma",b:"grandpa",   label:"Vovó e Vovô juntos",     icon:"hint-family.png"},
+          {type:"apart",   a:"aunt",   b:"uncle",     label:"Tia e Tio separados",    icon:"hint-ex.png"},
+          {type:"together",a:"bestman",b:"bridesmaid",label:"Padrinho/Madrinha juntos",icon:"hint-family.png"},
+          {type:"dancefloor",a:"friend",              label:"Amigo/a perto da pista",  icon:"hint-dancefloor.png", table:"mesa2"},
+        ]
+      },
+    ];
+
+    let curPuzzle=0, tableAssign={}, totalScore=0, finalScore=0, currentBg='reception';
+    // tableAssign: { tableId: [guestId, ...] }
+
+    function startSeat(){
+      document.getElementById('startModal').hidden=true;
+      loadPuzzle(0);
+      loadTop10();
+    }
+
+    function setBg(bg){
+      currentBg=bg;
+      document.querySelectorAll('.bg-btn').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase().includes(bg==='reception'?'salão':'jardim')));
+      document.getElementById('tablesAreaBg').src=`assets/img/seat-bg-${bg}.png`;
+    }
+
+    function loadPuzzle(idx){
+      curPuzzle=idx;
+      const p=PUZZLES[idx%PUZZLES.length];
+      // Initialize empty tables
+      tableAssign={};
+      p.tables.forEach(t=>tableAssign[t.id]=[]);
+      renderTables(p);
+      renderPool(p);
+      renderRules(p);
+      updateScore(p);
+    }
+
+    function resetPuzzle(){
+      document.getElementById('resultModal').hidden=true;
+      loadPuzzle(curPuzzle);
+    }
+    function nextPuzzle(){
+      document.getElementById('resultModal').hidden=true;
+      loadPuzzle((curPuzzle+1)%PUZZLES.length);
+    }
+
+    function renderTables(p){
+      const grid=document.getElementById('tablesGrid');
+      grid.innerHTML=p.tables.map(t=>`
+        <div class="table-card" id="tc_${t.id}">
+          <div class="table-card__header">
+            <img src="assets/img/${t.img}" alt="">
+            <span class="table-card__name">${t.name}</span>
+          </div>
+          <div class="seats-row" id="seats_${t.id}" 
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="dropToTable(event,'${t.id}')">
+            <!-- guests appear here -->
+          </div>
+          <div class="table-status" id="ts_${t.id}">0/${t.max} lugares</div>
+        </div>`).join('');
+    }
+
+    function renderPool(p){
+      const pool=document.getElementById('poolGuests');
+      pool.innerHTML=p.guests.map(gid=>{
+        const g=GUESTS.find(x=>x.id===gid);
+        return guestChip(g, false);
+      }).join('');
+    }
+
+    function guestChip(g, inTable){
+      return `<div class="seat-guest" draggable="true" id="sg_${g.id}"
+        ondragstart="dragGuest(event,'${g.id}')"
+        ondblclick="removeFromTable('${g.id}')">
+        <img class="sg-avatar" src="assets/img/${g.img}" alt="${g.name}" onerror="this.src='assets/img/gianface01.png'">
+        <span>${g.name}</span>
+      </div>`;
+    }
+
+    let draggedGuest=null;
+    function dragGuest(e,gid){
+      draggedGuest=gid;
+      e.dataTransfer.setData('text/plain',gid);
+    }
+
+    function dropToTable(e,tableId){
+      e.preventDefault();
+      const gid=draggedGuest||e.dataTransfer.getData('text/plain');
+      if(!gid) return;
+      const p=PUZZLES[curPuzzle%PUZZLES.length];
+      const table=p.tables.find(t=>t.id===tableId);
+      // Remove from previous table if assigned
+      removeGuestFromAllTables(gid);
+      // Check capacity
+      if(tableAssign[tableId].length>=table.max){
+        showCapacityWarning(tableId); return;
+      }
+      tableAssign[tableId].push(gid);
+      // Remove from pool if present
+      const poolEl=document.getElementById('sg_'+gid);
+      if(poolEl && poolEl.closest('#poolGuests')) poolEl.remove();
+      refreshTableSeats(p,tableId);
+      document.querySelectorAll('.seats-row').forEach(r=>r.classList.remove('drag-over'));
+      updateScore(p);
+      checkAutoWin(p);
+    }
+
+    function removeGuestFromAllTables(gid){
+      const p=PUZZLES[curPuzzle%PUZZLES.length];
+      p.tables.forEach(t=>{
+        const idx=tableAssign[t.id].indexOf(gid);
+        if(idx>=0){ tableAssign[t.id].splice(idx,1); refreshTableSeats(p,t.id); }
+      });
+    }
+
+    function removeFromTable(gid){
+      const p=PUZZLES[curPuzzle%PUZZLES.length];
+      removeGuestFromAllTables(gid);
+      // Add back to pool
+      const g=GUESTS.find(x=>x.id===gid);
+      if(g && !document.getElementById('sg_'+gid)){
+        document.getElementById('poolGuests').insertAdjacentHTML('beforeend',guestChip(g,false));
+      }
+      updateScore(p);
+    }
+
+    function refreshTableSeats(p,tableId){
+      const row=document.getElementById('seats_'+tableId);
+      row.innerHTML=tableAssign[tableId].map(gid=>{
+        const g=GUESTS.find(x=>x.id===gid);
+        return g?guestChip(g,true):'';
+      }).join('');
+      const table=p.tables.find(t=>t.id===tableId);
+      const ts=document.getElementById('ts_'+tableId);
+      ts.textContent=`${tableAssign[tableId].length}/${table.max} lugares`;
+      ts.className='table-status'+(tableAssign[tableId].length>=table.max?' ok':'');
+    }
+
+    function showCapacityWarning(tableId){
+      const card=document.getElementById('tc_'+tableId);
+      card.style.boxShadow='0 0 0 3px rgba(181,66,58,.45)';
+      setTimeout(()=>card.style.boxShadow='',700);
+    }
+
+    function calcScore(p){
+      let score=0; let violations=0;
+      p.rules.forEach(rule=>{
+        if(rule.type==='together'){
+          const tableA=findGuestTable(rule.a), tableB=findGuestTable(rule.b);
+          if(tableA && tableA===tableB) score+=100; else if(tableA && tableB) violations++;
+        } else if(rule.type==='apart'){
+          const tableA=findGuestTable(rule.a), tableB=findGuestTable(rule.b);
+          if(tableA && tableB && tableA!==tableB) score+=100; else if(tableA && tableB) violations++;
+        } else if(rule.type==='dancefloor'){
+          const tableA=findGuestTable(rule.a);
+          if(tableA===rule.table) score+=100;
+        }
+      });
+      // base points for seats filled
+      const filled=Object.values(tableAssign).flat().length;
+      score += filled*20;
+      return {score, violations};
+    }
+
+    function findGuestTable(gid){
+      for(const [tid,guests] of Object.entries(tableAssign)){
+        if(guests.includes(gid)) return tid;
+      }
+      return null;
+    }
+
+    function updateScore(p){
+      const {score,violations}=calcScore(p);
+      document.getElementById('liveScore').textContent=score;
+      // Update table highlights
+      p.tables.forEach(t=>{
+        const card=document.getElementById('tc_'+t.id);
+        if(!card) return;
+        card.classList.remove('satisfied');
+        if(tableAssign[t.id].length>0) card.classList.add('satisfied');
+      });
+    }
+
+    function checkAutoWin(p){
+      const allPlaced=p.guests.every(gid=>findGuestTable(gid)!==null);
+      if(allPlaced) setTimeout(()=>checkSolution(),300);
+    }
+
+    function renderRules(p){
+      document.getElementById('rulesList').innerHTML=p.rules.map(r=>`
+        <div class="rule-row">
+          <img src="assets/img/${r.icon}" alt="">
+          <span>${r.label}</span>
+        </div>`).join('');
+    }
+
+    function checkSolution(){
+      const p=PUZZLES[curPuzzle%PUZZLES.length];
+      const {score,violations}=calcScore(p);
+      finalScore=score; totalScore+=score;
+      const perfect=violations===0;
+      document.getElementById('resultIcon').innerHTML=perfect
+        ?'<img src="assets/img/seat-success-burst.png" alt="">'
+        :'<img src="assets/img/seat-failure-burst.png" alt="">';
+      document.getElementById('resultTitle').textContent=perfect?'Mesa perfeita! 🎊':'Quase lá!';
+      document.getElementById('resultText').textContent=perfect
+        ?`Todas as regras satisfeitas! ${score} pontos.`
+        :`${violations} regra${violations>1?'s':''} violada${violations>1?'s':''}. ${score} pontos — tente reorganizar!`;
+      document.getElementById('resultModal').hidden=false;
+      if(perfect && window.confettiBurst) confettiBurst({count:30,hearts:true});
+      // Flash success on all tables
+      if(perfect) p.tables.forEach(t=>{
+        const card=document.getElementById('tc_'+t.id);
+        if(card) { card.style.animation='tableSat .6s ease'; setTimeout(()=>card.style.animation='',700); }
+      });
+    }
+
+    async function doSave(){
+      const name=(document.getElementById('playerName').value||'').trim().slice(0,22);
+      const msg=document.getElementById('saveMsg');
+      if(!name){msg.textContent='Coloque seu nome!';return;}
+      msg.textContent='Salvando...';
+      try{
+        await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});
+        msg.textContent='Salvo! 🎉'; loadTop10();
+      }catch(e){msg.textContent='Erro ao salvar.';}
+    }
+
+    async function loadTop10(){
+      const list=document.getElementById('topList');
+      if(!list) return;
+      list.innerHTML='<li><span class="name">Carregando...</span></li>';
+      try{
+        const r=await fetch(`${API}?action=top10&jogo=${GAME_KEY}`);
+        const d=await r.json(); const arr=d.lista||[];
+        if(!arr.length){list.innerHTML='<li><span class="name">Seja o primeiro!</span></li>';return;}
+        list.innerHTML=arr.map((it,i)=>`<li><span class="pos">${i+1}</span><span class="name">${esc(it.nome)}</span><span class="pts">${it.pontos} pts</span></li>`).join('');
+      }catch(e){list.innerHTML='<li><span class="name">Placar indisponível.</span></li>';}
+    }
+
+    function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+
+    const st=document.createElement('style');
+    st.textContent='@keyframes tableSat{0%{box-shadow:0 6px 22px rgba(82,57,34,.08)}50%{box-shadow:0 0 0 5px rgba(122,155,110,.5)}100%{box-shadow:0 6px 22px rgba(82,57,34,.08)}}';
+    document.head.appendChild(st);
+  </script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/delights.js"></script>
+</body>
+</html>

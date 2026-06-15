@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Honeymoon Packing — Tiago e Gian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="assets/css/style.css"/>
+  <style>
+    :root{--g-ink:#2A2820;--g-muted:#6C6258;--g-line:#D8CDBC;--g-cream:#FBF7EF;--g-gold:#C8A050;}
+    body.game-page{min-height:100svh;background:radial-gradient(circle at 15% 0%,rgba(255,255,255,.9),transparent 28rem),linear-gradient(180deg,#FBF7EF 0%,#F2E7D7 60%,#EFE1D0 100%);color:var(--g-ink);}
+    .game-nav{position:sticky;top:0;z-index:30;background:rgba(251,247,239,.9);backdrop-filter:blur(14px);border-bottom:1px solid rgba(216,205,188,.75);}
+    .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:14px 0;}
+    .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.86rem;color:var(--g-muted);}
+    .game-back{font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:#766553;text-decoration:underline;text-underline-offset:4px;}
+    .game-shell{width:92%;max-width:860px;margin:0 auto;padding:28px 0 80px;}
+    .game-kicker{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:#A47845;text-align:center;margin-bottom:.4rem;}
+    .game-title{font-family:var(--font-display);font-size:clamp(2rem,7vw,3.6rem);font-weight:300;text-align:center;margin-bottom:.5rem;}
+    .game-sub{max-width:500px;margin:0 auto 1rem;text-align:center;color:var(--g-muted);font-size:.88rem;line-height:1.6;}
+
+    /* Layout */
+    .pack-layout{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;align-items:start;}
+    @media(max-width:640px){.pack-layout{grid-template-columns:1fr;}}
+
+    /* Dest picker */
+    .dest-picker{display:flex;flex-wrap:wrap;gap:.55rem;justify-content:center;margin-bottom:1.1rem;}
+    .dest-btn{display:flex;flex-direction:column;align-items:center;gap:.3rem;padding:.55rem .7rem;border-radius:14px;border:2px solid rgba(216,205,188,.9);background:rgba(255,255,255,.7);cursor:pointer;transition:all .15s;min-width:72px;}
+    .dest-btn img{width:44px;height:44px;object-fit:cover;border-radius:8px;}
+    .dest-btn span{font-size:.64rem;letter-spacing:.06em;text-transform:uppercase;color:var(--g-muted);font-weight:600;}
+    .dest-btn.active{border-color:var(--sage);background:var(--bg-green);}
+    .dest-btn:hover{border-color:var(--sage);}
+
+    /* Suitcase grid area */
+    .suitcase-area{position:relative;border-radius:18px;overflow:hidden;box-shadow:0 14px 50px rgba(82,57,34,.15);}
+    .suitcase-bg-img{width:100%;display:block;border-radius:18px;}
+    .dest-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:18px;opacity:.18;pointer-events:none;}
+    .grid-overlay{position:absolute;display:grid;gap:3px;}
+    .grid-cell{border-radius:5px;cursor:pointer;transition:background .12s;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+    .grid-cell img{width:85%;height:85%;object-fit:contain;pointer-events:none;}
+
+    /* Item tray */
+    .item-tray{background:rgba(255,255,255,.62);border:1px solid rgba(216,205,188,.9);border-radius:18px;padding:.9rem;box-shadow:0 10px 34px rgba(82,57,34,.09);}
+    .item-tray h3{font-family:var(--font-display);font-size:1.1rem;font-weight:400;margin-bottom:.6rem;text-align:center;}
+    .items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:.55rem;}
+    .item-chip{border-radius:12px;border:1.5px solid rgba(216,205,188,.9);background:#fff;padding:.45rem;cursor:grab;display:flex;flex-direction:column;align-items:center;gap:.25rem;transition:all .15s;position:relative;}
+    .item-chip img{width:40px;height:40px;object-fit:contain;}
+    .item-chip span{font-size:.58rem;text-align:center;color:var(--g-muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase;line-height:1.2;}
+    .item-chip.packed{opacity:.38;cursor:not-allowed;border-style:dashed;}
+    .item-chip.mandatory::before{content:"★";position:absolute;top:2px;right:4px;font-size:.6rem;color:var(--g-gold);}
+    .item-chip:not(.packed):hover{border-color:var(--sage);background:var(--bg-green);transform:scale(1.04);}
+    .item-chip.selected{border-color:var(--sage);background:var(--bg-green);box-shadow:0 0 0 3px rgba(122,155,110,.3);}
+    .rotate-hint{display:flex;align-items:center;gap:.4rem;font-size:.74rem;color:var(--g-muted);margin:.6rem 0 .4rem;justify-content:center;}
+    .rotate-hint img{width:22px;height:22px;object-fit:contain;}
+
+    /* Mandatory list */
+    .mandatory-row{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0;justify-content:center;}
+    .mandatory-tag{font-size:.66rem;padding:.25rem .55rem;border-radius:999px;background:rgba(200,160,80,.15);color:#7A5822;border:1px solid rgba(200,160,80,.35);font-weight:600;}
+
+    /* Progress bar */
+    .progress-bar-wrap{height:6px;background:rgba(216,205,188,.5);border-radius:99px;margin:.6rem 0;overflow:hidden;}
+    .progress-bar{height:100%;background:linear-gradient(90deg,var(--sage),#B5C98A);border-radius:99px;transition:width .4s ease;}
+
+    /* Buttons */
+    .pack-btns{display:flex;gap:.6rem;justify-content:center;margin-top:.9rem;flex-wrap:wrap;}
+    .game-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(180,137,70,.35);background:#fff;color:#5A4C3D;padding:.72rem 1.3rem;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 8px 24px rgba(110,80,45,.09);cursor:pointer;transition:all .15s;gap:.4rem;}
+    .game-btn:hover{transform:translateY(-1px);background:#FFF9EF;}
+    .game-btn--main{background:linear-gradient(135deg,#D6B167,#B98538);color:white;border-color:transparent;}
+    .game-btn--main:hover{background:linear-gradient(135deg,#E0BB71,#C08E42);}
+    .game-btn--clear{background:rgba(181,66,58,.08);color:#8E2738;border-color:rgba(181,66,58,.3);}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:rgba(251,247,239,.88);backdrop-filter:blur(8px);}
+    .modal[hidden]{display:none;}
+    .modal__card{width:min(94%,440px);background:rgba(255,255,255,.95);border:1px solid rgba(216,205,188,.95);border-radius:22px;padding:1.7rem;text-align:center;box-shadow:0 22px 70px rgba(82,57,34,.18);}
+    .modal__icon img{width:5rem;height:5rem;object-fit:contain;display:block;margin:0 auto .7rem;}
+    .modal__title{font-family:var(--font-display);font-size:2rem;font-weight:300;margin-bottom:.5rem;}
+    .modal__text{color:var(--g-muted);font-size:.88rem;line-height:1.65;margin-bottom:.9rem;}
+    .btn-row{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
+    .save-box{margin-top:.9rem;background:rgba(255,255,255,.62);border:1px solid rgba(216,205,188,.8);border-radius:14px;padding:.8rem;}
+    .save-box__row{display:flex;gap:.5rem;}
+    .save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.95);border-radius:999px;background:#fff;padding:.65rem .88rem;font:inherit;font-size:.88rem;outline:none;}
+    .save-msg{font-size:.74rem;color:var(--g-muted);margin-top:.35rem;min-height:1em;}
+    .top10{margin-top:1.2rem;background:rgba(255,255,255,.42);border:1px solid rgba(216,205,188,.75);border-radius:14px;padding:.85rem;}
+    .top10 h3{font-family:var(--font-display);font-size:1.2rem;font-weight:400;margin-bottom:.5rem;text-align:center;}
+    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.3rem;}
+    .top10 li{display:flex;align-items:center;gap:.55rem;background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.6);border-radius:10px;padding:.44rem .62rem;font-size:.84rem;}
+    .top10 .pos{font-family:var(--font-display);font-size:1rem;width:1.3rem;text-align:center;color:#A47845;}
+    .top10 .name{flex:1;font-weight:500;}.top10 .pts{font-weight:700;color:#7B4B22;}
+    @media(max-width:480px){.save-box__row{flex-direction:column}.game-btn{width:100%}}
+    @keyframes packBounce{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+    @keyframes flyAway{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(0,-80px) scale(.5)}}
+  </style>
+</head>
+<body class="game-page">
+  <nav class="game-nav"><div class="game-nav__inner">
+    <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
+    <div class="game-brand">Tiago & Gian</div>
+  </div></nav>
+
+  <main class="game-shell">
+    <p class="game-kicker">Puzzle</p>
+    <h1 class="game-title">Honeymoon Packing</h1>
+    <p class="game-sub">Escolha o destino e empacote os itens certos! Itens <strong style="color:#C8A050">★ obrigatórios</strong> devem sempre ir na mala.</p>
+
+    <!-- Destination picker -->
+    <div class="dest-picker" id="destPicker"></div>
+
+    <div class="pack-layout">
+      <!-- Suitcase -->
+      <div>
+        <div class="suitcase-area" id="suitcaseArea">
+          <img class="suitcase-bg-img" src="assets/img/packing-suitcase-open.png" alt="Mala aberta" id="suitcaseBg">
+          <img class="dest-preview" id="destPreview" src="" alt="">
+          <div class="grid-overlay" id="gridOverlay"></div>
+        </div>
+        <div class="mandatory-row" id="mandatoryRow"></div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+        <div class="pack-btns">
+          <button class="game-btn game-btn--clear" onclick="clearSuitcase()">🗑 Esvaziar</button>
+          <button class="game-btn game-btn--main" onclick="closeSuitcase()">🔒 Fechar mala</button>
+        </div>
+        <div style="text-align:center;margin-top:.5rem">
+          <img src="assets/img/packing-suitcase-shadow.png" alt="" style="max-width:180px;width:80%;opacity:.4">
+        </div>
+      </div>
+
+      <!-- Item tray -->
+      <div class="item-tray">
+        <h3>Itens para empacotar</h3>
+        <div class="rotate-hint"><img src="assets/img/packing-rotate-button.png" alt="">Clique para selecionar, clique na mala para colocar</div>
+        <div class="items-grid" id="itemsGrid"></div>
+      </div>
+    </div>
+
+    <section class="top10" style="max-width:500px;margin:1.5rem auto 0"><h3>Top 10</h3><ol id="topList"></ol></section>
+  </main>
+
+  <!-- Intro modal -->
+  <div class="modal" id="startModal">
+    <div class="modal__card">
+      <div class="modal__icon"><img src="assets/img/packing-suitcase-open.png" alt=""></div>
+      <h2 class="modal__title">Honeymoon Packing</h2>
+      <p class="modal__text">Escolha um destino da lua de mel e embale os itens certos. Não esqueça os obrigatórios! Quanto mais itens específicos do destino você incluir, mais pontos. ★ = obrigatório.</p>
+      <div class="btn-row"><button class="game-btn game-btn--main" onclick="closeStartModal()">✈️ Vamos empacotar!</button></div>
+    </div>
+  </div>
+
+  <!-- Victory modal -->
+  <div class="modal" id="winModal" hidden>
+    <div class="modal__card">
+      <div class="modal__icon" id="winIcon"><img src="assets/img/packing-perfect-fit.png" alt=""></div>
+      <h2 class="modal__title" id="winTitle">Mala perfeita!</h2>
+      <p class="modal__text" id="winText"></p>
+      <div class="btn-row" style="margin-bottom:.7rem">
+        <button class="game-btn" onclick="resetPacking()">↩ Novo destino</button>
+        <button class="game-btn game-btn--main" onclick="closeWinModal()">Ver pontuação</button>
+      </div>
+      <div class="save-box">
+        <div class="save-box__row">
+          <input class="save-input" id="playerName" placeholder="Seu nome" maxlength="22"/>
+          <button class="game-btn" onclick="doSave()">Salvar</button>
+        </div>
+        <p class="save-msg" id="saveMsg"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+    const GAME_KEY = "honeymoon-packing";
+
+    const DESTINATIONS = [
+      {id:"noronha",  name:"Noronha",    bg:"packing-bg-noronha.png",    img:"noronha.png",   bonus:["sunscreen","sunglasses","swimsuit","sandals"]},
+      {id:"caribe",   name:"Caribe",     bg:"packing-bg-caribe.png",     img:"caribe.png",    bonus:["swimsuit","sunscreen","sandals","macaron-box"]},
+      {id:"maiorca",  name:"Maiorca",    bg:"packing-bg-maiorca.png",    img:"caribe.png",    bonus:["book","sunglasses","shirt","camera"]},
+      {id:"tailandia",name:"Tailândia",  bg:"packing-bg-thailand.png",   img:"tailandia.png", bonus:["camera","binoculars","jacket","phone"]},
+      {id:"africa",   name:"África do Sul",bg:"packing-bg-southafrica.png",img:"africa.png",  bonus:["binoculars","jacket","powerbank","camera"]},
+    ];
+
+    const ALL_ITEMS = [
+      {id:"passport",  name:"Passaporte",  mandatory:true},
+      {id:"camera",    name:"Câmera",      mandatory:false},
+      {id:"sunglasses",name:"Óculos de sol",mandatory:false},
+      {id:"hat",       name:"Chapéu",      mandatory:false},
+      {id:"swimsuit",  name:"Suíte de banho",mandatory:false},
+      {id:"sandals",   name:"Sandálias",   mandatory:false},
+      {id:"shirt",     name:"Camisa",      mandatory:false},
+      {id:"pants",     name:"Calça",       mandatory:false},
+      {id:"jacket",    name:"Jaqueta",     mandatory:false},
+      {id:"binoculars",name:"Binóculos",   mandatory:false},
+      {id:"sunscreen", name:"Protetor solar",mandatory:false},
+      {id:"book",      name:"Livro",       mandatory:false},
+      {id:"toothbrush",name:"Escova",      mandatory:false},
+      {id:"powerbank", name:"Power bank",  mandatory:false},
+      {id:"phone",     name:"Celular",     mandatory:false},
+      {id:"macaron-box",name:"Macarons 💛",mandatory:false},
+    ];
+
+    const GRID_COLS=5, GRID_ROWS=4, MAX_ITEMS=GRID_COLS*GRID_ROWS;
+    let selectedDest=DESTINATIONS[0], packedItems=new Set(), selectedItem=null, finalScore=0;
+
+    function closeStartModal(){document.getElementById('startModal').hidden=true; init();}
+    function closeWinModal(){document.getElementById('winModal').hidden=true;}
+
+    function init(){
+      renderDestPicker();
+      selectDest(DESTINATIONS[0]);
+      loadTop10();
+    }
+
+    function renderDestPicker(){
+      const picker=document.getElementById('destPicker');
+      picker.innerHTML=DESTINATIONS.map(d=>`
+        <div class="dest-btn ${d===selectedDest?'active':''}" onclick="selectDestById('${d.id}')">
+          <img src="assets/img/${d.bg}" alt="${d.name}">
+          <span>${d.name}</span>
+        </div>`).join('');
+    }
+
+    function selectDestById(id){
+      selectDest(DESTINATIONS.find(d=>d.id===id));
+    }
+
+    function selectDest(dest){
+      selectedDest=dest; packedItems=new Set(); selectedItem=null;
+      document.querySelectorAll('.dest-btn').forEach((b,i)=>b.classList.toggle('active',DESTINATIONS[i].id===dest.id));
+      document.getElementById('destPreview').src='assets/img/'+dest.bg;
+      renderMandatoryRow();
+      renderGrid();
+      renderItemTray();
+      updateProgress();
+    }
+
+    function renderMandatoryRow(){
+      const row=document.getElementById('mandatoryRow');
+      row.innerHTML='<span style="font-size:.68rem;color:var(--g-muted);font-weight:600">Obrigatório:</span> '+
+        ALL_ITEMS.filter(it=>it.mandatory).map(it=>
+          `<span class="mandatory-tag" id="mand_${it.id}">★ ${it.name}</span>`
+        ).join('');
+    }
+
+    function renderGrid(){
+      const overlay=document.getElementById('gridOverlay');
+      const area=document.getElementById('suitcaseArea');
+      const bgImg=document.getElementById('suitcaseBg');
+      // Position overlay inside suitcase image (approx padding for the open suitcase shape)
+      const padT=18,padL=14,padR=14,padB=22;
+      overlay.style.cssText=`top:${padT}%;left:${padL}%;right:${padR}%;bottom:${padB}%;grid-template-columns:repeat(${GRID_COLS},1fr);`;
+      overlay.innerHTML='';
+      for(let r=0;r<GRID_ROWS;r++) for(let c=0;c<GRID_COLS;c++){
+        const key=`${r}_${c}`;
+        const cell=document.createElement('div');
+        cell.className='grid-cell';
+        cell.dataset.key=key;
+        cell.style.background='rgba(255,255,255,.18)';
+        cell.addEventListener('click',()=>placeCellClick(key,cell));
+        overlay.appendChild(cell);
+      }
+      // Re-render packed items
+      packedItems.forEach(itemId=>{
+        const cell=overlay.children[cellIndex(itemId)];
+        if(cell) renderCellFilled(cell,itemId);
+      });
+    }
+
+    let cellMap={}; // itemId -> cellIndex
+    function cellIndex(itemId){return Object.keys(cellMap).indexOf(itemId);}
+
+    function placeCellClick(key,cell){
+      if(!selectedItem){
+        // Try to remove item from this cell
+        const itemId=Object.entries(cellMap).find(([k,v])=>v===key)?.[0];
+        if(itemId){
+          delete cellMap[itemId]; packedItems.delete(itemId);
+          cell.innerHTML=''; cell.style.background='rgba(255,255,255,.18)';
+          animateItemOut(cell);
+          updateAfterChange();
+        }
+        return;
+      }
+      if(packedItems.size>=MAX_ITEMS) return;
+      if(packedItems.has(selectedItem.id)){clearSelected();return;}
+      // Find first empty cell
+      const emptyKey=findEmptyCell();
+      if(!emptyKey){showBurst('overflow');clearSelected();return;}
+      const emCell=document.querySelector(`[data-key="${emptyKey}"]`);
+      cellMap[selectedItem.id]=emptyKey;
+      packedItems.add(selectedItem.id);
+      renderCellFilled(emCell,selectedItem.id);
+      animateCellIn(emCell);
+      clearSelected();
+      updateAfterChange();
+    }
+
+    function findEmptyCell(){
+      const usedKeys=new Set(Object.values(cellMap));
+      const overlay=document.getElementById('gridOverlay');
+      for(const cell of overlay.children){
+        if(!usedKeys.has(cell.dataset.key)) return cell.dataset.key;
+      }
+      return null;
+    }
+
+    function renderCellFilled(cell,itemId){
+      const item=ALL_ITEMS.find(i=>i.id===itemId);
+      cell.innerHTML=`<img src="assets/img/packing-${itemId}.png" alt="${item?.name||itemId}" title="${item?.name||itemId}">`;
+      cell.style.background='rgba(235,240,230,.65)';
+    }
+
+    function animateCellIn(cell){
+      cell.style.animation='packBounce .35s ease';
+      setTimeout(()=>cell.style.animation='',400);
+    }
+    function animateItemOut(cell){
+      cell.style.animation='packBounce .25s ease';
+      setTimeout(()=>cell.style.animation='',300);
+    }
+
+    function clearSelected(){selectedItem=null; document.querySelectorAll('.item-chip').forEach(c=>c.classList.remove('selected'));}
+
+    function renderItemTray(){
+      const grid=document.getElementById('itemsGrid');
+      grid.innerHTML=ALL_ITEMS.map(item=>`
+        <div class="item-chip ${packedItems.has(item.id)?'packed':''} ${item.mandatory?'mandatory':''} ${selectedItem?.id===item.id?'selected':''}"
+             id="chip_${item.id}" onclick="selectItem('${item.id}')">
+          <img src="assets/img/packing-${item.id}.png" alt="${item.name}" onerror="this.src='assets/img/icon-suitcase.png'">
+          <span>${item.name}</span>
+        </div>`).join('');
+    }
+
+    function selectItem(id){
+      const item=ALL_ITEMS.find(i=>i.id===id);
+      if(!item||packedItems.has(id)){clearSelected();return;}
+      selectedItem=item;
+      document.querySelectorAll('.item-chip').forEach(c=>c.classList.toggle('selected',c.id===`chip_${id}`));
+    }
+
+    function updateAfterChange(){
+      renderItemTray();
+      updateMandatoryTags();
+      updateProgress();
+    }
+
+    function updateMandatoryTags(){
+      ALL_ITEMS.filter(i=>i.mandatory).forEach(it=>{
+        const el=document.getElementById(`mand_${it.id}`);
+        if(el) el.style.textDecoration=packedItems.has(it.id)?'line-through':'none';
+      });
+    }
+
+    function updateProgress(){
+      const total=ALL_ITEMS.length;
+      const pct=(packedItems.size/total)*100;
+      document.getElementById('progressBar').style.width=pct+'%';
+    }
+
+    function clearSuitcase(){
+      packedItems=new Set(); cellMap={}; selectedItem=null;
+      renderGrid(); renderItemTray(); updateMandatoryTags(); updateProgress();
+    }
+
+    function closeSuitcase(){
+      // Check mandatory items
+      const missing=ALL_ITEMS.filter(i=>i.mandatory && !packedItems.has(i.id));
+      if(missing.length>0){
+        const names=missing.map(i=>i.name).join(', ');
+        showTempMsg(`❗ Esqueceu: ${names}!`,'rgba(181,66,58,.9)');
+        showBurst('overflow');
+        return;
+      }
+      // Score calculation
+      const mandOk=ALL_ITEMS.filter(i=>i.mandatory).every(i=>packedItems.has(i.id));
+      const bonusItems=selectedDest.bonus.filter(id=>packedItems.has(id));
+      const baseScore = packedItems.size * 50;
+      const bonusScore = bonusItems.length * 150;
+      finalScore = baseScore + bonusScore + (mandOk?200:0);
+
+      document.getElementById('winTitle').textContent = bonusScore>400 ? '🏆 Mala Perfeita!' : '✅ Mala Fechada!';
+      document.getElementById('winText').textContent=
+        `Destino: ${selectedDest.name} | ${packedItems.size} itens | ${bonusItems.length} itens perfeitos para o destino | Pontos: ${finalScore}`;
+      document.getElementById('winIcon').innerHTML=bonusScore>300
+        ?'<img src="assets/img/packing-perfect-fit.png" alt="">'
+        :'<img src="assets/img/packing-airplane-takeoff.png" alt="">';
+      document.getElementById('winModal').hidden=false;
+      if(window.confettiBurst) confettiBurst({count:35,hearts:false});
+      showBurst('perfect');
+    }
+
+    function showBurst(type){
+      const img=document.createElement('img');
+      img.src=`assets/img/packing-${type==='perfect'?'perfect-fit':'overflow'}.png`;
+      img.style.cssText='position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);width:140px;height:140px;object-fit:contain;pointer-events:none;z-index:200;animation:packBounce .5s ease';
+      document.body.appendChild(img);
+      setTimeout(()=>img.remove(),800);
+    }
+
+    function showTempMsg(msg,bg){
+      const el=document.createElement('div');
+      el.style.cssText=`position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:${bg};color:#fff;font-weight:700;font-size:1rem;padding:.9rem 1.8rem;border-radius:999px;z-index:300;pointer-events:none;white-space:nowrap`;
+      el.textContent=msg;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),1800);
+    }
+
+    function resetPacking(){
+      document.getElementById('winModal').hidden=true;
+      selectDest(DESTINATIONS[Math.floor(Math.random()*DESTINATIONS.length)]);
+    }
+
+    async function doSave(){
+      const name=(document.getElementById('playerName').value||'').trim().slice(0,22);
+      const msg=document.getElementById('saveMsg');
+      if(!name){msg.textContent='Coloque seu nome!';return;}
+      msg.textContent='Salvando...';
+      try{
+        await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});
+        msg.textContent='Salvo! ✈️';
+        loadTop10();
+      }catch(e){msg.textContent='Erro ao salvar.';}
+    }
+
+    async function loadTop10(){
+      const list=document.getElementById('topList');
+      if(!list) return;
+      list.innerHTML='<li><span class="name">Carregando...</span></li>';
+      try{
+        const r=await fetch(`${API}?action=top10&jogo=${GAME_KEY}`);
+        const d=await r.json();
+        const arr=d.lista||[];
+        if(!arr.length){list.innerHTML='<li><span class="name">Seja o primeiro!</span></li>';return;}
+        list.innerHTML=arr.map((it,i)=>`<li><span class="pos">${i+1}</span><span class="name">${esc(it.nome)}</span><span class="pts">${it.pontos} pts</span></li>`).join('');
+      }catch(e){list.innerHTML='<li><span class="name">Placar indisponível.</span></li>';}
+    }
+
+    function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+
+    const st=document.createElement('style');
+    st.textContent='@keyframes packBounce{0%{transform:translate(-50%,-50%) scale(1)}40%{transform:translate(-50%,-50%) scale(1.2)}100%{transform:translate(-50%,-50%) scale(1)}}';
+    document.head.appendChild(st);
+  </script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/delights.js"></script>
+</body>
+</html>

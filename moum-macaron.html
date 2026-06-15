@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <title>MOUm! Macaron Mayhem — Tiago e Gian</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+
+    :root{
+      --game-ink:#2A2820;
+      --game-muted:#6C6258;
+      --game-line:#D8CDBC;
+      --game-cream:#FBF7EF;
+      --game-beige:#F2E7D7;
+      --game-gold:#C8A050;
+      --game-wine:#8E2738;
+      --game-red:#B5423A;
+    }
+    body.game-page{
+      min-height:100svh;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255,255,255,.92), transparent 30rem),
+        radial-gradient(circle at 84% 16%, rgba(246,214,151,.36), transparent 28rem),
+        linear-gradient(180deg,#FBF7EF 0%,#F2E7D7 52%,#EFE1D0 100%);
+      color:var(--game-ink);
+    }
+    .game-nav{
+      position:sticky;top:0;z-index:20;
+      background:rgba(251,247,239,.9);backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(216,205,188,.75);
+    }
+    .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:1rem;}
+    .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.86rem;color:var(--game-muted);}
+    .game-back{font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:#766553;text-decoration:underline;text-underline-offset:4px;}
+    .game-shell{width:92%;max-width:720px;margin:0 auto;padding:42px 0 80px;}
+    .game-kicker{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:#A47845;text-align:center;margin-bottom:.45rem;}
+    .game-title{font-family:var(--font-display);font-size:clamp(2.2rem,8vw,4.4rem);font-weight:300;line-height:.95;text-align:center;margin-bottom:.75rem;}
+    .game-sub{max-width:520px;margin:0 auto 1.6rem;text-align:center;color:var(--game-muted);font-size:.95rem;line-height:1.7;}
+    .hud{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin:1rem auto 1rem;}
+    .hud__pill{background:rgba(255,255,255,.66);border:1px solid rgba(216,205,188,.85);box-shadow:0 8px 30px rgba(114,86,52,.08);border-radius:999px;padding:.48rem .85rem;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:#665B4D;}
+    .hud__pill strong{color:var(--game-ink);font-weight:600;}
+    .hud__pill--combo{background:linear-gradient(135deg,#F6E0AC,#E9C067);color:#6B4A12;border-color:transparent;display:none;}
+    .hud__pill--combo.show{display:inline-flex;align-items:center;gap:.3rem;animation:moumPop .18s ease;}
+    .game-panel{position:relative;border:1px solid rgba(216,205,188,.95);background:rgba(255,255,255,.48);border-radius:22px;box-shadow:0 18px 70px rgba(82,57,34,.13);overflow:hidden;}
+    .game-actions{display:flex;justify-content:center;gap:.7rem;flex-wrap:wrap;margin-top:1rem;}
+    .game-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(180,137,70,.35);background:#FFFFFF;color:#5A4C3D;padding:.76rem 1.25rem;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 10px 28px rgba(110,80,45,.10);cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,background .16s ease;}
+    .game-btn:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(110,80,45,.14);background:#FFF9EF;}
+    .game-btn--main{background:linear-gradient(135deg,#D6B167,#B98538);color:white;border-color:transparent;}
+    .game-btn--main:hover{background:linear-gradient(135deg,#E0BB71,#C08E42);}
+    .modal{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:1.25rem;background:rgba(251,247,239,.84);backdrop-filter:blur(7px);}
+    .modal[hidden]{display:none;}
+    .modal__card{width:min(92%,420px);background:rgba(255,255,255,.92);border:1px solid rgba(216,205,188,.95);border-radius:22px;padding:1.5rem;text-align:center;box-shadow:0 22px 70px rgba(82,57,34,.18);}
+    .modal__icon{font-size:2.1rem;margin-bottom:.45rem;}
+    .modal__icon img{width:4rem;height:4rem;object-fit:contain;display:block;margin:0 auto;}
+    .modal__title{font-family:var(--font-display);font-size:2rem;font-weight:300;line-height:1.05;margin-bottom:.4rem;}
+    .modal__text{color:var(--game-muted);font-size:.9rem;line-height:1.6;margin-bottom:1rem;}
+    .save-box{margin-top:1rem;background:rgba(255,255,255,.62);border:1px solid rgba(216,205,188,.8);border-radius:18px;padding:1rem;}
+    .save-box__row{display:flex;gap:.55rem;}
+    .save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.95);border-radius:999px;background:#fff;padding:.75rem .95rem;font:inherit;font-size:.9rem;outline:none;}
+    .save-msg{font-size:.78rem;color:var(--game-muted);margin-top:.5rem;min-height:1.2em;}
+    .top10{margin-top:1.4rem;background:rgba(255,255,255,.42);border:1px solid rgba(216,205,188,.75);border-radius:18px;padding:1rem;}
+    .top10 h3{font-family:var(--font-display);font-size:1.35rem;font-weight:400;margin-bottom:.6rem;text-align:center;}
+    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.35rem;}
+    .top10 li{display:flex;align-items:center;gap:.65rem;background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.6);border-radius:12px;padding:.55rem .7rem;font-size:.88rem;}
+    .top10 .pos{font-family:var(--font-display);font-size:1.1rem;width:1.5rem;text-align:center;color:#A47845;}
+    .top10 .name{flex:1;font-weight:500;}
+    .top10 .pts{font-weight:700;color:#7B4B22;}
+    canvas{display:block;width:100%;touch-action:none;cursor:none;}
+    @media(max-width:520px){.game-shell{width:94%;padding-top:30px}.save-box__row{flex-direction:column}.game-btn{width:100%;}.hud__pill{font-size:.68rem}}
+
+    .moum-wrap{max-width:620px;margin:0 auto;padding:10px;}
+    #gameCanvas{height:auto;max-height:74svh;border-radius:20px;}
+    .moum-tip{text-align:center;color:#8E6D46;font-size:.82rem;margin-top:.7rem;}
+    .endstats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.9rem 0;text-align:left;}
+    .endstats div{background:rgba(255,255,255,.6);border:1px solid rgba(216,205,188,.8);border-radius:12px;padding:.5rem .7rem;font-size:.8rem;}
+    .endstats strong{display:block;font-size:1.15rem;color:var(--game-wine);font-family:var(--font-display);font-weight:500;}
+
+    @keyframes moumPop{0%{transform:scale(.7)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+    @keyframes moumFloat{0%{opacity:0;transform:translate(-50%,8px) scale(.8)}25%{opacity:1;transform:translate(-50%,-6px) scale(1.05)}75%{opacity:1;transform:translate(-50%,-26px) scale(1)}100%{opacity:0;transform:translate(-50%,-46px) scale(.95)}}
+    .moum-toast{
+      position:absolute;left:50%;top:38%;transform:translate(-50%,0);
+      font-family:var(--font-display);font-weight:500;font-size:clamp(1.6rem,7vw,2.6rem);
+      color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.28);
+      pointer-events:none;z-index:5;white-space:nowrap;
+      animation:moumFloat 1s ease forwards;
+    }
+    .moum-toast--bad{color:#FFE4DC;}
+    .moum-confuso{
+      position:absolute;top:.6rem;left:50%;transform:translateX(-50%);
+      background:linear-gradient(135deg,#8E2738,#B5423A);color:#fff;
+      font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
+      padding:.4rem .9rem;border-radius:999px;box-shadow:0 8px 24px rgba(142,39,56,.35);
+      z-index:5;animation:moumPop .25s ease;
+    }
+  </style>
+</head>
+<body class="game-page">
+  <nav class="game-nav"><div class="game-nav__inner"><a class="game-back" href="jogos.html" data-it="← Torna ai giochi">← Voltar aos jogos</a><div class="game-brand">Tiago & Gian</div></div></nav>
+  <main class="game-shell">
+    <p class="game-kicker" data-it="Arcade">Arcade</p>
+    <h1 class="game-title">MOUm! <span style="font-weight:300">Macaron Mayhem</span></h1>
+    <p class="game-sub" data-it="Spara solo ai macaron. I macarrão (i nidi di tagliatelle) sono praticamente identici — non lasciati ingannare!">Atire apenas nos macarons. Os macarrões (ninhos de massa) são quase iguais — não se deixe enganar!</p>
+
+    <div class="hud">
+      <div class="hud__pill"><span data-it="Pontos">Pontos</span>: <strong id="score">0</strong></div>
+      <div class="hud__pill"><span data-it="Vite">Vidas</span>: <strong id="lives">3</strong></div>
+      <div class="hud__pill"><span data-it="Tempo">Tempo</span>: <strong id="time">60</strong>s</div>
+      <div class="hud__pill hud__pill--combo" id="comboPill">🔥 <span data-it="Combo">Combo</span> ×<strong id="comboVal">2</strong></div>
+    </div>
+
+    <div class="_char-sel" style="display:flex;gap:.75rem;justify-content:center;align-items:center;margin:.75rem 0 .5rem">
+      <span style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)" data-it="Confettiere">Confeiteiro</span>
+      <button class="_char-btn" data-char="gian" onclick="setPersonagem('gian')"
+        style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;font-weight:600;padding:.45rem 1rem;border-radius:999px;border:2px solid var(--sage);background:var(--sage);color:white;cursor:pointer;transition:all .15s">
+        <img src="assets/img/gianface01.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover"> Gian
+      </button>
+      <button class="_char-btn" data-char="tiago" onclick="setPersonagem('tiago')"
+        style="display:flex;align-items:center;gap:.4rem;font-size:.88rem;font-weight:400;padding:.45rem 1rem;border-radius:999px;border:2px solid var(--line-green);background:var(--white);color:var(--sage-dark);cursor:pointer;transition:all .15s">
+        <img src="assets/img/tiagoface01.png" style="width:22px;height:22px;border-radius:50%;object-fit:cover"> Tiago
+      </button>
+    </div>
+
+    <section class="game-panel moum-wrap">
+      <canvas id="gameCanvas" width="620" height="760"></canvas>
+      <div class="modal" id="startModal">
+        <div class="modal__card">
+          <div class="modal__icon"><img src="assets/img/fx-gold-sparkles.png" alt=""></div>
+          <h2 class="modal__title" data-it="MOUm!">MOUm!</h2>
+          <p class="modal__text" data-it="Acerte os macaron. Evite i macarrão. Sono più simili di quanto sembrino.">Acerte os macarons.<br>Evite os macarrões.<br>Eles são mais parecidos do que parecem.</p>
+          <button class="game-btn game-btn--main" id="startBtn" data-it="Inizia">Começar</button>
+        </div>
+      </div>
+      <div class="modal" id="endModal" hidden>
+        <div class="modal__card">
+          <div class="modal__icon" id="endIcon"><img src="assets/img/icon-medal-gold.png" alt=""></div>
+          <h2 class="modal__title" id="endTitle" data-it="MOUm! Fine del gioco">MOUm! Fim de jogo</h2>
+          <p class="modal__text" id="endText"></p>
+          <div class="endstats">
+            <div><span data-it="Macaron acertati">Macarons acertados</span><strong id="statHits">0</strong></div>
+            <div><span data-it="Macarrão colpiti">Macarrões atingidos</span><strong id="statMiss">0</strong></div>
+            <div><span data-it="Combo massimo">Maior combo</span><strong id="statCombo">0</strong></div>
+            <div><span data-it="Precisione">Precisão</span><strong id="statAcc">0%</strong></div>
+          </div>
+          <button class="game-btn game-btn--main" id="againBtn" data-it="Gioca di nuovo">Jogar novamente</button>
+          <div class="save-box">
+            <div class="save-box__row"><input class="save-input" id="playerName" placeholder="Seu nome" maxlength="22"/><button class="game-btn" id="saveBtn" data-it="Salva">Salvar</button></div>
+            <p class="save-msg" id="saveMsg"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <p class="moum-tip" data-it="Macaron dorato = punti bonus. Dopo 5000 punti: Modo Confettiere Confuso.">Macaron dourado = pontos bônus. Após 5000 pontos: Modo Confeiteiro Confuso.</p>
+    <section class="top10"><h3 data-it="Top 10">Top 10</h3><ol id="topList"></ol></section>
+  </main>
+  <script>
+
+    let _moumScrollY=0;
+    function lockScroll(){_moumScrollY=window.scrollY;document.body.style.overflow="hidden";document.body.style.touchAction="none";}
+    function unlockScroll(){document.body.style.overflow="";document.body.style.touchAction="";window.scrollTo(0,_moumScrollY);}
+
+    // ── Faces Gian & Tiago (mira do confeiteiro + bônus dourado) ─────
+    const _GIAN_F=[], _TIAGO_F=[];
+    for(let i=1;i<=7;i++){
+      const g=new Image(); g.loaded=false; g.onload=()=>{g.loaded=true;};
+      g.src=`assets/img/gianface${String(i).padStart(2,'0')}.png`; _GIAN_F.push(g);
+      const t=new Image(); t.loaded=false; t.onload=()=>{t.loaded=true;};
+      t.src=`assets/img/tiagoface${String(i).padStart(2,'0')}.png`; _TIAGO_F.push(t);
+    }
+    let _personagem = "gian";
+    let _faceIdx = 0;
+    function _faces(){ return _personagem==="tiago" ? _TIAGO_F : _GIAN_F; }
+    function _nextFace(){ let ni; do{ ni=Math.floor(Math.random()*7); }while(ni===_faceIdx && 7>1); _faceIdx=ni; }
+    function _drawFace(ctx,cx,cy,r){
+      const img=_faces()[_faceIdx];
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.clip();
+      if(img && img.loaded){ ctx.drawImage(img,cx-r,cy-r,r*2,r*2); }
+      else { ctx.fillStyle=_personagem==="tiago"?"#B87B3E":"#7A9B6E"; ctx.fill(); }
+      ctx.restore();
+    }
+    function setPersonagem(p){
+      _personagem=p;
+      document.querySelectorAll('._char-btn').forEach(b=>{
+        const on=b.dataset.char===p;
+        b.style.background=on?'var(--sage)':'var(--white)';
+        b.style.color=on?'white':'var(--sage-dark)';
+        b.style.borderColor=on?'var(--sage)':'var(--line-green)';
+        b.style.fontWeight=on?'600':'400';
+      });
+    }
+
+    // ── Placar ────────────────────────────────────────────
+    const SCORE_API = (typeof API_URL !== "undefined") ? API_URL : "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+    function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));}
+    async function saveScore(game, name, score, msgEl){
+      name=(name||"").trim().slice(0,22);
+      if(!name){ if(msgEl) msgEl.textContent="Coloque seu nome para salvar."; return; }
+      if(msgEl) msgEl.textContent="Salvando...";
+      try{
+        await fetch(SCORE_API,{method:"POST",body:JSON.stringify({action:"score",jogo:game,nome:name,pontos:score})});
+        if(msgEl) msgEl.textContent="Salvo!";
+        loadTop10(game);
+      }catch(e){ if(msgEl) msgEl.textContent="Não salvou agora, mas seu score vale no coração."; }
+    }
+    async function loadTop10(game){
+      const list=document.getElementById("topList"); if(!list) return;
+      list.innerHTML='<li><span class="name">Carregando placar...</span></li>';
+      try{
+        const resp=await fetch(`${SCORE_API}?action=top10&jogo=${encodeURIComponent(game)}`);
+        const data=await resp.json();
+        const arr=Array.isArray(data)?data:(data.lista||data.top10||data.scores||[]);
+        if(!arr.length){ list.innerHTML='<li><span class="name">Ainda sem recordes por aqui.</span></li>'; return; }
+        list.innerHTML=arr.slice(0,10).map((it,i)=>`<li><span class="pos">${i+1}</span><span class="name">${esc(it.nome||it.name||"Convidado")}</span><span class="pts">${Number(it.pontos||it.score||0)} pts</span></li>`).join("");
+      }catch(e){ list.innerHTML='<li><span class="name">Placar indisponível agora.</span></li>'; }
+    }
+
+    // ── Som sintetizado (Web Audio) ──────────────────────
+    let _actx;
+    function _ac(){ if(!_actx) _actx = new (window.AudioContext||window.webkitAudioContext)(); return _actx; }
+    function _tone(freq, dur, type, vol, delay){
+      try{
+        const ctx=_ac(); const t0=ctx.currentTime+(delay||0);
+        const o=ctx.createOscillator(), g=ctx.createGain();
+        o.type=type||"sine"; o.frequency.setValueAtTime(freq,t0);
+        g.gain.setValueAtTime(vol||.12,t0);
+        g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t0); o.stop(t0+dur);
+      }catch(e){}
+    }
+    function soundMacaron(){ _tone(880,.09,"sine",.14); _tone(1320,.12,"sine",.08,.04); }
+    function soundMacarrao(){ _tone(180,.18,"sawtooth",.12); _tone(110,.22,"square",.08,.05); }
+    function soundCombo(combo){
+      const base=520; for(let i=0;i<Math.min(combo,5);i++) _tone(base+i*90,.09,"triangle",.1,i*.05);
+    }
+    function soundGameOver(){
+      [392,330,262,196].forEach((f,i)=>_tone(f,.35,"sine",.1,i*.14));
+    }
+    function soundEscape(){ _tone(140,.25,"sine",.1); }
+
+    // ── Sprites: tenta carregar PNGs reais; cai pra desenho vetorial ──
+    const MACARON_FILES = Array.from({length:12},(_,i)=>`assets/img/moum-macaron${String(i+1).padStart(2,'0')}.png`);
+    const MACARRAO_FILES = Array.from({length:12},(_,i)=>`assets/img/moum-macarrao${String(i+1).padStart(2,'0')}.png`);
+    function loadSpriteSet(files){
+      return files.map(src=>{
+        const img=new Image(); img.ok=false; img.failed=false;
+        img.onload=()=>{ img.ok=true; };
+        img.onerror=()=>{ img.failed=true; };
+        img.src=src;
+        return img;
+      });
+    }
+    const MACARON_IMGS = loadSpriteSet(MACARON_FILES);
+    const MACARRAO_IMGS = loadSpriteSet(MACARRAO_FILES);
+
+    // Paleta "wedding" para os macarons desenhados (cascas + recheio)
+    const MACARON_PALETTE = [
+      { shell:"#EFA8B8", inner:"#F8E6D9" }, // rosa
+      { shell:"#F0CE7A", inner:"#FFF6E0" }, // dourado
+      { shell:"#B9CDA1", inner:"#F3F5EC" }, // sage claro
+      { shell:"#E3936B", inner:"#FBE9DC" }, // terracota claro
+      { shell:"#CBB7E6", inner:"#F6F1FC" }, // lavanda
+      { shell:"#9FCBC9", inner:"#EAF6F5" }, // menta
+    ];
+    function drawMacaronVector(ctx,size,seed){
+      const pal = MACARON_PALETTE[seed % MACARON_PALETTE.length];
+      const s = size/64; // escala base 64px
+      ctx.save(); ctx.scale(s,s);
+      // sombra suave
+      ctx.fillStyle="rgba(70,40,20,.10)";
+      ctx.beginPath(); ctx.ellipse(0,20,30,7,0,0,Math.PI*2); ctx.fill();
+      // casca de baixo
+      ctx.fillStyle=pal.shell;
+      ctx.beginPath(); ctx.ellipse(0,10,30,15,0,0,Math.PI*2); ctx.fill();
+      // textura "pezinho" do macaron
+      ctx.fillStyle="rgba(255,255,255,.35)";
+      for(let i=-3;i<=3;i++){
+        ctx.beginPath(); ctx.ellipse(i*8,17,4,2.4,0,0,Math.PI*2); ctx.fill();
+      }
+      // recheio
+      ctx.fillStyle=pal.inner;
+      ctx.fillRect(-29,-2,58,8);
+      // casca de cima
+      ctx.fillStyle=pal.shell;
+      ctx.beginPath(); ctx.ellipse(0,-10,30,15,0,0,Math.PI*2); ctx.fill();
+      // brilho
+      ctx.fillStyle="rgba(255,255,255,.35)";
+      ctx.beginPath(); ctx.ellipse(-9,-16,9,4,-.3,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+    function drawMacarraoVector(ctx,size,seed){
+      // ninho de macarrão: tons de bege/dourado em espirais, bem parecido de longe
+      const tones = ["#E8C892","#D9A86B","#F0D9AE"];
+      const s = size/64;
+      ctx.save(); ctx.scale(s,s);
+      ctx.fillStyle="rgba(70,40,20,.10)";
+      ctx.beginPath(); ctx.ellipse(0,20,30,7,0,0,Math.PI*2); ctx.fill();
+      // base do ninho
+      ctx.fillStyle="#E3C496";
+      ctx.beginPath(); ctx.ellipse(0,6,30,16,0,0,Math.PI*2); ctx.fill();
+      // fios em espiral
+      ctx.lineWidth=3; ctx.lineCap="round";
+      for(let i=0;i<7;i++){
+        ctx.strokeStyle = tones[i%tones.length];
+        ctx.beginPath();
+        const r0 = 6+i*3;
+        ctx.arc((i%2?6:-6), -2+(i%3)*2, r0, 0.3+i*.4, 2.6+i*.4);
+        ctx.stroke();
+      }
+      // brilho de "molho" no topo
+      ctx.fillStyle="rgba(255,255,255,.22)";
+      ctx.beginPath(); ctx.ellipse(-8,-6,10,5,-.3,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+
+    // ── Nuvens e decorações de fundo (reaproveitadas de outros jogos) ──
+    const CLOUD_IMGS = ["flappy-cloud-01.png","flappy-cloud-02.png","flappy-cloud-03.png"].map(n=>{const i=new Image();i.src=`assets/img/${n}`;return i;});
+    const DECOR_IMGS = ["icon-road-sign.png","icon-compass.png","icon-bus-angle.png","icon-suitcase.png","icon-map-route.png"].map(n=>{const i=new Image();i.src=`assets/img/${n}`;return i;});
+
+    const GAME_KEY="moum-macaron";
+    const canvas=document.getElementById("gameCanvas"), ctx=canvas.getContext("2d");
+    const scoreEl=document.getElementById("score"), livesEl=document.getElementById("lives"), timeEl=document.getElementById("time");
+    const comboPill=document.getElementById("comboPill"), comboVal=document.getElementById("comboVal");
+    const startModal=document.getElementById("startModal"), endModal=document.getElementById("endModal"), endTitle=document.getElementById("endTitle"), endText=document.getElementById("endText");
+    const W=620,H=760;
+
+    let raf,state="idle",last=0,spawnT=0;
+    let items=[],particles=[],toasts=[],clouds=[],decors=[];
+    let score=0,lives=3,timeLeft=60,combo=0,maxCombo=0;
+    let hits=0, miss=0, totalShots=0;
+    let confuso=false;
+    let aimX=W/2, aimY=H/2;
+
+    function fitCanvas(){const dpr=Math.min(devicePixelRatio||1,2.5);canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width="100%";canvas.style.aspectRatio=W+"/"+H;ctx.setTransform(dpr,0,0,dpr,0,0);} fitCanvas();
+
+    function initClouds(){
+      clouds=[];
+      for(let i=0;i<4;i++){
+        clouds.push({img:CLOUD_IMGS[i%CLOUD_IMGS.length], x:Math.random()*W, y:40+Math.random()*160, w:90+Math.random()*70, v:.08+Math.random()*.18});
+      }
+    }
+    function initDecors(){
+      decors=[];
+      // placas/ícones decorativos nas laterais — só estética, sem colisão
+      decors.push({img:DECOR_IMGS[0], x:36, y:H-110, w:54, rot:-.08});
+      decors.push({img:DECOR_IMGS[1], x:W-70, y:H-150, w:64, rot:.1});
+      decors.push({img:DECOR_IMGS[2], x:W-86, y:120, w:78, rot:.05});
+      decors.push({img:DECOR_IMGS[3], x:30, y:160, w:56, rot:-.06});
+    }
+
+    function reset(){
+      items=[];particles=[];toasts=[];
+      score=0;lives=3;timeLeft=60;spawnT=0;combo=0;maxCombo=0;
+      hits=0;miss=0;totalShots=0;confuso=false;
+      state="ready"; initClouds(); initDecors();
+      updateHud(); draw(); endModal.hidden=true;
+      _confusoBadge(false);
+    }
+    function start(){ reset(); startModal.hidden=true; state="play"; last=performance.now(); lockScroll(); raf=requestAnimationFrame(loop); }
+
+    function updateHud(){
+      scoreEl.textContent=score;
+      livesEl.textContent=Math.max(0,lives);
+      timeEl.textContent=Math.max(0,Math.ceil(timeLeft));
+      if(combo>=2){ comboPill.classList.add("show"); comboVal.textContent=combo; }
+      else { comboPill.classList.remove("show"); }
+    }
+
+    // ── Dificuldade progressiva ──────────────────────────
+    function difficultyLevel(){ return Math.floor((60-timeLeft)/15); } // 0..3
+    function spawnInterval(){
+      const lvl=difficultyLevel();
+      let base=46 - lvl*8; // mais rápido com o tempo
+      return Math.max(14, base - score/300);
+    }
+    function simultaneousCount(){
+      const lvl=difficultyLevel();
+      return 1 + Math.min(3, lvl); // até 4 simultâneos
+    }
+    function sizeRoll(){
+      // após 60s (lvl>=3... mas nosso jogo dura 60s, então ativa perto do fim / modo extra)
+      const elapsed = 60-timeLeft;
+      if(elapsed < 45) return 1; // tamanho normal
+      const r = Math.random();
+      if(r<.7) return 1;
+      if(r<.9) return .68; // pequeno
+      return 1.42; // grande
+    }
+
+    function spawn(){
+      const n = simultaneousCount();
+      for(let k=0;k<n;k++){
+        const isMacaron = Math.random()<0.5;
+        const golden = isMacaron && Math.random()<0.06;
+        const goofy  = isMacaron && !golden && Math.random()<0.05; // bônus rosto goofy raro
+        const seed = Math.floor(Math.random()*12);
+        const x = 50 + Math.random()*(W-100);
+        const lvl = difficultyLevel();
+        const speed = (0.9+Math.random()*1.0) * (1 + lvl*0.22);
+        const rot0 = Math.random()*Math.PI*2;
+        const vr = (Math.random()-.5)*0.03 * (1+lvl*.3);
+        const swayAmp = 18+Math.random()*30;
+        const swaySpeed = .015+Math.random()*.02;
+        const size = 56 * sizeRoll();
+        items.push({
+          isMacaron, golden, goofy, seed, x, x0:x, y:-60-Math.random()*120,
+          vy: speed, rot: rot0, vr,
+          swayAmp, swaySpeed, swayPhase: Math.random()*Math.PI*2,
+          size, mirrored: confuso && Math.random()<.5,
+          confusoScale: confuso ? (0.85+Math.random()*0.35) : 1,
+          dead:false
+        });
+      }
+      spawnT = spawnInterval();
+    }
+
+    function loop(ts){
+      const dt=Math.min((ts-last)/16.67,2); last=ts;
+      if(state==="play"){
+        timeLeft -= dt/60;
+        spawnT -= dt;
+        if(spawnT<=0) spawn();
+
+        items.forEach(it=>{
+          it.y += it.vy*dt;
+          it.rot += it.vr*dt;
+          it.swayPhase += it.swaySpeed*dt;
+          it.x = it.x0 + Math.sin(it.swayPhase)*it.swayAmp;
+        });
+
+        // itens que saíram pela base
+        for(const it of items){
+          if(it.dead) continue;
+          if(it.y - it.size/2 > H){
+            it.dead = true;
+            if(it.isMacaron){
+              lives--; combo=0; soundEscape();
+              addToast(W/2, H*0.42, "Ops! Fugiu um macaron…", true);
+            }
+            // macarrão escapando não penaliza
+          }
+        }
+        items = items.filter(it=>!it.dead);
+
+        particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=p.g*dt;p.life-=dt;p.rot=(p.rot||0)+(p.vr||0)*dt;});
+        particles = particles.filter(p=>p.life>0);
+        toasts.forEach(t=>t.life-=dt);
+        toasts = toasts.filter(t=>t.life>0);
+
+        clouds.forEach(c=>{ c.x += c.v*dt; if(c.x > W+c.w) c.x = -c.w; });
+
+        // ativa modo confeiteiro confuso
+        if(!confuso && score>=5000){
+          confuso=true; _confusoBadge(true);
+          items.forEach(it=>{ it.mirrored = Math.random()<.5; it.confusoScale = 0.85+Math.random()*0.35; });
+        }
+
+        if(timeLeft<=0 || lives<=0) finish();
+        updateHud();
+      }
+      draw();
+      if(state==="play") raf=requestAnimationFrame(loop);
+    }
+
+    function _confusoBadge(on){
+      let el = document.getElementById("confusoBadge");
+      if(on){
+        if(!el){
+          el=document.createElement("div");
+          el.id="confusoBadge"; el.className="moum-confuso";
+          el.textContent = (window.I18N && window.I18N.lang==="it") ? "Modo Confettiere Confuso!" : "Modo Confeiteiro Confuso!";
+          document.querySelector(".moum-wrap").appendChild(el);
+        }
+      } else if(el){ el.remove(); }
+    }
+
+    function addToast(x,y,text,bad){
+      toasts.push({x,y,text,bad,life:60});
+    }
+
+    // ── Partículas / explosões ───────────────────────────
+    function burstGold(x,y){
+      for(let i=0;i<26;i++){
+        const a=Math.random()*Math.PI*2, s=1.5+Math.random()*4.5;
+        particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1.5,g:.05,life:34+Math.random()*26,r:1.5+Math.random()*3.5,
+          col:["#F0CE7A","#FFE9A8","#FFFFFF","#E3936B"][Math.floor(Math.random()*4)],rot:0,vr:(Math.random()-.5)*.3});
+      }
+      // brilhos maiores
+      for(let i=0;i<6;i++){
+        const a=Math.random()*Math.PI*2, s=1+Math.random()*2;
+        particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1,g:.03,life:40+Math.random()*20,r:4+Math.random()*4,
+          col:"#FFF6D8",rot:0,vr:0,star:true});
+      }
+    }
+    function burstNoodles(x,y){
+      for(let i=0;i<14;i++){
+        const a=Math.random()*Math.PI*2, s=1+Math.random()*3;
+        particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1,g:.06,life:26+Math.random()*18,r:1.2+Math.random()*2,
+          col:["#E8C892","#D9A86B","#C99A5B"][Math.floor(Math.random()*3)],rot:Math.random()*Math.PI,vr:(Math.random()-.5)*.2,strand:true});
+      }
+    }
+
+    // ── Acertos ───────────────────────────────────────────
+    function hitTest(x,y){
+      if(state!=="play") return;
+      totalShots++;
+      // procura o item mais "na frente" (maior y) sob o ponteiro
+      let best=null, bestY=-Infinity;
+      for(const it of items){
+        if(it.dead) continue;
+        const r = (it.size/2) * 1.18;
+        const dx=x-it.x, dy=y-it.y;
+        if(dx*dx+dy*dy <= r*r){
+          if(it.y>bestY){ best=it; bestY=it.y; }
+        }
+      }
+      if(!best) return;
+      best.dead = true;
+
+      if(best.isMacaron){
+        hits++;
+        combo++;
+        if(combo>maxCombo) maxCombo=combo;
+        let pts = best.golden ? 320 : (best.goofy ? 180 : 100);
+        pts *= Math.max(1, combo>=2 ? combo : 1);
+        score += Math.round(pts);
+        burstGold(best.x,best.y);
+        soundMacaron();
+        if(combo>=2) soundCombo(combo);
+        const msgs = best.golden
+          ? ["MOUm dourado!","Jackpot!","Perfeito!"]
+          : (best.goofy ? ["Rosto no macaron?!","MOUm!","Hahaha, perfeito!"] : ["Delícia!","Perfeito!","MOUm!"]);
+        addToast(best.x, best.y-30, msgs[Math.floor(Math.random()*msgs.length)], false);
+        if(best.goofy) _nextFace();
+      } else {
+        miss++;
+        combo=0;
+        score = Math.max(0, score-250);
+        burstNoodles(best.x,best.y);
+        soundMacarrao();
+        addToast(best.x, best.y-30, "Isso é macarrão!", true);
+      }
+      updateHud();
+    }
+
+    // ── Desenho ───────────────────────────────────────────
+    function drawBg(){
+      // céu degradê quente
+      const g = ctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0,"#FFF6E6"); g.addColorStop(.5,"#FCE9CC"); g.addColorStop(1,"#F4DDBE");
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+      // sol suave
+      ctx.fillStyle="rgba(255,255,255,.45)";
+      ctx.beginPath(); ctx.arc(W-72,86,76,0,Math.PI*2); ctx.fill();
+
+      // nuvens
+      clouds.forEach(c=>{
+        if(c.img && c.img.complete && c.img.naturalWidth>0){
+          const h = c.w * (c.img.naturalHeight/c.img.naturalWidth);
+          ctx.globalAlpha=.85;
+          ctx.drawImage(c.img, c.x, c.y, c.w, h);
+          ctx.globalAlpha=1;
+        }
+      });
+
+      // decorações temáticas (placas, mala, bússola etc.) bem discretas
+      decors.forEach(d=>{
+        if(d.img && d.img.complete && d.img.naturalWidth>0){
+          const h = d.w * (d.img.naturalHeight/d.img.naturalWidth);
+          ctx.save();
+          ctx.globalAlpha=.16;
+          ctx.translate(d.x,d.y); ctx.rotate(d.rot);
+          ctx.drawImage(d.img, -d.w/2, -h/2, d.w, h);
+          ctx.restore();
+        }
+      });
+
+      // chão sutil
+      ctx.fillStyle="rgba(180,130,70,.07)";
+      ctx.fillRect(0,H-26,W,26);
+    }
+
+    function drawItem(it){
+      if(it.dead) return;
+      ctx.save();
+      ctx.translate(it.x,it.y);
+      ctx.rotate(it.rot);
+      const scale = it.confusoScale * (it.mirrored?-1:1);
+      ctx.scale(scale, it.confusoScale);
+
+      if(it.isMacaron){
+        const img = MACARON_IMGS[it.seed];
+        if(it.golden){
+          // brilho dourado por trás
+          ctx.save();
+          ctx.globalAlpha=.55;
+          ctx.fillStyle="#FFE9A8";
+          ctx.beginPath(); ctx.arc(0,0,it.size*.62,0,Math.PI*2); ctx.fill();
+          ctx.restore();
+        }
+        if(img && img.ok && img.naturalWidth>0){
+          ctx.drawImage(img,-it.size/2,-it.size/2,it.size,it.size);
+        } else {
+          drawMacaronVector(ctx, it.size, it.golden ? 1 : it.seed);
+          if(it.golden){
+            ctx.fillStyle="rgba(255,255,255,.5)";
+            ctx.font=`700 ${Math.round(it.size*.32)}px serif`;
+            ctx.textAlign="center"; ctx.textBaseline="middle";
+            ctx.fillText("★",0,2);
+          }
+        }
+        if(it.goofy){
+          // rostinho goofy espiando do macaron
+          const r = it.size*.28;
+          _drawFace(ctx, 0, -it.size*.06, r);
+          ctx.strokeStyle="rgba(255,255,255,.85)"; ctx.lineWidth=2;
+          ctx.beginPath(); ctx.arc(0,-it.size*.06,r,0,Math.PI*2); ctx.stroke();
+        }
+      } else {
+        const img = MACARRAO_IMGS[it.seed];
+        if(img && img.ok && img.naturalWidth>0){
+          ctx.drawImage(img,-it.size/2,-it.size/2,it.size,it.size);
+        } else {
+          drawMacarraoVector(ctx, it.size, it.seed);
+        }
+      }
+      ctx.restore();
+    }
+
+    function drawParticles(){
+      particles.forEach(p=>{
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life/50);
+        if(p.star){
+          ctx.translate(p.x,p.y); ctx.rotate(p.rot||0);
+          ctx.fillStyle=p.col;
+          ctx.font=`${Math.round(p.r*4)}px serif`;
+          ctx.textAlign="center"; ctx.textBaseline="middle";
+          ctx.fillText("✦",0,0);
+        } else if(p.strand){
+          ctx.strokeStyle=p.col; ctx.lineWidth=p.r;
+          ctx.beginPath();
+          ctx.moveTo(p.x,p.y);
+          ctx.lineTo(p.x - p.vx*2, p.y - p.vy*2);
+          ctx.stroke();
+        } else {
+          ctx.fillStyle=p.col;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      });
+    }
+
+    function drawToasts(){
+      // os toasts são DOM (animação CSS), aqui só removemos os antigos do DOM
+    }
+    function renderDomToasts(){
+      const wrap = document.querySelector(".moum-wrap");
+      toasts.forEach(t=>{
+        if(t.el) return;
+        const el=document.createElement("div");
+        el.className = "moum-toast" + (t.bad?" moum-toast--bad":"");
+        el.textContent = t.text;
+        const rect = canvas.getBoundingClientRect();
+        const px = (t.x/W)*100, py=(t.y/H)*100;
+        el.style.left = px+"%";
+        el.style.top = py+"%";
+        wrap.appendChild(el);
+        t.el = el;
+        setTimeout(()=>{ el.remove(); }, 1050);
+      });
+    }
+
+    function drawAim(){
+      // mira do confeiteiro = rostinho fofo seguindo o ponteiro
+      const r = 26;
+      ctx.save();
+      ctx.globalAlpha=.95;
+      _drawFace(ctx, aimX, aimY, r);
+      ctx.strokeStyle="rgba(255,255,255,.9)"; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(aimX,aimY,r,0,Math.PI*2); ctx.stroke();
+      // mirinha
+      ctx.strokeStyle="rgba(142,39,56,.55)"; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(aimX-r-10,aimY); ctx.lineTo(aimX-r-2,aimY); ctx.moveTo(aimX+r+2,aimY); ctx.lineTo(aimX+r+10,aimY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(aimX,aimY-r-10); ctx.lineTo(aimX,aimY-r-2); ctx.moveTo(aimX,aimY+r+2); ctx.lineTo(aimX,aimY+r+10); ctx.stroke();
+      ctx.restore();
+    }
+
+    function draw(){
+      drawBg();
+      items.forEach(drawItem);
+      drawParticles();
+      if(state==="play") drawAim();
+      renderDomToasts();
+    }
+
+    // ── Finalização ───────────────────────────────────────
+    function finish(){
+      state="idle"; cancelAnimationFrame(raf); unlockScroll();
+      endModal.hidden=false;
+      const acc = totalShots>0 ? Math.round((hits/totalShots)*100) : 0;
+      document.getElementById("statHits").textContent=hits;
+      document.getElementById("statMiss").textContent=miss;
+      document.getElementById("statCombo").textContent=maxCombo;
+      document.getElementById("statAcc").textContent=acc+"%";
+      const isIt = window.I18N && window.I18N.lang==="it";
+      endTitle.textContent = isIt ? "MOUm! Fine del gioco" : "MOUm! Fim de jogo";
+      if(score>=5000){
+        endText.textContent = isIt
+          ? `Hai fatto ${score} punti. Confettiere leggendario — hai resistito al Modo Confuso!`
+          : `Você fez ${score} pontos. Confeiteiro legendário — resistiu ao Modo Confuso!`;
+      } else if(score>=2000){
+        endText.textContent = isIt
+          ? `Hai fatto ${score} punti. Ottimo occhio per i macaron!`
+          : `Você fez ${score} pontos. Ótimo olho para macarons!`;
+      } else {
+        endText.textContent = isIt
+          ? `Hai fatto ${score} punti. I macarrão quasi ti hanno ingannato…`
+          : `Você fez ${score} pontos. Os macarrões quase te enganaram…`;
+      }
+      soundGameOver();
+      _confusoBadge(false);
+    }
+
+    // ── Input ─────────────────────────────────────────────
+    function pos(e){
+      const r=canvas.getBoundingClientRect();
+      const t=e.touches?e.touches[0]:e;
+      return{x:(t.clientX-r.left)/r.width*W, y:(t.clientY-r.top)/r.height*H};
+    }
+    function onMove(e){
+      const p=pos(e); aimX=p.x; aimY=p.y;
+    }
+    function onShoot(e){
+      if(e.cancelable) e.preventDefault();
+      const p=pos(e); aimX=p.x; aimY=p.y;
+      hitTest(p.x,p.y);
+    }
+    canvas.addEventListener("mousemove", onMove);
+    canvas.addEventListener("click", onShoot);
+    canvas.addEventListener("touchstart", (e)=>{ onMove(e); onShoot(e); }, {passive:false});
+    canvas.addEventListener("touchmove", onMove, {passive:true});
+
+    document.getElementById("startBtn").onclick=start;
+    document.getElementById("againBtn").onclick=start;
+    document.getElementById("saveBtn").onclick=()=>saveScore(GAME_KEY,document.getElementById("playerName").value,score,document.getElementById("saveMsg"));
+
+    loadTop10(GAME_KEY); reset();
+  </script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/delights.js"></script>
+</body>
+</html>
