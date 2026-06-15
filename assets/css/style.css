@@ -92,7 +92,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   font-weight: 400; letter-spacing: .14em; color: var(--text-main);
 }
 .nav__links {
-  display: flex; align-items: center; gap: 2.25rem;
+  display: flex; align-items: center; gap: 1.75rem;
 }
 .nav__links a {
   font-size: .75rem; font-weight: 500; letter-spacing: .09em;
@@ -853,11 +853,12 @@ details[open] .faq__question::after { transform: rotate(45deg); }
 /* ── TOGGLE DE IDIOMA (PT/IT) ─────────────────────────────── */
 .nav__lang {
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-body); font-size: .68rem; font-weight: 700;
-  letter-spacing: .08em;
+  font-family: var(--font-body); font-size: .64rem; font-weight: 700;
+  letter-spacing: .06em;
   color: var(--sage-dark) !important;
   border: 1.5px solid var(--sage); border-radius: 999px;
-  width: 2rem; height: 2rem;
+  width: 1.8rem; height: 1.8rem;
+  margin-left: -.5rem;
   opacity: .8;
   transition: opacity var(--transition), background var(--transition), color var(--transition) !important;
 }
@@ -867,7 +868,7 @@ details[open] .faq__question::after { transform: rotate(45deg); }
   color: var(--white) !important;
 }
 @media (max-width: 860px) {
-  .nav__lang { margin-top: .5rem; width: auto; height: auto; padding: .4rem .9rem; border-radius: var(--radius); }
+  .nav__lang { margin-top: .5rem; margin-left: 0; width: auto; height: auto; padding: .4rem .9rem; border-radius: var(--radius); }
 }
 
 /* ══════════════════════════════════════════════════════════
