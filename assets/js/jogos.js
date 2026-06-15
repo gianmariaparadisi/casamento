@@ -270,17 +270,14 @@ function flDraw() {
   const ctx = flCtx; if (!ctx) return;
   const W = flW, H = flH;
 
-  /* ── Fundo / céu ── */
+  /* ── Fundo / céu (ocupa toda a tela, já inclui as colinas) ── */
   if (FL_SKY.complete && FL_SKY.naturalWidth > 0) {
-    ctx.drawImage(FL_SKY, 0, 0, W, H * .65);
+    ctx.drawImage(FL_SKY, 0, 0, W, H);
   } else {
-    const sky = ctx.createLinearGradient(0,0,0,H*.65);
-    sky.addColorStop(0,"#89CFF0"); sky.addColorStop(1,"#C8DDB8");
-    ctx.fillStyle = sky; ctx.fillRect(0,0,W,H*.65);
+    const sky = ctx.createLinearGradient(0,0,0,H);
+    sky.addColorStop(0,"#89CFF0"); sky.addColorStop(.65,"#C8DDB8"); sky.addColorStop(1,"#EBF0E6");
+    ctx.fillStyle = sky; ctx.fillRect(0,0,W,H);
   }
-
-  /* ── Chão (cor base) ── */
-  ctx.fillStyle = "#EBF0E6"; ctx.fillRect(0, H*.6, W, H*.4);
 
   /* ── Sol ── */
   if (FL_SUN.complete && FL_SUN.naturalWidth > 0) {
