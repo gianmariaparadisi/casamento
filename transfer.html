@@ -55,10 +55,15 @@
     @media(max-width:600px){ .transfer-search__row{flex-direction:column;align-items:stretch;} }
 
     .transfer__resultados { margin-top:1rem; }
-    .transfer-convidado__card { display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--line-green); }
-    .transfer-convidado__card:last-child { border-bottom:none; }
-    .transfer-convidado__nome { font-size:.95rem;font-weight:600;color:var(--text-main);margin-bottom:.2rem; }
-    .transfer-convidado__meta { font-size:.78rem;color:var(--text-muted);line-height:1.45; }
+    .transfer-convidado__card {
+      display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.25rem;
+      border:1px solid var(--line);border-radius:var(--radius);
+      margin-top:.75rem;background:var(--bg-main);
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .transfer-convidado__card:hover { border-color: var(--sage); background: var(--bg-green); }
+    .transfer-convidado__avatar { width: 2.25rem; height: 2.25rem; object-fit: contain; flex-shrink: 0; }
+    .transfer-convidado__nome { font-size:.95rem;font-weight:500;color:var(--text-main); }
     .transfer__badge { display:inline-flex;align-items:center;border-radius:999px;padding:.18rem .55rem;font-size:.72rem;font-weight:600;background:var(--bg-green);color:var(--sage-dark);border:1px solid var(--line-green);margin-left:.35rem;white-space:nowrap; }
     .transfer__badge--vazio { background:var(--bg-soft);color:var(--text-muted);border-color:var(--line); }
 
@@ -69,6 +74,7 @@
     .transfer-member { border:1px solid var(--line-green);border-radius:var(--radius);padding:1rem;margin-bottom:.85rem;background:var(--white); }
     .transfer-member.is-active { background:var(--bg-green);border-color:var(--sage); }
     .transfer-member__top { display:flex;gap:.7rem;align-items:flex-start;margin-bottom:.75rem; }
+    .transfer-member__avatar { width: 1.9rem; height: 1.9rem; object-fit: contain; flex-shrink: 0; margin-top:.1rem; }
     .transfer-member__check { margin-top:.2rem;accent-color:var(--sage); }
     .transfer-member__name { font-size:.9rem;font-weight:600;color:var(--text-main);line-height:1.4; }
     .transfer-member__hint { font-size:.76rem;color:var(--text-muted);margin-top:.1rem; }
@@ -216,6 +222,25 @@
         .replace(/"/g, "&quot;");
     }
 
+    // Avatar temático de viagem/transfer, consistente por nome (mesmo nome = mesmo ícone)
+    const TRANSFER_AVATARS = [
+      "icon-bus.png",
+      "icon-bus-angle.png",
+      "icon-compass.png",
+      "icon-map-route.png",
+      "icon-route.png",
+      "icon-road-sign.png",
+      "icon-suitcase.png"
+    ];
+    function avatarTransfer(nome) {
+      const str = String(nome || "");
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+      }
+      return TRANSFER_AVATARS[hash % TRANSFER_AVATARS.length];
+    }
+
     function normalizarTrecho(valor) {
       const raw = String(valor || "").trim();
       const v = raw
@@ -306,14 +331,11 @@
           card.className = "transfer-convidado__card";
           const interesseInicial = interesseDoItem(item);
           card.innerHTML = `
-            <div>
+            <img class="transfer-convidado__avatar" src="assets/img/${avatarTransfer(item.nome)}" alt="">
+            <div style="flex:1">
               <p class="transfer-convidado__nome">
                 ${tEsc(item.nome)}
                 ${interesseInicial ? `<span class="transfer__badge">${tEsc(rotuloTrecho(interesseInicial))}</span>` : ""}
-              </p>
-              <p class="transfer-convidado__meta">
-                ${item.grupo ? `${I18N.t("Grupo", "Gruppo")}: ${tEsc(item.grupo)}` : I18N.t("Convidado individual", "Ospite singolo")}
-                ${item.status ? ` · RSVP: ${tEsc(item.status)}` : ""}
               </p>
             </div>
             <button class="btn btn--outline btn--sm" type="button">${I18N.t("Selecionar","Seleziona")}</button>`;
@@ -438,6 +460,7 @@
         <div class="transfer-member" data-key="${tEsc(key)}">
           <label class="transfer-member__top">
             <input class="transfer-member__check" type="checkbox" name="transferAtualizar" value="${tEsc(key)}" ${checked} />
+            <img class="transfer-member__avatar" src="assets/img/${avatarTransfer(pessoa.nome)}" alt="">
             <span>
               <span class="transfer-member__name">
                 ${tEsc(pessoa.nome)}
