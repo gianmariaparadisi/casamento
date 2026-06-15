@@ -451,10 +451,17 @@
     if (!input) return;
     let wrap = input.parentElement;
     if (!wrap || !wrap.classList.contains("delights-input-wrap")) {
+      const hadFocus = document.activeElement === input;
+      const selStart = input.selectionStart;
+      const selEnd   = input.selectionEnd;
       wrap = document.createElement("div");
       wrap.className = "delights-input-wrap";
       input.parentNode.insertBefore(wrap, input);
-      wrap.appendChild(input);
+      wrap.appendChild(input); // move o input para dentro do wrap (1ª vez só)
+      if (hadFocus) {
+        input.focus();
+        try { input.setSelectionRange(selStart, selEnd); } catch (e) {}
+      }
     }
     let check = wrap.querySelector(".delights-input-check");
     if (!check) {
