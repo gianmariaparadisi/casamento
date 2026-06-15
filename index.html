@@ -64,7 +64,321 @@
   <!-- ─── HERO ──────────────────────────────────────────── -->
   <section class="hero" id="hero">
     <div class="hero__bg" aria-hidden="true">
-      <img src="assets/img/og-cover.jpg" alt="" class="hero__bg-img" />
+      <img src="assets/img/GT10.jpg" alt="" class="hero__bg-img" />
+    </div>
+    <div class="hero__content">
+      <p class="hero__eyebrow reveal">12 de dezembro de 2026</p>
+      <h1 class="hero__title reveal" aria-label="Tiago e Gian">
+        <img src="assets/img/logo_light.png" alt="Tiago e Gian"
+             class="site-logo site-logo--hero" />
+      </h1>
+      <p class="hero__place reveal">Fazenda Quilombo · Limeira</p>
+
+      <div class="hero__countdown reveal" id="countdown" aria-label="Contagem regressiva">
+        <div class="countdown__item"><span class="countdown__num" id="cd-dias">, </span><span class="countdown__label">dias</span></div>
+        <span class="countdown__sep" aria-hidden="true">·</span>
+        <div class="countdown__item"><span class="countdown__num" id="cd-horas">, </span><span class="countdown__label">horas</span></div>
+        <span class="countdown__sep" aria-hidden="true">·</span>
+        <div class="countdown__item"><span class="countdown__num" id="cd-min">, </span><span class="countdown__label">min</span></div>
+        <span class="countdown__sep" aria-hidden="true">·</span>
+        <div class="countdown__item"><span class="countdown__num" id="cd-seg">, </span><span class="countdown__label">seg</span></div>
+      </div>
+
+      <div class="hero__actions reveal">
+        <a href="#rsvp" class="btn btn--primary btn--lg">Confirmar presença</a>
+        <a href="#cerimonia" class="btn btn--ghost btn--lg">Local & Orientações</a>
+        <a href="presentes.html" class="btn btn--ghost btn--lg">Presentes</a>
+      </div>
+    </div>
+    <a href="#foto-strip-1" class="hero__scroll" aria-label="Rolar para baixo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </a>
+  </section>
+
+  <!-- ─── PHOTO STRIP 1 ─────────────────────────────────── -->
+  <div class="photo-strip" id="foto-strip-1" aria-hidden="true">
+    <div class="photo-strip__track">
+      <div class="photo-strip__item"><img src="assets/img/Q02.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT03.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q07.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT06.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q01.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT08.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q05.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT04.jpg" alt="" class="site-img" /></div>
+      <!-- duplicado para loop contínuo -->
+      <div class="photo-strip__item"><img src="assets/img/Q02.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT03.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q07.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT06.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q01.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT08.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q05.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT04.jpg" alt="" class="site-img" /></div>
+    </div>
+  </div>
+
+  <!-- ─── O DIA ──────────────────────────────────────────── -->
+  <section class="section" id="evento">
+    <div class="container">
+      <p class="section__eyebrow reveal">I.</p>
+      <h2 class="section__title reveal">O Dia</h2>
+
+      <div style="text-align:center;margin-bottom:1.5rem"><img src="assets/img/hero-toast.png" alt="" style="width:80px;height:80px;object-fit:contain;opacity:.85;display:inline-block"></div>
+      <div class="evento__intro">
+        <div class="evento__text reveal-left">
+          <p>Será um prazer compartilhar esse dia com todas as pessoas que tanto amamos, e esperamos que você possa fazer parte disso conosco.</p>
+          <p>Tudo sobre o dia você poderá encontrar aqui.</p>
+        </div>
+        <div class="evento__foto-wrap reveal-right">
+          <img src="assets/img/desenho_fazenda.jpg" alt="Ilustração da Fazenda Quilombo" class="evento__foto site-img--ilustracao" />
+          <div class="evento__foto-badge">
+            <strong>12 · 12 · 2026</strong>
+            Fazenda Quilombo<br>Limeira, SP
+          </div>
+        </div>
+      </div>
+
+      <!-- Carrossel -->
+      <div class="carrossel reveal" id="carrossel">
+        <div class="carrossel__track" id="carrosselTrack">
+          <div class="carrossel__slide"><img src="assets/img/GT03.jpg" alt="Tiago e Gian num jardim verde" class="site-img" /></div>
+          <div class="carrossel__slide"><img src="assets/img/GT01.jpg" alt="Tiago e Gian de terno" class="site-img" /></div>
+          <div class="carrossel__slide"><img src="assets/img/GT09.jpg" alt="Tiago e Gian no barco" class="site-img" /></div>
+          <div class="carrossel__slide"><img src="assets/img/GT04.jpg" alt="Tiago e Gian em Nova York" class="site-img" /></div>
+          <div class="carrossel__slide"><img src="assets/img/GT07.jpg" alt="Tiago e Gian se abraçando" class="site-img" /></div>
+          <div class="carrossel__slide"><img src="assets/img/GT05.jpg" alt="Tiago e Gian com amigos" class="site-img" /></div>
+        </div>
+        <button class="carrossel__btn carrossel__btn--prev" aria-label="Foto anterior" onclick="moverCarrossel(-1)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="carrossel__btn carrossel__btn--next" aria-label="Próxima foto" onclick="moverCarrossel(1)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="carrossel__dots" id="carrosselDots"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── MOSAICO ───────────────────────────────────────── -->
+  <div class="mosaico" aria-hidden="true">
+    <div class="mosaico__item"><img src="assets/img/Q02.jpg" alt="" class="site-img" /></div>
+    <div class="mosaico__item"><img src="assets/img/Q07.jpg" alt="" class="site-img" /></div>
+    <div class="mosaico__item"><img src="assets/img/Q04.jpg" alt="" class="site-img" /></div>
+    <div class="mosaico__item"><img src="assets/img/Q01.jpg" alt="" class="site-img" /></div>
+    <div class="mosaico__item"><img src="assets/img/Q06.jpg" alt="" class="site-img" /></div>
+  </div>
+
+  <div class="divider-wrap" style="padding:.75rem 0"><img src="assets/img/divider-sage.png" alt="" style="max-width:280px;width:55%;display:inline-block;opacity:.6"></div>
+  <!-- ─── LOCAL & ORIENTAÇÕES ──────────────────────────── -->
+  <section class="section section--green" id="cerimonia">
+    <div class="container">
+      <p class="section__eyebrow reveal">II.</p>
+      <h2 class="section__title reveal">Local & Orientações</h2>
+      <div class="ceri__grid">
+        <article class="ceri__card reveal">
+          <div class="ceri__icon">
+            <img src="assets/img/icon-pin.png" alt="">
+          </div>
+          <h3 class="ceri__label">Cerimônia & Recepção</h3>
+          <p class="ceri__time">Sábado, 12 de dezembro de 2026</p>
+          <p class="ceri__time" style="margin-top:.25rem">A Recepção se inicia 1h antes do evento, às 15h30</p>
+          <p class="ceri__time" style="margin-top:.25rem">Cerimônia às 16h30</p>
+          <p class="ceri__location" style="margin-top:.75rem">Fazenda Quilombo<br>Limeira, SP</p>
+          <p class="ceri__obs" style="margin-top:.5rem">As festividades serão todas no mesmo local, do welcome drink à festa.</p>
+          <p class="ceri__obs" style="margin-top:.5rem">Te esperamos com welcome drinks <img src="assets/img/icon-welcome-drink.png" alt="" style="width:1.3em;height:1.3em;object-fit:contain;vertical-align:middle;display:inline-block;margin-left:.2em;flex-shrink:0"></p>
+          <div class="ceri__actions">
+            <a href="https://maps.google.com/?q=Fazenda+Quilombo+Limeira+SP" target="_blank" rel="noopener" class="btn btn--outline-green btn--sm">Abrir no Maps</a>
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Casamento+Tiago+e+Gian&dates=20261212T193000Z/20261213T020000Z&details=Cerim%C3%B4nia+%2816h30%29+e+recep%C3%A7%C3%A3o+na+Fazenda+Quilombo%2C+Limeira+SP&location=Fazenda+Quilombo%2C+Limeira+SP" target="_blank" rel="noopener" class="btn btn--outline-green btn--sm">+ Calendário</a>
+          </div>
+        </article>
+        <article class="ceri__card reveal">
+          <div class="ceri__icon ceri__icon--dress">
+            <img src="assets/img/icon-shirt-bowtie.png" alt="">
+            <img src="assets/img/icon-dress.png" alt="">
+          </div>
+          <h3 class="ceri__label">Dress code</h3>
+          <p class="ceri__time">Esporte fino</p>
+          <p class="ceri__obs" style="margin-top:.5rem"><strong>Nada de capa.</strong></p>
+          <p class="ceri__obs">Nada de gravata ou formalidade excessiva, queremos que todos se sintam confortáveis. A festa é ao ar livre, então pense em tecidos leves: aprox. 26°C na cerimônia e 21°C à noite.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PHOTO PAIR ─────────────────────────────────────── -->
+  <div class="photo-pair" aria-hidden="true">
+    <div class="photo-pair__item"><img src="assets/img/Q03.jpg" alt="" class="site-img" /></div>
+    <div class="photo-pair__item"><img src="assets/img/Q08.jpg" alt="" class="site-img" /></div>
+  </div>
+
+  <div class="divider-wrap" style="padding:.75rem 0"><img src="assets/img/divider-terracota.png" alt="" style="max-width:280px;width:55%;display:inline-block;opacity:.6"></div>
+  <!-- ─── DESLOCAMENTO ──────────────────────────────────── -->
+  <section class="section" id="deslocamento">
+    <div class="container container--narrow">
+      <p class="section__eyebrow reveal">III.</p>
+      <h2 class="section__title reveal"><img src="assets/img/icon-compass.png" alt="" style="width:1em;height:1em;object-fit:contain;vertical-align:middle;margin-right:.3em;opacity:.8"> Como chegar</h2>
+      <div class="desloc__grid">
+        <div class="desloc__item reveal">
+          <img class="desloc__icon" src="assets/img/icon-pin.png" alt="" loading="lazy">
+          <h3 class="desloc__head">Estacionamento</h3>
+          <p>Estacionamento gratuito no local, com manobrista durante toda a festa.</p>
+        </div>
+        <div class="desloc__item reveal">
+          <img class="desloc__icon" src="assets/img/icon-bus.png" alt="" loading="lazy">
+          <h3 class="desloc__head">Transfer & Transporte</h3>
+          <p>Trecho Campinas → Limeira e São Paulo → Limeira. Se tiver interesse, marque aqui, vamos formar grupos com outros convidados e avisar vocês!</p>
+          <a href="transfer.html" class="btn btn--sage-solid btn--sm">Quero saber sobre transfer</a>
+        </div>
+        <div class="desloc__item reveal">
+          <img class="desloc__icon" src="assets/img/icon-hotel.png" alt="" loading="lazy">
+          <h3 class="desloc__head">Onde ficar?</h3>
+          <p>Reunimos algumas sugestões de hospedagem em Limeira e ao redor, para quem vier de fora e preferir dormir aqui!</p>
+          <a href="hospedagem.html" class="btn btn--sage-solid btn--sm">Ver opções de hospedagem</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PHOTO STRIP 2 ─────────────────────────────────── -->
+  <div class="photo-strip" aria-hidden="true">
+    <div class="photo-strip__track" style="animation-direction:reverse;animation-duration:32s">
+      <div class="photo-strip__item"><img src="assets/img/Q08.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT07.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q03.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q06.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT09.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q04.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT03.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q05.jpg" alt="" class="site-img" /></div>
+      <!-- duplicado -->
+      <div class="photo-strip__item"><img src="assets/img/Q08.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT07.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q03.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q06.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT09.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q04.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/GT03.jpg" alt="" class="site-img" /></div>
+      <div class="photo-strip__item"><img src="assets/img/Q05.jpg" alt="" class="site-img" /></div>
+    </div>
+  </div>
+
+  <!-- ─── RSVP ──────────────────────────────────────────── -->
+  <section class="section section--soft" id="rsvp">
+    <div class="container container--narrow">
+      <p class="section__eyebrow reveal">IV.</p>
+      <h2 class="section__title reveal">Confirme sua presença <img src="assets/img/icon-rsvp-envelope.png" alt="" style="width:1.2em;height:1.2em;object-fit:contain;vertical-align:middle;opacity:.85;flex-shrink:0"></h2>
+      <p class="section__subtitle reveal">Por favor, confirme até <strong>12 de agosto de 2026</strong>.</p>
+      <div class="rsvp__box reveal" id="rsvpBox">
+        <div id="rsvp-busca">
+          <label for="nomeBusca" class="rsvp__label">Digite seu nome</label>
+          <div class="rsvp__row">
+            <input type="text" id="nomeBusca" class="rsvp__input" placeholder="Ex: Tiago" autocomplete="name" aria-label="Nome do convidado" />
+            <button class="btn btn--primary" id="btnBuscar" onclick="buscar()">Buscar</button>
+          </div>
+          <p class="rsvp__hint" id="rsvpHint">Digite seu nome como ele aparece no convite.</p>
+        </div>
+        <div id="rsvp-resultado" class="oculto"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── RODAPÉ ─────────────────────────────────────────── -->
+  <div class="flourish-wrap" style="padding:1.5rem 0 0"><img src="assets/img/footer-flourish.png" alt="" style="max-width:440px;width:85%;display:inline-block"></div>
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__names" aria-label="Tiago e Gian">
+      <img src="assets/img/logohorizontal_light.png" alt="Tiago e Gian" class="site-logo site-logo--footer">
+    </p>
+      <p class="footer__date">12 · 12 · 2026</p>
+      <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
+      <div class="footer__links">
+        <a href="#rsvp">Confirmar presença</a>
+        <a href="presentes.html">Presentes</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" hidden>
+    <div class="modal__overlay" onclick="fecharModal()"></div>
+    <div class="modal__box">
+      <button class="modal__close" onclick="fecharModal()" aria-label="Fechar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div id="modalConteudo"></div>
+    </div>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Casamento de Tiago e Gian, 12 de dezembro de 2026, Fazenda Quilombo, Limeira." />
+  <title>Tiago e Gian, 12.12.2026</title>
+
+  <!-- Open Graph / WhatsApp preview -->
+  <meta property="og:title" content="Tiago e Gian, 12.12.2026" />
+  <meta property="og:description" content="Será um prazer compartilhar esse dia com todas as pessoas que tanto amamos. Fazenda Quilombo · Limeira · 12 de dezembro de 2026" />
+  <meta property="og:image" content="https://gianmariaparadisi.github.io/casamento/assets/img/og-cover.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="https://gianmariaparadisi.github.io/casamento/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Tiago e Gian, 12.12.2026" />
+  <meta name="twitter:description" content="Será um prazer compartilhar esse dia com todas as pessoas que tanto amamos." />
+  <meta name="twitter:image" content="https://gianmariaparadisi.github.io/casamento/assets/img/og-cover.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+  <!-- ─── NAV ───────────────────────────────────────────── -->
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="#hero" class="nav__logo-wrap">
+        <img src="assets/img/monograma_light.png" alt="" class="site-logo site-logo--mono" aria-hidden="true">
+        <span>Tiago e Gian</span>
+      </a>
+      <nav class="nav__links" id="navLinks" aria-label="Menu principal">
+        <a href="#evento">O Dia</a>
+        <a href="#cerimonia">Local & Orientações</a>
+        <a href="presentes.html">Presentes</a>
+        <div class="nav__dropdown">
+          <button class="nav__dropdown-toggle" aria-haspopup="true">
+            Informações
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav__dropdown-menu">
+            <a href="padrinhos.html">Para os Padrinhos</a>
+            <a href="transfer.html">Transfer</a>
+            <a href="hospedagem.html">Hospedagem</a>
+          </div>
+        </div>
+        <a href="jogos.html" class="nav__key" aria-label="Segredo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3"/>
+          </svg>
+        </a>
+        <a href="#rsvp" class="nav__cta">Confirmar presença</a>
+      </nav>
+      <button class="nav__hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ─── HERO ──────────────────────────────────────────── -->
+  <section class="hero" id="hero">
+    <div class="hero__bg" aria-hidden="true">
+      <img src="assets/img/GT10.jpg" alt="" class="hero__bg-img" />
     </div>
     <div class="hero__content">
       <p class="hero__eyebrow reveal">12 de dezembro de 2026</p>
