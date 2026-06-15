@@ -226,10 +226,11 @@
         ctx.globalAlpha=.18; ctx.drawImage(_toastImg, W/2-120, H/2-140, 240, 240); ctx.globalAlpha=1;
       }endTitle.textContent=win?"Brinde perfeito!":"A rolha escapou…";endText.textContent=win?`Você limpou tudo com ${score} pontos e muito glitter.`:`Você fez ${score} pontos. Mais uma rodada resolve esses champagne problems.`;}
     function drawBottle(t=0){
-      ctx.save();ctx.translate(W*.39,H-120);ctx.rotate(-.72);
+      ctx.save();ctx.translate(W*.39,H-120);
       if(_bottleImg.complete && _bottleImg.naturalWidth>0){
         ctx.drawImage(_bottleImg,-52,-130,104,200);
       } else {
+        ctx.rotate(-.72);
         ctx.fillStyle="#5B7D5D";ctx.strokeStyle="#38523B";ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(-28,-95,56,124,14);ctx.fill();ctx.stroke();ctx.fillStyle="#F2D27A";ctx.fillRect(-22,-80,44,20);ctx.fillStyle="#2F4A35";ctx.fillRect(-13,-150,26,64);ctx.fillStyle="#D3A33F";ctx.fillRect(-15,-154,30,10);
       }
       ctx.restore();
@@ -273,8 +274,8 @@
         ctx.fillStyle=pg;ctx.strokeStyle="#B48842";ctx.lineWidth=2;
         ctx.beginPath();ctx.roundRect(paddle.x,paddle.y,paddle.w,paddle.h,999);ctx.fill();ctx.stroke();
       }
-      // Rosto goofy sobre o paddle
-      const pr = paddle.h * 1.4;
+      // Rosto goofy sobre o paddle (3x maior)
+      const pr = paddle.h * 1.4 * 3;
       _drawFace(ctx, pcx, pcy - pr*.15, pr);
 
       drawCork();

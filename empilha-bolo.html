@@ -419,7 +419,7 @@
       burstCrumbs(newX + newW/2, moving.y + layerH/2, 12 + Math.min(18, layers.length));
       if(layers.length > 6){
         const highest = layers[layers.length-1].y;
-        targetCameraY = Math.min(0, H*.37 - highest);
+        targetCameraY = H*.37 - highest;
       }
       const nextY = moving.y - layerH;
       moving = makeMoving(layers.length, newW, nextY);
