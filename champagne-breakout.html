@@ -146,7 +146,7 @@
 
 
 
-    const SCORE_API = (typeof API_URL !== "undefined") ? API_URL : "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
+    const SCORE_API = (typeof API_URL !== "undefined") ? API_URL : "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
     function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));}
     async function saveScore(game, name, score, msgEl){
       name=(name||"").trim().slice(0,22);

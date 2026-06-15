@@ -190,7 +190,7 @@
     function unlockScroll(){document.body.style.overflow="";document.body.style.touchAction="";window.scrollTo(0,_w2ScrollY);}
 
 
-    const SCORE_API = (typeof API_URL !== "undefined") ? API_URL : "https://script.google.com/macros/s/AKfycbyYyCrT2oNLYDLcXDWq8X2b9Y0u0EbmQ7pUnpdRA3g0wZNUDtX0VTNrHq26wIngBwHn/exec";
+    const SCORE_API = (typeof API_URL !== "undefined") ? API_URL : "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
     function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));}
     async function saveScore(game, name, score, msgEl){
       name=(name||"").trim().slice(0,22);
@@ -221,8 +221,9 @@
     const endIcon=document.getElementById("endIcon"), endTitle=document.getElementById("endTitle"), endText=document.getElementById("endText");
     // Personagem: gian ou tiago — altera tiles de noivo
     let _2048personagem = "gian";
-    function _2048TileDefs(){
-      const noivo = _2048personagem === "tiago"
+    function _2048TileDefs(groom){
+      const g = groom || _2048personagem;
+      const noivo = g === "tiago"
         ? `<img src="assets/img/tiagoface0${1+Math.floor(Math.random()*3)}.png" style="width:60%;height:60%;object-fit:cover;border-radius:50%;margin-bottom:.15rem">`
         : `<img src="assets/img/gianface0${1+Math.floor(Math.random()*3)}.png" style="width:60%;height:60%;object-fit:cover;border-radius:50%;margin-bottom:.15rem">`;
       const ambos = `<div style="display:flex;gap:3px;justify-content:center">`
@@ -236,7 +237,7 @@
         {icon:"<img src='assets/img/tile-champagne.png' alt=''>",label:"Champagne",isHtml:true},
         {icon:"<img src='assets/img/tile-luademel.png' alt=''>",label:"Lua de mel",isHtml:true},
         {icon:"<img src='assets/img/tile-altar.png' alt=''>",label:"Altar",isHtml:true},
-        {icon:noivo,label:_2048personagem==="tiago"?"Tiago":"Gian",isHtml:true},
+        {icon:noivo,label:g==="tiago"?"Tiago":"Gian",isHtml:true},
         {icon:ambos,label:"Para sempre",isHtml:true}
       ];
     }
@@ -262,7 +263,7 @@
     }
     function makeTileEl(t, extra=""){
       const p=cellPos(t.r,t.c);
-      const defs=_2048TileDefs();
+      const defs=_2048TileDefs(t.groom);
       const def=defs[Math.min(t.level,defs.length-1)];
       const el=document.createElement("div");
       el.className=`tile l${Math.min(t.level,7)} ${extra}`;
@@ -306,7 +307,15 @@
         for(let k=0;k<items.length;k++){
           const a=items[k], target=coords[outIndex];
           if(k+1<items.length && items[k+1].level===a.level){
-            const b=items[k+1]; const lvl=Math.min(a.level+1,7); const nt={id:nextId++,level:lvl,r:target[0],c:target[1]}; next.push(nt); mergedIds.push(nt.id);
+            const b=items[k+1]; const lvl=Math.min(a.level+1,7); const nt={id:nextId++,level:lvl,r:target[0],c:target[1]};
+            if(lvl===6){
+              // Garante que os dois "Noivo" no tabuleiro sejam pessoas diferentes (Gian e Tiago)
+              const outroNoivo = tiles.find(x=>x.level===6 && x.id!==a.id && x.id!==b.id);
+              nt.groom = outroNoivo && outroNoivo.groom === "gian" ? "tiago"
+                       : outroNoivo && outroNoivo.groom === "tiago" ? "gian"
+                       : (Math.random()<.5 ? "gian" : "tiago");
+            }
+            next.push(nt); mergedIds.push(nt.id);
             records.push({from:{r:a.r,c:a.c},to:{r:target[0],c:target[1]},level:a.level});
             records.push({from:{r:b.r,c:b.c},to:{r:target[0],c:target[1]},level:b.level});
             if(a.r!==target[0]||a.c!==target[1]||b.r!==target[0]||b.c!==target[1]) changed=true; else changed=true;
@@ -382,7 +391,7 @@
     document.getElementById("undoBtn").onclick=()=>restoreState(history);
     document.getElementById("saveBtn").onclick=()=>saveScore(GAME_KEY,document.getElementById("playerName").value,score,document.getElementById("saveMsg"));
     window.addEventListener("resize",()=>renderStable());
-    document.addEventListener("keydown",e=>{if(startModal.hidden===false)return; const m={ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDown:"down"}[e.key]; if(m){e.preventDefault();move(m);}});
+    document.addEventListener("keydown",e=>{const tag=(e.target&&e.target.tagName)||""; if(tag==="INPUT"||tag==="TEXTAREA")return; if(startModal.hidden===false)return; const m={ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDown:"down"}[e.key]; if(m){e.preventDefault();move(m);}});
     let sx=0,sy=0;
     boardEl.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
     boardEl.addEventListener("touchend",e=>{const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))<28)return;move(Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy>0?"down":"up"));},{passive:true});

@@ -71,6 +71,7 @@
       font-weight: 600; color: var(--terracotta); font-size: .95rem;
       margin-top: .5rem;
     }
+    .presente__btn-icon { width: 1.05rem; height: 1.05rem; object-fit: contain; vertical-align: -.18rem; margin-right: .3rem; }
     .presente__card .btn { align-self: flex-start; margin-top: .85rem; }
     .presente__card--custom {
       border: 2px dashed var(--line-green);
@@ -97,21 +98,6 @@
       .pix-info { flex-direction: column; gap: 1rem; }
       .presentes__grid { grid-template-columns: 1fr; }
     }
-
-    /* ─── FILTRO POR FAIXA DE VALOR ─── */
-    .presentes__filtros {
-      display: flex; flex-wrap: wrap; gap: .6rem;
-      margin-top: 2.25rem; justify-content: center;
-    }
-    .presentes__filtro {
-      font-size: .8rem; font-weight: 500; color: var(--text-muted);
-      background: var(--white); border: 1.5px solid var(--line-green);
-      border-radius: 999px; padding: .5rem 1.1rem; cursor: pointer;
-      transition: background var(--transition), color var(--transition), border-color var(--transition);
-    }
-    .presentes__filtro:hover { border-color: var(--sage); color: var(--sage-dark); }
-    .presentes__filtro.active { background: var(--sage); color: var(--white); border-color: var(--sage); }
-    .presente__card.is-hidden { display: none; }
 
     /* ─── VOTAÇÃO LUA DE MEL ─── */
     .luademel { margin-bottom: 3.5rem; }
@@ -315,13 +301,6 @@
         <h2 class="luademel__title reveal">Lista de<br><em>presentes</em></h2>
       </div>
 
-      <div class="presentes__filtros reveal" role="group" aria-label="Filtrar por faixa de valor">
-        <button class="presentes__filtro active" data-filtro="todos">Todos</button>
-        <button class="presentes__filtro" data-filtro="0-200">Até R$ 200</button>
-        <button class="presentes__filtro" data-filtro="200-400">R$ 200 – 400</button>
-        <button class="presentes__filtro" data-filtro="400-9999">A partir de R$ 400</button>
-      </div>
-
       <div class="presentes__grid" id="presentesGrid">
 
         <article class="presente__card reveal"
@@ -333,7 +312,7 @@
             <h3 class="presente__nome">Passeio de barco</h3>
             <p class="presente__desc">Sai essa imagem de cineque! Uma tarde no mar, dois apaixonados, e total falta de responsabilidade.</p>
             <p class="presente__valor">R$ 600</p>
-            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
+            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)"><img src="assets/img/icon-gift-box.png" alt="" class="presente__btn-icon">Presentear</button>
           </div>
         </article>
 
@@ -346,7 +325,7 @@
             <h3 class="presente__nome">Degustação de vinhos e champagnes</h3>
             <p class="presente__desc">Porque champagne de caixinha já não basta mais. Vem sofisticar.</p>
             <p class="presente__valor">R$ 280</p>
-            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
+            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)"><img src="assets/img/icon-gift-box.png" alt="" class="presente__btn-icon">Presentear</button>
           </div>
         </article>
 
@@ -359,7 +338,7 @@
             <h3 class="presente__nome">Resort all inclusive</h3>
             <p class="presente__desc">Tudo incluso. Frigobar, piscina, aquele café da manhã que ninguém consegue terminar. O sonho.</p>
             <p class="presente__valor">R$ 1.200</p>
-            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
+            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)"><img src="assets/img/icon-gift-box.png" alt="" class="presente__btn-icon">Presentear</button>
           </div>
         </article>
 
@@ -372,7 +351,7 @@
             <h3 class="presente__nome">Café da manhã com vista</h3>
             <p class="presente__desc">Vista linda, café na xícara, zero compromisso. Perfeito para dois que acabaram de sobreviver a um casamento.</p>
             <p class="presente__valor">R$ 150</p>
-            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
+            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)"><img src="assets/img/icon-gift-box.png" alt="" class="presente__btn-icon">Presentear</button>
           </div>
         </article>
 
@@ -385,7 +364,7 @@
             <h3 class="presente__nome">Um vaso lindo para casa</h3>
             <p class="presente__desc">O tipo de vaso que vira assunto em toda visita. 'Ai que lindo, de onde é?' De gente que nos ama.</p>
             <p class="presente__valor">R$ 180</p>
-            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
+            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)"><img src="assets/img/icon-gift-box.png" alt="" class="presente__btn-icon">Presentear</button>
           </div>
         </article>
 
@@ -398,7 +377,7 @@
             <h3 class="presente__nome">Um mergulho relaxante</h3>
             <p class="presente__desc">Água cristalina, nenhum email, e a sensação de que a vida é boa. Você vai presentear isso.</p>
             <p class="presente__valor">R$ 350</p>
-            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
+            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)"><img src="assets/img/icon-gift-box.png" alt="" class="presente__btn-icon">Presentear</button>
           </div>
         </article>
 
@@ -411,7 +390,7 @@
             <h3 class="presente__nome">Passeio de vespa</h3>
             <p class="presente__desc">Vespa, estrada, cabelo bagunçado e sorriso na cara. A vida em resumo.</p>
             <p class="presente__valor">R$ 220</p>
-            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
+            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)"><img src="assets/img/icon-gift-box.png" alt="" class="presente__btn-icon">Presentear</button>
           </div>
         </article>
 
@@ -424,7 +403,7 @@
             <h3 class="presente__nome">Sessão de massagem relaxante</h3>
             <p class="presente__desc">Honestamente? Depois de planejar tudo isso, a massagem é praticamente medicinal.</p>
             <p class="presente__valor">R$ 200</p>
-            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
+            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)"><img src="assets/img/icon-gift-box.png" alt="" class="presente__btn-icon">Presentear</button>
           </div>
         </article>
 
@@ -437,7 +416,7 @@
             <h3 class="presente__nome">Jantar italiano delicioso</h3>
             <p class="presente__desc">Massa feita na hora, vinho que vai bem com qualquer conversa, sobremesa que faz os olhos brilharem.</p>
             <p class="presente__valor">R$ 250</p>
-            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)">Presentear</button>
+            <button class="btn btn--primary btn--sm" onclick="abrirModalPresente(this)"><img src="assets/img/icon-gift-box.png" alt="" class="presente__btn-icon">Presentear</button>
           </div>
         </article>
 
@@ -503,26 +482,6 @@
 
   <script src="assets/js/app.js"></script>
   <script>
-    /* ─── FILTRO DE PRESENTES POR FAIXA DE VALOR ─── */
-    (function () {
-      const filtros = document.querySelectorAll(".presentes__filtro");
-      const cards = document.querySelectorAll(".presente__card");
-      filtros.forEach(btn => {
-        btn.addEventListener("click", () => {
-          filtros.forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          const faixa = btn.dataset.filtro;
-          cards.forEach(card => {
-            if (card.classList.contains("presente__card--custom")) return; // sempre visível
-            if (faixa === "todos") { card.classList.remove("is-hidden"); return; }
-            const [min, max] = faixa.split("-").map(Number);
-            const valor = Number(card.dataset.valor || 0);
-            card.classList.toggle("is-hidden", !(valor >= min && valor <= max));
-          });
-        });
-      });
-    })();
-
     /* ─── VOTAÇÃO: DESTINO DA LUA DE MEL ─── */
     (function () {
       const cards = Array.from(document.querySelectorAll(".destino__card"));

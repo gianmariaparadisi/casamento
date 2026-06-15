@@ -325,6 +325,8 @@
   }
 
   document.addEventListener("keydown", function(e) {
+    const tag = (e.target && e.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA") return;
     if (jogoFinalizado) return;
     if (e.key === "Enter") processarTecla("ENTER");
     else if (e.key === "Backspace") processarTecla("⌫");

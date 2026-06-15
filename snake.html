@@ -264,7 +264,7 @@
   }
 
   /* ── SNAKE ─────────────────────────────────────────────── */
-  const SN_COLS = 14, SN_ROWS = 14;
+  const SN_COLS = 10, SN_ROWS = 10;
   let snCtx = null, snCell = 0;
   let snRaf = null, snScore = 0, snBest = 0;
   let snDir = {x:1,y:0}, snNext = {x:1,y:0};
@@ -287,7 +287,7 @@
 
     snScore = 0; snSpeed = 145; snLast = 0;
     snDir = {x:1,y:0}; snNext = {x:1,y:0};
-    snBody = [{x:5,y:11},{x:4,y:11},{x:3,y:11}];
+    snBody = [{x:5,y:5},{x:4,y:5},{x:3,y:5}];
     snVisual = snBody.map(s => ({x:s.x, y:s.y}));
     snFood = snNewFood();
     snFaceIdx = Math.floor(Math.random() * snFaces().length);
@@ -307,7 +307,7 @@
     if (snRaf) { cancelAnimationFrame(snRaf); snRaf = null; }
     snScore = 0; snSpeed = 145; snLast = 0;
     snDir = {x:1,y:0}; snNext = {x:1,y:0};
-    snBody = [{x:5,y:11},{x:4,y:11},{x:3,y:11}];
+    snBody = [{x:5,y:5},{x:4,y:5},{x:3,y:5}];
     snVisual = snBody.map(s => ({x:s.x, y:s.y}));
     snFood = snNewFood();
     snFaceIdx = Math.floor(Math.random() * snFaces().length);
@@ -453,6 +453,8 @@
 
   // Teclado
   document.addEventListener("keydown", e => {
+    const tag = (e.target && e.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA") return; // não captura teclas ao digitar nome etc.
     const dirs = {ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},
       w:{x:0,y:-1},s:{x:0,y:1},a:{x:-1,y:0},d:{x:1,y:0},
       W:{x:0,y:-1},S:{x:0,y:1},A:{x:-1,y:0},D:{x:1,y:0}};
