@@ -510,7 +510,8 @@
             registros: registros,
             grupoRowIds: registros.map(r => r.rowId),
             grupoNomes: registros.map(r => r.nome),
-            grupoTrechos: registros.map(r => r.trecho)
+            grupoTrechos: registros.map(r => r.trecho),
+            lang: (window.I18N && window.I18N.lang) || "pt"
           })
         });
 
