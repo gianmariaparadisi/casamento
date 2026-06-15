@@ -396,13 +396,13 @@ function flGameOver(){
   unlockScroll();
   flDraw();
   const nome = flPersonagem === "tiago" ? "Tiago" : "Gian";
-  const msgs = flScore>=15 ? [`O ${nome} virou pombo de competição!`,"Recorde lendário."] :
-               flScore>=8  ? [`O ${nome} voou bem hoje.`,"Consegue bater esse recorde?"] :
-               flScore>=3  ? ["Quase...","Tenta mais uma vez!"] :
-                             [`O ${nome} bateu logo de cara.`,"Cuidado com os canos!"];
+  const msgs = flScore>=15 ? [I18N.t(`O ${nome} virou pombo de competição!`,`${nome} è diventato un piccione da competizione!`),I18N.t("Recorde lendário.","Record leggendario.")] :
+               flScore>=8  ? [I18N.t(`O ${nome} voou bem hoje.`,`${nome} ha volato bene oggi.`),I18N.t("Consegue bater esse recorde?","Riesci a battere questo record?")] :
+               flScore>=3  ? [I18N.t("Quase...","Quasi..."),I18N.t("Tenta mais uma vez!","Riprova!")] :
+                             [I18N.t(`O ${nome} bateu logo de cara.`,`${nome} si è schiantato subito.`),I18N.t("Cuidado com os canos!","Attenzione ai tubi!")];
   if(FL_BURST.complete && FL_BURST.naturalWidth>0){ flCtx.drawImage(FL_BURST, flW*.22-40, flBirdY-40, 80, 80); }
-  showOverlay("flappy","<img src='assets/img/icon-collision-burst.png' alt='' style='width:3rem;height:3rem;object-fit:contain'>","Game Over!",`${flScore} cano${flScore!==1?"s":""} · ${msgs[0]}`,
-    [{label:"Jogar de novo",fn:"startFlappy()"},{label:"Voltar",fn:"voltarMenu()"}]);
+  showOverlay("flappy","<img src='assets/img/icon-collision-burst.png' alt='' style='width:3rem;height:3rem;object-fit:contain'>","Game Over!",`${flScore} ${I18N.t(flScore!==1?"canos":"cano",flScore!==1?"tubi":"tubo")} · ${msgs[0]}`,
+    [{label:I18N.t("Jogar de novo","Gioca di nuovo"),fn:"startFlappy()"},{label:I18N.t("Voltar","Indietro"),fn:"voltarMenu()"}]);
   setTimeout(()=>{
     const pg=document.getElementById("flappy-postgame"); if(pg) pg.style.display="block";
     carregarTop10("flappy");
@@ -432,34 +432,34 @@ function salvarScore(jogo){
   const nome=(ni?.value||"").trim();
   const ptMap={flappy:flScore};
   const pts=ptMap[jogo]||0;
-  if(!nome){if(me){me.style.color="var(--terracotta)";me.textContent="Informe seu nome.";}if(ni)ni.focus();return;}
+  if(!nome){if(me){me.style.color="var(--terracotta)";me.textContent=I18N.t("Informe seu nome.","Inserisci il tuo nome.");}if(ni)ni.focus();return;}
   if(btn){btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';}
   fetch(JOGOS_API,{method:"POST",body:JSON.stringify({action:"score",jogo,nome,pontos:pts})})
     .then(r=>r.json()).then(j=>{
       if(j.sucesso){
-        if(me){me.style.color="var(--sage-dark)";me.textContent="Recorde salvo! 🏆";}
-        if(btn){btn.disabled=true;btn.textContent="Salvo ✓";}
+        if(me){me.style.color="var(--sage-dark)";me.textContent=I18N.t("Recorde salvo! 🏆","Record salvato! 🏆");}
+        if(btn){btn.disabled=true;btn.textContent=I18N.t("Salvo ✓","Salvato ✓");}
         if(ni)ni.disabled=true;
         carregarTop10(jogo);
       } else throw new Error();
     }).catch(()=>{
-      if(btn){btn.disabled=false;btn.textContent="Salvar";}
-      if(me){me.style.color="var(--terracotta)";me.textContent="Não conseguimos salvar.";}
+      if(btn){btn.disabled=false;btn.textContent=I18N.t("Salvar","Salva");}
+      if(me){me.style.color="var(--terracotta)";me.textContent=I18N.t("Não conseguimos salvar.","Non siamo riusciti a salvare.");}
     });
 }
 window.salvarScore = salvarScore;
 
 async function carregarTop10(jogo){
   const el=document.getElementById(jogo+"-top10"); if(!el) return;
-  const nomes={flappy:"🏆 Top 10 — Flappy"};
-  el.innerHTML=`<h3 class="top10__title">${nomes[jogo]||"Top 10"}</h3><p class="top10__loading">Carregando…</p>`;
+  const nomes={flappy:I18N.t("🏆 Top 10 — Flappy","🏆 Top 10 — Flappy")};
+  el.innerHTML=`<h3 class="top10__title">${nomes[jogo]||"Top 10"}</h3><p class="top10__loading">${I18N.t("Carregando…","Caricamento…")}</p>`;
   try{
     const r=await fetch(`${JOGOS_API}?action=top10&jogo=${jogo}`);
     const d=await r.json();
-    if(!d?.lista?.length){el.innerHTML=`<h3 class="top10__title">${nomes[jogo]}</h3><p class="top10__empty">Nenhum recorde ainda!</p>`;return;}
+    if(!d?.lista?.length){el.innerHTML=`<h3 class="top10__title">${nomes[jogo]}</h3><p class="top10__empty">${I18N.t("Nenhum recorde ainda!","Ancora nessun record!")}</p>`;return;}
     const m=["🥇","🥈","🥉"],cs=["top10__item--gold","top10__item--silver","top10__item--bronze"];
     el.innerHTML=`<h3 class="top10__title">${nomes[jogo]}</h3><ul class="top10__list">${d.lista.map((it,i)=>`<li class="top10__item ${cs[i]||""}"><span class="top10__pos">${m[i]||(i+1)}</span><span class="top10__name">${escJ(it.nome)}</span><span class="top10__pts">${it.pontos} pts</span></li>`).join("")}</ul>`;
-  } catch{el.innerHTML=`<h3 class="top10__title">${nomes[jogo]||"Top 10"}</h3><p class="top10__empty">Não foi possível carregar.</p>`;}
+  } catch{el.innerHTML=`<h3 class="top10__title">${nomes[jogo]||"Top 10"}</h3><p class="top10__empty">${I18N.t("Não foi possível carregar.","Non è stato possibile caricare.")}</p>`;}
 }
 
 async function carregarPreviewRecorde(){
@@ -469,8 +469,8 @@ async function carregarPreviewRecorde(){
       const r=await fetch(`${JOGOS_API}?action=top10&jogo=${j}`);
       const d=await r.json();
       if(d?.lista?.length){const t=d.lista[0];el.textContent=`🥇 ${t.nome} · ${t.pontos} pts`;}
-      else el.textContent="Seja o primeiro!";
-    } catch{el.textContent="Placar disponível";}
+      else el.textContent=I18N.t("Seja o primeiro!","Sii il primo!");
+    } catch{el.textContent=I18N.t("Placar disponível","Classifica disponibile");}
   }
 }
 
