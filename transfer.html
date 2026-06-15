@@ -198,6 +198,7 @@
 
   <script src="assets/js/app.js"></script>
   <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/delights.js"></script>
   <script>
     const TRANSFER_API = (typeof API_URL !== "undefined")
       ? API_URL
@@ -266,6 +267,11 @@
 
       if (!nome) {
         setTransferHint(I18N.t("Digite seu nome para buscar.", "Scrivi il tuo nome per cercare."), "info");
+        if (input) {
+          input.classList.remove("delights-shake");
+          requestAnimationFrame(() => input.classList.add("delights-shake"));
+          setTimeout(() => input.classList.remove("delights-shake"), 450);
+        }
         input?.focus();
         return;
       }
@@ -552,9 +558,30 @@
     };
 
     document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("transferNomeBusca")?.addEventListener("keydown", e => {
+      const input = document.getElementById("transferNomeBusca");
+      input?.addEventListener("keydown", e => {
         if (e.key === "Enter") window.buscarTransfer();
       });
+
+      if (input) {
+        let debounceTimer = null;
+        input.addEventListener("input", () => {
+          clearTimeout(debounceTimer);
+          const nome = input.value.trim();
+          if (nome.length < 2) {
+            window.delightsSetInputCheck?.(input, false);
+            return;
+          }
+          debounceTimer = setTimeout(async () => {
+            try {
+              const resp  = await fetch(`${TRANSFER_API}?nome=${encodeURIComponent(nome)}`);
+              const dados = await resp.json();
+              const temResultado = dados && (Array.isArray(dados) ? dados.length > 0 : true);
+              window.delightsSetInputCheck?.(input, !!temResultado);
+            } catch (e) { /* silencioso */ }
+          }, 450);
+        });
+      }
     });
 
   </script>
