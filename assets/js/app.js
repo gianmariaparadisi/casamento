@@ -193,13 +193,30 @@ function mascararTelefone(tel) {
   carrossel.addEventListener("mouseleave", iniciarTimer);
 
   let touchStartX = 0;
+  let touchStartTime = 0;
   carrossel.addEventListener("touchstart", e => {
     touchStartX = e.touches[0].clientX;
+    touchStartTime = Date.now();
     pararTimer();
   }, { passive: true });
   carrossel.addEventListener("touchend", e => {
     const dx = e.changedTouches[0].clientX - touchStartX;
-    if (Math.abs(dx) > 40) irPara(atual + (dx < 0 ? 1 : -1));
+    const dt = Math.max(1, Date.now() - touchStartTime);
+    const velocity = Math.abs(dx) / dt; // px/ms
+
+    const tentandoVoltar = dx > 40 && atual === 0;
+    const tentandoAvancar = dx < -40 && atual === slides.length - 1;
+
+    if (Math.abs(dx) > 40) {
+      if ((tentandoVoltar || tentandoAvancar) && velocity > 0.6) {
+        // swipe rápido no limite do carrossel: pequena vibração elástica
+        track.classList.remove("delights-elastic");
+        requestAnimationFrame(() => track.classList.add("delights-elastic"));
+        setTimeout(() => track.classList.remove("delights-elastic"), 420);
+      } else {
+        irPara(atual + (dx < 0 ? 1 : -1));
+      }
+    }
     iniciarTimer();
   }, { passive: true });
 
@@ -222,6 +239,11 @@ window.buscar = async function() {
 
   if (!nome) {
     setHint("Digite seu nome para buscar.", "info");
+    if (input) {
+      input.classList.remove("delights-shake");
+      requestAnimationFrame(() => input.classList.add("delights-shake"));
+      setTimeout(() => input.classList.remove("delights-shake"), 450);
+    }
     input?.focus();
     return;
   }
@@ -316,13 +338,13 @@ function selecionarConvidado(item, todosDaBusca) {
       ${semTelefone ? `
       <div class="rsvp__field">
         <label class="rsvp__label" for="telefoneCad"><img src="assets/img/icon-luggage-tag.png" alt="" class="rsvp__label-icon"> Seu telefone (WhatsApp)</label>
-        <input type="tel" id="telefoneCad" class="rsvp__input" placeholder="(11) 99999-0000" inputmode="tel" autocomplete="tel" />
+        <input type="tel" id="telefoneCad" class="rsvp__input" placeholder="(11) 99999-0000" inputmode="tel" autocomplete="tel" oninput="window.delightsSetInputCheck(this, this.value.replace(/\\D/g,'').length >= 10)" />
         <p class="rsvp__hint">Não encontramos um telefone cadastrado para você. Informe para facilitar o contato.</p>
       </div>
       ` : `
       <div class="rsvp__field">
         <label class="rsvp__label" for="ultimos4"><img src="assets/img/icon-luggage-tag.png" alt="" class="rsvp__label-icon"> Últimos 4 dígitos do seu telefone</label>
-        <input type="tel" id="ultimos4" class="rsvp__input" maxlength="4" inputmode="numeric" placeholder="0000" autocomplete="off" />
+        <input type="tel" id="ultimos4" class="rsvp__input" maxlength="4" inputmode="numeric" placeholder="0000" autocomplete="off" oninput="window.delightsSetInputCheck(this, this.value.replace(/\\D/g,'').length === 4)" />
         <p class="rsvp__hint">Confirme o número cadastrado para segurança.</p>
       </div>
       `}
@@ -764,9 +786,31 @@ function setHint(msg, tipo) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("nomeBusca")?.addEventListener("keydown", e => {
+  const nomeInput = document.getElementById("nomeBusca");
+  nomeInput?.addEventListener("keydown", e => {
     if (e.key === "Enter") window.buscar();
   });
+
+  // Validação em tempo real: mostra um check verde quando o nome digitado tem correspondência
+  if (nomeInput) {
+    let debounceTimer = null;
+    nomeInput.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      const nome = nomeInput.value.trim();
+      if (nome.length < 2) {
+        window.delightsSetInputCheck?.(nomeInput, false);
+        return;
+      }
+      debounceTimer = setTimeout(async () => {
+        try {
+          const resp  = await fetch(`${API_URL}?nome=${encodeURIComponent(nome)}`);
+          const dados = await resp.json();
+          const temResultado = dados && (Array.isArray(dados) ? dados.length > 0 : true);
+          window.delightsSetInputCheck?.(nomeInput, !!temResultado);
+        } catch (e) { /* silencioso */ }
+      }, 450);
+    });
+  }
 });
 
 /* ══════════════════════════════════════════════════════════
@@ -904,10 +948,13 @@ window.copiarPix = async function() {
   try {
     await navigator.clipboard.writeText(code.textContent.trim());
     const btn = document.querySelector('[onclick="copiarPix()"]');
-    const orig = btn.textContent;
-    btn.textContent = "Copiado!";
+    const orig = btn.innerHTML;
+    const label = window.I18N && window.I18N.lang === "it" ? "Copiato!" : "Copiado!";
+    btn.innerHTML = `<img src="assets/img/icon-check-decorative.png" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:middle;margin-right:.3em">${label}`;
     btn.style.color = "var(--sage-dark)";
-    setTimeout(() => { btn.textContent = orig; btn.style.color = ""; }, 2000);
+    btn.classList.remove("delights-bounce");
+    requestAnimationFrame(() => btn.classList.add("delights-bounce"));
+    setTimeout(() => { btn.innerHTML = orig; btn.style.color = ""; btn.classList.remove("delights-bounce"); }, 2000);
   } catch {
     alert("Selecione e copie manualmente.");
   }
