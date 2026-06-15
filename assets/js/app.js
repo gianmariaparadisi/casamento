@@ -262,6 +262,7 @@ window.buscar = async function() {
       const card = document.createElement("div");
       card.className = "convidado__card";
       card.innerHTML = `
+        <img class="convidado__avatar" src="assets/img/${avatarParaNome(item.nome)}" alt="">
         <div class="convidado__info">
           <p class="convidado__nome">${escHtml(item.nome)} ${statusLabel}</p>
           ${telMascarado
@@ -301,30 +302,33 @@ function selecionarConvidado(item, todosDaBusca) {
   resultado.innerHTML = `
     <div class="rsvp__form" id="rsvpForm">
 
-      <div style="padding:.75rem 1rem;background:var(--bg-green);border-radius:var(--radius);border:1px solid var(--line-green)">
-        <p style="font-size:.85rem;color:var(--sage-dark)">
-          Confirmando: <strong>${escHtml(item.nome)}</strong>
-          ${telMascarado ? "· Tel: " + escHtml(telMascarado) : ""}
-        </p>
-        <button type="button" style="font-size:.75rem;color:var(--sage);text-decoration:underline;margin-top:.25rem;background:none;border:none;cursor:pointer" onclick="voltarBusca()">← Buscar outro nome</button>
+      <div style="padding:.75rem 1rem;background:var(--bg-green);border-radius:var(--radius);border:1px solid var(--line-green);display:flex;align-items:center;gap:.75rem">
+        <img src="assets/img/${avatarParaNome(item.nome)}" alt="" style="width:2.25rem;height:2.25rem;object-fit:contain;flex-shrink:0">
+        <div>
+          <p style="font-size:.85rem;color:var(--sage-dark)">
+            Confirmando: <strong>${escHtml(item.nome)}</strong>
+            ${telMascarado ? "· Tel: " + escHtml(telMascarado) : ""}
+          </p>
+          <button type="button" style="font-size:.75rem;color:var(--sage);text-decoration:underline;margin-top:.25rem;background:none;border:none;cursor:pointer" onclick="voltarBusca()">← Buscar outro nome</button>
+        </div>
       </div>
 
       ${semTelefone ? `
       <div class="rsvp__field">
-        <label class="rsvp__label" for="telefoneCad">Seu telefone (WhatsApp)</label>
+        <label class="rsvp__label" for="telefoneCad"><img src="assets/img/icon-luggage-tag.png" alt="" class="rsvp__label-icon"> Seu telefone (WhatsApp)</label>
         <input type="tel" id="telefoneCad" class="rsvp__input" placeholder="(11) 99999-0000" inputmode="tel" autocomplete="tel" />
         <p class="rsvp__hint">Não encontramos um telefone cadastrado para você. Informe para facilitar o contato.</p>
       </div>
       ` : `
       <div class="rsvp__field">
-        <label class="rsvp__label" for="ultimos4">Últimos 4 dígitos do seu telefone</label>
+        <label class="rsvp__label" for="ultimos4"><img src="assets/img/icon-luggage-tag.png" alt="" class="rsvp__label-icon"> Últimos 4 dígitos do seu telefone</label>
         <input type="tel" id="ultimos4" class="rsvp__input" maxlength="4" inputmode="numeric" placeholder="0000" autocomplete="off" />
         <p class="rsvp__hint">Confirme o número cadastrado para segurança.</p>
       </div>
       `}
 
       <div class="rsvp__field">
-        <label class="rsvp__label" for="emailRsvp">Seu e-mail</label>
+        <label class="rsvp__label" for="emailRsvp"><img src="assets/img/icon-envelope.png" alt="" class="rsvp__label-icon"> Seu e-mail</label>
         <input type="email" id="emailRsvp" class="rsvp__input" placeholder="seuemail@exemplo.com" autocomplete="email" />
         <p class="rsvp__hint">Enviaremos a confirmação e o link para alterar depois, se precisar.</p>
       </div>
@@ -351,15 +355,16 @@ function selecionarConvidado(item, todosDaBusca) {
           ${grupo.map(p => `
             <label class="grupo__membro">
               <input type="checkbox" name="grupo" value="${escHtml(p.rowId)}" data-nome="${escHtml(p.nome)}" />
+              <img class="grupo__membro-avatar" src="assets/img/${avatarParaNome(p.nome)}" alt="">
               <span class="grupo__membro-nome">${escHtml(p.nome)}</span>
-              <div class="rsvp__status" role="group" style="margin-top:.35rem;margin-left:.25rem">
-                <label class="rsvp__status-option" style="font-size:.8rem">
+              <div class="rsvp__status rsvp__status--sm" role="group" style="margin-top:.35rem;margin-left:.25rem">
+                <label class="rsvp__status-option rsvp__status-option--sm" style="font-size:.8rem">
                   <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="SIM" checked />
-                  ✓ Confirmado
+                  <img src="assets/img/icon-check-decorative.png" alt=""> Confirmado
                 </label>
-                <label class="rsvp__status-option" style="font-size:.8rem">
+                <label class="rsvp__status-option rsvp__status-option--sm" style="font-size:.8rem">
                   <input type="radio" name="grupoStatus_${escHtml(p.rowId)}" value="NAO" />
-                  ✕ Não poderá comparecer
+                  <img src="assets/img/icon-cancel-decorative.png" alt=""> Não poderá comparecer
                 </label>
               </div>
               ${p.status ? `<span class="grupo__membro-status">${escHtml(p.status)}</span>` : ""}
@@ -485,7 +490,7 @@ function mostrarSucessoRsvp(email, status, grupoNomes) {
 
   resultado.innerHTML = `
     <div class="rsvp__sucesso">
-      <div class="rsvp__sucesso-icon">${confirmado ? "❤️" : "💌"}</div>
+      <div class="rsvp__sucesso-icon">${confirmado ? "<img src='assets/img/icon-heart-full.png' alt=''>" : "<img src='assets/img/icon-rsvp-envelope.png' alt=''>"}</div>
       <h3>${confirmado ? "Presença confirmada!" : "Recebemos sua resposta."}</h3>
       <p>${confirmado ? "Mal podemos esperar para te ver lá!" : "Sentiremos sua falta. Obrigado por avisar."}</p>
       ${grupoMsg}
@@ -520,6 +525,48 @@ function mostrarSucessoRsvp(email, status, grupoNomes) {
       </div>
     </div>
   `;
+  if (confirmado) celebrarConfirmacao();
+}
+
+/* Chuva de confete + corações para celebrar uma confirmação de presença */
+function celebrarConfirmacao(){
+  const wrap = document.createElement("div");
+  wrap.style.position = "fixed";
+  wrap.style.inset = "0";
+  wrap.style.pointerEvents = "none";
+  wrap.style.zIndex = "9999";
+  wrap.style.overflow = "hidden";
+  const total = 40;
+  for(let i=0;i<total;i++){
+    const isHeart = i % 3 === 0;
+    const img = document.createElement("img");
+    if(isHeart){
+      img.src = "assets/img/icon-heart-full.png";
+    } else {
+      const piece = String((i % 12) + 1).padStart(2,"0");
+      img.src = `assets/img/confetti-piece-${piece}.png`;
+    }
+    img.alt = "";
+    img.style.position = "absolute";
+    img.style.top = "-10%";
+    img.style.left = (Math.random()*100) + "vw";
+    const size = isHeart ? (20 + Math.random()*16) : (16 + Math.random()*18);
+    img.style.width = size + "px";
+    img.style.height = size + "px";
+    img.style.objectFit = "contain";
+    const duration = 2.6 + Math.random()*2;
+    const delay = Math.random()*0.7;
+    img.style.animation = `confettiFall ${duration}s linear ${delay}s forwards`;
+    wrap.appendChild(img);
+  }
+  if(!document.getElementById("confettiFallKeyframes")){
+    const style = document.createElement("style");
+    style.id = "confettiFallKeyframes";
+    style.textContent = `@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(360deg);opacity:.85;}}`;
+    document.head.appendChild(style);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(() => wrap.remove(), 5500);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -739,6 +786,7 @@ window.abrirModalCustom = function() {
 
   conteudo.innerHTML = `
     <p class="modal__eyebrow">Presente personalizado</p>
+    <img src="assets/img/icon-gift-box.png" alt="" class="modal__icon-hero">
     <h2 class="modal__titulo" id="modalTitulo">Crie o seu presente</h2>
     <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem">Escolha um nome, valor e foto (opcional).</p>
 
@@ -794,7 +842,7 @@ window.confirmarCustom = function() {
     return;
   }
 
-  renderizarModalPresente(nome, valor, "Presente personalizado por você ❤️");
+  renderizarModalPresente(nome, valor, "Presente personalizado por você");
 };
 
 function renderizarModalPresente(nome, valor, desc) {
@@ -805,12 +853,13 @@ function renderizarModalPresente(nome, valor, desc) {
 
   conteudo.innerHTML = `
     <p class="modal__eyebrow">Presente</p>
+    <img src="assets/img/icon-gift-box.png" alt="" class="modal__icon-hero">
     <h2 class="modal__titulo" id="modalTitulo">${escHtml(nome)}</h2>
     <p class="modal__valor">R$ ${escHtml(valor)}</p>
     <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem">${escHtml(desc)}</p>
 
     <div class="pix__box">
-      <p class="pix__label">${isEmail ? "Chave Pix (e-mail)" : "Pix copia-e-cola"}</p>
+      <p class="pix__label"><img src="assets/img/icon-pix.png" alt="">${isEmail ? "Chave Pix (e-mail)" : "Pix copia-e-cola"}</p>
       <p class="pix__code" id="pixCode">${escHtml(pixCode)}</p>
       <button class="btn btn--outline-green btn--sm" type="button" onclick="copiarPix()">${isEmail ? "Copiar chave" : "Copiar código Pix"}</button>
     </div>
@@ -821,16 +870,16 @@ function renderizarModalPresente(nome, valor, desc) {
         <input type="text" id="presenteNome" class="modal__input" autocomplete="name" placeholder="Como prefere ser chamado(a)" />
       </div>
       <div class="modal__field">
-        <label class="modal__label" for="presenteEmail">Seu e-mail</label>
+        <label class="modal__label" for="presenteEmail"><img src="assets/img/icon-envelope.png" alt="" class="modal__label-icon">Seu e-mail</label>
         <input type="email" id="presenteEmail" class="modal__input" autocomplete="email" placeholder="seuemail@exemplo.com" />
       </div>
       <div class="modal__field">
-        <label class="modal__label" for="presenteMensagem">Mensagem (opcional)</label>
+        <label class="modal__label" for="presenteMensagem"><img src="assets/img/icon-rsvp-envelope.png" alt="" class="modal__label-icon">Mensagem (opcional)</label>
         <textarea id="presenteMensagem" class="modal__textarea" placeholder="Deixe uma mensagem para os noivos…"></textarea>
       </div>
       <div id="presenteErro"></div>
       <button class="btn btn--terra" type="button" id="btnPresente" onclick="enviarPresente('${escAttr(nome)}','${escAttr(valor)}')">
-        Já fiz o Pix ❤️
+        Já fiz o Pix <img src="assets/img/icon-heart-full.png" alt="" class="modal__icon-inline" style="margin-right:0;margin-left:.25rem">
       </button>
     </div>
   `;
@@ -895,18 +944,18 @@ window.enviarPresente = async function(nome, valor) {
     if (json.sucesso) {
       document.getElementById("modalConteudo").innerHTML = `
         <div class="modal__sucesso">
-          <div class="modal__sucesso-icon">🎁</div>
+          <div class="modal__sucesso-icon"><img src="assets/img/icon-gift-box.png" alt=""></div>
           <h3>Presente registrado!</h3>
           <p>Obrigado, ${escHtml(nomeRem)}!<br>Enviamos uma cópia para <strong>${escHtml(email)}</strong>.</p>
           <p class="mt-2" style="font-size:.78rem;color:var(--sage)">
-            Não chegou? Confira spam e promoções.<br>
-            Dúvidas? <a href="mailto:${EMAIL_CONTATO}" style="color:var(--terracotta)">${EMAIL_CONTATO}</a>
+            Não chegou? Confira spam e promoções.
           </p>
         </div>`;
+      celebrarConfirmacao();
     } else { throw new Error(json.erro); }
   } catch {
     btn.disabled = false;
-    btn.innerHTML = "Já fiz o Pix ❤️";
+    btn.innerHTML = "Já fiz o Pix <img src='assets/img/icon-heart-full.png' alt='' class='modal__icon-inline' style='margin-right:0;margin-left:.25rem'>";
     erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Não conseguimos registrar. Tente novamente.</p>`;
   }
 };
@@ -920,3 +969,17 @@ function escHtml(str) {
     .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 function escAttr(str) { return String(str || "").replace(/'/g, "\\'"); }
+
+/* Avatar decorativo determinístico por nome — mesma pessoa sempre recebe o mesmo ícone */
+const AVATAR_POOL = [
+  "icon-sunglasses.png", "icon-flower-crown.png", "icon-bouquet-tall.png",
+  "icon-cocktail.png", "icon-bell.png", "icon-laurel.png",
+  "icon-sparkle.png", "icon-gift-box-sage.png", "icon-palm.png",
+  "icon-wine.png", "icon-music.png", "icon-string-lights.png"
+];
+function avatarParaNome(nome) {
+  const s = String(nome || "");
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+  return AVATAR_POOL[hash % AVATAR_POOL.length];
+}
