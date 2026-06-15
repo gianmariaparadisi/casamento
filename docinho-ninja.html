@@ -174,7 +174,7 @@
     const scoreEl=document.getElementById("score"), livesEl=document.getElementById("lives"), timeEl=document.getElementById("time");
     const startModal=document.getElementById("startModal"), endModal=document.getElementById("endModal"), endTitle=document.getElementById("endTitle"), endText=document.getElementById("endText"), endIcon=document.getElementById("endIcon");
     const W=620,H=760; let raf,state="idle",items=[],halves=[],particles=[],slashes=[],score=0,lives=3,timeLeft=30,last=0,spawnT=0,combo=0;
-    const sweets=["brigadeiro","eclair","tart","macaron","truffle","cake","golden"], dangers=["glass","plate"];
+    const sweets=["brigadeiro","eclair","tart","macaron","truffle","cake","golden"], dangers=["glass","plate","gianface","tiagoface"];
     function fitCanvas(){const dpr=Math.min(devicePixelRatio||1,2.5);canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width="100%";canvas.style.aspectRatio=W+"/"+H;ctx.setTransform(dpr,0,0,dpr,0,0);} fitCanvas();
     function reset(){items=[];halves=[];particles=[];slashes=[];score=0;lives=3;timeLeft=30;spawnT=0;combo=0;state="ready";updateHud();draw();endModal.hidden=true;}
     function start(){reset();startModal.hidden=true;state="play";last=performance.now();lockScroll();raf=requestAnimationFrame(loop);}
@@ -208,6 +208,8 @@
       golden:     ['sweet-golden.png'],
       glass:      ['danger-glass-01.png','danger-glass-02.png'],
       plate:      ['danger-plate-01.png','danger-plate-02.png'],
+      gianface:   ['gianface01.png','gianface02.png','gianface03.png','gianface04.png','gianface05.png','gianface06.png','gianface07.png'],
+      tiagoface:  ['tiagoface01.png','tiagoface02.png','tiagoface03.png','tiagoface04.png','tiagoface05.png','tiagoface06.png','tiagoface07.png'],
     };
     Object.entries(_sweetMap).forEach(([k,files])=>{
       _sweetImgs[k]=files.map(name=>{const i=new Image();i.src=`assets/img/${name}`;return i;});
@@ -228,6 +230,27 @@
       ctx.rotate(rot);
       ctx.scale(SWEET_SCALE, SWEET_SCALE);
       if(half){ctx.beginPath();ctx.rect(half<0?-80:-1,-80,81,160);ctx.clip();}
+
+      // Rostos do Gian/Tiago — perigo especial, desenhados em círculo com aro de alerta
+      if(type==="gianface" || type==="tiagoface"){
+        const img = _getSweetImg(type);
+        const fr = 32;
+        if(img && img.complete && img.naturalWidth>0){
+          ctx.save();
+          ctx.beginPath(); ctx.arc(0,0,fr,0,Math.PI*2); ctx.clip();
+          ctx.drawImage(img,-fr,-fr,fr*2,fr*2);
+          ctx.restore();
+        } else {
+          ctx.fillStyle = type==="tiagoface" ? "#B87B3E" : "#7A9B6E";
+          ctx.beginPath(); ctx.arc(0,0,fr,0,Math.PI*2); ctx.fill();
+        }
+        // aro de alerta (não corte!)
+        ctx.strokeStyle = "#B35A4C"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(0,0,fr+2,0,Math.PI*2); ctx.stroke();
+        if(half){ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-42);ctx.lineTo(0,42);ctx.stroke();}
+        ctx.restore();
+        return;
+      }
 
       const img = _getSweetImg(type);
       if(img && img.complete && img.naturalWidth>0){
