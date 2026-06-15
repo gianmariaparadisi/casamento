@@ -143,13 +143,14 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .nav__dropdown-menu a:hover { background: var(--bg-green); color: var(--sage-dark); }
 
 @media (max-width: 900px) {
+  .nav__dropdown { width: 100%; }
   .nav__dropdown-menu {
     position: static; transform: none; opacity: 1; pointer-events: auto;
-    box-shadow: none; border: none; padding: 0 0 0 1rem; margin-top: .5rem;
-    display: none; min-width: 0;
+    box-shadow: none; border: none; padding: .25rem 0 0 1.6rem; margin-top: .5rem;
+    display: none; min-width: 0; width: 100%;
   }
   .nav__dropdown.open .nav__dropdown-menu { display: flex; }
-  .nav__dropdown-toggle { font-size: .95rem; letter-spacing: normal; text-transform: none; }
+  .nav__dropdown-toggle { font-size: .95rem; letter-spacing: normal; text-transform: none; width: 100%; justify-content: flex-start; }
   .nav__dropdown-menu a { font-size: .85rem; padding: .4rem 0; }
 }
 
@@ -855,6 +856,9 @@ details[open] .faq__question::after { transform: rotate(45deg); }
   opacity: 1;
   color: var(--sage-dark) !important;
   transform: rotate(15deg);
+}
+@media (max-width: 768px) {
+  .nav__key img { width: 50px !important; height: 50px !important; }
 }
 
 /* ── TOGGLE DE IDIOMA (PT/IT) ─────────────────────────────── */
