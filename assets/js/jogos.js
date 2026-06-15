@@ -177,7 +177,7 @@ let flBirdY=0, flBirdVY=0, flPipes=[], flTick=0;
 let flPersonagem = "gian";
 let flFaceIdx = 0;
 
-const FL_GRAVITY=0.42, FL_FLAP=-8.5, FL_PIPE_W=58, FL_GAP=160, FL_SPD=2.8, FL_INTV=95;
+const FL_GRAVITY=0.42, FL_FLAP=-8.5, FL_PIPE_W=58, FL_GAP=205, FL_SPD=2.8, FL_INTV=95;
 const FL_BIRD_R = 32; // raio grande e goofy!
 
 function resetFlappy() {
