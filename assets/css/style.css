@@ -850,6 +850,26 @@ details[open] .faq__question::after { transform: rotate(45deg); }
   transform: rotate(15deg);
 }
 
+/* ── TOGGLE DE IDIOMA (PT/IT) ─────────────────────────────── */
+.nav__lang {
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-body); font-size: .68rem; font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--sage-dark) !important;
+  border: 1.5px solid var(--sage); border-radius: 999px;
+  width: 2rem; height: 2rem;
+  opacity: .8;
+  transition: opacity var(--transition), background var(--transition), color var(--transition) !important;
+}
+.nav__lang:hover {
+  opacity: 1;
+  background: var(--sage);
+  color: var(--white) !important;
+}
+@media (max-width: 860px) {
+  .nav__lang { margin-top: .5rem; width: auto; height: auto; padding: .4rem .9rem; border-radius: var(--radius); }
+}
+
 /* ══════════════════════════════════════════════════════════
    FILTRO GLOBAL DE IMAGENS — Warm Matte
    Aplica em todas as fotos do site de uma vez
