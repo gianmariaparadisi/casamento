@@ -76,6 +76,9 @@
         position: absolute; top: -10%; object-fit: contain;
         animation-name: delightsFall; animation-timing-function: linear; animation-fill-mode: forwards;
       }
+      .delights-trail-piece {
+        position: fixed; pointer-events: none; z-index: 9998;
+      }
       .delights-pop {
         position: fixed; pointer-events: none; z-index: 9999;
         animation: delightsPop .9s ease-out forwards;
@@ -216,23 +219,25 @@
   }
 
   // Pequenos corações saindo do ponto clicado (efeito "double-tap like")
-  function spawnHeartFlash(x, y) {
+  function spawnHeartFlash(x, y, opts) {
     injectKeyframesOnce();
-    const n = 5;
-    for (let i = 0; i < n; i++) {
+    const { count = 5, spread = 60 } = opts || {};
+    for (let i = 0; i < count; i++) {
       const img = document.createElement("img");
       img.src = "assets/img/icon-heart-full.png";
       img.alt = "";
       img.className = "delights-float-heart";
-      const offsetX = (Math.random() - 0.5) * 60;
-      const size = 16 + Math.random() * 14;
+      const offsetX = (Math.random() - 0.5) * spread;
+      const offsetYStart = (Math.random() - 0.5) * (spread * 0.4);
+      const size = 14 + Math.random() * 16;
       img.style.left = (x + offsetX) + "px";
-      img.style.top = y + "px";
+      img.style.top = (y + offsetYStart) + "px";
       img.style.width = size + "px";
       img.style.height = size + "px";
-      img.style.animationDelay = (Math.random() * 0.15) + "s";
+      img.style.animationDelay = (Math.random() * 0.35) + "s";
+      img.style.animationDuration = (0.9 + Math.random() * 0.5) + "s";
       document.body.appendChild(img);
-      setTimeout(() => img.remove(), 1300);
+      setTimeout(() => img.remove(), 1700);
     }
   }
   window.delightsHeartFlash = spawnHeartFlash;
@@ -540,7 +545,7 @@
 
       if (kind === "heart") {
         const p = getPointerXY(e);
-        spawnHeartFlash(p.x, p.y);
+        spawnHeartFlash(p.x, p.y, { count: 50, spread: 160 });
       } else {
         const rect = img.getBoundingClientRect();
         const x = rect.left + rect.width / 2;
@@ -592,6 +597,80 @@
         }
       });
     });
+  }
+
+  /* ---------- 5d. Confete ao clicar em QUALQUER lugar do site ---------- */
+  function initAnywhereConfetti() {
+    document.addEventListener("click", (e) => {
+      // Não duplica em imagens (já têm seus próprios efeitos) nem em
+      // controles interativos (botões, links, inputs, selects) para não
+      // interferir no feedback normal da interface.
+      if (e.target.closest("img, a, button, input, select, textarea, label, .delights-scrolltop")) return;
+
+      const p = getPointerXY(e);
+      confettiBurst({ count: 10, originX: p.x, originY: p.y, spread: 70 });
+    });
+  }
+
+  /* ---------- 5e. Arrastar/segurar → chuvinha de confete seguindo o dedo/cursor ---------- */
+  function initDragConfettiTrail() {
+    injectKeyframesOnce();
+    let dragging = false;
+    let lastSpawn = 0;
+    let lastPos = { x: 0, y: 0 };
+
+    function spawnTrailPiece(x, y) {
+      const img = document.createElement("img");
+      const pieces = ["assets/img/confetti-piece-01.png","assets/img/confetti-piece-04.png",
+                       "assets/img/confetti-piece-06.png","assets/img/confetti-piece-09.png",
+                       "assets/img/confetti-piece-11.png","assets/img/icon-sparkle.png"];
+      img.src = pieces[Math.floor(Math.random() * pieces.length)];
+      img.alt = "";
+      img.className = "delights-confetti-piece delights-trail-piece";
+      const size = 10 + Math.random() * 14;
+      img.style.width = size + "px";
+      img.style.height = size + "px";
+      img.style.left = (x + (Math.random() - 0.5) * 24) + "px";
+      img.style.top = (y + (Math.random() - 0.5) * 24) + "px";
+      img.style.animationDuration = (1.4 + Math.random() * 1) + "s";
+      document.body.appendChild(img);
+      setTimeout(() => img.remove(), 2600);
+    }
+
+    function maybeSpawn(x, y) {
+      const now = Date.now();
+      if (now - lastSpawn < 60) return; // limita a frequência
+      lastSpawn = now;
+      spawnTrailPiece(x, y);
+      if (Math.random() < 0.4) spawnTrailPiece(x, y); // às vezes spawna 2
+    }
+
+    function start(e) {
+      // evita iniciar sobre controles interativos (não interfere com botões etc.)
+      if (e.target.closest("a, button, input, select, textarea, label")) return;
+      dragging = true;
+      const p = getPointerXY(e);
+      lastPos = p;
+      maybeSpawn(p.x, p.y);
+    }
+    function move(e) {
+      if (!dragging) return;
+      const p = getPointerXY(e);
+      lastPos = p;
+      maybeSpawn(p.x, p.y);
+    }
+    function end() {
+      dragging = false;
+    }
+
+    document.addEventListener("mousedown", start);
+    document.addEventListener("mousemove", move, { passive: true });
+    document.addEventListener("mouseup", end);
+
+    document.addEventListener("touchstart", start, { passive: true });
+    document.addEventListener("touchmove", move, { passive: true });
+    document.addEventListener("touchend", end, { passive: true });
+    document.addEventListener("touchcancel", end, { passive: true });
   }
 
   /* ---------- 6. Long-press / clique-e-segure em fotos ---------- */
@@ -752,6 +831,8 @@
     initLogoPartyMode();
     initToastClink();
     initImageClicks();
+    initAnywhereConfetti();
+    initDragConfettiTrail();
     initLongPressGlow();
     initShakeDetection();
     initPullToRefresh();
