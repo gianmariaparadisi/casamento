@@ -81,7 +81,7 @@
         animation: delightsPop .9s ease-out forwards;
       }
       .delights-float-heart {
-        position: absolute; pointer-events: none; z-index: 30;
+        position: fixed; pointer-events: none; z-index: 9999;
         animation: delightsFloatHeart 1.1s ease-out forwards;
       }
       .delights-shake { animation: delightsShake .4s ease-in-out; }
@@ -237,6 +237,17 @@
   }
   window.delightsHeartFlash = spawnHeartFlash;
 
+  // Coordenadas do ponteiro, funciona tanto para click (mouse/touch) quanto
+  // para eventos touch puros, caso necessário
+  function getPointerXY(e) {
+    if (typeof e.clientX === "number" && (e.clientX !== 0 || e.clientY !== 0)) {
+      return { x: e.clientX, y: e.clientY };
+    }
+    const touch = (e.changedTouches && e.changedTouches[0]) || (e.touches && e.touches[0]);
+    if (touch) return { x: touch.clientX, y: touch.clientY };
+    return { x: e.clientX || 0, y: e.clientY || 0 };
+  }
+
   /* ---------- 1. Passarinho cruzando a tela (raro) ---------- */
   function maybeFlyBird() {
     // ~1.5% de chance por carregamento de página
@@ -303,6 +314,73 @@
     }, { passive: true });
 
     resetIdle();
+  }
+
+  /* ---------- 2b. Pequenas partículas ao rolar (mobile-friendly) ---------- */
+  function initScrollDelights() {
+    injectKeyframesOnce();
+    let lastY = window.scrollY;
+    let lastSpawn = 0;
+    const particles = ["assets/img/icon-leaf-branch.png", "assets/img/icon-sparkle.png", "assets/img/confetti-piece-03.png"];
+
+    window.addEventListener("scroll", () => {
+      const now = Date.now();
+      const currentY = window.scrollY;
+      const delta = Math.abs(currentY - lastY);
+      lastY = currentY;
+
+      // só dispara ocasionalmente, em scrolls com algum "impulso", com intervalo mínimo
+      if (delta < 18) return;
+      if (now - lastSpawn < 900) return;
+      if (Math.random() > 0.18) return; // raro: ~18% dos scrolls "fortes"
+      lastSpawn = now;
+
+      const src = particles[Math.floor(Math.random() * particles.length)];
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = "";
+      img.style.position = "fixed";
+      img.style.left = (10 + Math.random() * 80) + "vw";
+      img.style.top = (15 + Math.random() * 50) + "vh";
+      const size = 16 + Math.random() * 14;
+      img.style.width = size + "px";
+      img.style.height = size + "px";
+      img.style.opacity = ".6";
+      img.style.pointerEvents = "none";
+      img.style.zIndex = "40";
+      img.style.transition = "opacity 1.1s ease, transform 1.1s ease";
+      img.style.transform = "translateY(0) rotate(0deg) scale(1)";
+      document.body.appendChild(img);
+      requestAnimationFrame(() => {
+        img.style.opacity = "0";
+        img.style.transform = `translateY(${30 + Math.random()*30}px) rotate(${(Math.random()-0.5)*120}deg) scale(.7)`;
+      });
+      setTimeout(() => img.remove(), 1200);
+    }, { passive: true });
+  }
+
+  /* ---------- 2c. Brilho sutil nos divisores ao entrarem na tela ---------- */
+  function initDividerShimmer() {
+    injectKeyframesOnce();
+    const dividers = document.querySelectorAll(".divider-wrap img, .flourish-wrap img");
+    if (!dividers.length || !("IntersectionObserver" in window)) return;
+    const seen = new WeakSet();
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !seen.has(entry.target)) {
+          seen.add(entry.target);
+          const el = entry.target;
+          el.style.transition = "opacity .9s ease, filter .9s ease";
+          const originalOpacity = el.style.opacity || "";
+          el.style.filter = "drop-shadow(0 0 0 transparent)";
+          requestAnimationFrame(() => {
+            el.style.filter = "drop-shadow(0 0 10px rgba(212,175,90,.45))";
+            setTimeout(() => { el.style.filter = ""; }, 900);
+          });
+        }
+      });
+    }, { threshold: 0.4 });
+    dividers.forEach(d => observer.observe(d));
   }
 
   /* ---------- 3. Confete em marcos do countdown ---------- */
@@ -428,35 +506,66 @@
   function initImageClicks() {
     // Fotos do site (carrossel, galeria, hero) → flash de corações
     document.querySelectorAll(".site-img, .carrossel__slide img, .photo-strip__item img, .photo-pair__item img").forEach(img => {
-      img.style.cursor = "pointer";
-      img.addEventListener("click", (e) => {
-        spawnHeartFlash(e.clientX, e.clientY);
-      });
+      img.dataset.delightsBound = "1";
+      img.dataset.delightsKind = "heart";
     });
 
     // Ícones decorativos pequenos (não dentro de botões/links com função própria)
     document.querySelectorAll("img[src*='assets/img/icon-']").forEach(img => {
-      // evita interferir em ícones dentro de botões/links (já têm sua própria ação)
       if (img.closest("a, button")) return;
       if (img.dataset.delightsBound) return;
       img.dataset.delightsBound = "1";
-      img.style.cursor = "pointer";
-      img.addEventListener("click", (e) => {
+      img.dataset.delightsKind = "pop";
+    });
+
+    // Demais imagens estáticas também recebem reação leve
+    document.querySelectorAll("img").forEach(img => {
+      if (img.dataset.delightsBound) return;
+      if (img.closest("a, button")) return;
+      img.dataset.delightsBound = "1";
+      img.dataset.delightsKind = "pop";
+    });
+
+    // Handler delegado em document: cobre tanto as imagens já marcadas quanto
+    // qualquer imagem adicionada dinamicamente depois (resultados de busca,
+    // modal de presentes, avatares etc.)
+    document.addEventListener("click", (e) => {
+      const img = e.target.closest("img");
+      if (!img) return;
+      if (img.closest("a, button")) return;
+      if (img.dataset.delightsNoReact) return;
+
+      const kind = img.dataset.delightsKind ||
+        (img.matches(".site-img, .carrossel__slide img, .photo-strip__item img, .photo-pair__item img") ? "heart" : "pop");
+
+      if (kind === "heart") {
+        const p = getPointerXY(e);
+        spawnHeartFlash(p.x, p.y);
+      } else {
         const rect = img.getBoundingClientRect();
         const x = rect.left + rect.width / 2;
         const y = rect.top + rect.height / 2;
-        const pieces = ["assets/img/confetti-piece-01.png","assets/img/confetti-piece-05.png","assets/img/icon-leaf-branch.png"];
+        const pieces = ["assets/img/confetti-piece-02.png","assets/img/confetti-piece-07.png","assets/img/icon-leaf-branch.png","assets/img/icon-sparkle.png"];
         const src = pieces[Math.floor(Math.random() * pieces.length)];
-        spawnPop(x, y, src, 24);
-      });
+        spawnPop(x, y, src, 22);
+      }
     });
+
+    // Aplica cursor pointer via CSS para todas as imagens não-interativas
+    if (!document.getElementById("delightsCursorStyle")) {
+      const style = document.createElement("style");
+      style.id = "delightsCursorStyle";
+      style.textContent = `img:not(a img):not(button img) { cursor: pointer; }`;
+      document.head.appendChild(style);
+    }
   }
 
   /* ---------- 5b. Tap no ícone de welcome drink → tilintar ---------- */
   function initToastClink() {
     document.querySelectorAll("[data-delights-toast]").forEach(img => {
       img.style.cursor = "pointer";
-      img.dataset.delightsBound = "1"; // evita o handler genérico de confete
+      img.dataset.delightsBound = "1";
+      img.dataset.delightsNoReact = "1"; // evita o handler genérico delegado de confete
       img.addEventListener("click", () => {
         img.classList.remove("delights-toast-clink");
         requestAnimationFrame(() => img.classList.add("delights-toast-clink"));
@@ -619,6 +728,11 @@
 
     btn.addEventListener("click", () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
+      btn.classList.remove("delights-bounce");
+      requestAnimationFrame(() => btn.classList.add("delights-bounce"));
+      setTimeout(() => btn.classList.remove("delights-bounce"), 550);
+      const rect = btn.getBoundingClientRect();
+      spawnPop(rect.left + rect.width / 2, rect.top + rect.height / 2, "assets/img/icon-leaf-branch.png", 22);
     });
 
     window.addEventListener("scroll", () => {
@@ -631,6 +745,8 @@
     injectKeyframesOnce();
     maybeFlyBird();
     initIdleLeafTrail();
+    initScrollDelights();
+    initDividerShimmer();
     initCountdownMilestones();
     initCountdownTapBounce();
     initLogoPartyMode();
