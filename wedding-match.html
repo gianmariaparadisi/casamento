@@ -9,81 +9,71 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="assets/css/style.css"/>
   <style>
-    :root{--game-ink:#2A2820;--game-muted:#6C6258;--game-line:#D8CDBC;--game-cream:#FBF7EF;--game-beige:#F2E7D7;--game-gold:#C8A050;--game-wine:#8E2738;--game-red:#B5423A;}
-    body.game-page{min-height:100svh;background:radial-gradient(circle at 12% 0%,rgba(255,255,255,.92),transparent 30rem),radial-gradient(circle at 84% 16%,rgba(246,214,151,.36),transparent 28rem),linear-gradient(180deg,#FBF7EF 0%,#F2E7D7 52%,#EFE1D0 100%);color:var(--game-ink);}
-    .game-nav{position:sticky;top:0;z-index:20;background:rgba(251,247,239,.9);backdrop-filter:blur(14px);border-bottom:1px solid rgba(216,205,188,.75);}
-    .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:1rem;}
-    .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.86rem;color:var(--game-muted);}
-    .game-back{font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:#766553;text-decoration:underline;text-underline-offset:4px;}
-    .game-shell{width:92%;max-width:720px;margin:0 auto;padding:32px 0 80px;}
-    .game-kicker{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:#A47845;text-align:center;margin-bottom:.45rem;}
-    .game-title{font-family:var(--font-display);font-size:clamp(2rem,8vw,4rem);font-weight:300;line-height:.95;text-align:center;margin-bottom:.65rem;}
-    .game-sub{max-width:480px;margin:0 auto 1.4rem;text-align:center;color:var(--game-muted);font-size:.9rem;line-height:1.65;}
-    .hud{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin:.8rem auto;}
-    .hud__pill{background:rgba(255,255,255,.66);border:1px solid rgba(216,205,188,.85);box-shadow:0 8px 30px rgba(114,86,52,.08);border-radius:999px;padding:.42rem .8rem;font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:#665B4D;display:flex;align-items:center;gap:.35rem;}
-    .hud__pill strong{color:var(--game-ink);font-weight:600;}
-    .hud__pill img{width:1.1rem;height:1.1rem;object-fit:contain;}
-    .diff-btns{display:flex;gap:.5rem;justify-content:center;margin-bottom:1rem;}
-    .diff-btn{padding:.4rem .9rem;border-radius:999px;border:1.5px solid var(--line-green);background:var(--white);color:var(--sage-dark);font-size:.74rem;font-weight:600;letter-spacing:.08em;cursor:pointer;transition:all .15s;}
-    .diff-btn.active{background:var(--sage);color:#fff;border-color:var(--sage);}
+    :root{--gi:#2A2820;--gm:#6C6258;--gl:#D8CDBC;--gc:#FBF7EF;--gg:#C8A050;}
+    body.game-page{min-height:100svh;background:radial-gradient(circle at 14% 0%,rgba(255,255,255,.92),transparent 28rem),radial-gradient(circle at 82% 14%,rgba(246,214,151,.34),transparent 26rem),linear-gradient(180deg,#FBF7EF 0%,#F2E7D7 55%,#EFE1D0 100%);color:var(--gi);}
+    .game-nav{position:sticky;top:0;z-index:20;background:rgba(251,247,239,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(216,205,188,.7);}
+    .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:13px 0;}
+    .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.84rem;color:var(--gm);}
+    .game-back{font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;color:#766553;text-decoration:underline;text-underline-offset:4px;}
+    .game-shell{width:92%;max-width:680px;margin:0 auto;padding:28px 0 80px;}
+    .game-kicker{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:#A47845;text-align:center;margin-bottom:.4rem;}
+    .game-title{font-family:var(--font-display);font-size:clamp(2rem,7vw,3.6rem);font-weight:300;line-height:.95;text-align:center;margin-bottom:.6rem;}
+    .game-sub{max-width:460px;margin:0 auto 1rem;text-align:center;color:var(--gm);font-size:.88rem;line-height:1.65;}
+    .hud{display:flex;gap:.55rem;justify-content:center;flex-wrap:wrap;margin:.7rem auto;}
+    .hud__pill{background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.85);border-radius:999px;padding:.4rem .78rem;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:#665B4D;display:flex;align-items:center;gap:.3rem;}
+    .hud__pill strong{color:var(--gi);font-weight:600;}
+    .hud__pill img{width:1rem;height:1rem;object-fit:contain;}
 
-    /* Match grid */
-    .match-board{display:grid;gap:clamp(6px,1.6vw,10px);margin:0 auto;perspective:900px;}
-    .card-wrap{aspect-ratio:1;cursor:pointer;perspective:600px;}
-    .card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1);}
-    .card-wrap.flipped .card-inner{transform:rotateY(180deg);}
-    .card-wrap.matched .card-inner{transform:rotateY(180deg);}
-    .card-front,.card-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-    .card-back{background:#fff;border:1.5px solid rgba(216,205,188,.9);box-shadow:0 6px 22px rgba(82,57,34,.09);}
-    .card-back img.cb-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:14px;}
-    .card-front{transform:rotateY(180deg);background:#fff;border:1.5px solid rgba(216,205,188,.9);box-shadow:0 6px 22px rgba(82,57,34,.09);padding:8%;}
-    .card-front img{width:72%;height:72%;object-fit:contain;}
-    .card-front .cf-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:.5;}
-    .card-front .cf-shine{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:0;transition:opacity .3s;}
-    .card-wrap.flipped .cf-shine,.card-wrap.matched .cf-shine{opacity:.6;}
-    .card-wrap.matched .card-front{background:rgba(235,240,230,.6);}
-    .card-wrap.matched::after{content:"✓";position:absolute;top:4px;right:6px;font-size:.65rem;color:var(--sage-dark);font-weight:700;z-index:2;}
-
-    /* Joker card */
-    .card-wrap.joker .card-front{background:linear-gradient(135deg,#FFF8DC,#F0D880);}
-    .card-wrap.joker .card-front img{animation:spinJoker 1.2s ease;}
+    /* 4×5 Board */
+    .match-board{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(5px,1.4vw,9px);margin:0 auto;}
+    .card-wrap{aspect-ratio:3/4;cursor:pointer;perspective:700px;position:relative;}
+    .card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .4s cubic-bezier(.4,0,.2,1);}
+    .card-wrap.flipped .card-inner,.card-wrap.matched .card-inner{transform:rotateY(180deg);}
+    .card-front,.card-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .card-back{background:#fff;border:1.5px solid rgba(216,205,188,.9);box-shadow:0 5px 18px rgba(82,57,34,.08);}
+    .card-back img.cbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px;}
+    .card-front{transform:rotateY(180deg);background:#fff;border:1.5px solid rgba(216,205,188,.85);box-shadow:0 5px 18px rgba(82,57,34,.08);flex-direction:column;gap:.2rem;padding:8%;}
+    .card-front img.cf-icon{width:64%;height:64%;object-fit:contain;flex-shrink:0;}
+    .card-front img.cf-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:.38;pointer-events:none;}
+    .card-front img.cf-shine{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;opacity:0;transition:opacity .3s;pointer-events:none;}
+    .card-wrap.flipped .cf-shine,.card-wrap.matched .cf-shine{opacity:.5;}
+    .card-wrap.matched .card-front{background:rgba(235,240,230,.62);}
+    .card-wrap.matched::after{content:"✓";position:absolute;top:4px;right:6px;font-size:.6rem;color:var(--sage-dark);font-weight:700;z-index:2;}
 
     /* Modals */
-    .game-panel{position:relative;border:1px solid rgba(216,205,188,.95);background:rgba(255,255,255,.48);border-radius:22px;box-shadow:0 18px 70px rgba(82,57,34,.13);overflow:hidden;padding:1.2rem;}
-    .modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:1.25rem;background:rgba(251,247,239,.88);backdrop-filter:blur(8px);}
+    .modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:rgba(251,247,239,.9);backdrop-filter:blur(8px);}
     .modal[hidden]{display:none;}
-    .modal__card{width:min(92%,440px);background:rgba(255,255,255,.95);border:1px solid rgba(216,205,188,.95);border-radius:22px;padding:1.8rem;text-align:center;box-shadow:0 22px 70px rgba(82,57,34,.18);}
+    .modal__card{width:min(92%,420px);background:rgba(255,255,255,.96);border:1px solid rgba(216,205,188,.95);border-radius:22px;padding:1.6rem;text-align:center;box-shadow:0 22px 70px rgba(82,57,34,.18);}
     .modal__icon img{width:4.5rem;height:4.5rem;object-fit:contain;display:block;margin:0 auto .6rem;}
-    .modal__title{font-family:var(--font-display);font-size:2.1rem;font-weight:300;line-height:1;margin-bottom:.5rem;}
-    .modal__text{color:var(--game-muted);font-size:.9rem;line-height:1.65;margin-bottom:1.1rem;}
-    .game-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(180,137,70,.35);background:#fff;color:#5A4C3D;padding:.76rem 1.4rem;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 10px 28px rgba(110,80,45,.10);cursor:pointer;transition:all .15s;gap:.4rem;}
-    .game-btn:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(110,80,45,.14);background:#FFF9EF;}
+    .modal__title{font-family:var(--font-display);font-size:2rem;font-weight:300;margin-bottom:.45rem;}
+    .modal__text{color:var(--gm);font-size:.88rem;line-height:1.65;margin-bottom:.9rem;}
+    .game-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(180,137,70,.35);background:#fff;color:#5A4C3D;padding:.72rem 1.3rem;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 8px 24px rgba(110,80,45,.09);cursor:pointer;transition:all .15s;gap:.35rem;}
+    .game-btn:hover{transform:translateY(-1px);background:#FFF9EF;}
     .game-btn--main{background:linear-gradient(135deg,#D6B167,#B98538);color:white;border-color:transparent;}
     .game-btn--main:hover{background:linear-gradient(135deg,#E0BB71,#C08E42);}
-    .btn-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;}
-    .save-box{margin-top:1rem;background:rgba(255,255,255,.62);border:1px solid rgba(216,205,188,.8);border-radius:16px;padding:.9rem;}
-    .save-box__row{display:flex;gap:.5rem;}
-    .save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.95);border-radius:999px;background:#fff;padding:.7rem .9rem;font:inherit;font-size:.88rem;outline:none;}
-    .save-msg{font-size:.76rem;color:var(--game-muted);margin-top:.4rem;min-height:1.1em;}
-    .top10{margin-top:1.2rem;background:rgba(255,255,255,.42);border:1px solid rgba(216,205,188,.75);border-radius:16px;padding:.9rem;}
-    .top10 h3{font-family:var(--font-display);font-size:1.3rem;font-weight:400;margin-bottom:.5rem;text-align:center;}
-    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.3rem;}
-    .top10 li{display:flex;align-items:center;gap:.6rem;background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.6);border-radius:11px;padding:.48rem .65rem;font-size:.85rem;}
-    .top10 .pos{font-family:var(--font-display);font-size:1rem;width:1.4rem;text-align:center;color:#A47845;}
-    .top10 .name{flex:1;font-weight:500;}
-    .top10 .pts{font-weight:700;color:#7B4B22;}
-    .endstats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.8rem 0;text-align:left;}
-    .endstats div{background:rgba(255,255,255,.65);border:1px solid rgba(216,205,188,.8);border-radius:12px;padding:.5rem .65rem;font-size:.78rem;}
-    .endstats strong{display:block;font-size:1.1rem;color:var(--game-wine);font-family:var(--font-display);font-weight:500;}
-    .endstats span{color:var(--game-muted);}
-    .victory-formation{text-align:center;margin:1rem 0;}
-    .victory-formation img{max-width:220px;width:80%;opacity:.92;}
+    .btn-row{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
+    .endstats{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin:.75rem 0;text-align:left;}
+    .endstats div{background:rgba(255,255,255,.65);border:1px solid rgba(216,205,188,.8);border-radius:11px;padding:.45rem .6rem;font-size:.76rem;}
+    .endstats strong{display:block;font-size:1.1rem;color:var(--game-wine,#8E2738);font-family:var(--font-display);font-weight:500;}
+    .endstats span{color:var(--gm);}
+    .victory-img{text-align:center;margin:.8rem 0;}
+    .victory-img img{max-width:200px;width:78%;opacity:.9;}
+    .save-box{margin-top:.85rem;background:rgba(255,255,255,.6);border:1px solid rgba(216,205,188,.8);border-radius:14px;padding:.78rem;}
+    .save-box__row{display:flex;gap:.45rem;}
+    .save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.9);border-radius:999px;background:#fff;padding:.65rem .88rem;font:inherit;font-size:.87rem;outline:none;}
+    .save-msg{font-size:.73rem;color:var(--gm);margin-top:.32rem;min-height:1em;}
+    .top10{margin-top:1.1rem;background:rgba(255,255,255,.42);border:1px solid rgba(216,205,188,.75);border-radius:14px;padding:.82rem;}
+    .top10 h3{font-family:var(--font-display);font-size:1.2rem;font-weight:400;margin-bottom:.45rem;text-align:center;}
+    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.28rem;}
+    .top10 li{display:flex;align-items:center;gap:.55rem;background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.6);border-radius:10px;padding:.42rem .6rem;font-size:.83rem;}
+    .top10 .pos{font-family:var(--font-display);font-size:.95rem;width:1.3rem;text-align:center;color:#A47845;}
+    .top10 .name{flex:1;font-weight:500;}.top10 .pts{font-weight:700;color:#7B4B22;}
     @media(max-width:480px){.save-box__row{flex-direction:column}.game-btn{width:100%}}
-    @keyframes spinJoker{0%{transform:scale(0) rotate(-180deg)}70%{transform:scale(1.2) rotate(10deg)}100%{transform:scale(1) rotate(0)}}
-    @keyframes matchPop{0%{transform:scale(1)}40%{transform:scale(1.15)}100%{transform:scale(1)}}
-    @keyframes shakeCard{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
-    .card-wrap.popping .card-inner{animation:matchPop .35s ease}
-    .card-wrap.wrong .card-inner{animation:shakeCard .35s ease}
+    @keyframes matchPop{0%{transform:scale(1)}45%{transform:scale(1.13)}100%{transform:scale(1)}}
+    @keyframes wrongShake{0%,100%{transform:translateX(0)}22%{transform:translateX(-5px)}44%{transform:translateX(5px)}66%{transform:translateX(-3px)}88%{transform:translateX(3px)}}
+    @keyframes burstAnim{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}35%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.25)}}
+    .card-wrap.popping .card-inner{animation:matchPop .32s ease;}
+    .card-wrap.wrong .card-inner{animation:wrongShake .32s ease;}
   </style>
 </head>
 <body class="game-page">
@@ -91,57 +81,44 @@
     <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
     <div class="game-brand">Tiago & Gian</div>
   </div></nav>
-
   <main class="game-shell">
     <p class="game-kicker">Memória</p>
     <h1 class="game-title">Wedding Match</h1>
-    <p class="game-sub">Encontre todos os pares do casamento. Cartas <strong style="color:#C8A050">douradas</strong> dão bônus de tempo!</p>
-
+    <p class="game-sub">Encontre todos os pares! 4×5 cartas, 10 pares para descobrir.</p>
     <div class="hud">
       <div class="hud__pill"><img src="assets/img/match-move-counter.png" alt=""> Jogadas: <strong id="moves">0</strong></div>
-      <div class="hud__pill"><img src="assets/img/match-timer-icon.png" alt=""> <strong id="timer">90</strong>s</div>
-      <div class="hud__pill">Pares: <strong id="pairs">0</strong> / <strong id="total">0</strong></div>
+      <div class="hud__pill"><img src="assets/img/match-timer-icon.png" alt=""> <strong id="timer">120</strong>s</div>
+      <div class="hud__pill">Pares: <strong id="pairs">0</strong>/10</div>
     </div>
-    <div class="diff-btns">
-      <button class="diff-btn active" onclick="setDiff(0)" id="d0">Fácil</button>
-      <button class="diff-btn" onclick="setDiff(1)" id="d1">Médio</button>
-      <button class="diff-btn" onclick="setDiff(2)" id="d2">Difícil</button>
-    </div>
-    <section class="game-panel">
-      <div class="match-board" id="board"></div>
-    </section>
-    <div class="game-actions" style="margin-top:1rem">
+    <div class="match-board" id="board"></div>
+    <div style="display:flex;gap:.5rem;justify-content:center;margin-top:.9rem">
       <button class="game-btn" onclick="restartGame()">🔄 Novo jogo</button>
     </div>
     <section class="top10"><h3>Top 10</h3><ol id="topList"></ol></section>
   </main>
 
-  <!-- Start modal -->
   <div class="modal" id="startModal">
     <div class="modal__card">
       <div class="modal__icon"><img src="assets/img/match-heart.png" alt=""></div>
       <h2 class="modal__title">Wedding Match</h2>
-      <p class="modal__text">Encontre todos os pares! Cartas douradas são <em>joker</em> — combinam com qualquer par e dão bônus de tempo.</p>
-      <div class="btn-row">
-        <button class="game-btn game-btn--main" onclick="startGame()">💛 Começar</button>
-      </div>
+      <p class="modal__text">Encontre todos os 10 pares antes do tempo acabar. Clique em duas cartas para virá-las — se forem iguais, ficam abertas!</p>
+      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startGame()">💛 Começar</button></div>
     </div>
   </div>
 
-  <!-- End modal -->
   <div class="modal" id="endModal" hidden>
     <div class="modal__card">
       <div class="modal__icon" id="endIcon"><img src="assets/img/match-confetti-burst.png" alt=""></div>
       <h2 class="modal__title" id="endTitle">Fim!</h2>
       <p class="modal__text" id="endText"></p>
-      <div class="victory-formation" id="victoryImg" style="display:none"><img src="assets/img/match-heart-formation.png" alt=""></div>
+      <div class="victory-img" id="victoryArea" style="display:none"><img src="assets/img/match-heart-formation.png" alt=""></div>
       <div class="endstats">
         <div><span>Jogadas</span><strong id="sMoves">—</strong></div>
         <div><span>Tempo restante</span><strong id="sTime">—</strong></div>
         <div><span>Pares</span><strong id="sPairs">—</strong></div>
         <div><span>Pontos</span><strong id="sScore">—</strong></div>
       </div>
-      <div class="btn-row" style="margin-bottom:.75rem">
+      <div class="btn-row" style="margin-bottom:.7rem">
         <button class="game-btn game-btn--main" onclick="restartGame()">Jogar novamente</button>
       </div>
       <div class="save-box">
@@ -153,206 +130,136 @@
       </div>
     </div>
   </div>
+<script>
+const API="https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+const GAME_KEY="wedding-match";
+// Exactly 10 symbols → 20 cards → 4×5 grid
+const SYMBOLS=["ring","bouquet","cake","champagne","bowtie","heart","airplane","arch","key","star"];
+let cards=[],flipped=[],matched=0,moves=0,score=0,timeLeft=120,timer=null,canFlip=true,finalScore=0;
 
-  <script>
-    const API = "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
-    const GAME_KEY = "wedding-match";
+// Sound via Web Audio
+let _ac=null;
+function ac(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();return _ac;}
+function beep(f,dur,vol,type){try{const c=ac(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(vol||.09,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur);}catch(e){}}
+function sndFlip(){beep(660,.08,.07);}
+function sndMatch(){beep(880,.07,.1);setTimeout(()=>beep(1100,.12,.09),60);}
+function sndWrong(){beep(220,.18,.08,'sawtooth');}
+function sndWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.15,.1),i*80));}
+function sndTick(){beep(880,.04,.05);}
+function haptic(ms){try{navigator.vibrate&&navigator.vibrate(ms||15);}catch(e){}}
 
-    // Card symbols per difficulty
-    const SYMBOLS = [
-      // Easy: 6 pairs (4x3)
-      ["ring","bouquet","cake","champagne","bowtie","heart"],
-      // Medium: 8 pairs (4x4)
-      ["ring","bouquet","cake","champagne","bowtie","heart","airplane","arch"],
-      // Hard: 10 pairs (5x4, but we'll do 5x4=20 cards = 10 pairs)
-      ["ring","bouquet","cake","champagne","bowtie","heart","airplane","arch","key","suitcase"]
-    ];
-    const GRIDS = [[4,3],[4,4],[5,4]]; // cols x rows
-    const TIMES = [90,75,60];
-    const JOKER_COUNT = [1,2,2]; // joker pairs per diff
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-    let diff=0, cards=[], flipped=[], matched=0, moves=0, score=0, timer=null, timeLeft=90, canFlip=true, total=0;
-    let finalScore=0, finalMoves=0, finalTime=0, finalPairs=0;
+function startGame(){document.getElementById('startModal').hidden=true;restartGame();}
 
-    function setDiff(d){diff=d;document.querySelectorAll('.diff-btn').forEach((b,i)=>b.classList.toggle('active',i===d));}
+function restartGame(){
+  clearInterval(timer);document.getElementById('endModal').hidden=true;
+  matched=0;moves=0;score=0;flipped=[];canFlip=true;timeLeft=120;
+  updateHud();
+  const deck=shuffle([...SYMBOLS,...SYMBOLS]);
+  renderBoard(deck);
+  timer=setInterval(tick,1000);
+}
 
-    function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function tick(){
+  timeLeft--;updateHud();
+  if(timeLeft<=0)endGame(false);
+  if(timeLeft<=10)sndTick();
+}
+function updateHud(){
+  document.getElementById('moves').textContent=moves;
+  document.getElementById('timer').textContent=Math.max(0,timeLeft);
+  document.getElementById('pairs').textContent=matched;
+}
 
-    function buildDeck(){
-      const syms=SYMBOLS[diff]; const jokers=JOKER_COUNT[diff];
-      let deck=[];
-      syms.forEach(s=>deck.push({sym:s,joker:false},{ sym:s,joker:false}));
-      for(let i=0;i<jokers;i++) deck.push({sym:'joker',joker:true},{sym:'joker',joker:true});
-      return shuffle(deck).slice(0,GRIDS[diff][0]*GRIDS[diff][1]);
-    }
+function renderBoard(deck){
+  const board=document.getElementById('board');
+  board.innerHTML='';cards=[];
+  deck.forEach((sym,i)=>{
+    const w=document.createElement('div');
+    w.className='card-wrap';w.dataset.sym=sym;
+    w.innerHTML=`<div class="card-inner">
+      <div class="card-back"><img class="cbg" src="assets/img/match-card-back.png" alt=""></div>
+      <div class="card-front">
+        <img class="cf-frame" src="assets/img/match-card-frame.png" alt="">
+        <img class="cf-icon" src="assets/img/match-${sym}.png" alt="${sym}">
+        <img class="cf-shine" src="assets/img/match-card-flip-shine.png" alt="">
+      </div>
+    </div>`;
+    w.addEventListener('click',()=>flipCard(w));
+    board.appendChild(w);cards.push(w);
+  });
+}
 
-    function startGame(){
-      document.getElementById('startModal').hidden=true;
-      restartGame();
-    }
+function flipCard(w){
+  if(!canFlip||w.classList.contains('flipped')||w.classList.contains('matched')||flipped.length>=2)return;
+  w.classList.add('flipped');sndFlip();flipped.push(w);
+  if(flipped.length===2){moves++;updateHud();canFlip=false;setTimeout(checkMatch,650);}
+}
 
-    function restartGame(){
-      clearInterval(timer);
-      document.getElementById('endModal').hidden=true;
-      matched=0; moves=0; score=0; flipped=[]; canFlip=true;
-      timeLeft=TIMES[diff];
-      const deck=buildDeck();
-      total=deck.length/2;
-      updateHud();
-      renderBoard(deck);
-      timer=setInterval(tick,1000);
-    }
+function checkMatch(){
+  const[a,b]=flipped;
+  if(a.dataset.sym===b.dataset.sym){
+    a.classList.add('matched','popping');b.classList.add('matched','popping');
+    matched++;score+=100+Math.max(0,timeLeft)*2;
+    sndMatch();haptic(20);
+    burstAt(a,'assets/img/match-petal-burst.png');
+    burstAt(b,'assets/img/match-gold-sparkles.png');
+    updateHud();
+    if(matched>=10)setTimeout(()=>endGame(true),400);
+  } else {
+    a.classList.add('wrong');b.classList.add('wrong');
+    sndWrong();haptic([10,30,10]);
+    setTimeout(()=>{a.classList.remove('flipped','wrong');b.classList.remove('flipped','wrong');},550);
+  }
+  flipped=[];canFlip=true;
+}
 
-    function tick(){
-      timeLeft--;
-      updateHud();
-      if(timeLeft<=0){endGame(false);}
-    }
+function burstAt(wrap,src){
+  const r=wrap.getBoundingClientRect();
+  const img=document.createElement('img');
+  img.src=src;
+  img.style.cssText=`position:fixed;left:${r.left+r.width/2}px;top:${r.top+r.height/2}px;width:80px;height:80px;pointer-events:none;z-index:300;animation:burstAnim .65s ease forwards`;
+  document.body.appendChild(img);setTimeout(()=>img.remove(),700);
+}
 
-    function updateHud(){
-      document.getElementById('moves').textContent=moves;
-      document.getElementById('timer').textContent=Math.max(0,timeLeft);
-      document.getElementById('pairs').textContent=matched;
-      document.getElementById('total').textContent=total;
-    }
+function endGame(won){
+  clearInterval(timer);
+  finalScore=score+(won?timeLeft*5:0);
+  document.getElementById('sMoves').textContent=moves;
+  document.getElementById('sTime').textContent=Math.max(0,timeLeft)+'s';
+  document.getElementById('sPairs').textContent=matched+'/10';
+  document.getElementById('sScore').textContent=finalScore+' pts';
+  document.getElementById('victoryArea').style.display=won?'block':'none';
+  document.getElementById('endTitle').textContent=won?'Todos os pares! ❤️':'Tempo esgotado!';
+  document.getElementById('endText').textContent=won
+    ?`Fantástico! ${matched} pares em ${moves} jogadas.`
+    :`Você encontrou ${matched} de 10 pares. Tente novamente!`;
+  document.getElementById('endIcon').innerHTML=won
+    ?'<img src="assets/img/match-confetti-burst.png" alt="">'
+    :'<img src="assets/img/match-heart.png" alt="">';
+  document.getElementById('endModal').hidden=false;
+  if(won){sndWin();haptic(50);if(window.confettiBurst)confettiBurst({count:40,hearts:true});}
+}
 
-    function renderBoard(deck){
-      const board=document.getElementById('board');
-      const [cols]=GRIDS[diff];
-      board.style.gridTemplateColumns=`repeat(${cols},1fr)`;
-      board.innerHTML='';
-      cards=[];
-      deck.forEach((card,i)=>{
-        const wrap=document.createElement('div');
-        wrap.className='card-wrap'+(card.joker?' joker':'');
-        wrap.dataset.idx=i; wrap.dataset.sym=card.sym; wrap.dataset.joker=card.joker?'1':'0';
-        wrap.innerHTML=`
-          <div class="card-inner">
-            <div class="card-back">
-              <img class="cb-bg" src="assets/img/match-card-back.png" alt="">
-            </div>
-            <div class="card-front">
-              <img class="cf-frame" src="assets/img/match-card-frame.png" alt="">
-              <img src="assets/img/match-${card.sym}.png" alt="${card.sym}">
-              <img class="cf-shine" src="assets/img/match-card-flip-shine.png" alt="">
-            </div>
-          </div>`;
-        wrap.addEventListener('click',()=>flipCard(wrap));
-        board.appendChild(wrap);
-        cards.push(wrap);
-      });
-    }
-
-    function flipCard(wrap){
-      if(!canFlip) return;
-      if(wrap.classList.contains('flipped')||wrap.classList.contains('matched')) return;
-      if(flipped.length>=2) return;
-      wrap.classList.add('flipped');
-      flipped.push(wrap);
-      if(flipped.length===2){
-        moves++;
-        updateHud();
-        canFlip=false;
-        setTimeout(checkMatch,700);
-      }
-    }
-
-    function checkMatch(){
-      const [a,b]=flipped;
-      const symA=a.dataset.sym, symB=b.dataset.sym;
-      const jokerA=a.dataset.joker==='1', jokerB=b.dataset.joker==='1';
-      const isMatch = symA===symB || jokerA || jokerB;
-
-      if(isMatch){
-        a.classList.add('matched','popping'); b.classList.add('matched','popping');
-        matched++;
-        score+=100;
-        if(jokerA||jokerB){ timeLeft+=8; burstSparkles(a); burstSparkles(b); }
-        else { burstPetals(a); burstPetals(b); }
-        updateHud();
-        if(matched>=total) setTimeout(()=>endGame(true),400);
-      } else {
-        a.classList.add('wrong'); b.classList.add('wrong');
-        setTimeout(()=>{
-          a.classList.remove('flipped','wrong');
-          b.classList.remove('flipped','wrong');
-        },500);
-      }
-      flipped=[];
-      canFlip=true;
-    }
-
-    function burstPetals(wrap){
-      const rect=wrap.getBoundingClientRect();
-      const img=document.createElement('img');
-      img.src='assets/img/match-petal-burst.png';
-      img.style.cssText=`position:fixed;left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px;width:90px;height:90px;transform:translate(-50%,-50%);pointer-events:none;z-index:200;animation:burstFade .7s ease forwards`;
-      document.body.appendChild(img);
-      setTimeout(()=>img.remove(),750);
-    }
-
-    function burstSparkles(wrap){
-      const rect=wrap.getBoundingClientRect();
-      const img=document.createElement('img');
-      img.src='assets/img/match-gold-sparkles.png';
-      img.style.cssText=`position:fixed;left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px;width:110px;height:110px;transform:translate(-50%,-50%);pointer-events:none;z-index:200;animation:burstFade .8s ease forwards`;
-      document.body.appendChild(img);
-      setTimeout(()=>img.remove(),850);
-    }
-
-    function endGame(won){
-      clearInterval(timer);
-      finalScore = score + (won ? timeLeft*3 : 0);
-      finalMoves=moves; finalTime=timeLeft; finalPairs=matched;
-      document.getElementById('sMoves').textContent=moves;
-      document.getElementById('sTime').textContent=Math.max(0,timeLeft)+'s';
-      document.getElementById('sPairs').textContent=matched+'/'+total;
-      document.getElementById('sScore').textContent=finalScore+' pts';
-      document.getElementById('victoryImg').style.display=won?'block':'none';
-      document.getElementById('endTitle').textContent=won?'Todos os pares! ❤️':'Tempo esgotado!';
-      document.getElementById('endText').textContent=won
-        ?`Incrível! ${matched} pares em ${moves} jogadas.`
-        :`Você encontrou ${matched} de ${total} pares. Tente de novo!`;
-      document.getElementById('endIcon').innerHTML=won
-        ?'<img src="assets/img/match-confetti-burst.png" alt="">'
-        :'<img src="assets/img/match-heart.png" alt="">';
-      document.getElementById('endModal').hidden=false;
-      if(won && window.confettiBurst) confettiBurst({count:40,hearts:true});
-    }
-
-    async function doSave(){
-      const name=(document.getElementById('playerName').value||'').trim().slice(0,22);
-      const msg=document.getElementById('saveMsg');
-      if(!name){msg.textContent='Coloque seu nome!';return;}
-      msg.textContent='Salvando...';
-      try{
-        await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});
-        msg.textContent='Salvo! 🎉';
-        loadTop10();
-      }catch(e){msg.textContent='Erro ao salvar.';}
-    }
-
-    async function loadTop10(){
-      const list=document.getElementById('topList');
-      list.innerHTML='<li><span class="name">Carregando...</span></li>';
-      try{
-        const r=await fetch(`${API}?action=top10&jogo=${GAME_KEY}`);
-        const d=await r.json();
-        const arr=d.lista||[];
-        if(!arr.length){list.innerHTML='<li><span class="name">Seja o primeiro!</span></li>';return;}
-        list.innerHTML=arr.map((it,i)=>`<li><span class="pos">${i+1}</span><span class="name">${esc(it.nome)}</span><span class="pts">${it.pontos} pts</span></li>`).join('');
-      }catch(e){list.innerHTML='<li><span class="name">Placar indisponível.</span></li>';}
-    }
-
-    function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
-
-    // CSS for burst animation injected
-    const st=document.createElement('style');
-    st.textContent='@keyframes burstFade{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.3)}}';
-    document.head.appendChild(st);
-
-    loadTop10();
-  </script>
+async function doSave(){
+  const name=(document.getElementById('playerName').value||'').trim().slice(0,22);
+  const msg=document.getElementById('saveMsg');
+  if(!name){msg.textContent='Coloque seu nome!';return;}
+  msg.textContent='Salvando...';
+  try{await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});msg.textContent='Salvo! 🎉';loadTop10();}
+  catch(e){msg.textContent='Erro ao salvar.';}
+}
+async function loadTop10(){
+  const list=document.getElementById('topList');list.innerHTML='<li><span class="name">Carregando...</span></li>';
+  try{const r=await fetch(`${API}?action=top10&jogo=${GAME_KEY}`);const d=await r.json();const arr=d.lista||[];
+    if(!arr.length){list.innerHTML='<li><span class="name">Seja o primeiro!</span></li>';return;}
+    list.innerHTML=arr.map((it,i)=>`<li><span class="pos">${i+1}</span><span class="name">${esc(it.nome)}</span><span class="pts">${it.pontos} pts</span></li>`).join('');
+  }catch(e){list.innerHTML='<li><span class="name">Placar indisponível.</span></li>';}
+}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+loadTop10();
+</script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/delights.js"></script>
 </body>
