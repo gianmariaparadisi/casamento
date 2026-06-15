@@ -164,9 +164,13 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .btn img { width: 1.1rem; height: 1.1rem; object-fit: contain; flex-shrink: 0; }
 .btn--primary { background: var(--sage); color: var(--white); }
-.btn--primary:hover { background: var(--sage-dark); }
+.btn--primary:hover { background: var(--sage-dark); animation: delightsBtnBreathe 1.8s ease-in-out infinite; }
 .btn--terra { background: var(--terracotta); color: var(--white); }
-.btn--terra:hover { background: var(--terracotta-hover); }
+.btn--terra:hover { background: var(--terracotta-hover); animation: delightsBtnBreathe 1.8s ease-in-out infinite; }
+@keyframes delightsBtnBreathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(122,155,110,.35); }
+  50% { box-shadow: 0 0 0 8px rgba(122,155,110,0); }
+}
 .btn--ghost { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,.5); }
 .btn--ghost:hover { border-color: var(--white); }
 .btn--outline { background: transparent; color: var(--text-main); border: 1.5px solid var(--line); }
