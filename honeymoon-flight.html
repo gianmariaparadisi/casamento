@@ -8,7 +8,1439 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="assets/css/style.css"/>
+  <style>a<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lua de Mel de Papel — Tiago & Gian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="assets/css/style.css"/>
   <style>
+    :root {
+      --fl-cream:   #FBF7EF; --fl-cream2: #F4F1EB;
+      --fl-sage:    #7A9B6E; --fl-sage-dk:#506B45; --fl-sage-lt:#EBF0E6;
+      --fl-terra:   #C46D28; --fl-amber:  #B87B3E;
+      --fl-rose:    #D98A82; --fl-navy:   #1A1A40;
+      --fl-gold:    #C8A050; --fl-gold-lt:#F4D878;
+    }
+    body.game-page { min-height:100svh; background:var(--fl-cream2); color:var(--fl-navy); overscroll-behavior:none; }
+
+    .game-nav { position:sticky;top:0;z-index:30;background:rgba(251,247,239,.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(196,109,40,.18); }
+    .game-nav__inner { width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:13px 0;gap:1rem; }
+    .game-brand { font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.84rem;color:var(--fl-amber); }
+    .game-back  { font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--fl-sage-dk);text-decoration:underline;text-underline-offset:3px; }
+
+    .game-shell { width:94%;max-width:580px;margin:0 auto;padding:24px 0 80px; }
+    .game-kicker { font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--fl-terra);text-align:center;margin-bottom:.4rem; }
+    .game-title  { font-family:var(--font-display);font-size:clamp(2rem,8vw,3.4rem);font-weight:300;line-height:.95;text-align:center;margin-bottom:.5rem; }
+    .game-sub    { max-width:400px;margin:0 auto 1.2rem;text-align:center;color:var(--fl-amber);font-size:.86rem;line-height:1.65; }
+
+    .screen { display:none; }
+    .screen.active { display:block; }
+
+    /* DEST GRID */
+    .dest-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-top:1.5rem; }
+    .dest-card { background:var(--fl-cream);border:1.5px solid rgba(196,109,40,.25);border-radius:16px;padding:1.25rem 1rem 1rem;text-align:center;cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s;position:relative; }
+    .dest-card:hover:not(.locked) { transform:translateY(-3px);box-shadow:0 12px 32px rgba(196,109,40,.18);border-color:var(--fl-terra); }
+    .dest-card.locked { opacity:.55;cursor:not-allowed; }
+    .dest-card__flag  { font-size:2.4rem;margin-bottom:.4rem;display:block; }
+    .dest-card__name  { font-family:var(--font-display);font-size:1.1rem;font-weight:400;color:var(--fl-navy);margin-bottom:.2rem; }
+    .dest-card__sub   { font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--fl-amber);margin-bottom:.5rem; }
+    .dest-card__stars { letter-spacing:.1em;font-size:.95rem;margin-bottom:.4rem;display:block; }
+    .dest-card__rec   { font-size:.68rem;color:var(--fl-sage-dk);background:var(--fl-sage-lt);padding:.2rem .5rem;border-radius:20px;display:inline-block; }
+    .dest-card__lock  { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:14px;font-size:1.8rem; }
+    .dest-card .btn-play { margin-top:.5rem;display:inline-block;font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:var(--fl-terra);color:#fff;padding:.45rem 1rem;border-radius:20px;border:none;cursor:pointer;transition:background .15s; }
+    .dest-card .btn-play:hover { background:var(--fl-amber); }
+
+    /* GAME PANEL */
+    .game-panel { position:relative;border-radius:18px;overflow:hidden;border:2px solid rgba(196,109,40,.22);box-shadow:0 16px 60px rgba(26,26,64,.14); }
+    canvas { display:block;width:100%;touch-action:none;cursor:none; }
+
+    /* OVERLAY (start/end) */
+    .game-overlay { position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,247,239,.93);border-radius:16px;text-align:center;padding:2rem 1.5rem;backdrop-filter:blur(5px); }
+    .game-overlay.show { display:flex; }
+    .ov-emoji { font-size:3rem;margin-bottom:.5rem; }
+    .ov-title { font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--fl-navy);margin-bottom:.3rem; }
+    .ov-sub   { font-size:.88rem;color:var(--fl-amber);margin-bottom:1rem;line-height:1.6;max-width:340px; }
+    .ov-stats { display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1.1rem;width:100%;max-width:300px; }
+    .ov-stat  { background:var(--fl-sage-lt);border-radius:10px;padding:.5rem .6rem;font-size:.72rem;color:var(--fl-sage-dk); }
+    .ov-stat strong { display:block;font-size:1.1rem;font-weight:600;color:var(--fl-navy); }
+    .ov-stars { font-size:1.8rem;letter-spacing:.15em;margin-bottom:.8rem; }
+    .ov-btns  { display:flex;gap:.65rem;flex-wrap:wrap;justify-content:center; }
+
+    /* BUTTONS */
+    .game-btn { display:inline-flex;align-items:center;justify-content:center;border-radius:30px;border:1.5px solid rgba(196,109,40,.35);background:var(--fl-cream);color:var(--fl-navy);padding:.7rem 1.3rem;font-size:.73rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;cursor:pointer;transition:all .15s;gap:.4rem;font-family:'Inter',sans-serif; }
+    .game-btn:hover { background:var(--fl-cream2);border-color:var(--fl-terra); }
+    .game-btn--main { background:var(--fl-terra);color:#fff;border-color:transparent; }
+    .game-btn--main:hover { background:var(--fl-amber); }
+
+    .mobile-hint { text-align:center;font-size:.72rem;color:var(--fl-amber);margin-top:.6rem; }
+
+    /* BRIEFING */
+    .briefing { text-align:center;padding:2.5rem 1rem; }
+    .briefing__flag    { font-size:4rem;margin-bottom:.5rem; }
+    .briefing__dest    { font-family:var(--font-display);font-size:2.8rem;font-weight:300;color:var(--fl-navy);margin-bottom:.25rem; }
+    .briefing__tagline { font-size:.9rem;color:var(--fl-amber);margin-bottom:1.2rem; }
+    .briefing__tip     { background:var(--fl-sage-lt);border:1px solid rgba(122,155,110,.3);border-radius:12px;padding:.9rem 1.2rem;font-size:.82rem;color:var(--fl-sage-dk);line-height:1.65;max-width:360px;margin:0 auto 1.5rem; }
+
+    /* RESULT */
+    .result-header { text-align:center;padding:1.5rem 0; }
+    .result-stats  { display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.2rem; }
+    .result-stat   { background:var(--fl-cream);border:1px solid rgba(196,109,40,.18);border-radius:12px;padding:.9rem;text-align:center; }
+    .result-stat__val { font-family:var(--font-display);font-size:1.8rem;font-weight:400;color:var(--fl-navy); }
+    .result-stat__lbl { font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--fl-amber);margin-top:.15rem; }
+
+    /* SAVE/TOP10 */
+    .save-box { margin-top:1rem;background:var(--fl-cream);border:1px solid rgba(196,109,40,.2);border-radius:14px;padding:.9rem; }
+    .save-box h3 { font-family:var(--font-display);font-size:1.2rem;font-weight:400;margin-bottom:.6rem; }
+    .save-row { display:flex;gap:.5rem; }
+    .save-input { flex:1;min-width:0;border:1px solid rgba(196,109,40,.3);border-radius:30px;background:#fff;padding:.6rem .9rem;font:inherit;font-size:.88rem;outline:none;color:var(--fl-navy); }
+    .save-msg { font-size:.72rem;color:var(--fl-amber);margin-top:.35rem;min-height:1em; }
+    .top10-box { margin-top:1rem;background:var(--fl-cream);border:1px solid rgba(196,109,40,.15);border-radius:14px;padding:.9rem; }
+    .top10-box h3 { font-family:var(--font-display);font-size:1.15rem;font-weight:400;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem; }
+    .top10-list { list-style:none;display:grid;gap:.28rem; }
+    .top10-item { display:flex;align-items:center;gap:.55rem;background:rgba(255,255,255,.7);border:1px solid rgba(196,109,40,.12);border-radius:10px;padding:.4rem .65rem;font-size:.82rem; }
+    .top10-item--gold   { background:#FFF8E7;border-color:#E8C84A; }
+    .top10-item--silver { background:#F5F5F5;border-color:#C0C0C0; }
+    .top10-item--bronze { background:#FFF2EC;border-color:#CD7F32; }
+    .t10-pos  { font-family:var(--font-display);font-size:.95rem;width:1.3rem;text-align:center;color:var(--fl-amber); }
+    .t10-name { flex:1;font-weight:500;color:var(--fl-navy); }
+    .t10-pts  { font-weight:700;color:var(--fl-sage-dk);font-size:.8rem; }
+    .t10-empty,.t10-loading { text-align:center;padding:1rem;font-size:.82rem;color:var(--fl-amber);font-style:italic; }
+
+    /* WIN */
+    .album-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin:1rem 0; }
+    .album-polaroid { background:#fff;border:1px solid rgba(196,109,40,.2);border-radius:6px;padding:.4rem .4rem .8rem;text-align:center;box-shadow:0 3px 10px rgba(26,26,64,.1); }
+    .album-polaroid.earned { transform:rotate(-2deg); }
+    .album-polaroid:nth-child(even).earned { transform:rotate(2deg); }
+
+    .spinner { display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @media(max-width:480px) { .save-row{flex-direction:column} .game-btn{width:100%} .dest-grid{grid-template-columns:repeat(2,1fr)} .album-grid{grid-template-columns:repeat(3,1fr)} .result-stats{grid-template-columns:1fr} }
+    html,body { overscroll-behavior:none; }
+  </style>
+</head>
+<body class="game-page">
+  <nav class="game-nav">
+    <div class="game-nav__inner">
+      <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
+      <div class="game-brand">Tiago &amp; Gian</div>
+    </div>
+  </nav>
+
+  <main class="game-shell">
+
+    <!-- SELECT -->
+    <div class="screen active" id="screen-select">
+      <div style="text-align:center;margin-bottom:.5rem">
+        <img src="assets/img/packing-airplane-takeoff.png" alt="" style="width:4rem;height:4rem;object-fit:contain;display:inline-block;filter:drop-shadow(0 4px 8px rgba(196,109,40,.22))" onerror="this.style.fontSize='3rem';this.outerHTML='<span style=\'display:block;text-align:center;font-size:3rem\'>✈️</span>'">
+      </div>
+      <p class="game-kicker">✈️ 5 Destinos · Física Real</p>
+      <h1 class="game-title">Lua de Mel<br><em>de Papel</em></h1>
+      <p class="game-sub">Arraste e solte para lançar o avião. Segure para dar gás. Colete lembranças europeias!</p>
+      <div class="dest-grid" id="dest-grid"></div>
+    </div>
+
+    <!-- BRIEFING -->
+    <div class="screen" id="screen-briefing">
+      <div class="briefing">
+        <div class="briefing__flag"    id="br-flag"></div>
+        <div class="briefing__dest"    id="br-dest"></div>
+        <div class="briefing__tagline" id="br-tagline"></div>
+        <div class="briefing__tip"     id="br-tip"></div>
+        <button class="game-btn game-btn--main" onclick="startFlight()">✈️ Decolar!</button>
+      </div>
+    </div>
+
+    <!-- GAME -->
+    <div class="screen" id="screen-game">
+      <div class="game-panel" id="game-panel">
+        <canvas id="flight-canvas" tabindex="0"></canvas>
+        <!-- Overlay start/end inside canvas -->
+        <div class="game-overlay show" id="game-overlay">
+          <div class="ov-emoji" id="ov-emoji">✈️</div>
+          <div class="ov-title" id="ov-title">Pronto para decolar?</div>
+          <div class="ov-sub"   id="ov-sub">Arraste o avião para mirar e solte para lançar.<br>Segure a tela durante o voo para dar gás!</div>
+          <div class="ov-stats" id="ov-stats" style="display:none"></div>
+          <div class="ov-stars" id="ov-stars"></div>
+          <div class="ov-btns"  id="ov-btns">
+            <button class="game-btn game-btn--main" id="ov-main-btn" onclick="beginAiming()">✈️ Lançar!</button>
+            <button class="game-btn" onclick="goToSelect()">← Destinos</button>
+          </div>
+        </div>
+      </div>
+      <p class="mobile-hint" id="mobile-hint">Arraste o avião ✈️ para mirar · Segure para gás 🔥</p>
+    </div>
+
+    <!-- RESULT -->
+    <div class="screen" id="screen-result">
+      <div class="result-header">
+        <div style="font-size:3rem;margin-bottom:.4rem" id="res-emoji">✈️</div>
+        <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--fl-navy);margin-bottom:.2rem" id="res-title"></div>
+        <div style="font-size:.88rem;color:var(--fl-amber);margin-bottom:.8rem" id="res-tagline"></div>
+        <div style="font-size:2rem;letter-spacing:.15em;margin-bottom:.8rem" id="res-stars"></div>
+      </div>
+      <div class="result-stats" id="result-stats"></div>
+      <div class="save-box">
+        <h3>Salvar seu recorde</h3>
+        <div class="save-row">
+          <input type="text" id="flight-nome" class="save-input" placeholder="Seu nome" maxlength="30" autocomplete="name"/>
+          <button class="game-btn game-btn--main" onclick="flightSaveScore()">Salvar</button>
+        </div>
+        <p class="save-msg" id="flight-save-msg"></p>
+      </div>
+      <div class="top10-box" id="flight-top10"></div>
+      <div style="display:flex;gap:.65rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem">
+        <button class="game-btn game-btn--main" id="res-replay-btn" onclick="replayFlight()">↩ Voar de novo</button>
+        <button class="game-btn" onclick="goToSelect()">← Todos os destinos</button>
+      </div>
+    </div>
+
+    <!-- WIN -->
+    <div class="screen" id="screen-win">
+      <div style="text-align:center;padding:2rem 0 1rem">
+        <div style="font-size:3.5rem;margin-bottom:.5rem">💍</div>
+        <div style="font-family:var(--font-display);font-size:2.6rem;font-weight:300;color:var(--fl-navy);margin-bottom:.3rem">Lua de mel completa!</div>
+        <div style="font-size:.9rem;color:var(--fl-amber);margin-bottom:1.2rem;line-height:1.6">Vocês voaram por toda a Europa juntos ❤️</div>
+        <div class="album-grid" id="album-grid"></div>
+        <div style="font-size:.8rem;color:var(--fl-sage-dk);margin:1rem 0 1.5rem;font-style:italic">5 destinos · 5 memórias · Uma vida inteira pela frente</div>
+        <button class="game-btn game-btn--main" onclick="goToSelect()">✈️ Voar de novo</button>
+      </div>
+      <div class="top10-box" id="win-top10"></div>
+    </div>
+
+  </main>
+
+  <div class="flourish-wrap" style="padding:1.5rem 0 0">
+    <img src="assets/img/footer-flourish.png" alt="" style="max-width:440px;width:85%;display:inline-block" onerror="this.style.display='none'">
+  </div>
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__names"><img src="assets/img/logohorizontal_light.png" alt="Tiago e Gian" class="site-logo site-logo--footer" onerror="this.style.display='none'"></p>
+      <p class="footer__date">12 · 12 · 2026</p>
+      <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════
+   LUA DE MEL DE PAPEL v2 — física real, HUD no canvas
+   Tiago & Gian
+═══════════════════════════════════════════════════════════ */
+
+const FLIGHT_API = typeof API_URL !== "undefined"
+  ? API_URL
+  : "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+
+const DPR    = Math.min(window.devicePixelRatio || 1, 2);
+const GAME_W = 520;
+const GAME_H = 340;
+const GROUND_Y = GAME_H - 38;   // world ground (in screen when camera.y=0)
+
+/* ═══════════════════════════════════════════════════════════
+   DESTINATION DATA
+═══════════════════════════════════════════════════════════ */
+const DESTINATIONS = [
+  {
+    id:"lisboa", name:"Lisboa", flag:"🇵🇹",
+    tagline:"A cidade das sete colinas e do fado",
+    tip:"Arraste para mirar e solte para lançar! Segure durante o voo para dar gás. Colete pastéis de nata!",
+    targetDist:1800, starThresholds:[800,1400,1800],
+    sky:"#8AABCC", horizon:"#D4B890", ground:"#506B45", groundLine:"#3D5230",
+    collectibles:[
+      {id:"nata",     emoji:"🥐", pts:50,  label:"Pastel de Nata"},
+      {id:"sardinha", emoji:"🐟", pts:35,  label:"Sardinha"},
+      {id:"azulejo",  emoji:"🟦", pts:60,  label:"Azulejo"},
+      {id:"fado",     emoji:"🎵", pts:45,  label:"Fado Record"},
+    ],
+    obstacles:[
+      {emoji:"🚋", w:88, h:52, label:"Eléctrico"},
+      {emoji:"🐦", w:52, h:36, label:"Gaivota", wave:true},
+      {emoji:"🚩", w:20, h:80, label:"Varal", tall:true},
+    ],
+  },
+  {
+    id:"paris", name:"Paris", flag:"🇫🇷",
+    tagline:"Cidade Luz — romance a cada esquina",
+    tip:"Desvie dos pombos parisienses e baguetes voadoras. Os macarons valem muito!",
+    targetDist:2200, starThresholds:[1000,1700,2200],
+    sky:"#8A9BB0", horizon:"#E8C878", ground:"#506B45", groundLine:"#3D5230",
+    collectibles:[
+      {id:"macaron",   emoji:"🍬", pts:80,  label:"Macaron"},
+      {id:"baguete",   emoji:"🥖", pts:40,  label:"Baguete"},
+      {id:"papoula",   emoji:"🌸", pts:55,  label:"Papoula"},
+      {id:"champagne", emoji:"🥂", pts:100, label:"Champagne"},
+    ],
+    obstacles:[
+      {emoji:"🐦", w:48, h:38, label:"Pombo", wave:true},
+      {emoji:"☂️",  w:55, h:68, label:"Guarda-chuva"},
+      {emoji:"🥖", w:90, h:28, label:"Baguete Voadora"},
+    ],
+  },
+  {
+    id:"roma", name:"Roma", flag:"🇮🇹",
+    tagline:"A Cidade Eterna — dolce vita",
+    tip:"Fique longe das colunas romanas! Colete gelato e moedas da Fontana di Trevi.",
+    targetDist:2600, starThresholds:[1200,2000,2600],
+    sky:"#D4A878", horizon:"#F4E0B8", ground:"#6B5840", groundLine:"#4A3A25",
+    collectibles:[
+      {id:"gelato",    emoji:"🍦", pts:75,  label:"Gelato"},
+      {id:"limone",    emoji:"🍋", pts:50,  label:"Limone"},
+      {id:"moeda",     emoji:"🪙", pts:90,  label:"Moeda da Fontana"},
+      {id:"espaguete", emoji:"🍝", pts:60,  label:"Espaguete"},
+    ],
+    obstacles:[
+      {emoji:"🛵", w:78, h:52, label:"Scooter"},
+      {emoji:"🐈", w:55, h:42, label:"Gato Romano"},
+      {emoji:"🏛️", w:38, h:98, label:"Coluna", tall:true},
+    ],
+  },
+  {
+    id:"santorini", name:"Santorini", flag:"🇬🇷",
+    tagline:"Vento do Egeu — pôr do sol eterno",
+    tip:"Ventos erráticos! O moinho gira. Colete alianças — valem muito.",
+    targetDist:3000, starThresholds:[1400,2300,3000],
+    sky:"#3A6BA0", horizon:"#E8784A", ground:"#1A5A80", groundLine:"#0D3F5C",
+    collectibles:[
+      {id:"ouzo",       emoji:"🥃", pts:65,  label:"Ouzo"},
+      {id:"polvo",      emoji:"🐙", pts:80,  label:"Polvo"},
+      {id:"buganvilha", emoji:"🌸", pts:55,  label:"Buganvília"},
+      {id:"anel",       emoji:"💍", pts:150, label:"Aliança"},
+    ],
+    obstacles:[
+      {emoji:"⚙️", w:78, h:108, label:"Moinho", spin:true},
+      {emoji:"🫏", w:70, h:55,  label:"Burro"},
+      {emoji:"🏺", w:46, h:60,  label:"Vaso", fall:true},
+    ],
+  },
+  {
+    id:"positano", name:"Positano", flag:"🇮🇹",
+    tagline:"Costa Amalfitana — o gran finale!",
+    tip:"Limões caindo das árvores e o ônibus da costa! Colete corações — o item mais raro.",
+    targetDist:3500, starThresholds:[1600,2700,3500],
+    sky:"#1A1A40", horizon:"#E8784A", ground:"#0A6060", groundLine:"#064040",
+    collectibles:[
+      {id:"limoncello", emoji:"🍋", pts:80,  label:"Limoncello"},
+      {id:"postal",     emoji:"📮", pts:70,  label:"Postal"},
+      {id:"flores",     emoji:"💐", pts:60,  label:"Flores"},
+      {id:"coracao",    emoji:"❤️",  pts:200, label:"Coração"},
+    ],
+    obstacles:[
+      {emoji:"🍋", w:52, h:65, label:"Limão Caindo", fall:true},
+      {emoji:"🚌", w:100,h:62, label:"Ônibus da Costa"},
+      {emoji:"🐐", w:62, h:50, label:"Cabra"},
+    ],
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════
+   CANVAS
+═══════════════════════════════════════════════════════════ */
+const canvas = document.getElementById("flight-canvas");
+canvas.width  = GAME_W * DPR;
+canvas.height = GAME_H * DPR;
+canvas.style.width  = GAME_W + "px";
+canvas.style.height = GAME_H + "px";
+const ctx = canvas.getContext("2d");
+ctx.scale(DPR, DPR);
+
+/* ═══════════════════════════════════════════════════════════
+   IMAGE LOADER
+═══════════════════════════════════════════════════════════ */
+const IMGS = {};
+function loadImg(src) {
+  if (IMGS[src]) return IMGS[src];
+  const i = new Image();
+  i.onload = () => { i.ok = true; };
+  i.src = src;
+  IMGS[src] = i;
+  return i;
+}
+// Preload backgrounds and plane
+["flappy-sky-bg","flappy-cloud-01","flappy-cloud-02","flappy-cloud-03","flappy-sun",
+ "packing-airplane-takeoff","icon-heart-full",
+ "bg-lisboa-sky","bg-lisboa-mid","bg-lisboa-front",
+ "bg-paris-sky","bg-paris-mid","bg-paris-front",
+ "bg-roma-sky","bg-roma-mid","bg-roma-front",
+ "bg-santorini-sky","bg-santorini-mid","bg-santorini-front",
+ "bg-positano-sky","bg-positano-mid","bg-positano-front",
+].forEach(n => loadImg("assets/img/" + n + ".png"));
+
+/* ═══════════════════════════════════════════════════════════
+   PHYSICS CONSTANTS
+═══════════════════════════════════════════════════════════ */
+const GRAVITY      = 860;    // px/s²
+const DRAG         = 0.0016; // quadratic drag coefficient
+const LIFT         = 0.0013; // lift coefficient
+const BOOST_POWER  = 480;    // px/s² boost acceleration
+const BOOST_DRAIN  = 32;     // energy/s drain
+const MAX_LAUNCH   = 230;    // max launch drag distance
+const LAUNCH_MULT  = 5.8;    // velocity multiplier on launch
+const ROT_SPEED    = 5;      // angle smoothing
+const MAX_ANGLE    = 55;     // degrees — stall angle (nose can't go past this up)
+const STALL_SPEED  = 80;     // below this speed, lift barely works
+
+/* ═══════════════════════════════════════════════════════════
+   GAME STATE
+═══════════════════════════════════════════════════════════ */
+let currentDest = 0;
+let gameState   = "idle"; // idle | aiming | flight | result
+
+// Physics object
+const plane = {
+  x:0, y:0, vx:0, vy:0, angle:0,
+  energy:100, maxEnergy:100,
+};
+
+// Camera (world x offset — only horizontal scroll)
+const camera = { x:0 };
+
+// Input
+const input = {
+  boosting: false,
+  drag: null, // {sx,sy} aiming start
+  cur:  null, // current pointer world pos
+};
+
+// Session
+let score        = 0;
+let coins        = 0;
+let itemsCollected = 0;
+let bestDist     = 0;
+let runDist      = 0;    // distance this run (meters)
+let particles    = [];
+let worldItems   = [];
+let raf          = null;
+let lastTime     = 0;
+let _scrollY     = 0;
+let comboCount   = 0;
+let comboTimer   = 0;
+
+// Background scroll offsets per layer
+let bgSkyX = 0, bgMidX = 0, bgFgX = 0;
+
+/* ═══════════════════════════════════════════════════════════
+   LOCAL STORAGE
+═══════════════════════════════════════════════════════════ */
+function getSave()  { try { return JSON.parse(localStorage.getItem("flight2_save")||"{}"); } catch { return {}; } }
+function setSave(d) { try { localStorage.setItem("flight2_save", JSON.stringify(d)); } catch {} }
+function getUnlocked() { return getSave().unlocked || [true,false,false,false,false]; }
+function getBest(i)    { return (getSave().bests||[0,0,0,0,0])[i]||0; }
+function saveBest(i,v) {
+  const s = getSave();
+  if (!s.bests)    s.bests    = [0,0,0,0,0];
+  if (!s.unlocked) s.unlocked = [true,false,false,false,false];
+  if (v > s.bests[i]) s.bests[i] = v;
+  if (i+1 < 5) s.unlocked[i+1] = true;
+  setSave(s);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCREEN MANAGER
+═══════════════════════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+function showOverlay(show) {
+  document.getElementById("game-overlay").classList.toggle("show", show);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DESTINATION GRID
+═══════════════════════════════════════════════════════════ */
+function starsStr(i) {
+  const b = getBest(i), d = DESTINATIONS[i];
+  const n = b>=d.starThresholds[2]?3: b>=d.starThresholds[1]?2: b>=d.starThresholds[0]?1:0;
+  return "⭐".repeat(n)+"☆".repeat(3-n);
+}
+function renderDestGrid() {
+  const ul = getUnlocked();
+  document.getElementById("dest-grid").innerHTML = DESTINATIONS.map((d,i) => {
+    const locked = !ul[i];
+    const b = getBest(i);
+    return `<div class="dest-card${locked?" locked":""}" ${locked?"":`onclick="selectDest(${i})"`}>
+      <span class="dest-card__flag">${d.flag}</span>
+      <div class="dest-card__name">${d.name}</div>
+      <div class="dest-card__sub">${i+1}º Destino</div>
+      <span class="dest-card__stars">${starsStr(i)}</span>
+      <div class="dest-card__rec">${b>0?"Melhor: "+b+" m":"Sem recorde"}</div>
+      ${locked?`<div class="dest-card__lock">🔒</div>`:`<button class="btn-play">Voar →</button>`}
+    </div>`;
+  }).join("");
+}
+
+window.selectDest = function(i) {
+  currentDest = i;
+  const d = DESTINATIONS[i];
+  document.getElementById("br-flag").textContent    = d.flag;
+  document.getElementById("br-dest").textContent    = d.name;
+  document.getElementById("br-tagline").textContent = d.tagline;
+  document.getElementById("br-tip").textContent     = "💡 " + d.tip;
+  showScreen("screen-briefing");
+};
+
+window.goToSelect = function() {
+  stopGame(); unlockScroll();
+  showScreen("screen-select");
+  renderDestGrid();
+};
+
+/* ═══════════════════════════════════════════════════════════
+   FLIGHT INIT
+═══════════════════════════════════════════════════════════ */
+window.startFlight = function() {
+  showScreen("screen-game");
+  initRun();
+};
+
+function initRun() {
+  const d = DESTINATIONS[currentDest];
+
+  // Reset physics
+  plane.x = 80; plane.y = GROUND_Y - 20;
+  plane.vx = 0; plane.vy = 0; plane.angle = 0;
+  plane.energy = plane.maxEnergy = 100;
+
+  // Reset state
+  camera.x = 0;
+  score = 0; coins = 0; itemsCollected = 0; runDist = 0;
+  particles = [];
+  comboCount = 0; comboTimer = 0;
+  bgSkyX = 0; bgMidX = 0; bgFgX = 0;
+  input.boosting = false; input.drag = null; input.cur = null;
+  gameState = "idle";
+  lastTime  = 0;
+
+  // Generate world items
+  generateItems();
+
+  // Show "aiming" overlay
+  document.getElementById("ov-emoji").textContent = DESTINATIONS[currentDest].flag + " " + DESTINATIONS[currentDest].name;
+  document.getElementById("ov-title").textContent = "Pronto para decolar?";
+  document.getElementById("ov-sub").textContent   = "Arraste o avião ✈️ para mirar · Solte para lançar · Segure para gás!";
+  document.getElementById("ov-stats").style.display = "none";
+  document.getElementById("ov-stars").textContent = "";
+  document.getElementById("ov-btns").innerHTML =
+    `<button class="game-btn game-btn--main" onclick="beginAiming()">✈️ Preparar lançamento</button>
+     <button class="game-btn" onclick="goToSelect()">← Destinos</button>`;
+  showOverlay(true);
+
+  document.getElementById("mobile-hint").textContent = "Arraste o ✈️ para mirar · Segure para gás 🔥";
+
+  // Draw static first frame
+  drawFrame();
+}
+
+window.beginAiming = function() {
+  showOverlay(false);
+  gameState = "aiming";
+  lockScroll();
+  if (raf) cancelAnimationFrame(raf);
+  lastTime = 0;
+  raf = requestAnimationFrame(gameLoop);
+};
+
+window.replayFlight = function() {
+  showScreen("screen-game");
+  initRun();
+};
+
+/* ═══════════════════════════════════════════════════════════
+   WORLD ITEMS GENERATION
+   Items placed in a wave pattern at realistic flight heights
+═══════════════════════════════════════════════════════════ */
+function generateItems() {
+  worldItems = [];
+  const d   = DESTINATIONS[currentDest];
+  const targetPx = d.targetDist * 10; // 1 m = 10 px
+  const spacing  = 180;
+  const n        = Math.floor(targetPx / spacing);
+
+  for (let i = 0; i < n; i++) {
+    const wx = 400 + i * spacing + Math.random() * 80 - 40;
+
+    // Alternate between collectible and obstacle (more collectibles)
+    const isObstacle = Math.random() < 0.35;
+
+    if (isObstacle) {
+      const obs = d.obstacles[Math.floor(Math.random() * d.obstacles.length)];
+      // Place obstacles at varying heights - tall ones near ground, flyers higher
+      const wy = obs.tall
+        ? GROUND_Y - obs.h / 2              // tall: base on ground
+        : obs.wave
+          ? 80 + Math.random() * 120        // flyers: upper half
+          : GROUND_Y - obs.h/2 - Math.random()*60; // normal: near ground
+      worldItems.push({ type:"obstacle", ...obs, wx, wy,
+        phase: Math.random()*Math.PI*2, vfall: obs.fall ? 0 : 0 });
+    } else {
+      const col = d.collectibles[Math.floor(Math.random() * d.collectibles.length)];
+      // Items in a wave between 60px and 220px from ground
+      const wave = Math.sin(i * 0.65) * 80;
+      const wy   = GROUND_Y - 100 + wave - Math.random() * 40;
+      worldItems.push({ type:"collect", ...col, wx, wy, phase: Math.random()*Math.PI*2 });
+    }
+  }
+
+  // Goal flag at the end
+  worldItems.push({ type:"goal", wx: targetPx + 300, wy: GROUND_Y - 60, w:30, h:120, emoji:"🏁" });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL LOCK
+═══════════════════════════════════════════════════════════ */
+function lockScroll()   { _scrollY=window.scrollY; document.body.style.overflow="hidden"; document.body.style.touchAction="none"; }
+function unlockScroll() { document.body.style.overflow=""; document.body.style.touchAction=""; window.scrollTo(0,_scrollY); }
+
+/* ═══════════════════════════════════════════════════════════
+   INPUT — pointer/touch events on canvas
+═══════════════════════════════════════════════════════════ */
+function canvasXY(e) {
+  const r   = canvas.getBoundingClientRect();
+  const scX = GAME_W / r.width;
+  const cx  = ((e.clientX !== undefined ? e.clientX : e.touches[0].clientX) - r.left) * scX;
+  const cy  = ((e.clientY !== undefined ? e.clientY : e.touches[0].clientY) - r.top)  * scX;
+  return { x: cx + camera.x, y: cy }; // world coords
+}
+function canvasXYScreen(e) {
+  const r   = canvas.getBoundingClientRect();
+  const scX = GAME_W / r.width;
+  return {
+    x: ((e.clientX !== undefined ? e.clientX : e.touches[0].clientX) - r.left) * scX,
+    y: ((e.clientY !== undefined ? e.clientY : e.touches[0].clientY) - r.top)  * scX,
+  };
+}
+
+canvas.addEventListener("mousedown",  onDown, {passive:false});
+canvas.addEventListener("touchstart", onDown, {passive:false});
+canvas.addEventListener("mousemove",  onMove, {passive:false});
+canvas.addEventListener("touchmove",  onMove, {passive:false});
+canvas.addEventListener("mouseup",    onUp,   {passive:false});
+canvas.addEventListener("touchend",   onUp,   {passive:false});
+canvas.addEventListener("mouseleave", onUp,   {passive:false});
+
+function onDown(e) {
+  e.preventDefault();
+  if (gameState === "aiming") {
+    // Start drag — only if near plane (within 60px on screen)
+    const sc  = canvasXYScreen(e);
+    const spx = plane.x - camera.x;
+    const spy = plane.y;
+    const dx  = sc.x - spx, dy = sc.y - spy;
+    if (Math.hypot(dx,dy) < 70) {
+      input.drag = { sx: sc.x, sy: sc.y };
+      input.cur  = { x: sc.x, y: sc.y };
+    }
+  } else if (gameState === "flight") {
+    input.boosting = true;
+  }
+}
+function onMove(e) {
+  e.preventDefault();
+  if (gameState === "aiming" && input.drag) {
+    const sc = canvasXYScreen(e);
+    input.cur = { x: sc.x, y: sc.y };
+  }
+}
+function onUp(e) {
+  e.preventDefault();
+  if (gameState === "aiming" && input.drag) {
+    const sc = canvasXYScreen(e);
+    launchPlane(input.drag, sc);
+    input.drag = null; input.cur = null;
+  }
+  input.boosting = false;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LAUNCH
+═══════════════════════════════════════════════════════════ */
+function launchPlane(start, end) {
+  const dx  = start.x - end.x;
+  const dy  = start.y - end.y;
+  const raw = Math.hypot(dx, dy);
+  if (raw < 12) return; // too short — ignore
+  const power = Math.min(raw, MAX_LAUNCH);
+  const angle = Math.atan2(dy, dx);
+
+  // Clamp vertical angle: can't launch downward past 5°, up past MAX_ANGLE
+  const maxUp   = (-MAX_ANGLE * Math.PI) / 180;
+  const maxDown = (5 * Math.PI) / 180;
+  const clamped = Math.max(maxUp, Math.min(maxDown, angle));
+
+  plane.vx    = Math.cos(clamped) * power * LAUNCH_MULT;
+  plane.vy    = Math.sin(clamped) * power * LAUNCH_MULT;
+  plane.angle = clamped;
+  plane.energy = plane.maxEnergy;
+
+  gameState = "flight";
+  document.getElementById("mobile-hint").textContent = "Segure a tela para dar gás 🔥";
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PHYSICS UPDATE
+═══════════════════════════════════════════════════════════ */
+function updatePhysics(dt) {
+  const speed = Math.hypot(plane.vx, plane.vy);
+
+  // 1. Gravity
+  plane.vy += GRAVITY * dt;
+
+  // 2. Drag (quadratic)
+  if (speed > 1) {
+    const df = DRAG * speed * speed;
+    plane.vx -= (plane.vx / speed) * df * dt;
+    plane.vy -= (plane.vy / speed) * df * dt;
+  }
+
+  // 3. Lift (proportional to speed² but reduced at stall)
+  const liftFactor = speed < STALL_SPEED ? (speed / STALL_SPEED) : 1;
+  const lf = LIFT * speed * speed * liftFactor;
+  plane.vy -= lf * dt;
+
+  // 4. Boost (player holding)
+  if (input.boosting && plane.energy > 0) {
+    // Boost direction = current velocity direction (not just angle)
+    // Cap upward angle to MAX_ANGLE so player can't "stand still"
+    const boostAngle = Math.max(
+      (-MAX_ANGLE * Math.PI) / 180,
+      Math.atan2(plane.vy, plane.vx)
+    );
+    plane.vx += Math.cos(boostAngle) * BOOST_POWER * dt;
+    plane.vy += Math.sin(boostAngle) * BOOST_POWER * dt;
+    plane.energy = Math.max(0, plane.energy - BOOST_DRAIN * dt);
+  } else if (!input.boosting) {
+    // Energy recharges slowly when not boosting
+    plane.energy = Math.min(plane.maxEnergy, plane.energy + 8 * dt);
+  }
+
+  // 5. Clamp max speed
+  const spd2 = Math.hypot(plane.vx, plane.vy);
+  if (spd2 > 1400) {
+    plane.vx = (plane.vx / spd2) * 1400;
+    plane.vy = (plane.vy / spd2) * 1400;
+  }
+
+  // 6. Update position
+  plane.x += plane.vx * dt;
+  plane.y += plane.vy * dt;
+
+  // 7. Smooth angle toward velocity direction
+  const targetAngle = Math.atan2(plane.vy, plane.vx);
+  let da = targetAngle - plane.angle;
+  // Wrap to [-π, π]
+  while (da >  Math.PI) da -= Math.PI*2;
+  while (da < -Math.PI) da += Math.PI*2;
+  plane.angle += da * ROT_SPEED * dt;
+
+  // 8. Camera follows plane smoothly (horizontal only)
+  const targetCamX = plane.x - GAME_W * 0.25;
+  camera.x += (targetCamX - camera.x) * 0.08;
+
+  // 9. Background parallax
+  const spd = Math.hypot(plane.vx, plane.vy);
+  const scrollDt = spd * dt;
+  bgSkyX += scrollDt * 0.08;
+  bgMidX += scrollDt * 0.18;
+  bgFgX  += scrollDt * 0.32;
+
+  // 10. Distance
+  runDist = Math.max(runDist, Math.floor(plane.x / 10));
+
+  // 11. Ground collision
+  if (plane.y >= GROUND_Y) {
+    plane.y = GROUND_Y;
+    endRun();
+  }
+  // Off-left safety
+  if (plane.x < 0) { plane.x = 0; plane.vx = Math.abs(plane.vx) * 0.3; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ITEM COLLISIONS
+═══════════════════════════════════════════════════════════ */
+function checkItems(dt, ts) {
+  const pr = 22;
+  for (const it of worldItems) {
+    if (it.collected) continue;
+
+    // Move obstacles
+    if (it.type === "obstacle") {
+      if (it.wave) it.wy += Math.sin(ts * 0.002 + it.phase) * 45 * dt;
+      if (it.fall) it.wy = Math.min(GROUND_Y - it.h/2, it.wy + 200 * dt);
+      if (it.spin) it.rot = (it.rot||0) + 90 * dt;
+    }
+
+    const dx   = plane.x - it.wx;
+    const dy   = plane.y - it.wy;
+    const hitR = pr + Math.min(it.w||30, it.h||30) * 0.4;
+    if (Math.hypot(dx, dy) > hitR) continue;
+
+    it.collected = true;
+
+    if (it.type === "collect") {
+      comboCount++;
+      comboTimer = 1800;
+      const mult   = comboCount >= 8 ? 3 : comboCount >= 5 ? 2 : comboCount >= 3 ? 1.5 : 1;
+      const earned = Math.round((it.pts||50) * mult);
+      score  += earned;
+      coins  += Math.round(earned * 0.2);
+      itemsCollected++;
+      spawnBurst(plane.x - camera.x, plane.y, "#C8A050", 8);
+      spawnFloatText("+" + earned + (mult>1?" ×"+mult:""), plane.x - camera.x, plane.y - 20, "#C8A050");
+    } else if (it.type === "goal") {
+      endRun(true);
+    } else if (it.type === "obstacle") {
+      spawnBurst(plane.x - camera.x, plane.y, "#C46D28", 10);
+      spawnFloatText("💥 " + (it.label||""), plane.x - camera.x, plane.y - 20, "#C46D28");
+      // Penalty: knock the plane
+      plane.vy += 300;
+      plane.vx *= 0.6;
+      comboCount = 0;
+    }
+  }
+
+  // Combo decay
+  if (comboTimer > 0) {
+    comboTimer -= dt * 1000;
+    if (comboTimer <= 0) comboCount = 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   END RUN
+═══════════════════════════════════════════════════════════ */
+function endRun(goalReached) {
+  if (gameState === "result") return;
+  gameState = "result";
+
+  const d      = DESTINATIONS[currentDest];
+  const dist   = runDist;
+  const distScore = Math.floor(dist * 0.8);
+  score += distScore;
+  if (goalReached) score += 500; // bonus for reaching target
+
+  saveBest(currentDest, dist);
+
+  const stars = dist >= d.starThresholds[2] ? 3 :
+                dist >= d.starThresholds[1] ? 2 :
+                dist >= d.starThresholds[0] ? 1 : 0;
+
+  // Show result overlay in canvas
+  document.getElementById("ov-emoji").textContent = goalReached ? "🎉" : "✈️";
+  document.getElementById("ov-title").textContent = goalReached
+    ? "Chegou a " + d.name + "!" : "Voo encerrado!";
+  document.getElementById("ov-sub").textContent = goalReached
+    ? d.tagline : "O avião aterrissou. " + dist + " m voados!";
+  document.getElementById("ov-stars").textContent = "⭐".repeat(stars)+"☆".repeat(3-stars);
+
+  const statsEl = document.getElementById("ov-stats");
+  statsEl.style.display = "grid";
+  statsEl.innerHTML = `
+    <div class="ov-stat"><strong>${dist} m</strong>Distância</div>
+    <div class="ov-stat"><strong>${itemsCollected}</strong>Itens</div>
+    <div class="ov-stat"><strong>${score}</strong>Pontos</div>
+    <div class="ov-stat"><strong>${coins}</strong>Moedas</div>`;
+
+  document.getElementById("ov-btns").innerHTML = `
+    <button class="game-btn game-btn--main" onclick="goToResult()">📊 Ver resultado</button>
+    <button class="game-btn" onclick="replayFlight()">↩ Tentar de novo</button>`;
+
+  showOverlay(true);
+  unlockScroll();
+}
+
+window.goToResult = function() {
+  stopGame();
+  const d    = DESTINATIONS[currentDest];
+  const dist = runDist;
+  const stars= dist>=d.starThresholds[2]?3: dist>=d.starThresholds[1]?2: dist>=d.starThresholds[0]?1:0;
+
+  document.getElementById("res-emoji").textContent   = "✈️";
+  document.getElementById("res-title").textContent   = dist >= d.targetDist ? "Chegou a "+d.name+"!" : "Voo encerrado";
+  document.getElementById("res-tagline").textContent = d.tagline;
+  document.getElementById("res-stars").textContent   = "⭐".repeat(stars)+"☆".repeat(3-stars);
+  document.getElementById("result-stats").innerHTML  = `
+    <div class="result-stat"><div class="result-stat__val">${dist} m</div><div class="result-stat__lbl">Distância</div></div>
+    <div class="result-stat"><div class="result-stat__val">${score}</div><div class="result-stat__lbl">Pontos</div></div>
+    <div class="result-stat"><div class="result-stat__val">${itemsCollected}</div><div class="result-stat__lbl">Itens</div></div>
+    <div class="result-stat"><div class="result-stat__val">${coins}</div><div class="result-stat__lbl">Moedas</div></div>`;
+  document.getElementById("res-replay-btn").textContent = "↩ Voar em " + d.name;
+  showScreen("screen-result");
+  loadTop10("flight-top10");
+
+  if (dist >= d.targetDist && currentDest === 4) {
+    setTimeout(goToFinalWin, 2000);
+  }
+};
+
+function goToFinalWin() {
+  stopGame();
+  showScreen("screen-win");
+  const bests = getSave().bests || [0,0,0,0,0];
+  document.getElementById("album-grid").innerHTML = DESTINATIONS.map((d,i) => `
+    <div class="album-polaroid${bests[i]>0?" earned":""}">
+      <div style="font-size:1.4rem">${d.flag}</div>
+      <div style="font-size:.6rem;color:var(--fl-amber);margin-top:.2rem">${d.name}</div>
+      <div style="font-size:.56rem;color:var(--fl-sage-dk)">${bests[i]>0?bests[i]+" m":"—"}</div>
+    </div>`).join("");
+  loadTop10("win-top10");
+}
+
+function stopGame() {
+  gameState = "idle";
+  if (raf) { cancelAnimationFrame(raf); raf = null; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PARTICLES
+═══════════════════════════════════════════════════════════ */
+function spawnBurst(sx, sy, color, n) {
+  for (let i=0; i<n; i++) {
+    const a = (Math.PI*2*i/n)+Math.random()*.5;
+    const s = 2+Math.random()*3.5;
+    particles.push({x:sx,y:sy,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1,color,size:4+Math.random()*4,life:1,alpha:1,type:"dot"});
+  }
+}
+function spawnFloatText(text, sx, sy, color) {
+  particles.push({type:"text",text,x:sx,y:sy,color,alpha:1,life:1.3,vy:-1.1});
+}
+function updateParticles(dt) {
+  for (let i=particles.length-1; i>=0; i--) {
+    const p = particles[i];
+    p.life  -= dt / (p.type==="text"?1.3:0.9);
+    p.alpha  = Math.max(0,p.life);
+    p.y     += (p.vy||0) * dt * 60;
+    if (p.vx) { p.x+=p.vx*dt*60; p.vy=(p.vy||0)+0.08; }
+    if (p.size) p.size *= 0.98;
+    if (p.life <= 0) particles.splice(i,1);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MIRROR TILE DRAW
+═══════════════════════════════════════════════════════════ */
+function drawMirrorTile(scrollX, img, drawW, y, h, alpha) {
+  if (!img || !img.ok) return;
+  const period = drawW * 2;
+  const offset = scrollX % period;
+  const startX = -offset;
+  ctx.save();
+  ctx.globalAlpha = alpha !== undefined ? alpha : 1;
+  for (let x = startX; x < GAME_W + drawW; x += drawW) {
+    const idx      = Math.floor((x - startX) / drawW + Math.floor(scrollX / drawW));
+    const mirrored = idx % 2 === 1;
+    if (mirrored) {
+      ctx.save();
+      ctx.translate(x + drawW, y);
+      ctx.scale(-1, 1);
+      ctx.drawImage(img, 0, 0, drawW, h);
+      ctx.restore();
+    } else {
+      ctx.drawImage(img, x, y, drawW, h);
+    }
+  }
+  ctx.restore();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DRAW BACKGROUND — fades applied, mid/fg faded out
+═══════════════════════════════════════════════════════════ */
+function drawBackground() {
+  const d  = DESTINATIONS[currentDest];
+  const skyH = GAME_H * 0.72; // sky covers most of frame
+
+  /* — SKY solid fill first — */
+  ctx.fillStyle = d.sky;
+  ctx.fillRect(0, 0, GAME_W, skyH);
+
+  /* — Horizon gradient strip — */
+  const grad = ctx.createLinearGradient(0, skyH*0.55, 0, skyH);
+  grad.addColorStop(0, d.sky);
+  grad.addColorStop(1, d.horizon);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, skyH*0.55, GAME_W, skyH*0.45);
+
+  /* — SKY image (very faded so horizon shows through) — */
+  const skyI = loadImg(`assets/img/bg-${d.id}-sky.png`);
+  if (skyI.ok) {
+    const sh = skyI.naturalHeight||400;
+    const sw = skyI.naturalWidth*(skyH/sh);
+    drawMirrorTile(bgSkyX, skyI, sw, 0, skyH, 0.55);
+  } else {
+    // Fallback: procedural skyline silhouette
+    drawFallbackSkyline(d);
+  }
+
+  /* — GROUND — */
+  ctx.fillStyle = d.ground;
+  ctx.fillRect(0, skyH, GAME_W, GAME_H - skyH);
+  ctx.fillStyle = d.groundLine;
+  ctx.fillRect(0, skyH, GAME_W, 3);
+
+  /* — MID layer — heavily faded so items are visible — */
+  const midI = loadImg(`assets/img/bg-${d.id}-mid.png`);
+  if (midI.ok) {
+    const mh  = midI.naturalHeight||300;
+    const mh2 = GAME_H * 0.40;
+    const mw  = midI.naturalWidth*(mh2/mh);
+    const my  = GAME_H * 0.38;
+    drawMirrorTile(bgMidX, midI, mw, my, mh2, 0.30);
+    // Fade mask top of mid layer
+    const mfade = ctx.createLinearGradient(0, my, 0, my + mh2*0.4);
+    mfade.addColorStop(0, d.sky + "CC");
+    mfade.addColorStop(1, "transparent");
+    ctx.fillStyle = mfade;
+    ctx.fillRect(0, my, GAME_W, mh2*0.4);
+  }
+
+  /* — FRONT layer — very faded — */
+  const fgI = loadImg(`assets/img/bg-${d.id}-front.png`);
+  if (fgI.ok) {
+    const fh  = fgI.naturalHeight||280;
+    const fh2 = GAME_H * 0.30;
+    const fw  = fgI.naturalWidth*(fh2/fh);
+    const fy  = GAME_H * 0.62;
+    drawMirrorTile(bgFgX, fgI, fw, fy, fh2, 0.22);
+  }
+}
+
+function drawFallbackSkyline(d) {
+  ctx.save();
+  ctx.fillStyle = d.skylineColor||"rgba(26,26,64,.18)";
+  ctx.globalAlpha = 0.18;
+  ctx.beginPath();
+  ctx.moveTo(0, GAME_H*0.55);
+  const N=16, seed=d.id.charCodeAt(0);
+  for (let i=0;i<=N;i++) {
+    const x=(i/N)*GAME_W;
+    const h=16+(Math.sin(i*1.4+seed)*0.5+0.5)*60;
+    ctx.lineTo(x, GAME_H*0.55-h);
+  }
+  ctx.lineTo(GAME_W, GAME_H*0.55);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DRAW WORLD ITEMS
+═══════════════════════════════════════════════════════════ */
+function drawWorldItems(ts) {
+  for (const it of worldItems) {
+    if (it.collected) continue;
+    const sx = it.wx - camera.x;
+    if (sx < -80 || sx > GAME_W + 80) continue;
+
+    const sy = it.wy;
+
+    ctx.save();
+    ctx.translate(sx, sy);
+
+    if (it.spin) {
+      ctx.rotate(((it.rot||0) * Math.PI) / 180);
+    }
+
+    if (it.type === "collect") {
+      // Bob animation
+      const bob = Math.sin(ts*0.003+it.phase)*5;
+      ctx.translate(0, bob);
+      // Glow ring
+      ctx.save();
+      ctx.globalAlpha = 0.25;
+      ctx.fillStyle = "#C8A050";
+      ctx.beginPath(); ctx.arc(0,0,20,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+
+    if (it.type === "goal") {
+      // Finish flag
+      ctx.font = "24px serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("🏁", 0, -it.h/2 + 12);
+      ctx.strokeStyle = "#506B45";
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(0,-it.h/2); ctx.lineTo(0,it.h/2); ctx.stroke();
+      ctx.restore();
+      continue;
+    }
+
+    const sz = Math.max(it.w||40, it.h||40) * 0.85;
+    ctx.font = `${sz}px serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(it.emoji, 0, 0);
+
+    ctx.restore();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DRAW PLANE
+═══════════════════════════════════════════════════════════ */
+const trailPts = [];
+function drawPlane(ts) {
+  const sx = plane.x - camera.x;
+  const sy = plane.y;
+
+  // Trail
+  trailPts.push({x:sx-20*Math.cos(plane.angle), y:sy-20*Math.sin(plane.angle), t:ts});
+  while (trailPts.length > 20) trailPts.shift();
+  for (const p of trailPts) {
+    const age = (ts - p.t) / 500;
+    if (age > 1) continue;
+    ctx.save();
+    ctx.globalAlpha = (1-age)*0.45;
+    ctx.fillStyle = input.boosting ? "#C8A050" : "#D98A82";
+    if (Math.floor(ts/120+trailPts.indexOf(p)) % 3 === 0) {
+      // heart
+      ctx.font = `${(1-age)*9}px serif`;
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("♥",p.x,p.y);
+    } else {
+      const sz = (1-age)*4;
+      ctx.fillRect(p.x-sz/2, p.y-sz/2, sz, sz);
+    }
+    ctx.restore();
+  }
+
+  // Boost flame
+  if (input.boosting && plane.energy > 0) {
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.rotate(plane.angle);
+    ctx.globalAlpha = 0.7 + Math.sin(ts*0.02)*0.3;
+    ctx.font = "16px serif";
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText("🔥", -28, 0);
+    ctx.restore();
+  }
+
+  // Plane sprite
+  const planeImg = loadImg("assets/img/packing-airplane-takeoff.png");
+  ctx.save();
+  ctx.translate(sx, sy);
+  ctx.rotate(plane.angle);
+
+  if (planeImg.ok) {
+    const pw = 58, ph = 38;
+    ctx.drawImage(planeImg, -pw/2, -ph/2, pw, ph);
+  } else {
+    // Fallback drawn plane
+    ctx.fillStyle = "#FBF7EF";
+    ctx.beginPath();
+    ctx.moveTo(30,0); ctx.lineTo(-18,-13); ctx.lineTo(-8,0); ctx.lineTo(-18,13);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#7A9B6E";
+    ctx.beginPath();
+    ctx.moveTo(30,0); ctx.lineTo(-8,0); ctx.lineTo(-18,-13); ctx.lineTo(8,-6);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle="#C46D28"; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(30,0); ctx.lineTo(-8,0); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DRAW AIMING INDICATOR
+═══════════════════════════════════════════════════════════ */
+function drawAimIndicator() {
+  if (!input.drag || !input.cur) {
+    // Pulse ring around plane to indicate it's draggable
+    const sx = plane.x - camera.x;
+    ctx.save();
+    ctx.strokeStyle = "#C8A050";
+    ctx.lineWidth   = 1.5;
+    ctx.globalAlpha = 0.5 + Math.sin(Date.now()*0.005)*0.3;
+    ctx.setLineDash([5,4]);
+    ctx.beginPath();
+    ctx.arc(sx, plane.y, 38, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.restore();
+    // Label
+    ctx.save();
+    ctx.font="bold 10px Inter,sans-serif";
+    ctx.fillStyle="#C46D28";
+    ctx.textAlign="center";
+    ctx.globalAlpha=0.7;
+    ctx.fillText("ARRASTE", sx, plane.y + 50);
+    ctx.restore();
+    return;
+  }
+
+  const sx   = plane.x - camera.x;
+  const sy   = plane.y;
+  const dx   = input.drag.sx - input.cur.x;
+  const dy   = input.drag.sy - input.cur.y;
+  const raw  = Math.hypot(dx,dy);
+  const pct  = Math.min(raw, MAX_LAUNCH) / MAX_LAUNCH;
+
+  // Arrow from plane in launch direction
+  ctx.save();
+  ctx.strokeStyle = "#C46D28";
+  ctx.lineWidth   = 2.5;
+  ctx.setLineDash([6,5]);
+  ctx.globalAlpha = 0.85;
+
+  const angle = Math.atan2(dy, dx);
+  const len   = pct * 80;
+  ctx.beginPath();
+  ctx.moveTo(sx, sy);
+  ctx.lineTo(sx + Math.cos(angle)*len, sy + Math.sin(angle)*len);
+  ctx.stroke();
+
+  // Power circle
+  ctx.setLineDash([]);
+  ctx.strokeStyle = "#C8A050";
+  ctx.lineWidth   = 2;
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  ctx.arc(input.drag.sx, input.drag.sy, Math.min(raw,MAX_LAUNCH)*0.35, 0, Math.PI*2);
+  ctx.stroke();
+
+  // Force bar
+  ctx.fillStyle = pct > 0.8 ? "#C46D28" : "#C8A050";
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx-30, sy+40, 60*pct, 6);
+  ctx.strokeStyle = "rgba(255,255,255,.5)";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(sx-30, sy+40, 60, 6);
+
+  ctx.restore();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DRAW HUD (canvas-based, always visible during flight)
+═══════════════════════════════════════════════════════════ */
+function drawHUD() {
+  const d = DESTINATIONS[currentDest];
+
+  // Top bar background
+  ctx.save();
+  const barGrad = ctx.createLinearGradient(0,0,0,48);
+  barGrad.addColorStop(0,"rgba(26,26,64,.72)");
+  barGrad.addColorStop(1,"transparent");
+  ctx.fillStyle = barGrad;
+  ctx.fillRect(0,0,GAME_W,48);
+
+  // Lives / hearts (using emoji)
+  const heartImg = loadImg("assets/img/icon-heart-full.png");
+  for (let i=0; i<3; i++) {
+    const hx = 10 + i*22;
+    if (heartImg.ok) {
+      ctx.globalAlpha = 1;
+      ctx.drawImage(heartImg, hx, 8, 16, 16);
+    } else {
+      ctx.font="14px serif"; ctx.textAlign="left"; ctx.textBaseline="top";
+      ctx.globalAlpha=1; ctx.fillText("❤️", hx, 7);
+    }
+  }
+
+  // Distance bar
+  const barX=76, barY=10, barW=GAME_W-160, barH=10;
+  ctx.globalAlpha = 0.4;
+  ctx.fillStyle="#fff";
+  ctx.beginPath(); ctx.roundRect(barX, barY, barW, barH, 5); ctx.fill();
+
+  const pct = Math.min(1, runDist / d.targetDist);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = pct >= 1 ? "#C8A050" : "#7A9B6E";
+  if (pct > 0) {
+    ctx.beginPath(); ctx.roundRect(barX, barY, barW*pct, barH, 5); ctx.fill();
+  }
+
+  // Destination name + distance
+  ctx.fillStyle="#fff"; ctx.globalAlpha=0.8;
+  ctx.font="bold 9px Inter,sans-serif"; ctx.textAlign="center";
+  ctx.fillText(d.name.toUpperCase()+" · "+runDist+"m / "+d.targetDist+"m", barX+barW/2, barY+barH+10);
+
+  // Score (top-right)
+  ctx.fillStyle="#fff"; ctx.globalAlpha=1;
+  ctx.font="bold 12px Inter,sans-serif"; ctx.textAlign="right";
+  ctx.fillText(score+" pts", GAME_W-8, 14);
+
+  ctx.restore();
+
+  // Energy bar (bottom)
+  drawEnergyBar();
+
+  // Combo text
+  if (comboCount >= 2) {
+    ctx.save();
+    ctx.font="bold 18px 'Cormorant Garamond',serif";
+    ctx.fillStyle="#C8A050";
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.globalAlpha = 0.85 + Math.sin(Date.now()*0.01)*0.15;
+    ctx.fillText("×"+comboCount+" COMBO!", GAME_W/2, GAME_H/2 - 50);
+    ctx.restore();
+  }
+
+  // Float particles (drawn over HUD so they're visible)
+  drawParticles();
+}
+
+function drawEnergyBar() {
+  const bx=8, by=GAME_H-20, bw=90, bh=8;
+  const pct = plane.energy / plane.maxEnergy;
+
+  ctx.save();
+  // Label
+  ctx.fillStyle="#fff"; ctx.globalAlpha=0.75;
+  ctx.font="bold 8px Inter,sans-serif"; ctx.textAlign="left";
+  ctx.fillText("GÁS", bx, by-3);
+
+  // Track
+  ctx.globalAlpha=0.3; ctx.fillStyle="#fff";
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 4); ctx.fill();
+
+  // Fill — color changes: green>yellow>red
+  const col = pct>0.5 ? "#7A9B6E" : pct>0.25 ? "#C8A050" : "#C46D28";
+  ctx.globalAlpha = input.boosting ? (0.8+Math.sin(Date.now()*0.015)*0.2) : 0.9;
+  ctx.fillStyle = col;
+  if (pct > 0) {
+    ctx.beginPath(); ctx.roundRect(bx, by, bw*pct, bh, 4); ctx.fill();
+  }
+
+  // Flash when boosting
+  if (input.boosting && plane.energy > 0) {
+    ctx.globalAlpha=0.5; ctx.fillStyle="#fff";
+    ctx.beginPath(); ctx.roundRect(bx, by, bw*pct*0.4, bh/2, 3); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawParticles() {
+  for (const p of particles) {
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    if (p.type === "text") {
+      ctx.font="bold 12px Inter,sans-serif";
+      ctx.fillStyle = p.color;
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText(p.text, p.x, p.y);
+    } else {
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(.5,p.size||3), 0, Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DRAW GROUND & GROUND ITEMS
+═══════════════════════════════════════════════════════════ */
+function drawGround() {
+  const d  = DESTINATIONS[currentDest];
+  const gy = GROUND_Y;
+  // Already drawn in drawBackground, just add motion dashes
+  const dashW = 40, dashH = 3;
+  ctx.fillStyle = "rgba(255,255,255,.1)";
+  const offset = -(camera.x * 0.9) % (dashW+30);
+  for (let x = offset; x < GAME_W; x += dashW+30) {
+    ctx.fillRect(x, gy+8, dashW, dashH);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MAIN DRAW FRAME
+═══════════════════════════════════════════════════════════ */
+function drawFrame(ts) {
+  ctx.clearRect(0,0,GAME_W,GAME_H);
+  drawBackground();
+  drawGround();
+  drawWorldItems(ts||0);
+  if (gameState === "aiming") drawAimIndicator();
+  if (gameState !== "idle")   drawPlane(ts||0);
+  if (gameState === "flight" || gameState === "result") drawHUD();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GAME LOOP
+═══════════════════════════════════════════════════════════ */
+function gameLoop(ts) {
+  const dt = lastTime ? Math.min((ts - lastTime) / 1000, 0.033) : 0.016;
+  lastTime = ts;
+
+  if (gameState === "flight") {
+    updatePhysics(dt);
+    checkItems(dt, ts);
+    updateParticles(dt);
+  } else if (gameState === "aiming") {
+    // slight idle bob
+    plane.y = GROUND_Y - 20 + Math.sin(ts*0.002)*3;
+    updateParticles(dt);
+  } else if (gameState === "result") {
+    updateParticles(dt);
+  }
+
+  drawFrame(ts);
+
+  if (gameState !== "idle") {
+    raf = requestAnimationFrame(gameLoop);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCORE API
+═══════════════════════════════════════════════════════════ */
+function escJ(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+window.flightSaveScore = async function() {
+  const ni  = document.getElementById("flight-nome");
+  const me  = document.getElementById("flight-save-msg");
+  const btn = ni?.nextElementSibling;
+  const nome = (ni?.value||"").trim();
+  if (!nome) { me.style.color="var(--fl-terra)"; me.textContent="Informe seu nome."; ni?.focus(); return; }
+  if (btn) { btn.disabled=true; btn.innerHTML='<span class="spinner"></span>'; }
+  try {
+    const r = await fetch(FLIGHT_API,{method:"POST",body:JSON.stringify({action:"score",jogo:"luademel-"+DESTINATIONS[currentDest].id,nome,pontos:score})});
+    const j = await r.json();
+    if (j.sucesso) {
+      me.style.color="var(--fl-sage-dk)"; me.textContent="Recorde salvo! ";
+      me.insertAdjacentHTML("beforeend","<img src='assets/img/icon-trophy.png' alt='' style='width:1em;height:1em;vertical-align:middle' onerror=\"this.style.display='none'\">");
+      if (btn) { btn.disabled=true; btn.textContent="Salvo ✓"; }
+      if (ni) ni.disabled=true;
+      loadTop10("flight-top10");
+    } else throw new Error();
+  } catch {
+    if (btn) { btn.disabled=false; btn.textContent="Salvar"; }
+    me.style.color="var(--fl-terra)"; me.textContent="Não conseguimos salvar. Tente novamente.";
+  }
+};
+
+async function loadTop10(elId) {
+  const el = document.getElementById(elId); if (!el) return;
+  const jogo = "luademel-"+DESTINATIONS[currentDest].id;
+  el.innerHTML=`<h3>🏆 Top 10 — ${DESTINATIONS[currentDest].name}</h3><p class="t10-loading">Carregando…</p>`;
+  try {
+    const r = await fetch(`${FLIGHT_API}?action=top10&jogo=${jogo}`);
+    const d = await r.json();
+    if (!d?.lista?.length) { el.innerHTML=`<h3>🏆 Top 10 — ${DESTINATIONS[currentDest].name}</h3><p class="t10-empty">Nenhum recorde ainda!</p>`; return; }
+    const medals=["🥇","🥈","🥉"]; const cls=["top10-item--gold","top10-item--silver","top10-item--bronze"];
+    el.innerHTML=`<h3>🏆 Top 10 — ${DESTINATIONS[currentDest].name}</h3><ul class="top10-list">${
+      d.lista.map((it,i)=>`<li class="top10-item ${cls[i]||""}"><span class="t10-pos">${medals[i]||i+1}</span><span class="t10-name">${escJ(it.nome)}</span><span class="t10-pts">${it.pontos} pts</span></li>`).join("")}</ul>`;
+  } catch { el.innerHTML=`<h3>🏆 Top 10 — ${DESTINATIONS[currentDest].name}</h3><p class="t10-empty">Não foi possível carregar.</p>`; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
+renderDestGrid();
+// Draw idle canvas
+ctx.fillStyle = "#EBF0E6";
+ctx.fillRect(0,0,GAME_W,GAME_H);
+ctx.font="40px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+ctx.fillText("✈️", GAME_W/2, GAME_H/2);
+  </script>
+  <script src="assets/js/scroll-to-game.js"></script>
+</body>
+</html>
     /* ── TOKENS ─────────────────────────────── */
     :root {
       --fl-cream:     #FBF7EF;
