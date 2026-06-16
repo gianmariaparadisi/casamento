@@ -73,13 +73,13 @@
     }
     .conn-word {
       position: relative;
-      overflow: hidden;
+      overflow: visible;
       border: 1.5px solid rgba(216,205,188,.8);
       border-radius: 11px;
-      padding: 10px 4px;
+      padding: 8px 6px;
       text-align: center;
       font-family: var(--font-display);
-      font-size: 1.05rem; font-weight: 700;
+      font-size: clamp(.78rem, 2.2vw, 1rem); font-weight: 700;
       color: #4A3820;
       cursor: pointer;
       user-select: none;
@@ -89,6 +89,9 @@
       background: rgba(255,255,255,.82);
       box-shadow: 0 3px 10px rgba(82,57,34,.09);
       -webkit-tap-highlight-color: transparent;
+      word-break: break-word;
+      hyphens: auto;
+      line-height: 1.2;
     }
     /* Card-back texture behind each word */
     .conn-word::before {
@@ -98,8 +101,9 @@
       opacity: 0.14;
       pointer-events:none;
       border-radius: 9px;
+      overflow: hidden;
     }
-    .conn-word span { position:relative;z-index:1; }
+    .conn-word span { position:relative;z-index:1;word-break:break-word;hyphens:auto; }
     .conn-word:hover { border-color:var(--sage); background:rgba(235,245,230,.9); }
     .conn-word.selected { background:var(--sage-dark); border-color:var(--sage-dark); color:white; box-shadow:0 0 0 2px rgba(80,120,70,.3); }
     .conn-word.selected::before { opacity:.06; }
@@ -148,7 +152,7 @@
     .g3 { background: linear-gradient(135deg,#D4A0D8,#B06CB8); color:#2a0a30; border:1.5px solid rgba(160,80,180,.35);}
 
     @media(max-width:400px){
-      .conn-word { font-size:.9rem;min-height:46px;padding:7px 2px; }
+      .conn-word { font-size:.78rem;min-height:46px;padding:6px 4px; }
     }
 
     /* ─── MOBILE: trava rolagem da página durante o jogo ─────── */
