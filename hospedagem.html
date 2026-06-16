@@ -101,8 +101,9 @@
     /* Mapa geral compartilhado */
     .hospedagem__mapa-geral { margin-top:2rem; }
     .hospedagem__mapa-titulo { font-family:var(--font-display);font-size:1.05rem;font-weight:400;color:var(--text-main);margin-bottom:.6rem;text-align:center; }
-    .hospedagem__mapa-legenda { font-size:.72rem;color:var(--text-muted);text-align:center;margin-top:.45rem; }
-    .hospedagem__mapa-geral .hotel__mapa-img { max-height:320px;object-fit:contain;background:#f5f5f2; }
+    .hospedagem__mapa-geral .hotel__mapa-wrap { max-width:100%; }
+    .hospedagem__mapa-geral .hotel__mapa-img { max-height:none;height:480px;object-fit:cover;object-position:center; }
+    @media(max-width:640px){ .hospedagem__mapa-geral .hotel__mapa-img { height:240px; } }
 
     .hospedagem__nota { background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius-lg);padding:1.5rem 2rem;margin-top:3rem;font-size:.85rem;color:var(--text-muted);line-height:1.75; }
     .hospedagem__nota strong { color:var(--text-main); }
@@ -327,9 +328,8 @@
       <div class="hospedagem__mapa-geral reveal">
         <p class="hospedagem__mapa-titulo" data-it="Come arrivare alla Fazenda Quilombo">Como chegar à Fazenda Quilombo</p>
         <div class="hotel__mapa-wrap">
-          <img src="assets/img/map-limeira.png" alt="Rotas dos hotéis até a Fazenda Quilombo" class="hotel__mapa-img" style="max-height:320px" loading="lazy">
+          <img src="assets/img/map-limeira.png" alt="Rotas dos hotéis até a Fazenda Quilombo" class="hotel__mapa-img" loading="lazy">
         </div>
-        <p class="hospedagem__mapa-legenda" data-it="Screenshot Google Maps · Fazenda Quilombo — SP-151 km 4, Limeira">Screenshot Google Maps · Fazenda Quilombo — SP-151 km 4, Limeira</p>
       </div>
 
       <div class="hospedagem__nota reveal" data-it-html="<strong>💡 Consiglio:</strong> il matrimonio è il giorno <strong>12 dicembre (sabato)</strong>. Se volete sfruttare il viaggio e passare il weekend, vi consigliamo di prenotare anche la notte di venerdì (11/12) per arrivare con calma. Dicembre è alta stagione, prenotate in anticipo!<br><br>I valori delle tariffe mostrati sono approssimativi (ricerca recente) e possono variare molto in base alla data e disponibilità, controllate sempre il valore aggiornato sul sito ufficiale o su Booking prima di prenotare.">
