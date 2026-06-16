@@ -24,30 +24,22 @@
     .scene-tabs{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-bottom:.7rem;}
     .scene-tab{padding:.32rem .78rem;border-radius:999px;border:1.5px solid rgba(216,205,188,.9);background:rgba(255,255,255,.7);font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6C6258;cursor:pointer;transition:all .14s;}
     .scene-tab.active,.scene-tab:hover{background:var(--sage);color:#fff;border-color:var(--sage);}
-    .game-area{display:grid;grid-template-columns:1fr 180px;gap:.9rem;align-items:start;}
+    .game-area{display:grid;grid-template-columns:1fr 175px;gap:.9rem;align-items:start;}
     @media(max-width:650px){.game-area{grid-template-columns:1fr;}}
-
-    /* Canvas scene */
-    .scene-wrap{position:relative;border-radius:16px;overflow:hidden;box-shadow:0 14px 50px rgba(82,57,34,.14);cursor:crosshair;}
-    canvas#sceneCanvas{display:block;width:100%;touch-action:none;}
-
-    /* Checklist */
+    .scene-wrap{position:relative;border-radius:16px;overflow:hidden;box-shadow:0 14px 50px rgba(82,57,34,.14);}
+    canvas#sceneCanvas{display:block;width:100%;touch-action:none;cursor:crosshair;}
     .checklist{background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.9);border-radius:14px;padding:.7rem .6rem;box-shadow:0 8px 26px rgba(82,57,34,.09);}
     .checklist h3{font-family:var(--font-display);font-size:.95rem;font-weight:400;text-align:center;margin-bottom:.5rem;}
     .ci{display:flex;align-items:center;gap:.38rem;border-radius:9px;border:1.5px solid rgba(216,205,188,.9);background:#fff;padding:.38rem .44rem;margin-bottom:.3rem;transition:all .18s;}
-    .ci img.ci-icon{width:28px;height:28px;object-fit:contain;border-radius:50%;flex-shrink:0;}
-    .ci span{font-size:.68rem;font-weight:600;color:#6C6258;flex:1;}
+    .ci img.ci-icon{width:26px;height:26px;object-fit:contain;border-radius:50%;flex-shrink:0;}
+    .ci span{font-size:.66rem;font-weight:600;color:#6C6258;flex:1;}
     .ci.found{background:rgba(235,240,230,.7);border-color:var(--sage);}
     .ci.found span{color:var(--sage-dark);text-decoration:line-through;}
-    .ci img.ci-check{width:16px;height:16px;object-fit:contain;display:none;}
+    .ci img.ci-check{width:14px;height:14px;object-fit:contain;display:none;}
     .ci.found img.ci-check{display:block;}
     .hint-wrap{display:flex;flex-direction:column;align-items:center;gap:.25rem;margin-top:.55rem;}
-    .hint-btn{display:flex;align-items:center;gap:.3rem;padding:.38rem .82rem;border-radius:999px;border:1.5px solid rgba(200,160,80,.4);background:rgba(255,248,220,.65);color:#7A5822;font-size:.68rem;font-weight:600;cursor:pointer;transition:all .14s;}
+    .hint-btn{display:flex;align-items:center;gap:.3rem;padding:.38rem .82rem;border-radius:999px;border:1.5px solid rgba(200,160,80,.4);background:rgba(255,248,220,.65);color:#7A5822;font-size:.68rem;font-weight:600;cursor:pointer;}
     .hint-btn img{width:18px;height:18px;object-fit:contain;}
-    .hint-btn:hover{background:rgba(255,248,220,.95);}
-    .hint-count{font-size:.62rem;color:#A47845;text-align:center;}
-
-    /* Modals */
     .modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:rgba(251,247,239,.9);backdrop-filter:blur(8px);}
     .modal[hidden]{display:none;}
     .modal__card{width:min(94%,420px);background:rgba(255,255,255,.96);border:1px solid rgba(216,205,188,.95);border-radius:22px;padding:1.6rem;text-align:center;box-shadow:0 22px 70px rgba(82,57,34,.18);}
@@ -69,7 +61,6 @@
     .top10 .pos{font-family:var(--font-display);font-size:.9rem;width:1.2rem;text-align:center;color:#A47845;}
     .top10 .name{flex:1;font-weight:500;}.top10 .pts{font-weight:700;color:#7B4B22;}
     @media(max-width:480px){.save-box__row{flex-direction:column}.game-btn{width:100%}}
-    @keyframes foundRing{0%{opacity:1;transform:translate(-50%,-50%) scale(0.5)}100%{opacity:0;transform:translate(-50%,-50%) scale(2)}}
   </style>
 </head>
 <body class="game-page">
@@ -80,23 +71,21 @@
   <main class="game-shell">
     <p class="game-kicker">Objeto Escondido</p>
     <h1 class="game-title">Find Tiago & Gian</h1>
-    <p class="game-sub">Encontre todos os itens escondidos na cena. A cena está cheia de pistas falsas para te confundir!</p>
+    <p class="game-sub">Encontre os 10 itens escondidos! A cena está repleta de objetos para te confundir. Clique diretamente sobre o item!</p>
     <div class="hud">
-      <div class="hud__pill">Encontrados: <strong id="foundCount">0</strong>/<strong id="totalCount">0</strong></div>
+      <div class="hud__pill">Encontrados: <strong id="foundCount">0</strong>/10</div>
       <div class="hud__pill">⏱ <strong id="timerEl">0</strong>s</div>
       <div class="hud__pill">Cliques: <strong id="clickCount">0</strong></div>
     </div>
     <div class="scene-tabs" id="sceneTabs"></div>
     <div class="game-area">
-      <div class="scene-wrap">
-        <canvas id="sceneCanvas"></canvas>
-      </div>
+      <div class="scene-wrap"><canvas id="sceneCanvas"></canvas></div>
       <div class="checklist" id="checklist">
         <h3>Encontre:</h3>
         <div id="checkItems"></div>
         <div class="hint-wrap">
           <button class="hint-btn" onclick="useHint()"><img src="assets/img/find-hint-star.png" alt=""> Dica</button>
-          <span class="hint-count" id="hintCount">3 dicas</span>
+          <span style="font-size:.62rem;color:#A47845" id="hintCount">3 dicas</span>
         </div>
       </div>
     </div>
@@ -107,14 +96,14 @@
     <div class="modal__card">
       <div class="modal__icon"><img src="assets/img/find-magnifier.png" alt=""></div>
       <h2 class="modal__title">Find Tiago & Gian</h2>
-      <p class="modal__text">Encontre os itens na cena! Ela está cheia de objetos falsos e cores parecidas para te confundir. Use dicas se precisar. Clique rápido — cada segundo conta!</p>
+      <p class="modal__text">Encontre 10 itens escondidos em cada cena! Cada cena tem mais de 60 objetos para te confundir — clique exatamente sobre o item certo. 3 dicas disponíveis por cena!</p>
       <div class="btn-row"><button class="game-btn game-btn--main" onclick="startFind()">🔍 Começar</button></div>
     </div>
   </div>
   <div class="modal" id="winModal" hidden>
     <div class="modal__card">
       <div class="modal__icon"><img src="assets/img/find-complete-scene.png" alt=""></div>
-      <h2 class="modal__title" id="winTitle">Tudo encontrado!</h2>
+      <h2 class="modal__title" id="winTitle">Tudo encontrado! ⭐</h2>
       <p class="modal__text" id="winText"></p>
       <div class="btn-row" style="margin-bottom:.65rem">
         <button class="game-btn" onclick="nextScene()">Próxima cena →</button>
@@ -131,150 +120,157 @@
 const API="https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
 const GAME_KEY="find-tiago-gian";
 
-// Sound
 let _AC=null;function getAC(){if(!_AC)_AC=new(window.AudioContext||window.webkitAudioContext)();return _AC;}
 function beep(f,d,v){try{const c=getAC(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.frequency.value=f;g.gain.setValueAtTime(v||.08,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d);}catch(e){}}
 function sndFound(){beep(880,.06,.1);setTimeout(()=>beep(1100,.1,.09),55);}
-function sndMiss(){beep(280,.15,.07,'sawtooth');}
+function sndMiss(){beep(280,.12,.06,'sawtooth');}
 function sndHint(){beep(660,.1,.07);}
 function haptic(p){try{navigator.vibrate&&navigator.vibrate(p||15);}catch(e){}}
 
-// ── Scenes config ─────────────────────────────────────
-// Objects placed at % of canvas (W=800,H=520)
-// "decoys" are objects from other games scattered to confuse
+// Large pool of decoy objects for maximum confusion
+const DECOY_POOL=[
+  {f:"confetti-piece-01.png",s:28},{f:"confetti-piece-02.png",s:24},{f:"confetti-piece-03.png",s:22},
+  {f:"confetti-piece-04.png",s:26},{f:"confetti-piece-05.png",s:24},{f:"confetti-piece-06.png",s:22},
+  {f:"confetti-piece-07.png",s:28},{f:"confetti-piece-08.png",s:24},{f:"confetti-piece-09.png",s:22},
+  {f:"confetti-piece-10.png",s:20},{f:"confetti-piece-11.png",s:22},{f:"confetti-piece-12.png",s:20},
+  {f:"sweet-brigadeiro-01.png",s:40},{f:"sweet-brigadeiro-02.png",s:38},{f:"sweet-eclair-01.png",s:44},
+  {f:"sweet-tart-01.png",s:38},{f:"sweet-truffle-01.png",s:36},{f:"sweet-macaron-01.png",s:42},
+  {f:"sweet-golden.png",s:36},{f:"sweet-cake-01.png",s:44},
+  {f:"cake-candle.png",s:28},{f:"cake-cherry.png",s:24},{f:"cake-slice-falling.png",s:42},
+  {f:"cake-stand.png",s:44},{f:"cake-sprinkles.png",s:38},{f:"cake-layer-cream.png",s:36},
+  {f:"icon-heart-full.png",s:32},{f:"icon-sparkle.png",s:28},{f:"icon-medal-gold.png",s:34},
+  {f:"icon-bouquet-tall.png",s:44},{f:"icon-cocktail.png",s:38},{f:"icon-bell.png",s:32},
+  {f:"icon-calendar.png",s:36},{f:"icon-flower-crown.png",s:42},{f:"icon-laurel.png",s:38},
+  {f:"icon-gift-box.png",s:36},{f:"icon-key.png",s:32},{f:"icon-envelope.png",s:34},
+  {f:"icon-compass.png",s:40},{f:"icon-road-sign.png",s:44},{f:"icon-bus-angle.png",s:50},
+  {f:"icon-suitcase.png",s:42},{f:"icon-camera.png",s:38},{f:"icon-bird.png",s:36},
+  {f:"icon-hanger.png",s:34},{f:"icon-dress.png",s:42},{f:"icon-hamburger.png",s:38},
+  {f:"tile-anel.png",s:40},{f:"tile-bouquet.png",s:44},{f:"tile-bolo.png",s:44},
+  {f:"tile-champagne.png",s:40},{f:"tile-noivo-a.png",s:46},{f:"tile-noivo-b.png",s:46},
+  {f:"match-ring.png",s:38},{f:"match-bouquet.png",s:42},{f:"match-cake.png",s:44},
+  {f:"match-star.png",s:36},{f:"match-champagne.png",s:40},{f:"match-bowtie.png",s:38},
+  {f:"match-airplane.png",s:44},{f:"match-arch.png",s:48},{f:"match-heart.png",s:36},
+  {f:"match-key.png",s:34},{f:"match-suitcase.png",s:40},{f:"moum-macaron01.png",s:46},
+  {f:"moum-macaron03.png",s:44},{f:"moum-macaron07.png",s:42},{f:"moum-macarrao01.png",s:46},
+  {f:"moum-macarrao04.png",s:44},{f:"moum-macarrao09.png",s:42},
+  {f:"fx-gold-sparkles.png",s:38},{f:"fx-sparkle-burst.png",s:34},{f:"fx-bubble-burst.png",s:36},
+  {f:"packing-sunglasses.png",s:40},{f:"packing-camera.png",s:44},{f:"packing-hat.png",s:46},
+  {f:"packing-sandals.png",s:38},{f:"packing-macaron-box.png",s:40},{f:"packing-book.png",s:36},
+  {f:"breakout-paddle.png",s:50},{f:"icon-confetti-burst.png",s:38},{f:"icon-boat.png",s:40},
+  {f:"icon-chapel.png",s:44},{f:"icon-cocktail.png",s:36},{f:"icon-hotel.png",s:42},
+];
+
+// Generate 60 non-overlapping decoy positions for a scene
+// Returns array of {img, x, y, size, rot}
+function generateDecoys(objectZones){
+  const placed=[];
+  const shuffled=[...DECOY_POOL].sort(()=>Math.random()-.5);
+  let attempts=0;
+  for(const d of shuffled){
+    if(placed.length>=65)break;
+    for(let try_=0;try_<30;try_++){
+      const x=4+Math.random()*92; // % of canvas
+      const y=4+Math.random()*92;
+      // Not overlapping with known objects (keep 8% clearance)
+      const tooCloseToObject=objectZones.some(o=>{
+        const dx=x-o.x,dy=y-o.y;
+        return Math.sqrt(dx*dx+dy*dy)<9; // 9% buffer around objects
+      });
+      // Not overlapping with other decoys (5% clearance)
+      const tooCloseToDecoy=placed.some(p=>{
+        const dx=x-p.x,dy=y-p.y;
+        return Math.sqrt(dx*dx+dy*dy)<5.5;
+      });
+      if(!tooCloseToObject&&!tooCloseToDecoy){
+        placed.push({img:d.f,x,y,size:d.s,rot:(Math.random()-.5)*0.6});
+        break;
+      }
+      attempts++;
+    }
+  }
+  return placed;
+}
+
 const SCENES=[
   {id:"farm",name:"Fazenda",img:"scene-farm.png",
    objects:[
-     {id:"rings",   name:"Alianças",   x:19, y:62, r:4.5},
-     {id:"bouquet", name:"Buquê",      x:70, y:52, r:5},
-     {id:"champagne",name:"Champagne", x:84, y:36, r:4.2},
-     {id:"tiago",   name:"Tiago",      x:38, y:78, r:5.5},
-     {id:"gian",    name:"Gian",       x:58, y:72, r:5.5},
-     {id:"cat",     name:"Gatinho",    x:92, y:82, r:4},
-   ],
-   decoys:[
-     {img:"match-bowtie.png",  x:52,y:35,size:38,rot:0.2},
-     {img:"match-star.png",    x:14,y:28,size:32,rot:-0.1},
-     {img:"find-key.png",      x:77,y:70,size:30,rot:0.4},
-     {img:"sweet-macaron-01.png",x:31,y:46,size:34,rot:-0.3},
-     {img:"match-ring.png",    x:65,y:30,size:36,rot:0.1},
-     {img:"cake-candle.png",   x:46,y:84,size:28,rot:0},
-     {img:"confetti-piece-03.png",x:22,y:55,size:22,rot:.6},
-     {img:"tile-anel.png",     x:88,y:55,size:30,rot:.2},
-     {img:"match-champagne.png",x:10,y:44,size:34,rot:-.2},
-     {img:"icon-sparkle.png",  x:78,y:88,size:20,rot:.4},
+     {id:"rings",    name:"Alianças",  x:17,y:58,sz:48},{id:"bouquet",  name:"Buquê",     x:72,y:48,sz:52},
+     {id:"champagne",name:"Champagne", x:86,y:33,sz:44},{id:"tiago",   name:"Tiago",     x:36,y:82,sz:56},
+     {id:"gian",     name:"Gian",      x:58,y:75,sz:56},{id:"cat",     name:"Gatinho",   x:91,y:84,sz:44},
+     {id:"bowtie",   name:"Gravata",   x:24,y:34,sz:42},{id:"key",     name:"Chave",     x:62,y:26,sz:38},
+     {id:"macaron",  name:"Macaron",   x:44,y:60,sz:44},{id:"passport",name:"Passaporte",x:79,y:68,sz:42},
    ]},
   {id:"ceremony",name:"Cerimônia",img:"scene-ceremony.png",
    objects:[
-     {id:"rings",    name:"Alianças",  x:51, y:20, r:4},
-     {id:"bouquet",  name:"Buquê",     x:22, y:72, r:5},
-     {id:"bowtie",   name:"Gravata",   x:74, y:58, r:4},
-     {id:"tiago",    name:"Tiago",     x:42, y:80, r:5.2},
-     {id:"gian",     name:"Gian",      x:62, y:80, r:5.2},
-     {id:"key",      name:"Chave",     x:89, y:38, r:3.8},
-   ],
-   decoys:[
-     {img:"match-heart.png",    x:28,y:38,size:34,rot:.1},
-     {img:"find-champagne.png", x:68,y:25,size:32,rot:-.2},
-     {img:"match-arch.png",     x:8,y:55,size:40,rot:.0},
-     {img:"sweet-macaron-02.png",x:82,y:72,size:30,rot:.3},
-     {img:"tile-bouquet.png",   x:56,y:45,size:36,rot:.15},
-     {img:"icon-medal-gold.png",x:38,y:33,size:28,rot:-.1},
-     {img:"match-star.png",     x:15,y:85,size:26,rot:.5},
-     {img:"confetti-piece-06.png",x:78,y:90,size:20,rot:.8},
-     {img:"tile-anel.png",      x:47,y:62,size:30,rot:-.3},
-     {img:"fx-gold-sparkles.png",x:92,y:20,size:34,rot:.2},
+     {id:"rings",    name:"Alianças",  x:49,y:19,sz:46},{id:"bouquet", name:"Buquê",     x:21,y:74,sz:52},
+     {id:"bowtie",   name:"Gravata",   x:76,y:56,sz:44},{id:"tiago",  name:"Tiago",     x:40,y:82,sz:56},
+     {id:"gian",     name:"Gian",      x:63,y:82,sz:56},{id:"key",    name:"Chave",     x:88,y:37,sz:38},
+     {id:"champagne",name:"Champagne", x:12,y:44,sz:44},{id:"macaron",name:"Macaron",   x:55,y:64,sz:44},
+     {id:"passport", name:"Passaporte",x:30,y:52,sz:42},{id:"camera", name:"Câmera",    x:82,y:72,sz:42},
    ]},
   {id:"reception",name:"Recepção",img:"scene-reception.png",
    objects:[
-     {id:"champagne", name:"Champagne", x:18,y:44,r:4.5},
-     {id:"macaron",   name:"Macaron",   x:79,y:62,r:4},
-     {id:"camera",    name:"Câmera",    x:54,y:30,r:4},
-     {id:"bouquet",   name:"Buquê",     x:29,y:76,r:5},
-     {id:"gian",      name:"Gian",      x:66,y:82,r:5.2},
-     {id:"tiago",     name:"Tiago",     x:44,y:70,r:5.2},
-   ],
-   decoys:[
-     {img:"match-cake.png",      x:37,y:50,size:36,rot:.1},
-     {img:"sweet-brigadeiro-01.png",x:70,y:38,size:32,rot:-.2},
-     {img:"match-suitcase.png",  x:90,y:76,size:34,rot:.2},
-     {img:"tile-bolo.png",       x:12,y:62,size:38,rot:0},
-     {img:"match-confetti.png",  x:58,y:54,size:30,rot:.3},
-     {img:"icon-sparkle.png",    x:82,y:22,size:22,rot:.6},
-     {img:"confetti-piece-09.png",x:24,y:32,size:20,rot:-.5},
-     {img:"match-bowtie.png",    x:46,y:88,size:32,rot:.4},
-     {img:"tile-champagne.png",  x:10,y:86,size:36,rot:.1},
-     {img:"sweet-macaron-01.png",x:63,y:50,size:30,rot:-.3},
+     {id:"champagne",name:"Champagne", x:17,y:42,sz:46},{id:"macaron",name:"Macaron",   x:81,y:64,sz:46},
+     {id:"camera",   name:"Câmera",    x:55,y:27,sz:44},{id:"bouquet",name:"Buquê",     x:28,y:78,sz:52},
+     {id:"gian",     name:"Gian",      x:68,y:84,sz:56},{id:"tiago", name:"Tiago",     x:43,y:71,sz:56},
+     {id:"key",      name:"Chave",     x:90,y:52,sz:38},{id:"rings", name:"Alianças",  x:38,y:45,sz:46},
+     {id:"suitcase", name:"Malinha",   x:73,y:35,sz:44},{id:"bowtie",name:"Gravata",   x:14,y:65,sz:42},
    ]},
   {id:"italy",name:"Itália",img:"scene-italy.png",
    objects:[
-     {id:"passport",  name:"Passaporte", x:63,y:46,r:4},
-     {id:"camera",    name:"Câmera",     x:26,y:34,r:4},
-     {id:"cat",       name:"Gatinho",    x:87,y:78,r:4.5},
-     {id:"suitcase",  name:"Malinha",    x:16,y:70,r:5},
-     {id:"macaron",   name:"Macaron",    x:74,y:28,r:3.8},
-     {id:"bowtie",    name:"Gravata",    x:48,y:84,r:4},
-   ],
-   decoys:[
-     {img:"packing-passport.png",  x:40,y:46,size:32,rot:.2},
-     {img:"match-key.png",         x:80,y:50,size:30,rot:-.1},
-     {img:"packing-suitcase-closed.png",x:85,y:30,size:38,rot:.1},
-     {img:"find-rings.png",        x:30,y:62,size:32,rot:.3},
-     {img:"moum-macaron01.png",    x:54,y:60,size:34,rot:-.2},
-     {img:"sweet-eclair-01.png",   x:20,y:46,size:30,rot:.4},
-     {img:"icon-compass.png",      x:68,y:82,size:36,rot:.1},
-     {img:"match-airplane.png",    x:10,y:28,size:34,rot:.2},
-     {img:"tile-luademel.png",     x:92,y:56,size:30,rot:-.3},
-     {img:"icon-road-sign.png",    x:42,y:24,size:36,rot:.15},
+     {id:"passport", name:"Passaporte",x:64,y:44,sz:44},{id:"camera", name:"Câmera",    x:24,y:32,sz:44},
+     {id:"cat",      name:"Gatinho",   x:88,y:80,sz:46},{id:"suitcase",name:"Malinha",  x:15,y:72,sz:48},
+     {id:"macaron",  name:"Macaron",   x:76,y:26,sz:44},{id:"bowtie",name:"Gravata",   x:47,y:86,sz:42},
+     {id:"rings",    name:"Alianças",  x:34,y:62,sz:44},{id:"bouquet",name:"Buquê",    x:59,y:54,sz:50},
+     {id:"key",      name:"Chave",     x:82,y:46,sz:38},{id:"champagne",name:"Champagne",x:10,y:52,sz:44},
    ]},
   {id:"honeymoon",name:"Lua de Mel",img:"scene-honeymoon.png",
    objects:[
-     {id:"rings",    name:"Alianças",  x:50,y:32,r:4.2},
-     {id:"champagne",name:"Champagne", x:80,y:48,r:4.5},
-     {id:"suitcase", name:"Malinha",   x:20,y:65,r:5},
-     {id:"camera",   name:"Câmera",    x:66,y:74,r:4},
-     {id:"gian",     name:"Gian",      x:37,y:80,r:5.2},
-     {id:"tiago",    name:"Tiago",     x:56,y:82,r:5.2},
-   ],
-   decoys:[
-     {img:"africa.png",          x:88,y:22,size:40,rot:.1,alpha:.4},
-     {img:"find-bouquet.png",    x:33,y:52,size:32,rot:.2},
-     {img:"match-heart.png",     x:63,y:38,size:34,rot:-.1},
-     {img:"packing-hat.png",     x:14,y:40,size:30,rot:.3},
-     {img:"packing-swimsuit.png",x:75,y:60,size:28,rot:-.2},
-     {img:"icon-suitcase.png",   x:44,y:65,size:32,rot:.4},
-     {img:"match-star.png",      x:24,y:82,size:26,rot:.5},
-     {img:"confetti-piece-01.png",x:82,y:88,size:20,rot:.7},
-     {img:"moum-macaron03.png",  x:58,y:55,size:30,rot:-.3},
-     {img:"tile-fim.png",        x:10,y:55,size:34,rot:.1},
+     {id:"rings",    name:"Alianças",  x:51,y:30,sz:44},{id:"champagne",name:"Champagne",x:82,y:46,sz:46},
+     {id:"suitcase", name:"Malinha",   x:19,y:67,sz:48},{id:"camera",  name:"Câmera",   x:67,y:75,sz:44},
+     {id:"gian",     name:"Gian",      x:36,y:82,sz:56},{id:"tiago",   name:"Tiago",   x:58,y:84,sz:56},
+     {id:"bouquet",  name:"Buquê",     x:28,y:50,sz:50},{id:"macaron", name:"Macaron", x:76,y:58,sz:44},
+     {id:"key",      name:"Chave",     x:45,y:48,sz:38},{id:"passport",name:"Passaporte",x:12,y:38,sz:44},
    ]},
 ];
 
-// ── Canvas ────────────────────────────────────────────
+// Pre-generate decoys for each scene
+SCENES.forEach(sc=>{
+  sc.decoys=generateDecoys(sc.objects);
+});
+
 const CW=800,CH=520;
 const canvas=document.getElementById('sceneCanvas');
 const ctx=canvas.getContext('2d');
-function fitCanvas(){const d=Math.min(devicePixelRatio||1,2);canvas.width=CW*d;canvas.height=CH*d;canvas.style.width='100%';canvas.style.aspectRatio=CW+'/'+CH;ctx.setTransform(d,0,0,d,0,0);}fitCanvas();
+function fitCanvas(){
+  const d=Math.min(devicePixelRatio||1,2);
+  canvas.width=CW*d;canvas.height=CH*d;
+  canvas.style.width='100%';canvas.style.aspectRatio=CW+'/'+CH;
+  ctx.setTransform(d,0,0,d,0,0);
+}fitCanvas();
 
-// ── Image cache ───────────────────────────────────────
-const IMG_CACHE={};
+const ICACHE={};
 function loadImg(src){
-  if(IMG_CACHE[src])return IMG_CACHE[src];
+  if(ICACHE[src])return ICACHE[src];
   const img=new Image();img.src='assets/img/'+src;
-  IMG_CACHE[src]=img;return img;
+  ICACHE[src]=img;return img;
 }
-// Preload scene images + find icons
-SCENES.forEach(s=>{loadImg(s.img);s.objects.forEach(o=>loadImg('find-'+o.id+'.png'));s.decoys.forEach(d=>loadImg(d.img));});
 
-// ── State ─────────────────────────────────────────────
-let curScene=0,foundSet=new Set(),clicks=0,hints=3,timerSec=0,timerInt=null,totalScore=0,finalScore=0;
-let hintTarget=null,hintTimer=0,hintActive=false,hintX=0,hintY=0;
-let animRaf,foundParticles=[];
+// Preload everything
+SCENES.forEach(sc=>{
+  loadImg(sc.img);
+  sc.objects.forEach(o=>loadImg('find-'+o.id+'.png'));
+  sc.decoys.forEach(d=>loadImg(d.img));
+});
+
+let curScene=0,foundSet=new Set(),clicks=0,hints=3,timerSec=0,timerInt=null;
+let totalScore=0,finalScore=0,hintActive=false,hintObj=null,hintTimer=0,animRaf;
+let ripples=[]; // click feedback
 
 function startFind(){document.getElementById('startModal').hidden=true;loadScene(0);loadTop10();}
 
 function loadScene(idx){
-  curScene=idx;foundSet=new Set();clicks=0;hints=3;timerSec=0;hintActive=false;hintTarget=null;foundParticles=[];
+  curScene=idx;foundSet=new Set();clicks=0;hints=3;timerSec=0;hintActive=false;ripples=[];
   clearInterval(timerInt);
   timerInt=setInterval(()=>{timerSec++;document.getElementById('timerEl').textContent=timerSec;},1000);
   renderSceneTabs();renderChecklist();updateHud();
@@ -287,101 +283,108 @@ function renderSceneTabs(){
 }
 function renderChecklist(){
   const sc=SCENES[curScene];
-  document.getElementById('totalCount').textContent=sc.objects.length;
-  document.getElementById('hintCount').textContent=`${hints} dica${hints===1?'':'s'}`;
   document.getElementById('checkItems').innerHTML=sc.objects.map(o=>`
     <div class="ci ${foundSet.has(o.id)?'found':''}" id="ci_${o.id}">
       <img class="ci-icon" src="assets/img/find-${o.id}.png" alt="${o.name}" onerror="this.src='assets/img/find-rings.png'">
       <span>${o.name}</span>
       <img class="ci-check" src="assets/img/find-star-burst.png" alt="">
     </div>`).join('');
+  document.getElementById('hintCount').textContent=`${hints} dica${hints===1?'':'s'}`;
 }
 function updateHud(){
   document.getElementById('foundCount').textContent=foundSet.size;
   document.getElementById('clickCount').textContent=clicks;
-  document.getElementById('hintCount').textContent=`${hints} dica${hints===1?'':'s'}`;
 }
 
 // ── Draw loop ─────────────────────────────────────────
 function drawLoop(){
   drawScene();
+  hintTimer>0&&hintTimer--;
+  if(hintTimer<=0)hintActive=false;
+  ripples=ripples.filter(r=>r.t<28);
+  ripples.forEach(r=>r.t++);
   animRaf=requestAnimationFrame(drawLoop);
 }
 
 function drawScene(){
   ctx.clearRect(0,0,CW,CH);
   const sc=SCENES[curScene];
-  // 1. Scene background image — FULL SIZE behind everything
+
+  // 1. Scene background — full size, no overlay, fully opaque
   const bg=loadImg(sc.img);
   if(bg.complete&&bg.naturalWidth){
     const scale=Math.max(CW/bg.naturalWidth,CH/bg.naturalHeight);
     const dw=bg.naturalWidth*scale,dh=bg.naturalHeight*scale;
     ctx.drawImage(bg,(CW-dw)/2,(CH-dh)/2,dw,dh);
-  } else {
-    ctx.fillStyle='#F2E7D7';ctx.fillRect(0,0,CW,CH);
-  }
-  // 2. Decoy objects sprinkled all over to confuse
+  } else {ctx.fillStyle='#F2E7D7';ctx.fillRect(0,0,CW,CH);}
+
+  // 2. Decoys — fully opaque, rotated, scattered
   sc.decoys.forEach(d=>{
     const img=loadImg(d.img);
     if(!img.complete||!img.naturalWidth)return;
-    ctx.save();
-    ctx.globalAlpha=d.alpha||0.72;
     const px=d.x/100*CW,py=d.y/100*CH;
-    ctx.translate(px,py);ctx.rotate(d.rot||0);
+    ctx.save();ctx.translate(px,py);ctx.rotate(d.rot);
     ctx.drawImage(img,-d.size/2,-d.size/2,d.size,d.size);
-    ctx.globalAlpha=1;ctx.restore();
+    ctx.restore();
   });
-  // 3. Hidden objects (slightly tinted to NOT be invisible, but still blended)
+
+  // 3. Hidden objects — FULLY OPAQUE (not transparent!) but naturally placed
   sc.objects.forEach(o=>{
     if(foundSet.has(o.id))return;
     const img=loadImg('find-'+o.id+'.png');
     if(!img.complete||!img.naturalWidth)return;
     const px=o.x/100*CW,py=o.y/100*CH;
-    const sz=(o.r/5)*55; // scale radius to pixel size
-    ctx.save();ctx.globalAlpha=0.62; // slightly transparent = blended
-    ctx.drawImage(img,px-sz/2,py-sz/2,sz,sz);
-    ctx.globalAlpha=1;ctx.restore();
+    // Draw at full opacity — difficulty comes from decoy density, not transparency
+    ctx.drawImage(img,px-o.sz/2,py-o.sz/2,o.sz,o.sz);
   });
+
   // 4. Found markers
   sc.objects.forEach(o=>{
     if(!foundSet.has(o.id))return;
     const px=o.x/100*CW,py=o.y/100*CH;
     const burst=loadImg('find-star-burst.png');
-    ctx.save();ctx.globalAlpha=.9;
-    ctx.drawImage(burst,px-22,py-22,44,44);
-    ctx.restore();
+    ctx.save();ctx.globalAlpha=.9;ctx.drawImage(burst,px-24,py-24,48,48);ctx.restore();
+    // Green circle around found item
+    ctx.strokeStyle='rgba(122,155,110,.85)';ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(px,py,o.sz*.6,0,Math.PI*2);ctx.stroke();
   });
-  // 5. Hint glow pulse
-  if(hintActive&&hintTarget){
-    const now=performance.now();const pulse=Math.sin(now*.006)*.5+.5;
-    const px=hintTarget.x/100*CW,py=hintTarget.y/100*CH;
-    const glowImg=loadImg('find-hint-glow.png');
-    ctx.save();ctx.globalAlpha=0.55+pulse*.45;
-    ctx.drawImage(glowImg,px-55,py-55,110,110);
-    ctx.restore();
+
+  // 5. Hint glow
+  if(hintActive&&hintObj){
+    const px=hintObj.x/100*CW,py=hintObj.y/100*CH;
+    const glow=loadImg('find-hint-glow.png');
+    const pulse=Math.sin(hintTimer*0.18)*0.4+0.6;
+    ctx.save();ctx.globalAlpha=pulse;ctx.drawImage(glow,px-60,py-60,120,120);ctx.restore();
   }
-  // 6. Hit particles
-  foundParticles.forEach(p=>{
-    p.t+=.04;
-    ctx.save();ctx.globalAlpha=Math.max(0,1-p.t);
-    ctx.fillStyle=p.col;
-    ctx.beginPath();ctx.arc(p.x+p.vx*p.t*40,p.y+p.vy*p.t*40-p.t*p.t*20,p.r,0,Math.PI*2);ctx.fill();
+
+  // 6. Click ripples (miss/hit feedback)
+  ripples.forEach(r=>{
+    const alpha=Math.max(0,1-r.t/28);
+    const rad=r.t*1.8;
+    ctx.save();ctx.globalAlpha=alpha*0.7;
+    ctx.strokeStyle=r.hit?'rgba(122,155,110,.8)':'rgba(181,66,58,.7)';
+    ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(r.x,r.y,rad,0,Math.PI*2);ctx.stroke();
     ctx.restore();
   });
-  foundParticles=foundParticles.filter(p=>p.t<1);
 }
 
-// ── Click handling ─────────────────────────────────────
-canvas.addEventListener('click',handleClick);
-canvas.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];const r=canvas.getBoundingClientRect();const x=(t.clientX-r.left)/r.width*CW,y=(t.clientY-r.top)/r.height*CH;processClick(x,y);},{passive:false});
-
-function handleClick(e){
+// ── Click ─────────────────────────────────────────────
+canvas.addEventListener('click',e=>{
   const r=canvas.getBoundingClientRect();
-  const x=(e.clientX-r.left)/r.width*CW,y=(e.clientY-r.top)/r.height*CH;
+  const x=(e.clientX-r.left)/r.width*CW;
+  const y=(e.clientY-r.top)/r.height*CH;
   processClick(x,y);
-}
+});
+canvas.addEventListener('touchend',e=>{
+  e.preventDefault();
+  const t=e.changedTouches[0];
+  const r=canvas.getBoundingClientRect();
+  const x=(t.clientX-r.left)/r.width*CW;
+  const y=(t.clientY-r.top)/r.height*CH;
+  processClick(x,y);
+},{passive:false});
 
-function processClick(x,y){
+function processClick(cx,cy){
   if(document.getElementById('winModal').hidden===false)return;
   clicks++;updateHud();
   const sc=SCENES[curScene];
@@ -389,33 +392,28 @@ function processClick(x,y){
   for(const o of sc.objects){
     if(foundSet.has(o.id))continue;
     const px=o.x/100*CW,py=o.y/100*CH;
-    const pr=(o.r/100)*CW;
-    const dx=x-px,dy=y-py;
-    if(Math.sqrt(dx*dx+dy*dy)<pr){
-      foundObject(o,x,y);hit=true;break;
+    // Click radius = half the drawn size + generous 10px buffer
+    const cr=o.sz*0.6+10;
+    const dx=cx-px,dy=cy-py;
+    if(Math.sqrt(dx*dx+dy*dy)<cr){
+      foundObject(o,cx,cy);hit=true;break;
     }
   }
-  if(!hit){sndMiss();haptic(8);showMissRing(x,y);}
+  if(!hit){
+    sndMiss();
+    ripples.push({x:cx,y:cy,t:0,hit:false});
+    haptic(6);
+  }
 }
 
-function foundObject(o,x,y){
+function foundObject(o,cx,cy){
   foundSet.add(o.id);hintActive=false;
   sndFound();haptic(20);
-  // Update checklist
+  ripples.push({x:cx,y:cy,t:0,hit:true});
   const ci=document.getElementById('ci_'+o.id);
   if(ci)ci.classList.add('found');
-  // Burst particles
-  for(let i=0;i<18;i++){
-    const a=Math.random()*Math.PI*2;
-    foundParticles.push({x,y,vx:Math.cos(a),vy:Math.sin(a),r:2+Math.random()*3,col:['#F0CE7A','#FFE9A8','#EFA8B8','#fff'][Math.floor(Math.random()*4)],t:0});
-  }
   updateHud();
-  if(foundSet.size>=SCENES[curScene].objects.length)setTimeout(sceneComplete,500);
-}
-
-function showMissRing(x,y){
-  // Draw a quick expanding ring on canvas via a short particle
-  foundParticles.push({x,y,vx:0,vy:0,r:18,col:'rgba(181,66,58,.5)',t:0,miss:true});
+  if(foundSet.size>=10)setTimeout(sceneComplete,500);
 }
 
 function useHint(){
@@ -424,20 +422,19 @@ function useHint(){
   const unfound=sc.objects.filter(o=>!foundSet.has(o.id));
   if(!unfound.length)return;
   hints--;sndHint();haptic(10);
-  hintTarget=unfound[Math.floor(Math.random()*unfound.length)];
-  hintActive=true;
+  hintObj=unfound[Math.floor(Math.random()*unfound.length)];
+  hintActive=true;hintTimer=90;
   document.getElementById('hintCount').textContent=`${hints} dica${hints===1?'':'s'}`;
-  setTimeout(()=>{hintActive=false;},3000);
 }
 
 function sceneComplete(){
   clearInterval(timerInt);
-  const bonus=hints*80+Math.max(0,300-clicks*6)+Math.max(0,500-timerSec*3);
-  const pts=500+bonus;totalScore+=pts;finalScore=totalScore;
+  const bonus=hints*80+Math.max(0,350-clicks*7)+Math.max(0,600-timerSec*3);
+  const pts=600+bonus;totalScore+=pts;finalScore=totalScore;
   document.getElementById('winTitle').textContent='Tudo encontrado! ⭐';
-  document.getElementById('winText').textContent=`Cena: ${SCENES[curScene].name} | ${timerSec}s | ${clicks} cliques | +${pts} pts | Total: ${totalScore}`;
+  document.getElementById('winText').textContent=`${SCENES[curScene].name} | ${timerSec}s | ${clicks} cliques | +${pts} pts | Total: ${totalScore}`;
   document.getElementById('winModal').hidden=false;
-  if(window.confettiBurst)confettiBurst({count:28,hearts:true});
+  if(window.confettiBurst)confettiBurst({count:30,hearts:true});
   haptic(50);
 }
 function nextScene(){document.getElementById('winModal').hidden=true;loadScene((curScene+1)%SCENES.length);}

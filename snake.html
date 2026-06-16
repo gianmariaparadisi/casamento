@@ -465,7 +465,12 @@
       if(d.x!==-snDir.x||d.y!==-snDir.y) snNext=d;
       e.preventDefault();
     }
-    if (e.key === " " && !snAlive) startSnake();
+    if (e.key === " " && !snAlive) {
+      // Don't restart if user is typing in the save form
+      const active = document.activeElement;
+      if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) return;
+      startSnake();
+    }
   });
 
   // Touch swipe
@@ -508,12 +513,15 @@
     });
     const title = document.querySelector(".snake-header__title");
     if (title) title.innerHTML = `Snake<br><em>do ${p === "gian" ? "Gian" : "Tiago"}</em>`;
-    resetSnake();
+    if (!snAlive) resetSnake(); // só reseta se não está jogando
   };
 
   // Resize: reconstrói o canvas mantendo o jogo
   window.addEventListener("resize", () => {
     if (snAlive) return; // evita resetar durante a partida
+    // Não reseta se o postgame está visível (usuário pode estar digitando o nome)
+    const postgame = document.getElementById("snake-postgame");
+    if (postgame && postgame.style.display !== "none") return;
     resetSnake();
   });
 

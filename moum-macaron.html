@@ -164,10 +164,11 @@ for(let i=1;i<=12;i++){
 }
 
 // ── Game State ─────────────────────────────────────────
-let state='idle',items=[],particles=[],bullets=[],toasts=[],explosions=[];
+let state='idle',items=[],particles=[],bullets=[],toasts=[],explosions=[],powerups=[];
 let score=0,lives=3,timeLeft=60,combo=0,maxCombo=0,hits=0,misses=0,totalShots=0;
 let spawnT=0,raf,last=0,confuso=false;
 let aimX=W/2,aimY=H*0.8,finalScore=0;
+let multiShot=0,multiShotTimer=0; // powerup: multi-shot bullets remaining
 
 // Cannon state
 let cannonAngle=-Math.PI/2; // pointing up by default
@@ -178,8 +179,9 @@ function spawnInterval(){return Math.max(30,80-diffLevel()*14-score/400);}
 
 // ── Reset / Start ──────────────────────────────────────
 function reset(){
-  items=[];particles=[];bullets=[];toasts=[];explosions=[];
+  items=[];particles=[];bullets=[];toasts=[];explosions=[];powerups=[];
   score=0;lives=3;timeLeft=60;combo=0;maxCombo=0;hits=0;misses=0;totalShots=0;confuso=false;spawnT=0;
+  multiShot=0;multiShotTimer=0;
   updateHudDOM();
 }
 function startGame(){
@@ -195,17 +197,22 @@ function spawnItem(){
   const n=Math.min(1+diffLevel(),4);
   for(let k=0;k<n;k++){
     const isMac=Math.random()<.5;
+    // Special powerup macarons (only spawn as macarons)
+    const rnd=Math.random();
+    const isPowerClear=isMac&&rnd<0.07; // ★ golden sparkle = clears all items
+    const isPowerMulti=isMac&&!isPowerClear&&rnd<0.13; // ⚡ triple shot
     const seed=Math.floor(Math.random()*12);
     const speed=(0.7+Math.random()*0.9)*(1+diffLevel()*0.18);
     const swayAmp=14+Math.random()*26;
     let size=64;
+    if(isPowerClear||isPowerMulti)size=72; // powerups slightly bigger
     if(timeLeft<20){const r=Math.random();if(r<.2)size=46;else if(r<.3)size=80;}
     items.push({
-      isMac,seed,
+      isMac,seed,isPowerClear,isPowerMulti,
       x:60+Math.random()*(W-120),x0:0,
       y:-size,vy:speed,rot:Math.random()*Math.PI*2,vr:(Math.random()-.5)*.025*(1+diffLevel()*.4),
       swayAmp,swayPhase:Math.random()*Math.PI*2,swaySpd:.015+Math.random()*.015,
-      size,dead:false,
+      size,dead:false,glowT:0,
       mirror:confuso&&Math.random()<.5,cScale:confuso?(0.8+Math.random()*.45):1,
     });
     items[items.length-1].x0=items[items.length-1].x;
@@ -216,12 +223,18 @@ function spawnItem(){
 function fireBullet(){
   const angle=cannonAngle;
   const spd=14+diffLevel();
-  bullets.push({
-    x:CANNON_X+Math.cos(angle)*30,
-    y:CANNON_Y+Math.sin(angle)*30,
-    vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd,
-    r:6,life:80
-  });
+  const count=multiShot>0?3:1;
+  for(let i=0;i<count;i++){
+    const spread=(i-Math.floor(count/2))*0.15;
+    const a=angle+spread;
+    bullets.push({
+      x:CANNON_X+Math.cos(a)*30,
+      y:CANNON_Y+Math.sin(a)*30,
+      vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,
+      r:6,life:80,multi:count>1
+    });
+  }
+  if(multiShot>0){multiShot--;if(multiShot===0)addToast(W/2,H*.6,'⚡ Multi-shot acabou',true);}
   totalShots++;
   haptic(8);
 }
@@ -280,13 +293,36 @@ function loop(ts){
 function hitItem(it){
   if(it.isMac){
     hits++;combo++;if(combo>maxCombo)maxCombo=combo;
-    const pts=100*Math.max(1,combo>=2?combo:1);
-    score+=pts;sndHit();haptic(20);nextFace();
-    addExplosion(it.x,it.y,true);
-    spawnParticles(it.x,it.y,'gold');
-    const msgs=['Delícia!','MOUm!','Perfeito!','🍬 Sim!'];
-    addToast(it.x,it.y-30,msgs[Math.floor(Math.random()*msgs.length)],false);
-    if(combo>=2){sndCombo(combo);document.getElementById('comboPill').style.display='flex';document.getElementById('comboVal').textContent=combo;}
+
+    // ★ POWERUP: CLEAR ALL (golden sparkle macaron)
+    if(it.isPowerClear){
+      score+=500;
+      addToast(W/2,H*.38,'✨ LIMPEZA TOTAL! +500','false');
+      sndCombo(5);haptic([20,30,20,30,20]);
+      // Explode every item on screen
+      items.forEach(i=>{if(!i.dead){addExplosion(i.x,i.y,i.isMac);spawnParticles(i.x,i.y,'gold');i.dead=true;}});
+      // Big burst at click point
+      for(let i=0;i<4;i++)setTimeout(()=>spawnParticles(it.x+Math.random()*80-40,it.y+Math.random()*80-40,'gold'),i*80);
+      if(window.confettiBurst)confettiBurst({count:20});
+    }
+    // ⚡ POWERUP: MULTI-SHOT
+    else if(it.isPowerMulti){
+      multiShot=12; // 12 extra triple-shot bullets
+      score+=200;
+      addToast(it.x,it.y-30,'⚡ TRIPLE SHOT!',false);
+      sndCombo(3);haptic([10,20,10]);
+      spawnParticles(it.x,it.y,'gold');
+    }
+    // Normal macaron
+    else {
+      const pts=100*Math.max(1,combo>=2?combo:1);
+      score+=pts;sndHit();haptic(20);nextFace();
+      addExplosion(it.x,it.y,true);
+      spawnParticles(it.x,it.y,'gold');
+      const msgs=['Delícia!','MOUm!','Perfeito!','🍬 Sim!'];
+      addToast(it.x,it.y-30,msgs[Math.floor(Math.random()*msgs.length)],false);
+      if(combo>=2){sndCombo(combo);document.getElementById('comboPill').style.display='flex';document.getElementById('comboVal').textContent=combo;}
+    }
   } else {
     misses++;combo=0;score=Math.max(0,score-250);sndMiss();haptic([15,40,15]);
     addExplosion(it.x,it.y,false);
@@ -347,17 +383,47 @@ function drawBG(){
 
 function drawItem(it){
   if(it.dead)return;
+  it.glowT=(it.glowT||0)+0.06;
   ctx.save();ctx.translate(it.x,it.y);ctx.rotate(it.rot);
   const sc=it.cScale*(it.mirror?-1:1);ctx.scale(sc,it.cScale);
+
+  // Powerup glow BEFORE drawing the macaron
+  if(it.isPowerClear){
+    // Golden sparkle halo
+    const pulse=Math.sin(it.glowT)*0.5+0.5;
+    const g=ctx.createRadialGradient(0,0,it.size*.2,0,0,it.size*.9);
+    g.addColorStop(0,`rgba(255,230,80,${0.6+pulse*.3})`);
+    g.addColorStop(1,'rgba(255,200,50,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,it.size*.9,0,Math.PI*2);ctx.fill();
+    // Spinning sparkle points
+    for(let s=0;s<6;s++){
+      ctx.save();ctx.rotate(it.glowT+s*Math.PI/3);
+      ctx.fillStyle=`rgba(255,240,120,${0.5+pulse*.4})`;
+      ctx.beginPath();ctx.arc(it.size*.55,0,5+pulse*3,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    }
+  } else if(it.isPowerMulti){
+    // Blue-white lightning glow
+    const pulse=Math.sin(it.glowT*1.5)*0.5+0.5;
+    const g=ctx.createRadialGradient(0,0,it.size*.15,0,0,it.size*.75);
+    g.addColorStop(0,`rgba(120,200,255,${0.5+pulse*.3})`);
+    g.addColorStop(1,'rgba(80,160,255,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,it.size*.75,0,Math.PI*2);ctx.fill();
+  }
+
   const arr=it.isMac?MCARON:MCARRAO;
   const img=arr[it.seed%arr.length];
   if(img&&img.complete&&img.naturalWidth>0){
     ctx.drawImage(img,-it.size/2,-it.size/2,it.size,it.size);
   } else {
-    // fallback shape
     ctx.fillStyle=it.isMac?'#EFA8B8':'#E8C892';
     ctx.beginPath();ctx.ellipse(0,0,it.size*.42,it.size*.28,0,0,Math.PI*2);ctx.fill();
   }
+
+  // Powerup label overlay
+  if(it.isPowerClear){ctx.font=`bold ${Math.round(it.size*.22)}px Inter`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='rgba(255,220,30,.9)';ctx.fillText('✨',0,0);}
+  else if(it.isPowerMulti){ctx.font=`bold ${Math.round(it.size*.22)}px Inter`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='rgba(120,200,255,.9)';ctx.fillText('⚡',0,0);}
+
   ctx.restore();
 }
 
@@ -365,10 +431,11 @@ function drawBullets(){
   bullets.forEach(b=>{
     if(BULLET_IMG.complete&&BULLET_IMG.naturalWidth){
       ctx.save();ctx.globalAlpha=Math.min(1,b.life/15);
-      ctx.drawImage(BULLET_IMG,b.x-8,b.y-8,16,16);
+      ctx.drawImage(BULLET_IMG,b.x-24,b.y-24,48,48); // 3x: was 16x16
       ctx.globalAlpha=1;ctx.restore();
     } else {
-      ctx.fillStyle='#FFE88A';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=b.multi?'#FFB340':'#FFE88A';
+      ctx.beginPath();ctx.arc(b.x,b.y,b.r*3,0,Math.PI*2);ctx.fill();
     }
   });
 }
@@ -410,20 +477,22 @@ function drawToasts(){
 }
 
 function drawCannon(){
-  // Cannon barrel pointing toward aim
+  // Update cannon angle from aim
   const ang=Math.atan2(aimY-CANNON_Y,aimX-CANNON_X);
   cannonAngle=ang;
   ctx.save();ctx.translate(CANNON_X,CANNON_Y);
-  // Base
+  // Raw base - 3x bigger, no skew: just scale uniformly
   if(CANNON_BASE.complete&&CANNON_BASE.naturalWidth){
-    ctx.drawImage(CANNON_BASE,-26,-20,52,40);
+    ctx.drawImage(CANNON_BASE,-78,-60,156,120); // 3x of original ~52x40
+  } else {
+    ctx.fillStyle='#C8A050';ctx.beginPath();ctx.ellipse(0,0,52,36,0,0,Math.PI*2);ctx.fill();
   }
-  // Rotating barrel
+  // Barrel rotates - drawn on top, 3x bigger
   ctx.rotate(ang+Math.PI/2);
   if(CANNON_BAR.complete&&CANNON_BAR.naturalWidth){
-    ctx.drawImage(CANNON_BAR,-16,-40,32,50);
+    ctx.drawImage(CANNON_BAR,-48,-120,96,150); // 3x of original ~32x50
   } else {
-    ctx.fillStyle='#C8A050';ctx.fillRect(-10,-42,20,44);ctx.beginPath();ctx.arc(0,-42,10,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#B98538';ctx.fillRect(-30,-126,60,132);ctx.beginPath();ctx.arc(0,-126,30,0,Math.PI*2);ctx.fill();
   }
   ctx.restore();
 }
