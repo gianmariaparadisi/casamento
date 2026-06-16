@@ -463,10 +463,24 @@ async function carregarTop10(jogo){
 }
 
 async function carregarPreviewRecorde(){
-  for(const j of["flappy"]){
-    const el=document.getElementById("record-"+j+"-preview"); if(!el) continue;
+  const jogos=[
+    {key:"flappy",    el:"record-flappy-preview"},
+    {key:"snake",     el:"record-snake-preview"},
+    {key:"wordle",    el:"record-wordle-preview"},
+    {key:"connect4",  el:"record-connect4-preview"},
+    {key:"docinho-ninja",el:"record-docinho-preview"},
+    {key:"champagne-breakout",el:"record-breakout-preview"},
+    {key:"wedding-2048",el:"record-2048-preview"},
+    {key:"empilha-bolo",el:"record-bolo-preview"},
+    {key:"wedding-match",el:"record-match-preview"},
+    {key:"moum-macaron",el:"record-moum-preview"},
+    {key:"find-tiago-gian",el:"record-find-preview"},
+    {key:"seat-puzzle",el:"record-seat-preview"},
+  ];
+  for(const j of jogos){
+    const el=document.getElementById(j.el); if(!el) continue;
     try{
-      const r=await fetch(`${JOGOS_API}?action=top10&jogo=${j}`);
+      const r=await fetch(`${JOGOS_API}?action=top10&jogo=${j.key}`);
       const d=await r.json();
       if(d?.lista?.length){const t=d.lista[0];el.textContent=`🥇 ${t.nome} · ${t.pontos} pts`;}
       else el.textContent=I18N.t("Seja o primeiro!","Sii il primo!");
