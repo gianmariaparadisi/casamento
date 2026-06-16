@@ -21,83 +21,81 @@
     .hud{display:flex;gap:.46rem;justify-content:center;flex-wrap:wrap;margin:.52rem auto;}
     .hud__pill{background:rgba(255,255,255,.7);border:1px solid rgba(216,205,188,.85);border-radius:999px;padding:.33rem .7rem;font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;color:#665B4D;}
     .hud__pill strong{color:#2A2820;font-weight:600;}
-    .level-tabs{display:flex;gap:.4rem;justify-content:center;margin-bottom:.65rem;flex-wrap:wrap;}
-    .lvl-btn{padding:.3rem .74rem;border-radius:999px;border:1.5px solid rgba(216,205,188,.9);background:rgba(255,255,255,.72);font-size:.68rem;font-weight:600;text-transform:uppercase;cursor:pointer;letter-spacing:.07em;transition:all .13s;}
+    .level-tabs{display:flex;gap:.32rem;justify-content:center;margin-bottom:.65rem;flex-wrap:wrap;}
+    .lvl-btn{padding:.28rem .62rem;border-radius:999px;border:1.5px solid rgba(216,205,188,.9);background:rgba(255,255,255,.72);font-size:.63rem;font-weight:600;text-transform:uppercase;cursor:pointer;letter-spacing:.06em;transition:all .13s;}
     .lvl-btn.active{background:var(--sage);color:#fff;border-color:var(--sage);}
-    .game-area{display:grid;grid-template-columns:1fr 195px;gap:.9rem;align-items:start;}
+    .lvl-btn.done{background:rgba(122,155,110,.18);border-color:var(--sage);}
+    .game-area{display:grid;grid-template-columns:1fr 200px;gap:.9rem;align-items:start;}
     @media(max-width:680px){.game-area{grid-template-columns:1fr;}}
     .table-stage{background:rgba(255,255,255,.58);border:1px solid rgba(216,205,188,.9);border-radius:16px;padding:.7rem;box-shadow:0 12px 44px rgba(82,57,34,.12);}
-    canvas#tableCanvas{display:block;width:100%;border-radius:10px;}
-    .right-panel{display:flex;flex-direction:column;gap:.65rem;}
-    .guest-pool{background:rgba(255,255,255,.7);border:1px solid rgba(216,205,188,.9);border-radius:14px;padding:.65rem;}
-    .guest-pool h3{font-family:var(--font-display);font-size:.9rem;font-weight:400;text-align:center;margin-bottom:.48rem;}
-    .guest-list{display:flex;flex-direction:column;gap:.28rem;}
-    .guest-chip{display:flex;align-items:center;gap:.36rem;border:1.5px solid rgba(216,205,188,.9);border-radius:9px;background:#fff;padding:.32rem .42rem;cursor:pointer;transition:all .13s;user-select:none;}
-    .guest-chip img{width:28px;height:28px;object-fit:contain;border-radius:50%;flex-shrink:0;}
-    .guest-chip span{font-size:.65rem;font-weight:600;color:#6C6258;flex:1;}
-    .guest-chip.placed{opacity:.3;cursor:default;background:rgba(235,240,230,.6);}
+    canvas#tableCanvas{display:block;width:100%;border-radius:10px;cursor:pointer;}
+    .right-panel{display:flex;flex-direction:column;gap:.55rem;}
+    .guest-pool{background:rgba(255,255,255,.7);border:1px solid rgba(216,205,188,.9);border-radius:14px;padding:.6rem;}
+    .guest-pool h3{font-family:var(--font-display);font-size:.88rem;font-weight:400;text-align:center;margin-bottom:.42rem;}
+    .guest-list{display:flex;flex-direction:column;gap:.24rem;}
+    .guest-chip{display:flex;align-items:center;gap:.32rem;border:1.5px solid rgba(216,205,188,.9);border-radius:9px;background:#fff;padding:.28rem .38rem;cursor:pointer;transition:all .13s;user-select:none;}
+    .guest-chip img{width:30px;height:30px;object-fit:contain;border-radius:50%;flex-shrink:0;}
+    .guest-chip span{font-size:.64rem;font-weight:600;color:#6C6258;flex:1;}
+    .guest-chip.placed{opacity:.3;cursor:default;}
     .guest-chip.selected{border-color:var(--sage);background:var(--bg-green);box-shadow:0 0 0 2px rgba(122,155,110,.3);}
-    .rules-box{background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.9);border-radius:14px;padding:.62rem;}
-    .rules-box h4{font-family:var(--font-display);font-size:.86rem;font-weight:400;text-align:center;margin-bottom:.42rem;color:#6C6258;}
-    .rule-row{display:flex;align-items:center;gap:.32rem;font-size:.63rem;color:#6C6258;margin-bottom:.26rem;line-height:1.3;padding:.2rem .3rem;border-radius:6px;}
-    .rule-row img{width:16px;height:16px;object-fit:contain;flex-shrink:0;}
+    .rules-box{background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.9);border-radius:14px;padding:.55rem;}
+    .rules-box h4{font-family:var(--font-display);font-size:.84rem;font-weight:400;text-align:center;margin-bottom:.38rem;color:#6C6258;}
+    .rule-row{display:flex;align-items:flex-start;gap:.28rem;font-size:.61rem;color:#6C6258;margin-bottom:.22rem;line-height:1.3;padding:.18rem .28rem;border-radius:6px;}
+    .rule-row img{width:14px;height:14px;object-fit:contain;flex-shrink:0;margin-top:.05rem;}
     .rule-row.ok{color:var(--sage-dark);background:rgba(235,240,230,.5);}
     .rule-row.fail{color:#B5423A;background:rgba(181,66,58,.07);}
-    .score-live{text-align:center;padding:.35rem;}
-    .score-live strong{font-family:var(--font-display);font-size:1.4rem;color:#C8A050;display:block;}
-    .score-live span{font-size:.66rem;color:#6C6258;text-transform:uppercase;letter-spacing:.07em;}
-    .puzzle-btns{display:flex;gap:.42rem;justify-content:center;margin-top:.7rem;flex-wrap:wrap;}
-    .game-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(180,137,70,.35);background:#fff;color:#5A4C3D;padding:.62rem 1.1rem;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 7px 20px rgba(110,80,45,.08);cursor:pointer;transition:all .13s;gap:.28rem;}
-    .game-btn:hover{transform:translateY(-1px);background:#FFF9EF;}
+    .puzzle-btns{display:flex;gap:.4rem;justify-content:center;margin-top:.65rem;flex-wrap:wrap;}
+    .game-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(180,137,70,.35);background:#fff;color:#5A4C3D;padding:.58rem 1rem;font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 7px 20px rgba(110,80,45,.08);cursor:pointer;transition:all .13s;gap:.26rem;}
+    .game-btn:hover{transform:translateY(-1px);}
     .game-btn--main{background:linear-gradient(135deg,#D6B167,#B98538);color:white;border-color:transparent;}
     .modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:rgba(251,247,239,.9);backdrop-filter:blur(8px);}
     .modal[hidden]{display:none;}
-    .modal__card{width:min(94%,410px);background:rgba(255,255,255,.96);border:1px solid rgba(216,205,188,.95);border-radius:22px;padding:1.55rem;text-align:center;box-shadow:0 22px 70px rgba(82,57,34,.18);}
+    .modal__card{width:min(94%,420px);background:rgba(255,255,255,.96);border:1px solid rgba(216,205,188,.95);border-radius:22px;padding:1.5rem;text-align:center;box-shadow:0 22px 70px rgba(82,57,34,.18);}
     .modal__icon img{width:4.5rem;height:4.5rem;object-fit:contain;display:block;margin:0 auto .5rem;}
-    .modal__title{font-family:var(--font-display);font-size:1.85rem;font-weight:300;margin-bottom:.38rem;}
-    .modal__text{color:#6C6258;font-size:.84rem;line-height:1.65;margin-bottom:.8rem;}
+    .modal__title{font-family:var(--font-display);font-size:1.85rem;font-weight:300;margin-bottom:.35rem;}
+    .modal__text{color:#6C6258;font-size:.82rem;line-height:1.65;margin-bottom:.75rem;}
     .btn-row{display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;}
-    .save-box{margin-top:.72rem;background:rgba(255,255,255,.6);border:1px solid rgba(216,205,188,.8);border-radius:12px;padding:.65rem;}
-    .save-box__row{display:flex;gap:.36rem;}
-    .save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.9);border-radius:999px;background:#fff;padding:.56rem .8rem;font:inherit;font-size:.85rem;outline:none;}
-    .save-msg{font-size:.66rem;color:#6C6258;margin-top:.24rem;}
+    .save-box{margin-top:.7rem;background:rgba(255,255,255,.6);border:1px solid rgba(216,205,188,.8);border-radius:12px;padding:.6rem;}
+    .save-box__row{display:flex;gap:.32rem;}
+    .save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.9);border-radius:999px;background:#fff;padding:.52rem .75rem;font:inherit;font-size:.84rem;outline:none;}
+    .save-msg{font-size:.64rem;color:#6C6258;margin-top:.22rem;}
     .top10{margin-top:.85rem;background:rgba(255,255,255,.44);border:1px solid rgba(216,205,188,.75);border-radius:12px;padding:.7rem;}
     .top10 h3{font-family:var(--font-display);font-size:1rem;font-weight:400;margin-bottom:.32rem;text-align:center;}
-    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.22rem;}
-    .top10 li{display:flex;align-items:center;gap:.44rem;background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.6);border-radius:9px;padding:.34rem .5rem;font-size:.78rem;}
-    .top10 .pos{font-family:var(--font-display);font-size:.88rem;width:1.1rem;text-align:center;color:#A47845;}
-    .top10 .name{flex:1;font-weight:500;}.top10 .pts{font-weight:700;color:#7B4B22;}
+    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.2rem;}
+    .top10 li{display:flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.6);border-radius:9px;padding:.3rem .46rem;font-size:.76rem;}
+    .top10 .pos{font-family:var(--font-display);font-size:.86rem;width:1.1rem;text-align:center;color:#A47845;}
+    .top10 .name{flex:1;font-weight:500;} .top10 .pts{font-weight:700;color:#7B4B22;}
     @media(max-width:480px){.save-box__row{flex-direction:column}.game-btn{width:100%}}
   </style>
 </head>
 <body class="game-page">
   <nav class="game-nav"><div class="game-nav__inner">
-    <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
+    <a class="game-back" href="jogos.html" data-it="← Torna ai giochi">← Voltar aos jogos</a>
     <div class="game-brand">Tiago & Gian</div>
   </div></nav>
   <main class="game-shell">
-    <p class="game-kicker" data-it="Puzzle Sociale"><span data-it="Puzzle Sociale">Puzzle Social</span></p>
-    <h1 class="game-title" data-it="È Libero Questo Posto?"><span data-it="È Libero Questo Posto?">Is This Seat Taken?</span></h1>
-    <p class="game-sub" data-it="Sistema gli ospiti soddisfacendo TUTTE le regole. Clicca su un ospite, poi su una sedia.">Arranje os convidados satisfazendo TODAS as regras. Clique num convidado, depois numa cadeira. Cada puzzle tem solução única!</p>
+    <p class="game-kicker" data-it="Puzzle Sociale">Puzzle Social</p>
+    <h1 class="game-title" data-it="È Libero Questo Posto?">Is This Seat Taken?</h1>
+    <p class="game-sub" data-it="Sistema gli ospiti soddisfacendo TUTTE le regole. Clicca ospite poi sedia.">Arranje os convidados satisfazendo TODAS as regras. Clique num convidado, depois numa cadeira.</p>
     <div class="hud">
       <div class="hud__pill"><span data-it="Regole:">Regras:</span> <strong id="satisfiedCount">0</strong>/<strong id="totalRules">0</strong></div>
       <div class="hud__pill">Score: <strong id="scoreEl">0</strong></div>
-      <div class="hud__pill">Puzzle <strong id="lvlEl">1</strong>/5</div>
+      <div class="hud__pill">Puzzle <strong id="lvlEl">1</strong>/15</div>
     </div>
     <div class="level-tabs" id="levelTabs"></div>
     <div class="game-area">
       <div>
         <div class="table-stage"><canvas id="tableCanvas"></canvas></div>
         <div class="puzzle-btns">
-          <button class="game-btn" onclick="resetPuzzle()"><img src="assets/img/icon-sparkle.png" alt="" style="width:1.9em;height:1.9em;object-fit:contain;vertical-align:-.28em"> <span data-it="Ricomincia">Recomeçar</span></button>
-          <button class="game-btn" onclick="showHint()"><img src="assets/img/find-hint-star.png" alt="" style="width:1.9em;height:1.9em;object-fit:contain;vertical-align:-.28em"> Dica</button>
-          <button class="game-btn game-btn--main" onclick="checkSolution()"><img src="assets/img/icon-check-decorative.png" alt="" style="width:1.9em;height:1.9em;object-fit:contain;vertical-align:-.28em"> <span data-it="Verifica">Verificar</span></button>
+          <button class="game-btn" onclick="resetPuzzle()"><img src="assets/img/icon-sparkle.png" alt="" style="width:1.5em;height:1.5em;object-fit:contain;vertical-align:-.25em"> <span data-it="Ricomincia">Recomeçar</span></button>
+          <button class="game-btn" onclick="showHint()"><img src="assets/img/find-hint-star.png" alt="" style="width:1.5em;height:1.5em;object-fit:contain;vertical-align:-.25em"> <span data-it="Indizio">Dica</span></button>
+          <button class="game-btn game-btn--main" onclick="checkSolution()"><img src="assets/img/icon-check-decorative.png" alt="" style="width:1.5em;height:1.5em;object-fit:contain;vertical-align:-.25em"> <span data-it="Verifica">Verificar</span></button>
         </div>
       </div>
       <div class="right-panel">
-        <div class="guest-pool"><h3><span data-it="Ospiti">Convidados</span></h3><div class="guest-list" id="guestList"></div></div>
-        <div class="rules-box"><h4><span data-it="Regole">Regras</span></h4><div id="rulesList"></div></div>
-        <div class="score-live"><span><span data-it="Punteggio">Pontuação</span></span><strong id="livePts">0</strong></div>
+        <div class="guest-pool"><h3 data-it="Ospiti">Convidados</h3><div class="guest-list" id="guestList"></div></div>
+        <div class="rules-box"><h4 data-it="Regole">Regras</h4><div id="rulesList"></div></div>
+        <div style="text-align:center;padding:.3rem;"><span style="font-size:.64rem;color:#6C6258;text-transform:uppercase;letter-spacing:.07em" data-it="Punteggio">Pontuação</span><br><strong style="font-family:var(--font-display);font-size:1.4rem;color:#C8A050" id="livePts">0</strong></div>
       </div>
     </div>
     <section class="top10" style="max-width:460px;margin:1.2rem auto 0"><h3>Top 10</h3><ol id="topList"></ol></section>
@@ -106,9 +104,9 @@
   <div class="modal" id="startModal">
     <div class="modal__card">
       <div class="modal__icon"><img src="assets/img/seat-table-round.png" alt=""></div>
-      <h2 class="modal__title">Is This Seat Taken?</h2>
-      <p class="modal__text">Coloque cada convidado numa cadeira satisfazendo TODAS as regras. Cada puzzle tem uma solução possível. Clique num convidado → clique na cadeira. Use <img src="assets/img/find-hint-star.png" alt="" style="width:1.6em;height:1.6em;object-fit:contain;vertical-align:-.28em"> <span data-it="per un indizio se sei bloccato!">para uma dica se travar!</span></p>
-      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startSeat()"><img src="assets/img/seat-chair-empty.png" alt="" style="width:1.9em;height:1.9em;object-fit:contain;vertical-align:-.28em"> Começar</button></div>
+      <h2 class="modal__title" data-it="È Libero Questo Posto?">Is This Seat Taken?</h2>
+      <p class="modal__text" data-it="Sistema ogni ospite su una sedia soddisfacendo TUTTE le regole. Clicca ospite → sedia. 15 puzzle progressivi!">Coloque cada convidado numa cadeira satisfazendo TODAS as regras. Clique num convidado → clique numa cadeira. 15 puzzles progressivos!</p>
+      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startSeat()"><img src="assets/img/seat-chair-empty.png" alt="" style="width:1.5em;height:1.5em;object-fit:contain;vertical-align:-.25em"> <span data-it="Inizia">Começar</span></button></div>
     </div>
   </div>
   <div class="modal" id="resultModal" hidden>
@@ -116,199 +114,314 @@
       <div class="modal__icon" id="resIcon"><img src="assets/img/seat-success-burst.png" alt=""></div>
       <h2 class="modal__title" id="resTitle">Perfeito!</h2>
       <p class="modal__text" id="resText"></p>
-      <div class="btn-row" style="margin-bottom:.62rem">
-        <button class="game-btn" onclick="resetPuzzle()"><span data-it="↩ Riprova">↩ Tentar de novo</span></button>
-        <button class="game-btn game-btn--main" onclick="nextPuzzle()"><span data-it="Prossimo ›">Próximo ›</span></button>
+      <div class="btn-row" style="margin-bottom:.6rem">
+        <button class="game-btn" onclick="resetPuzzle()" data-it="↩ Riprova">↩ Tentar de novo</button>
+        <button class="game-btn game-btn--main" onclick="nextPuzzle()" data-it="Prossimo ›">Próximo ›</button>
       </div>
       <div class="save-box">
-        <div class="save-box__row"><input class="save-input" id="pName" placeholder="Seu nome" maxlength="22"/><button class="game-btn" onclick="doSave()">Salvar</button></div>
+        <div class="save-box__row"><input class="save-input" id="pName" placeholder="Seu nome" maxlength="22"/><button class="game-btn" onclick="doSave()" data-it="Salva">Salvar</button></div>
         <p class="save-msg" id="saveMsg"></p>
       </div>
     </div>
   </div>
+
 <script>
 const API="https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
 const GAME_KEY="seat-puzzle";
 
-let _AC=null;function getAC(){if(!_AC)_AC=new(window.AudioContext||window.webkitAudioContext)();return _AC;}
+let _AC=null;
+function getAC(){if(!_AC)_AC=new(window.AudioContext||window.webkitAudioContext)();return _AC;}
 function beep(f,d,v,t){try{const c=getAC(),ts=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.08,ts);g.gain.exponentialRampToValueAtTime(.0001,ts+d);o.connect(g);g.connect(c.destination);o.start(ts);o.stop(ts+d);}catch(e){}}
-function sndSeat(){beep(660,.07,.09);}
+function sndPlace(){beep(660,.07,.09);}
 function sndBad(){beep(220,.18,.09,'sawtooth');}
 function sndWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.12,.1),i*65));}
-function sndPartial(){beep(440,.08,.07);}
+function sndHint(){beep(440,.08,.07);}
 function haptic(p){try{navigator.vibrate&&navigator.vibrate(p||15);}catch(e){}}
 
+const IT = ()=> window.I18N && window.I18N.lang==='it';
+
 const GUESTS=[
-  {id:"groom-a",   name:(window.I18N&&window.I18N.lang==='it'?"Tiago":"Tiago"),     img:"guest-groom-a.png"},
-  {id:"groom-b",   name:(window.I18N&&window.I18N.lang==='it'?"Gian":"Gian"),      img:"guest-groom-b.png"},
-  {id:"grandma",   name:(window.I18N&&window.I18N.lang==='it'?"Nonna":"Vovó"),      img:"guest-grandma.png"},
-  {id:"grandpa",   name:(window.I18N&&window.I18N.lang==='it'?"Nonno":"Vovô"),      img:"guest-grandpa.png"},
-  {id:"aunt",      name:(window.I18N&&window.I18N.lang==='it'?"Zia Rosa":"Tia Rosa"),  img:"guest-aunt.png"},
-  {id:"uncle",     name:(window.I18N&&window.I18N.lang==='it'?"Zio Marco":"Tio Marco"), img:"guest-uncle.png"},
-  {id:"cousin",    name:(window.I18N&&window.I18N.lang==='it'?"Cugino":"Primo"),     img:"guest-cousin.png"},
-  {id:"friend",    name:(window.I18N&&window.I18N.lang==='it'?"Amica":"Amiga"),     img:"guest-friend.png"},
-  {id:"bestman",   name:(window.I18N&&window.I18N.lang==='it'?"Padrino":"Padrinho"),  img:"guest-bestman.png"},
-  {id:"bridesmaid",name:(window.I18N&&window.I18N.lang==='it'?"Madrina":"Madrinha"),  img:"guest-bridesmaid.png"},
+  {id:"groom-a",   name:()=>IT()?"Tiago":"Tiago",      img:"guest-groom-a.png"},
+  {id:"groom-b",   name:()=>IT()?"Gian":"Gian",        img:"guest-groom-b.png"},
+  {id:"grandma",   name:()=>IT()?"Nonna":"Vovó",       img:"guest-grandma.png"},
+  {id:"grandpa",   name:()=>IT()?"Nonno":"Vovô",       img:"guest-grandpa.png"},
+  {id:"aunt",      name:()=>IT()?"Zia Rosa":"Tia Rosa", img:"guest-aunt.png"},
+  {id:"uncle",     name:()=>IT()?"Zio Marco":"Tio Marco",img:"guest-uncle.png"},
+  {id:"cousin",    name:()=>IT()?"Cugino":"Primo",     img:"guest-cousin.png"},
+  {id:"friend",    name:()=>IT()?"Amica":"Amiga",      img:"guest-friend.png"},
+  {id:"bestman",   name:()=>IT()?"Padrino":"Padrinho", img:"guest-bestman.png"},
+  {id:"bridesmaid",name:()=>IT()?"Madrina":"Madrinha", img:"guest-bridesmaid.png"},
 ];
 
-// SEATS on round table (6): positions as % of canvas CW×CH
-// Based on seat-table-round.png: table center ~50%,50%, chairs around perimeter
-// Positions calibrated by pixel analysis of actual PNG assets
-// Mesa redonda 243×259 → canvas 480×340 (pad=24, scale=1.1274, tx=103, ty=24)
+// ── Seat positions calibrated from ACTUAL screenshot pixel analysis ──────────
+// Round table screenshot 834×902 → chair cushion centroids:
 const R6=[
-  {id:0,x:48.9,y:17.0}, // topo       — pixel (117,30)
-  {id:1,x:66.8,y:31.9}, // topo-dir   — pixel (193,75)
-  {id:2,x:67.5,y:67.4}, // baixo-dir  — pixel (196,182)
-  {id:3,x:49.9,y:80.7}, // base       — pixel (121,222)
-  {id:4,x:32.5,y:67.1}, // baixo-esq  — pixel (47,181)
-  {id:5,x:33.0,y:31.6}, // topo-esq   — pixel (49,74)
+  {id:0,x:51.0,y:16.7}, // topo         screen(425,151)
+  {id:1,x:79.5,y:32.4}, // topo-dir     screen(663,292)
+  {id:2,x:80.7,y:69.3}, // baixo-dir    screen(673,625)
+  {id:3,x:52.5,y:83.4}, // base         screen(438,752)
+  {id:4,x:24.7,y:69.1}, // baixo-esq    screen(206,623)
+  {id:5,x:25.5,y:32.0}, // topo-esq     screen(213,289)
 ];
 
-// Mesa longa 361×227 → canvas 480×340 (pad=24, scale=1.1967, tx=24, ty=34.2)
-// 4 cadeiras topo (y≈17%) e 4 base (y≈82%), espaçadas em x
+// Long table screenshot 1284×878 → chair cushion centroids:
 const L8=[
-  {id:0,x:13.7,y:17.1},{id:1,x:33.7,y:17.1},{id:2,x:66.1,y:17.1},{id:3,x:86.0,y:17.1},
-  {id:4,x:13.7,y:82.2},{id:5,x:33.7,y:82.2},{id:6,x:66.1,y:82.2},{id:7,x:86.0,y:82.2},
+  {id:0,x:12.7,y:16.2},{id:1,x:33.5,y:16.2},{id:2,x:67.1,y:16.1},{id:3,x:87.8,y:16.2},
+  {id:4,x:12.7,y:86.1},{id:5,x:33.5,y:86.1},{id:6,x:67.1,y:86.1},{id:7,x:87.8,y:86.1},
 ];
 
-// Duas mesas redondas: cada uma com sz=201.6px
-// Mesa A centro em CW*0.25=120, Mesa B centro em CW*0.73=350.4
-// scale_t2 = 201.6/259 = 0.778; offA=(19.2,69.2), offB=(249.6,69.2)
+// Two round tables: Mesa A (seats 0-4) left side, Mesa B (seats 5-9) right side
 const T2=[
-  {id:0,x:23.0,y:27.2},{id:1,x:35.3,y:37.5},{id:2,x:35.8,y:62.0},{id:3,x:23.6,y:71.2},{id:4,x:11.6,y:61.8}, // Mesa A
-  {id:5,x:71.0,y:27.2},{id:6,x:83.3,y:37.5},{id:7,x:83.8,y:62.0},{id:8,x:71.6,y:71.2},{id:9,x:59.6,y:61.8}, // Mesa B
+  {id:0,x:22.5,y:26.0},{id:1,x:35.0,y:14.5},{id:2,x:43.0,y:37.0},{id:3,x:35.0,y:56.5},{id:4,x:20.0,y:49.0},
+  {id:5,x:70.5,y:26.0},{id:6,x:83.0,y:14.5},{id:7,x:91.0,y:37.0},{id:8,x:83.0,y:56.5},{id:9,x:68.0,y:49.0},
 ];
 
+// ── Helper rule functions ────────────────────────────────────────────────────
 function adjRound(sa,sb,seats){
   const n=seats.length;
-  const idxA=seats.findIndex(s=>s.id===sa),idxB=seats.findIndex(s=>s.id===sb);
-  if(idxA<0||idxB<0)return false;
-  return Math.abs(idxA-idxB)===1||(idxA===0&&idxB===n-1)||(idxB===0&&idxA===n-1);
+  const ia=seats.findIndex(s=>s.id===sa),ib=seats.findIndex(s=>s.id===sb);
+  if(ia<0||ib<0)return false;
+  return Math.abs(ia-ib)===1||(ia===0&&ib===n-1)||(ib===0&&ia===n-1);
 }
 function oppRound(sa,sb,seats){
   const n=seats.length;
-  const idxA=seats.findIndex(s=>s.id===sa),idxB=seats.findIndex(s=>s.id===sb);
-  if(idxA<0||idxB<0)return false;
-  return Math.abs(idxA-idxB)===Math.floor(n/2);
+  const ia=seats.findIndex(s=>s.id===sa),ib=seats.findIndex(s=>s.id===sb);
+  return Math.abs(ia-ib)===Math.floor(n/2);
 }
 function adjLong(sa,sb){
-  const rowA=sa<4?0:1,rowB=sb<4?0:1;
-  if(rowA!==rowB)return false;
+  if((sa<4)!==(sb<4))return false;
   return Math.abs(sa%4-sb%4)===1;
 }
-function sameTableT2(sa,sb){return (sa<5)===(sb<5);}
+function oppLong(sa,sb){return Math.abs(sa-sb)===4;}
+function rowLong(sa,sb){return (sa<4)===(sb<4);}
+function sameTable(sa,sb,sz){sz=sz||5;return (sa<sz)===(sb<sz);}
 
-// ===== 5 VERIFIED PUZZLES =====
+// ── Rule evaluation ──────────────────────────────────────────────────────────
+function evalRule(r,seat,p){
+  const sa=findSeat(r.a,seat),sb=r.b!=null?findSeat(r.b,seat):-9;
+  if(sa<0||(r.b!=null&&sb<0))return null;
+  let v;
+  if(r.type==='adj')      v=adjRound(sa,sb,r.seats||p.seats);
+  else if(r.type==='opp') v=oppRound(sa,sb,r.seats||p.seats);
+  else if(r.type==='adj_long') v=adjLong(sa,sb);
+  else if(r.type==='opp_long') v=oppLong(sa,sb);
+  else if(r.type==='row_long') v=rowLong(sa,sb);
+  else if(r.type==='same_table') v=sameTable(sa,sb,r.sz);
+  else if(r.type==='diff_table') v=!sameTable(sa,sb,r.sz);
+  else return null;
+  return r.must?v:!v;
+}
+function findSeat(gid,seat){for(const[sid,g]of Object.entries(seat)){if(g===gid)return parseInt(sid);}return -1;}
+
+// ── 15 Puzzles (ALL VERIFIED SOLVABLE) ──────────────────────────────────────
 const PUZZLES=[
-
-  // PUZZLE 1: Round table, 6 guests (VERIFIED: 24 solutions, easy)
-  {
-    id:1, label:"Puzzle 1 — Mesa Redonda",
-    tableImg:"seat-table-round.png", tableType:"round", seats:R6,
-    guestIds:["groom-a","groom-b","grandma","grandpa","aunt","uncle"],
-    rules:[
-      {type:"adj",a:"groom-a",b:"groom-b",must:true, seats:R6, icon:"hint-couple.png",   label:(window.I18N&&window.I18N.lang==='it'?"Tiago e Gian fianco a fianco":"Tiago e Gian lado a lado")},
-      {type:"adj",a:"grandma",b:"grandpa",must:true, seats:R6, icon:"hint-family.png",   label:(window.I18N&&window.I18N.lang==='it'?"Nonna e Nonno insieme":"Vovó e Vovô juntos")},
-      {type:"adj",a:"aunt",  b:"uncle",  must:true, seats:R6, icon:"hint-family.png",   label:"Tia e Tio juntos"},
-      {type:"adj",a:"groom-a",b:"uncle", must:false,seats:R6, icon:"hint-ex.png",       label:"Tiago não ao lado do Tio"},
-      {type:"adj",a:"grandma",b:"groom-a",must:false,seats:R6,icon:"hint-ex.png",       label:"Vovó não ao lado do Tiago"},
-      {type:"opp",a:"groom-a",b:"uncle", must:true, seats:R6, icon:"hint-dancefloor.png",label:"Tiago e Tio em frente um ao outro"},
-    ],
-    bgImg:"seat-bg-reception.png",
-  },
-
-  // PUZZLE 2: Round table, 6 guests (VERIFIED: 24 solutions, medium)
-  {
-    id:2, label:"Puzzle 2 — Padrinhos",
-    tableImg:"seat-table-round.png", tableType:"round", seats:R6,
-    guestIds:["groom-a","groom-b","bestman","bridesmaid","grandma","friend"],
-    rules:[
-      {type:"adj",a:"groom-a",b:"groom-b",   must:true, seats:R6,icon:"hint-couple.png",   label:(window.I18N&&window.I18N.lang==='it'?"Sposi insieme":"Noivos juntos")},
-      {type:"adj",a:"bestman",b:"groom-a",   must:true, seats:R6,icon:"hint-dancefloor.png",label:(window.I18N&&window.I18N.lang==='it'?"Padrino accanto a Tiago":"Padrinho ao lado do Tiago")},
-      {type:"adj",a:"bridesmaid",b:"groom-b",must:true, seats:R6,icon:"hint-dancefloor.png",label:(window.I18N&&window.I18N.lang==='it'?"Madrina accanto a Gian":"Madrinha ao lado do Gian")},
-      {type:"adj",a:"bestman",b:"bridesmaid",must:false,seats:R6,icon:"hint-ex.png",        label:(window.I18N&&window.I18N.lang==='it'?"Padrino e Madrina NON insieme":"Padrinho e Madrinha NÃO juntos")},
-      {type:"adj",a:"grandma",b:"friend",    must:true, seats:R6,icon:"hint-family.png",    label:(window.I18N&&window.I18N.lang==='it'?"Nonna accanto all'Amica":"Vovó ao lado da Amiga")},
-    ],
-    bgImg:"seat-bg-reception.png",
-  },
-
-  // PUZZLE 3: Round table, 6 guests (VERIFIED: 12 solutions, hard)
-  {
-    id:3, label:"Puzzle 3 — Família Difícil",
-    tableImg:"seat-table-round.png", tableType:"round", seats:R6,
-    guestIds:["groom-a","groom-b","grandpa","aunt","uncle","cousin"],
-    rules:[
-      {type:"adj",a:"groom-a",b:"groom-b",must:true, seats:R6,icon:"hint-couple.png",    label:"Noivos juntos"},
-      {type:"adj",a:"grandpa",b:"groom-a",must:true, seats:R6,icon:"hint-family.png",    label:"Vovô ao lado do Tiago"},
-      {type:"adj",a:"aunt",  b:"uncle",  must:false,seats:R6,icon:"hint-ex.png",         label:"Tia e Tio SEPARADOS (ex!)"},
-      {type:"opp",a:"groom-a",b:"cousin",must:true, seats:R6,icon:"hint-dancefloor.png", label:(window.I18N&&window.I18N.lang==='it'?"Tiago di fronte al Cugino":"Tiago em frente ao Primo")},
-      {type:"adj",a:"aunt",  b:"groom-b",must:false,seats:R6,icon:"hint-ex.png",         label:(window.I18N&&window.I18N.lang==='it'?"Zia non accanto a Gian":"Tia não ao lado do Gian")},
-      {type:"adj",a:"uncle", b:"groom-b",must:true, seats:R6,icon:"hint-family.png",     label:(window.I18N&&window.I18N.lang==='it'?"Zio accanto a Gian":"Tio ao lado do Gian")},
-    ],
-    bgImg:"seat-bg-garden.png",
-  },
-
-  // PUZZLE 4: Long table, 8 guests (VERIFIED: 32 solutions, medium-hard)
-  {
-    id:4, label:"Puzzle 4 — Mesa Longa",
-    tableImg:"seat-table-long.png", tableType:"long", seats:L8,
-    guestIds:["groom-a","groom-b","grandma","grandpa","bestman","bridesmaid","aunt","cousin"],
-    rules:[
-      {type:"opp_long",a:"groom-a",b:"groom-b",must:true, icon:"hint-couple.png",    label:(window.I18N&&window.I18N.lang==='it'?"Sposi uno di fronte all'altro":"Noivos um de frente para o outro")},
-      {type:"adj_long",a:"bestman",b:"groom-a",must:true, icon:"hint-dancefloor.png",label:"Padrinho ao lado do Tiago"},
-      {type:"adj_long",a:"bridesmaid",b:"groom-b",must:true,icon:"hint-dancefloor.png",label:"Madrinha ao lado do Gian"},
-      {type:"adj_long",a:"grandma",b:"grandpa",must:true, icon:"hint-family.png",    label:(window.I18N&&window.I18N.lang==='it'?"Nonni insieme":"Vovós juntos")},
-      {type:"opp_long",a:"grandma",b:"grandpa",must:true, icon:"hint-family.png",    label:(window.I18N&&window.I18N.lang==='it'?"Nonni uno di fronte all'altro":"Vovós em frente um ao outro")},
-      {type:"adj_long",a:"aunt",b:"groom-a",must:false,   icon:"hint-ex.png",        label:(window.I18N&&window.I18N.lang==='it'?"Zia NON accanto a Tiago":"Tia NÃO ao lado do Tiago")},
-    ],
-    bgImg:"seat-bg-garden.png",
-  },
-
-  // PUZZLE 5: Two round tables, 10 guests (VERIFIED: 51+ solutions, hard)
-  {
-    id:5, label:"Puzzle 5 — Duas Mesas!",
-    tableImg:"two-tables", tableType:"two", seats:T2,
-    guestIds:["groom-a","groom-b","grandma","grandpa","bestman","bridesmaid","aunt","uncle","cousin","friend"],
-    rules:[
-      {type:"diff_table",a:"groom-a",b:"groom-b",must:true, icon:"hint-dancefloor.png",label:"Noivos em mesas diferentes (tradição!)"},
-      {type:"same_table",a:"grandma",b:"grandpa",must:true, icon:"hint-family.png",   label:(window.I18N&&window.I18N.lang==='it'?"Nonni allo stesso tavolo":"Vovós na mesma mesa")},
-      {type:"same_table",a:"bestman",b:"groom-a",must:true, icon:"hint-couple.png",   label:(window.I18N&&window.I18N.lang==='it'?"Padrino al tavolo di Tiago":"Padrinho na mesa do Tiago")},
-      {type:"same_table",a:"bridesmaid",b:"groom-b",must:true,icon:"hint-couple.png", label:(window.I18N&&window.I18N.lang==='it'?"Madrina al tavolo di Gian":"Madrinha na mesa do Gian")},
-      {type:"same_table",a:"grandma",b:"groom-b",must:true, icon:"hint-family.png",   label:(window.I18N&&window.I18N.lang==='it'?"Nonni con Gian":"Vovós com Gian")},
-      {type:"diff_table",a:"aunt",b:"uncle",must:true,      icon:"hint-ex.png",       label:(window.I18N&&window.I18N.lang==='it'?"Zia e Zio a tavoli SEPARATI":"Tia e Tio em mesas SEPARADAS")},
-      {type:"same_table",a:"aunt",b:"groom-a",must:true,    icon:"hint-family.png",   label:(window.I18N&&window.I18N.lang==='it'?"Zia al tavolo di Tiago":"Tia na mesa do Tiago")},
-    ],
-    bgImg:"seat-bg-reception.png",
-  },
+  // P1 — Mesa Redonda · Fácil · 12 soluções
+  {id:1,label:"P1 — Mesa Redonda",tableType:"round",seats:R6,bg:"seat-bg-reception.png",
+   guestIds:["groom-a","groom-b","grandma","grandpa","aunt","uncle"],
+   rules:[
+    {type:"adj",a:"groom-a",b:"groom-b",must:true, seats:R6,icon:"hint-couple.png",   label:()=>IT()?"Tiago e Gian fianco a fianco":"Tiago e Gian lado a lado"},
+    {type:"adj",a:"grandma",b:"grandpa",must:true, seats:R6,icon:"hint-family.png",   label:()=>IT()?"Nonna e Nonno insieme":"Vovó e Vovô juntos"},
+    {type:"adj",a:"aunt",   b:"uncle",  must:true, seats:R6,icon:"hint-family.png",   label:()=>IT()?"Zia e Zio insieme":"Tia e Tio juntos"},
+    {type:"adj",a:"groom-a",b:"uncle",  must:false,seats:R6,icon:"hint-ex.png",       label:()=>IT()?"Tiago NON vicino allo Zio":"Tiago não ao lado do Tio"},
+    {type:"adj",a:"grandma",b:"groom-a",must:false,seats:R6,icon:"hint-ex.png",       label:()=>IT()?"Nonna NON vicino a Tiago":"Vovó não ao lado do Tiago"},
+    {type:"opp",a:"groom-a",b:"uncle",  must:true, seats:R6,icon:"hint-dancefloor.png",label:()=>IT()?"Tiago di fronte allo Zio":"Tiago e Tio em frente"},
+  ]},
+  // P2 — Padrinhos · Médio · 24 soluções
+  {id:2,label:"P2 — Padrinhos",tableType:"round",seats:R6,bg:"seat-bg-reception.png",
+   guestIds:["groom-a","groom-b","bestman","bridesmaid","grandma","friend"],
+   rules:[
+    {type:"adj",a:"groom-a",   b:"groom-b",    must:true, seats:R6,icon:"hint-couple.png",   label:()=>IT()?"Sposi insieme":"Noivos juntos"},
+    {type:"adj",a:"bestman",   b:"groom-a",    must:true, seats:R6,icon:"hint-dancefloor.png",label:()=>IT()?"Padrino accanto a Tiago":"Padrinho ao lado do Tiago"},
+    {type:"adj",a:"bridesmaid",b:"groom-b",    must:true, seats:R6,icon:"hint-dancefloor.png",label:()=>IT()?"Madrina accanto a Gian":"Madrinha ao lado do Gian"},
+    {type:"adj",a:"bestman",   b:"bridesmaid", must:false,seats:R6,icon:"hint-ex.png",        label:()=>IT()?"Padrino e Madrina NON vicini":"Padrinho e Madrinha NÃO juntos"},
+    {type:"adj",a:"grandma",   b:"friend",     must:true, seats:R6,icon:"hint-family.png",    label:()=>IT()?"Nonna vicino all'Amica":"Vovó ao lado da Amiga"},
+  ]},
+  // P3 — Família Difícil · Médio-Difícil · 12 soluções
+  {id:3,label:"P3 — Família",tableType:"round",seats:R6,bg:"seat-bg-garden.png",
+   guestIds:["groom-a","groom-b","grandpa","aunt","uncle","cousin"],
+   rules:[
+    {type:"adj",a:"groom-a",b:"groom-b",must:true, seats:R6,icon:"hint-couple.png",    label:()=>IT()?"Sposi insieme":"Noivos juntos"},
+    {type:"adj",a:"grandpa",b:"groom-a",must:true, seats:R6,icon:"hint-family.png",    label:()=>IT()?"Nonno vicino a Tiago":"Vovô ao lado do Tiago"},
+    {type:"adj",a:"aunt",   b:"uncle",  must:false,seats:R6,icon:"hint-ex.png",        label:()=>IT()?"Zia e Zio SEPARATI":"Tia e Tio SEPARADOS"},
+    {type:"opp",a:"groom-a",b:"cousin",must:true, seats:R6,icon:"hint-dancefloor.png", label:()=>IT()?"Tiago di fronte al Cugino":"Tiago em frente ao Primo"},
+    {type:"adj",a:"aunt",   b:"groom-b",must:false,seats:R6,icon:"hint-ex.png",        label:()=>IT()?"Zia NON vicino a Gian":"Tia não ao lado do Gian"},
+    {type:"adj",a:"uncle",  b:"groom-b",must:true, seats:R6,icon:"hint-family.png",    label:()=>IT()?"Zio vicino a Gian":"Tio ao lado do Gian"},
+  ]},
+  // P4 — Mesa Longa · 80 soluções (CORRIGIDO)
+  {id:4,label:"P4 — Mesa Longa",tableType:"long",seats:L8,bg:"seat-bg-garden.png",
+   guestIds:["groom-a","groom-b","grandma","grandpa","bestman","bridesmaid","aunt","cousin"],
+   rules:[
+    {type:"opp_long",a:"groom-a",   b:"groom-b",    must:true, icon:"hint-couple.png",    label:()=>IT()?"Sposi di fronte":"Noivos de frente"},
+    {type:"adj_long",a:"bestman",   b:"groom-a",    must:true, icon:"hint-dancefloor.png", label:()=>IT()?"Padrino vicino a Tiago":"Padrinho ao lado do Tiago"},
+    {type:"adj_long",a:"bridesmaid",b:"groom-b",    must:true, icon:"hint-dancefloor.png", label:()=>IT()?"Madrina vicino a Gian":"Madrinha ao lado do Gian"},
+    {type:"adj_long",a:"grandma",   b:"grandpa",    must:true, icon:"hint-family.png",     label:()=>IT()?"Nonni vicini":"Vovós juntos na mesma fila"},
+    {type:"adj_long",a:"aunt",      b:"groom-a",    must:false,icon:"hint-ex.png",         label:()=>IT()?"Zia NON vicino a Tiago":"Tia NÃO ao lado do Tiago"},
+  ]},
+  // P5 — Duas Mesas · 200+ soluções
+  {id:5,label:"P5 — Duas Mesas",tableType:"two",seats:T2,bg:"seat-bg-reception.png",
+   guestIds:["groom-a","groom-b","grandma","grandpa","bestman","bridesmaid","aunt","uncle","cousin","friend"],
+   rules:[
+    {type:"diff_table",a:"groom-a",   b:"groom-b",  must:true, icon:"hint-dancefloor.png",label:()=>IT()?"Sposi a tavoli DIVERSI":"Noivos em mesas DIFERENTES"},
+    {type:"same_table",a:"grandma",   b:"grandpa",  must:true, icon:"hint-family.png",    label:()=>IT()?"Nonni allo stesso tavolo":"Vovós na mesma mesa"},
+    {type:"same_table",a:"bestman",   b:"groom-a",  must:true, icon:"hint-couple.png",    label:()=>IT()?"Padrino con Tiago":"Padrinho com Tiago"},
+    {type:"same_table",a:"bridesmaid",b:"groom-b",  must:true, icon:"hint-couple.png",    label:()=>IT()?"Madrina con Gian":"Madrinha com Gian"},
+    {type:"same_table",a:"grandma",   b:"groom-b",  must:true, icon:"hint-family.png",    label:()=>IT()?"Nonni con Gian":"Vovós com Gian"},
+    {type:"diff_table",a:"aunt",      b:"uncle",    must:true, icon:"hint-ex.png",        label:()=>IT()?"Zia e Zio SEPARATI":"Tia e Tio SEPARADOS"},
+    {type:"same_table",a:"aunt",      b:"groom-a",  must:true, icon:"hint-family.png",    label:()=>IT()?"Zia con Tiago":"Tia com Tiago"},
+  ]},
+  // P6 — Nova · Médio · 24 soluções
+  {id:6,label:"P6 — Padrinhos & Primos",tableType:"round",seats:R6,bg:"seat-bg-reception.png",
+   guestIds:["groom-a","groom-b","bestman","bridesmaid","cousin","friend"],
+   rules:[
+    {type:"adj",a:"groom-a",   b:"groom-b",    must:true, seats:R6,icon:"hint-couple.png",    label:()=>IT()?"Sposi insieme":"Noivos juntos"},
+    {type:"adj",a:"bestman",   b:"groom-a",    must:true, seats:R6,icon:"hint-dancefloor.png", label:()=>IT()?"Padrino vicino a Tiago":"Padrinho ao lado do Tiago"},
+    {type:"adj",a:"bridesmaid",b:"groom-b",    must:true, seats:R6,icon:"hint-dancefloor.png", label:()=>IT()?"Madrina vicino a Gian":"Madrinha ao lado do Gian"},
+    {type:"adj",a:"bestman",   b:"bridesmaid", must:false,seats:R6,icon:"hint-ex.png",         label:()=>IT()?"Padrino e Madrina NON vicini":"Padrinho e Madrinha NÃO juntos"},
+    {type:"adj",a:"cousin",    b:"friend",     must:true, seats:R6,icon:"hint-family.png",     label:()=>IT()?"Cugino vicino all'Amica":"Primo ao lado da Amiga"},
+  ]},
+  // P7 — Nova · Médio-Difícil · 72 soluções
+  {id:7,label:"P7 — Avós & Amigos",tableType:"round",seats:R6,bg:"seat-bg-garden.png",
+   guestIds:["groom-a","groom-b","grandma","grandpa","aunt","friend"],
+   rules:[
+    {type:"adj",a:"groom-a",b:"groom-b",must:true, seats:R6,icon:"hint-couple.png",   label:()=>IT()?"Sposi insieme":"Noivos juntos"},
+    {type:"adj",a:"grandma",b:"grandpa",must:true, seats:R6,icon:"hint-family.png",   label:()=>IT()?"Nonni insieme":"Vovós juntos"},
+    {type:"adj",a:"aunt",   b:"friend", must:true, seats:R6,icon:"hint-family.png",   label:()=>IT()?"Zia vicino all'Amica":"Tia ao lado da Amiga"},
+    {type:"adj",a:"grandma",b:"groom-a",must:false,seats:R6,icon:"hint-ex.png",       label:()=>IT()?"Nonna NON vicino a Tiago":"Vovó não ao lado do Tiago"},
+  ]},
+  // P8 — Mesa Longa · 80 soluções
+  {id:8,label:"P8 — Mesa Longa dos Avós",tableType:"long",seats:L8,bg:"seat-bg-garden.png",
+   guestIds:["groom-a","groom-b","grandma","grandpa","uncle","aunt","bestman","friend"],
+   rules:[
+    {type:"opp_long",a:"groom-a",b:"groom-b", must:true, icon:"hint-couple.png",    label:()=>IT()?"Sposi di fronte":"Noivos de frente"},
+    {type:"adj_long",a:"grandma",b:"grandpa", must:true, icon:"hint-family.png",    label:()=>IT()?"Nonni vicini":"Vovós juntos"},
+    {type:"row_long",a:"grandma",b:"grandpa", must:true, icon:"hint-family.png",    label:()=>IT()?"Nonni nella stessa fila":"Vovós na mesma fila"},
+    {type:"adj_long",a:"bestman",b:"groom-a", must:true, icon:"hint-dancefloor.png",label:()=>IT()?"Padrino vicino a Tiago":"Padrinho ao lado do Tiago"},
+    {type:"row_long",a:"bestman",b:"groom-a", must:true, icon:"hint-dancefloor.png",label:()=>IT()?"Padrino nella fila di Tiago":"Padrinho na fila do Tiago"},
+    {type:"row_long",a:"uncle",  b:"aunt",    must:false,icon:"hint-ex.png",        label:()=>IT()?"Zio e Zia in file diverse":"Tio e Tia em filas opostas"},
+    {type:"adj_long",a:"aunt",   b:"groom-b", must:false,icon:"hint-ex.png",        label:()=>IT()?"Zia NON vicino a Gian":"Tia não ao lado do Gian"},
+  ]},
+  // P9 — Mesa Longa · Difícil · 64 soluções
+  {id:9,label:"P9 — Mesa dos Padrinhos",tableType:"long",seats:L8,bg:"seat-bg-reception.png",
+   guestIds:["groom-a","groom-b","grandma","cousin","bestman","bridesmaid","aunt","uncle"],
+   rules:[
+    {type:"opp_long",a:"groom-a",   b:"groom-b",    must:true, icon:"hint-couple.png",    label:()=>IT()?"Sposi di fronte":"Noivos de frente"},
+    {type:"adj_long",a:"bestman",   b:"groom-a",    must:true, icon:"hint-dancefloor.png", label:()=>IT()?"Padrino vicino a Tiago":"Padrinho ao lado do Tiago"},
+    {type:"adj_long",a:"bridesmaid",b:"groom-b",    must:true, icon:"hint-dancefloor.png", label:()=>IT()?"Madrina vicino a Gian":"Madrinha ao lado do Gian"},
+    {type:"opp_long",a:"bestman",   b:"bridesmaid", must:true, icon:"hint-couple.png",     label:()=>IT()?"Padrino e Madrina di fronte":"Padrinho e Madrinha de frente"},
+    {type:"row_long",a:"grandma",   b:"groom-b",    must:true, icon:"hint-family.png",     label:()=>IT()?"Nonna nella fila di Gian":"Vovó na fila do Gian"},
+    {type:"row_long",a:"aunt",      b:"uncle",      must:false,icon:"hint-ex.png",         label:()=>IT()?"Zia e Zio in file diverse":"Tia e Tio em filas opostas"},
+    {type:"adj_long",a:"cousin",    b:"groom-a",    must:false,icon:"hint-ex.png",         label:()=>IT()?"Cugino NON vicino a Tiago":"Primo não ao lado do Tiago"},
+  ]},
+  // P10 — Duas Mesas Pequenas · 200+ soluções
+  {id:10,label:"P10 — Duas Mesas Pequenas",tableType:"two",seats:T2,bg:"seat-bg-garden.png",
+   guestIds:["groom-a","groom-b","grandma","grandpa","bestman","bridesmaid","aunt","cousin"],
+   rules:[
+    {type:"diff_table",a:"groom-a",   b:"groom-b",  must:true, sz:4,icon:"hint-dancefloor.png",label:()=>IT()?"Sposi a tavoli DIVERSI":"Noivos em mesas DIFERENTES"},
+    {type:"same_table",a:"grandma",   b:"grandpa",  must:true, sz:4,icon:"hint-family.png",    label:()=>IT()?"Nonni allo stesso tavolo":"Vovós na mesma mesa"},
+    {type:"same_table",a:"bestman",   b:"groom-a",  must:true, sz:4,icon:"hint-couple.png",    label:()=>IT()?"Padrino con Tiago":"Padrinho com Tiago"},
+    {type:"same_table",a:"bridesmaid",b:"groom-b",  must:true, sz:4,icon:"hint-couple.png",    label:()=>IT()?"Madrina con Gian":"Madrinha com Gian"},
+    {type:"same_table",a:"aunt",      b:"groom-b",  must:true, sz:4,icon:"hint-family.png",    label:()=>IT()?"Zia con Gian":"Tia com Gian"},
+    {type:"same_table",a:"grandma",   b:"groom-a",  must:true, sz:4,icon:"hint-family.png",    label:()=>IT()?"Nonni con Tiago":"Vovós com Tiago"},
+  ]},
+  // P11 — A Festa Completa · 200+ soluções
+  {id:11,label:"P11 — A Festa Completa",tableType:"two",seats:T2,bg:"seat-bg-reception.png",
+   guestIds:["groom-a","groom-b","grandma","grandpa","bestman","bridesmaid","aunt","uncle","cousin","friend"],
+   rules:[
+    {type:"diff_table",a:"groom-a",   b:"groom-b",  must:true, icon:"hint-dancefloor.png",label:()=>IT()?"Sposi a tavoli DIVERSI":"Noivos em mesas DIFERENTES"},
+    {type:"same_table",a:"grandma",   b:"grandpa",  must:true, icon:"hint-family.png",    label:()=>IT()?"Nonni allo stesso tavolo":"Vovós juntos"},
+    {type:"same_table",a:"grandma",   b:"groom-b",  must:true, icon:"hint-family.png",    label:()=>IT()?"Nonni con Gian":"Vovós com Gian"},
+    {type:"same_table",a:"bestman",   b:"groom-a",  must:true, icon:"hint-couple.png",    label:()=>IT()?"Padrino con Tiago":"Padrinho com Tiago"},
+    {type:"same_table",a:"bridesmaid",b:"groom-b",  must:true, icon:"hint-couple.png",    label:()=>IT()?"Madrina con Gian":"Madrinha com Gian"},
+    {type:"diff_table",a:"aunt",      b:"uncle",    must:true, icon:"hint-ex.png",        label:()=>IT()?"Zia e Zio SEPARATI":"Tia e Tio SEPARADOS"},
+    {type:"diff_table",a:"friend",    b:"aunt",     must:true, icon:"hint-ex.png",        label:()=>IT()?"Amica NON con la Zia":"Amiga não com a Tia"},
+  ]},
+  // P12 — Expert Mesa Redonda · 12 soluções
+  {id:12,label:"P12 — Expert",tableType:"round",seats:R6,bg:"seat-bg-garden.png",
+   guestIds:["groom-a","groom-b","uncle","aunt","cousin","friend"],
+   rules:[
+    {type:"adj",a:"groom-a",b:"groom-b",must:true, seats:R6,icon:"hint-couple.png",    label:()=>IT()?"Sposi insieme":"Noivos juntos"},
+    {type:"opp",a:"groom-a",b:"uncle",  must:true, seats:R6,icon:"hint-dancefloor.png", label:()=>IT()?"Tiago di fronte allo Zio":"Tiago em frente ao Tio"},
+    {type:"adj",a:"aunt",   b:"cousin", must:true, seats:R6,icon:"hint-family.png",    label:()=>IT()?"Zia vicino al Cugino":"Tia ao lado do Primo"},
+    {type:"adj",a:"aunt",   b:"groom-a",must:false,seats:R6,icon:"hint-ex.png",        label:()=>IT()?"Zia NON vicino a Tiago":"Tia não ao lado do Tiago"},
+  ]},
+  // P13 — Cerimônia · 12 soluções
+  {id:13,label:"P13 — Cerimônia",tableType:"round",seats:R6,bg:"seat-bg-reception.png",
+   guestIds:["groom-a","groom-b","grandma","uncle","cousin","bridesmaid"],
+   rules:[
+    {type:"adj",a:"groom-a",   b:"groom-b",    must:true, seats:R6,icon:"hint-couple.png",    label:()=>IT()?"Sposi insieme":"Noivos juntos"},
+    {type:"adj",a:"groom-b",   b:"bridesmaid", must:true, seats:R6,icon:"hint-dancefloor.png", label:()=>IT()?"Madrina vicino a Gian":"Madrinha ao lado do Gian"},
+    {type:"opp",a:"groom-a",   b:"uncle",      must:true, seats:R6,icon:"hint-dancefloor.png", label:()=>IT()?"Tiago di fronte allo Zio":"Tiago em frente ao Tio"},
+    {type:"adj",a:"grandma",   b:"cousin",     must:true, seats:R6,icon:"hint-family.png",    label:()=>IT()?"Nonna vicino al Cugino":"Vovó ao lado do Primo"},
+    {type:"adj",a:"grandma",   b:"groom-a",    must:false,seats:R6,icon:"hint-ex.png",         label:()=>IT()?"Nonna NON vicino a Tiago":"Vovó não ao lado do Tiago"},
+  ]},
+  // P14 — Mesa Longa dos Amigos · 200+ soluções
+  {id:14,label:"P14 — Mesa dos Amigos",tableType:"long",seats:L8,bg:"seat-bg-garden.png",
+   guestIds:["groom-a","groom-b","grandma","grandpa","cousin","friend","aunt","uncle"],
+   rules:[
+    {type:"opp_long",a:"groom-a",b:"groom-b", must:true, icon:"hint-couple.png",    label:()=>IT()?"Sposi di fronte":"Noivos de frente"},
+    {type:"adj_long",a:"grandma",b:"grandpa", must:true, icon:"hint-family.png",    label:()=>IT()?"Nonni vicini":"Vovós juntos"},
+    {type:"row_long",a:"grandma",b:"grandpa", must:true, icon:"hint-family.png",    label:()=>IT()?"Nonni stessa fila":"Vovós mesma fila"},
+    {type:"adj_long",a:"cousin", b:"friend",  must:true, icon:"hint-family.png",    label:()=>IT()?"Cugino vicino all'Amica":"Primo ao lado da Amiga"},
+    {type:"row_long",a:"cousin", b:"friend",  must:true, icon:"hint-family.png",    label:()=>IT()?"Cugino e Amica stessa fila":"Primo e Amiga mesma fila"},
+    {type:"row_long",a:"aunt",   b:"uncle",   must:false,icon:"hint-ex.png",        label:()=>IT()?"Zia e Zio file diverse":"Tia e Tio filas opostas"},
+    {type:"adj_long",a:"groom-a",b:"uncle",   must:false,icon:"hint-ex.png",        label:()=>IT()?"Tiago NON vicino allo Zio":"Tiago não ao lado do Tio"},
+  ]},
+  // P15 — Expert Duas Mesas · 200+ soluções
+  {id:15,label:"P15 — Expert: Duas Mesas",tableType:"two",seats:T2,bg:"seat-bg-reception.png",
+   guestIds:["groom-a","groom-b","grandma","grandpa","bestman","bridesmaid","aunt","uncle","cousin","friend"],
+   rules:[
+    {type:"diff_table",a:"groom-a",   b:"groom-b",  must:true, icon:"hint-dancefloor.png",label:()=>IT()?"Sposi a tavoli DIVERSI":"Noivos em mesas DIFERENTES"},
+    {type:"same_table",a:"bestman",   b:"groom-a",  must:true, icon:"hint-couple.png",    label:()=>IT()?"Padrino con Tiago":"Padrinho com Tiago"},
+    {type:"same_table",a:"bridesmaid",b:"groom-b",  must:true, icon:"hint-couple.png",    label:()=>IT()?"Madrina con Gian":"Madrinha com Gian"},
+    {type:"diff_table",a:"aunt",      b:"uncle",    must:true, icon:"hint-ex.png",        label:()=>IT()?"Zia e Zio SEPARATI":"Tia e Tio SEPARADOS"},
+    {type:"same_table",a:"grandma",   b:"groom-a",  must:true, icon:"hint-family.png",    label:()=>IT()?"Nonna con Tiago":"Vovó com Tiago"},
+    {type:"same_table",a:"grandpa",   b:"groom-b",  must:true, icon:"hint-family.png",    label:()=>IT()?"Nonno con Gian":"Vovô com Gian"},
+    {type:"diff_table",a:"cousin",    b:"aunt",     must:true, icon:"hint-ex.png",        label:()=>IT()?"Cugino NON con la Zia":"Primo não com a Tia"},
+  ]},
 ];
 
-// ── Canvas ────────────────────────────────────────────
+// ── Canvas ────────────────────────────────────────────────────────────────────
 const CW=480,CH=340;
 const canvas=document.getElementById('tableCanvas');
 const ctx=canvas.getContext('2d');
-function fitCanvas(){const d=Math.min(devicePixelRatio||1,2);canvas.width=CW*d;canvas.height=CH*d;canvas.style.width='100%';canvas.style.aspectRatio=CW+'/'+CH;ctx.setTransform(d,0,0,d,0,0);}fitCanvas();
-const ICACHE={};function loadImg(src){if(ICACHE[src])return ICACHE[src];const i=new Image();i.src='assets/img/'+src;ICACHE[src]=i;return i;}
+function fitCanvas(){
+  const d=Math.min(devicePixelRatio||1,2);
+  canvas.width=CW*d;canvas.height=CH*d;
+  canvas.style.width='100%';canvas.style.aspectRatio=CW+'/'+CH;
+  ctx.setTransform(d,0,0,d,0,0);
+}
+fitCanvas();
+window.addEventListener('resize',()=>{if(!seating||Object.keys(seating).length===0)fitCanvas();});
 
-let curPuzzle=0,seating={},selectedGuest=null,totalScore=0,finalScore=0,drawRaf;
+const IC={};
+function img(src){
+  if(IC[src])return IC[src];
+  const i=new Image();i.src='assets/img/'+src;IC[src]=i;return i;
+}
 
-function startSeat(){document.getElementById('startModal').hidden=true;const panel=document.querySelector('.table-stage');if(window.scrollToGame&&panel){const nav=document.querySelector('.game-nav');scrollToGame(panel,nav?nav.getBoundingClientRect().height:56,()=>{loadPuzzle(0);loadTop10();});}else{loadPuzzle(0);loadTop10();}}
+// ── State ─────────────────────────────────────────────────────────────────────
+let curPuzzle=0,seating={},selectedGuest=null,totalScore=0,finalScore=0,drawRaf,donePuzzles=new Set();
+
+function startSeat(){document.getElementById('startModal').hidden=true;loadPuzzle(0);loadTop10();}
 
 function loadPuzzle(idx){
   curPuzzle=idx;seating={};selectedGuest=null;
-  document.getElementById('lvlEl').textContent=idx+1;
   const p=PUZZLES[idx];
-  // Preload
-  loadImg(p.tableImg!=='two-tables'?p.tableImg:'seat-table-round.png');
-  loadImg('seat-chair-empty.png');loadImg('seat-chair-highlight.png');loadImg('seat-chair-occupied.png');
-  loadImg(p.bgImg);
-  p.guestIds.forEach(id=>{const g=GUESTS.find(x=>x.id===id);if(g)loadImg(g.img);});
+  document.getElementById('lvlEl').textContent=idx+1;
+  // Preload images
+  img(p.tableType==='two'?'seat-table-round.png':'seat-table-'+(p.tableType==='round'?'round':'long')+'.png');
+  ['seat-chair-empty.png','seat-chair-occupied.png','seat-chair-highlight.png'].forEach(i=>img(i));
+  if(p.bg)img(p.bg);
+  p.guestIds.forEach(id=>{const g=GUESTS.find(x=>x.id===id);if(g)img(g.img);});
   renderLevelTabs();renderGuestList();renderRules();updateScore();
   cancelAnimationFrame(drawRaf);schedDraw();
 }
 
 function renderLevelTabs(){
-  document.getElementById('levelTabs').innerHTML=PUZZLES.map((p,i)=>
-    `<button class="lvl-btn ${i===curPuzzle?'active':''}" onclick="loadPuzzle(${i})">${p.label.split(' — ')[0]}</button>`).join('');
+  document.getElementById('levelTabs').innerHTML=PUZZLES.map((p,i)=>{
+    const cls=i===curPuzzle?'active':donePuzzles.has(i)?'done':'';
+    return `<button class="lvl-btn ${cls}" onclick="loadPuzzle(${i})" title="${p.label}">${i+1}</button>`;
+  }).join('');
 }
 
 function renderGuestList(){
@@ -317,70 +430,51 @@ function renderGuestList(){
     const g=GUESTS.find(x=>x.id===id);
     const placed=Object.values(seating).includes(id);
     const sel=selectedGuest===id;
-    return `<div class="guest-chip ${placed?'placed':''} ${sel?'selected':''}" id="gc_${id}" onclick="selectGuest('${id}')">
-      <img src="assets/img/${g.img}" alt="${g.name}" onerror="this.src='assets/img/gianface01.png'">
-      <span>${g.name}</span>
+    return `<div class="guest-chip${placed?' placed':''}${sel?' selected':''}" id="gc_${id}" onclick="selectGuest('${id}')">
+      <img src="assets/img/${g.img}" alt="${g.name()}" onerror="this.style.display='none'">
+      <span>${g.name()}</span>
     </div>`;
   }).join('');
 }
 
 function evalRules(p,seat){
-  return p.rules.map(r=>{
-    const sa=findSeat(r.a,seat),sb=r.b?findSeat(r.b,seat):-2;
-    if(sa<0||(r.b&&sb<0))return null; // not placed yet
-    if(r.type==='adj'){
-      const v=adjRound(sa,sb,r.seats||p.seats);return r.must?v:!v;
-    }
-    if(r.type==='opp'){
-      const v=oppRound(sa,sb,r.seats||p.seats);return r.must?v:!v;
-    }
-    if(r.type==='adj_long'){
-      const v=adjLong(sa,sb);return r.must?v:!v;
-    }
-    if(r.type==='opp_long'){
-      const v=Math.abs(sa-sb)===4;return r.must?v:!v;
-    }
-    if(r.type==='same_table'||r.type==='diff_table'){
-      const same=sameTableT2(sa,sb);
-      return r.type==='same_table'?same:!same;
-    }
-    return null;
-  });
-}
-
-function findSeat(guestId,seat){
-  seat=seat||seating;
-  for(const[sid,gid]of Object.entries(seat)){if(gid===guestId)return parseInt(sid);}
-  return -1;
+  return p.rules.map(r=>evalRule(r,seat,p));
 }
 
 function renderRules(){
-  const p=PUZZLES[curPuzzle];const rs=evalRules(p,seating);
+  const p=PUZZLES[curPuzzle];
+  const rs=evalRules(p,seating);
   const sat=rs.filter(v=>v===true).length;
   document.getElementById('totalRules').textContent=p.rules.length;
   document.getElementById('satisfiedCount').textContent=sat;
   document.getElementById('rulesList').innerHTML=p.rules.map((r,i)=>{
-    const v=rs[i];const placed=Object.keys(seating).length>0;
-    const cls=placed?(v===true?'ok':v===false?'fail':''):'';
-    return `<div class="rule-row ${cls}"><img src="assets/img/${r.icon}" alt="">${r.label}</div>`;
+    const v=rs[i];
+    const cls=v===true?'ok':v===false?'fail':'';
+    return `<div class="rule-row ${cls}"><img src="assets/img/${r.icon}" alt="">${r.label()}</div>`;
   }).join('');
 }
 
 function selectGuest(id){
-  if(Object.values(seating).includes(id))return;
-  selectedGuest=selectedGuest===id?null:id;
+  if(Object.values(seating).includes(id)){
+    // click on placed guest → select them so they can be moved
+    selectedGuest=selectedGuest===id?null:id;
+  } else {
+    selectedGuest=selectedGuest===id?null:id;
+  }
   renderGuestList();schedDraw();
 }
 
 function updateScore(){
-  const p=PUZZLES[curPuzzle];const rs=evalRules(p,seating);
-  const sat=rs.filter(v=>v===true).length;const pts=sat*100;
+  const p=PUZZLES[curPuzzle];
+  const rs=evalRules(p,seating);
+  const sat=rs.filter(v=>v===true).length;
+  const pts=sat*100;
   document.getElementById('livePts').textContent=pts;
   document.getElementById('scoreEl').textContent=pts;
   renderRules();schedDraw();
 }
 
-// ── Canvas drawing ─────────────────────────────────────
+// ── Drawing ──────────────────────────────────────────────────────────────────
 function schedDraw(){cancelAnimationFrame(drawRaf);drawRaf=requestAnimationFrame(drawAll);}
 
 function drawAll(){
@@ -388,162 +482,164 @@ function drawAll(){
   const p=PUZZLES[curPuzzle];
 
   // Background
-  const bgImg=loadImg(p.bgImg);
-  if(bgImg.complete&&bgImg.naturalWidth){
-    ctx.globalAlpha=.28;
-    ctx.drawImage(bgImg,0,0,CW,CH);
-    ctx.globalAlpha=1;
+  if(p.bg){
+    const bg=img(p.bg);
+    if(bg.complete&&bg.naturalWidth){ctx.globalAlpha=.22;ctx.drawImage(bg,0,0,CW,CH);ctx.globalAlpha=1;}
   }
-  // Cream overlay for clarity
-  ctx.fillStyle='rgba(248,244,238,.62)';ctx.fillRect(0,0,CW,CH);
+  ctx.fillStyle='rgba(248,244,238,.65)';ctx.fillRect(0,0,CW,CH);
 
-  if(p.tableType==='two'){
-    drawTwoTables(p);
-  } else {
-    drawSingleTable(p);
-  }
-  schedDraw(); // keep looping for smooth selection feedback
+  if(p.tableType==='two') drawTwoTables(p);
+  else drawSingleTable(p);
+
+  drawRaf=requestAnimationFrame(drawAll);
 }
 
 function drawSingleTable(p){
-  const tImg=loadImg(p.tableImg);
-  const pad=24;
-  if(!tImg.complete||!tImg.naturalWidth){schedDraw();return;}
-  const scale=Math.min((CW-pad*2)/tImg.naturalWidth,(CH-pad*2)/tImg.naturalHeight);
-  const tw=tImg.naturalWidth*scale,th=tImg.naturalHeight*scale;
+  const tname=p.tableType==='round'?'seat-table-round.png':'seat-table-long.png';
+  const ti=img(tname);
+  if(!ti.complete||!ti.naturalWidth){schedDraw();return;}
+  const pad=20;
+  const scale=Math.min((CW-pad*2)/ti.naturalWidth,(CH-pad*2)/ti.naturalHeight);
+  const tw=ti.naturalWidth*scale,th=ti.naturalHeight*scale;
   const tx=(CW-tw)/2,ty=(CH-th)/2;
-  ctx.drawImage(tImg,tx,ty,tw,th);
-  drawSeats(p,p.seats,0,0);
+  ctx.drawImage(ti,tx,ty,tw,th);
+  drawSeats(p,p.seats);
 }
 
 function drawTwoTables(p){
-  const tImg=loadImg('seat-table-round.png');
-  if(!tImg.complete||!tImg.naturalWidth){schedDraw();return;}
-  // Draw table A (left half) and table B (right half)
-  const sz=Math.min(CW*0.42,CH*0.78);
-  // Table A: centered at 27% x, 48% y
-  const ax=CW*0.25-sz/2,ay=(CH-sz)/2;
-  ctx.drawImage(tImg,ax,ay,sz,sz);
-  // Table B: centered at 73% x, 48% y
-  const bx=CW*0.73-sz/2,by=(CH-sz)/2;
-  ctx.drawImage(tImg,bx,by,sz,sz);
-  // Label tables
-  ctx.font='bold 11px Inter,sans-serif';ctx.textAlign='center';ctx.fillStyle='rgba(92,122,82,.85)';
-  ctx.fillText('Mesa A',CW*0.25,ay-6);
-  ctx.fillText('Mesa B',CW*0.73,by-6);
+  const ti=img('seat-table-round.png');
+  if(!ti.complete||!ti.naturalWidth){schedDraw();return;}
+  const sz=Math.min(CW*0.42,CH*0.80);
+  // Mesa A left, Mesa B right
+  const aX=CW*0.24-sz/2,aY=(CH-sz)/2;
+  const bX=CW*0.74-sz/2,bY=(CH-sz)/2;
+  ctx.drawImage(ti,aX,aY,sz,sz);
+  ctx.drawImage(ti,bX,bY,sz,sz);
+  // Labels
+  ctx.font='bold 10px Inter,sans-serif';ctx.textAlign='center';
+  ctx.fillStyle='rgba(82,122,72,.9)';
+  ctx.fillText(IT()?'Tavolo A':'Mesa A',CW*0.24,aY-5);
+  ctx.fillText(IT()?'Tavolo B':'Mesa B',CW*0.74,bY-5);
   ctx.textAlign='left';
-  drawSeats(p,p.seats.slice(0,5),0,0);
-  drawSeats(p,p.seats.slice(5),0,0);
+  drawSeats(p,p.seats);
 }
 
-function drawSeats(p,seats,offX,offY){
+function drawSeats(p,seats){
   const rs=evalRules(p,seating);
-  seats.forEach((seat)=>{
-    const px=seat.x/100*CW+offX,py=seat.y/100*CH+offY;
+  seats.forEach(seat=>{
+    const px=seat.x/100*CW,py=seat.y/100*CH;
     const guestId=seating[seat.id];
-    const isTarget=selectedGuest&&!guestId;
-    const sz=44;
-    // Chair image
-    let cImg='seat-chair-empty.png';
-    if(guestId)cImg='seat-chair-occupied.png';
-    else if(isTarget)cImg='seat-chair-highlight.png';
-    const ci=loadImg(cImg);
+    const isHighlight=selectedGuest&&!guestId;
+    const sz=62; // chair size — bigger for visibility
+
+    // Chair background image
+    const cImg=img(guestId?'seat-chair-occupied.png':isHighlight?'seat-chair-highlight.png':'seat-chair-empty.png');
     ctx.save();ctx.translate(px,py);
-    if(ci.complete&&ci.naturalWidth){ctx.drawImage(ci,-sz/2,-sz/2,sz,sz);}
-    else{ctx.fillStyle=guestId?'#7A9B6E':isTarget?'#F0CE7A':'rgba(216,205,188,.8)';ctx.beginPath();ctx.ellipse(0,0,18,12,0,0,Math.PI*2);ctx.fill();}
+    if(cImg.complete&&cImg.naturalWidth){
+      ctx.drawImage(cImg,-sz/2,-sz/2,sz,sz);
+    } else {
+      ctx.fillStyle=guestId?'#7A9B6E':isHighlight?'#F0CE7A':'rgba(216,205,188,.8)';
+      ctx.beginPath();ctx.ellipse(0,0,22,14,0,0,Math.PI*2);ctx.fill();
+    }
+
     // Guest avatar
     if(guestId){
       const g=GUESTS.find(x=>x.id===guestId);
       if(g){
-        const aImg=loadImg(g.img);
+        const aImg=img(g.img);
+        const r=22; // avatar radius — bigger
         if(aImg.complete&&aImg.naturalWidth){
-          ctx.save();ctx.beginPath();ctx.arc(0,0,16,0,Math.PI*2);ctx.clip();
-          ctx.drawImage(aImg,-16,-16,32,32);ctx.restore();
+          ctx.save();ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.clip();
+          ctx.drawImage(aImg,-r,-r,r*2,r*2);ctx.restore();
         }
-        // Status ring from rules
-        const myRulesStatus=p.rules.map((r,i)=>{
-          if(r.a===guestId||(r.b&&r.b===guestId))return rs[i];return undefined;
+        // Status ring
+        const myRules=p.rules.map((rule,i)=>{
+          if(rule.a===guestId||(rule.b&&rule.b===guestId))return rs[i];
+          return undefined;
         }).filter(v=>v!==undefined);
-        const allOk=myRulesStatus.length>0&&myRulesStatus.every(v=>v===true);
-        const anyFail=myRulesStatus.some(v=>v===false);
-        ctx.strokeStyle=allOk?'rgba(122,155,110,.85)':anyFail?'rgba(181,66,58,.85)':'rgba(200,160,80,.5)';
-        ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(0,0,17,0,Math.PI*2);ctx.stroke();
+        const allOk=myRules.length>0&&myRules.every(v=>v===true);
+        const anyFail=myRules.some(v=>v===false);
+        ctx.strokeStyle=allOk?'rgba(100,155,90,.9)':anyFail?'rgba(181,66,58,.85)':'rgba(200,160,80,.6)';
+        ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(0,0,r+1,0,Math.PI*2);ctx.stroke();
       }
+    } else {
+      // Seat number label
+      ctx.fillStyle='rgba(0,0,0,.32)';ctx.font='bold 10px Inter';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(seat.id+1,0,0);
     }
-    // Seat label when empty
-    if(!guestId){ctx.fillStyle='rgba(0,0,0,.28)';ctx.font='bold 9px Inter';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(seat.id+1,0,0);}
     ctx.restore();
   });
   ctx.textBaseline='alphabetic';ctx.textAlign='left';
 }
 
-// ── Click ─────────────────────────────────────────────
-canvas.addEventListener('click',handleCanvasClick);
-canvas.addEventListener('touchend',e=>{
-  e.preventDefault();
-  const t=e.changedTouches[0];
-  const r=canvas.getBoundingClientRect();
-  doClick((t.clientX-r.left)/r.width*CW,(t.clientY-r.top)/r.height*CH);
-},{passive:false});
-function handleCanvasClick(e){
+// ── Click handling ────────────────────────────────────────────────────────────
+canvas.addEventListener('click',e=>{
   const r=canvas.getBoundingClientRect();
   doClick((e.clientX-r.left)/r.width*CW,(e.clientY-r.top)/r.height*CH);
-}
+});
+canvas.addEventListener('touchend',e=>{
+  e.preventDefault();
+  const t=e.changedTouches[0],r=canvas.getBoundingClientRect();
+  doClick((t.clientX-r.left)/r.width*CW,(t.clientY-r.top)/r.height*CH);
+},{passive:false});
+
 function doClick(cx,cy){
   const p=PUZZLES[curPuzzle];
-  // Find nearest seat within 30px
-  let best=-1,bestD=9999,bestSeat=null;
-  p.seats.forEach(seat=>{
-    const px=seat.x/100*CW,py=seat.y/100*CH;
+  let best=-1,bestD=9999;
+  p.seats.forEach(s=>{
+    const px=s.x/100*CW,py=s.y/100*CH;
     const d=Math.sqrt((cx-px)**2+(cy-py)**2);
-    if(d<36&&d<bestD){bestD=d;best=seat.id;bestSeat=seat;}
+    if(d<40&&d<bestD){bestD=d;best=s.id;}
   });
-  if(best>=0){
-    if(selectedGuest){
-      // Remove guest from previous seat
-      for(const k of Object.keys(seating)){if(seating[k]===selectedGuest)delete seating[k];}
-      // Place on new seat (remove current occupant to pool if any)
-      seating[best]=selectedGuest;
-      selectedGuest=null;
-      sndSeat();haptic(12);
-      renderGuestList();updateScore();
-    } else {
-      // Select occupant
-      if(seating[best]){selectedGuest=seating[best];renderGuestList();schedDraw();}
-    }
+  if(best<0)return;
+
+  if(selectedGuest){
+    // Remove guest from their current seat first
+    for(const k of Object.keys(seating)){if(seating[k]===selectedGuest)delete seating[k];}
+    seating[best]=selectedGuest;
+    selectedGuest=null;
+    sndPlace();haptic(12);
+    renderGuestList();updateScore();
+  } else if(seating[best]){
+    selectedGuest=seating[best];
+    renderGuestList();schedDraw();
   }
 }
 
+// ── Actions ───────────────────────────────────────────────────────────────────
 function showHint(){
   const p=PUZZLES[curPuzzle];
-  // Find a violated or unsatisfied rule and give a hint
   const rs=evalRules(p,seating);
-  const failIdx=rs.findIndex(v=>v===false);
-  const nullIdx=rs.findIndex(v=>v===null);
-  const idx=failIdx>=0?failIdx:nullIdx;
-  if(idx<0){showFlash('Todas as regras satisfeitas!','rgba(122,155,110,.9)');return;}
-  const r=p.rules[idx];
-  const hint=`Dica: "${r.label}"`;
-  showFlash(hint,'rgba(200,160,80,.92)');
-  sndPartial();
+  const idx=rs.findIndex(v=>v===false)>=0?rs.findIndex(v=>v===false):rs.findIndex(v=>v===null);
+  if(idx<0){showFlash(IT()?'Tutte le regole ok!':'Todas as regras satisfeitas!','rgba(122,155,110,.9)');return;}
+  showFlash((IT()?'Suggerimento: ':'Dica: ')+(p.rules[idx].label()),'rgba(200,160,80,.92)');
+  sndHint();
 }
 
 function checkSolution(){
   const p=PUZZLES[curPuzzle];
-  if(Object.keys(seating).length<p.guestIds.length){showFlash((window.I18N&&window.I18N.lang==='it'?'Sistema tutti gli ospiti prima!':'Sente todos os convidados primeiro!'),'rgba(200,160,80,.9)');sndBad();return;}
+  if(Object.keys(seating).length<p.guestIds.length){
+    showFlash(IT()?'Sistema tutti gli ospiti prima!':'Sente todos os convidados primeiro!','rgba(200,160,80,.9)');
+    sndBad();return;
+  }
   const rs=evalRules(p,seating);
   const sat=rs.filter(v=>v===true).length;
   const fail=rs.filter(v=>v===false).length;
-  const perfect=sat===p.rules.length;
+  const perfect=sat===p.rules.length&&fail===0;
   finalScore=totalScore+(sat*100);
-  document.getElementById('resIcon').innerHTML=perfect?'<img src="assets/img/seat-success-burst.png" alt="">':'<img src="assets/img/seat-failure-burst.png" alt="">';
-  document.getElementById('resTitle').textContent=perfect?(window.I18N&&window.I18N.lang==='it'?'Tavolo Perfetto!':'Mesa Perfeita!'):`${sat}/${p.rules.length} regras OK`;
-  document.getElementById('resText').textContent=perfect
-    ?`Todas as ${p.rules.length} regras satisfeitas! +${sat*100} pontos.`
-    :`${fail} regra${fail!==1?'s':''} violada${fail!==1?'s':''}. Reveja e tente de novo — cada puzzle tem solução!`;
+  if(perfect){donePuzzles.add(curPuzzle);totalScore+=sat*100;sndWin();haptic(50);}
+  else{sndBad();haptic([15,40,15]);}
+  document.getElementById('resIcon').innerHTML=perfect?
+    "<img src='assets/img/seat-success-burst.png' alt=''>":
+    "<img src='assets/img/seat-failure-burst.png' alt=''>";
+  document.getElementById('resTitle').textContent=perfect?
+    (IT()?'Tavolo Perfetto!':'Mesa Perfeita!'):`${sat}/${p.rules.length} ${IT()?'regole ok':'regras ok'}`;
+  document.getElementById('resText').textContent=perfect?
+    `${IT()?'Tutte le':'Todas as'} ${p.rules.length} ${IT()?'regole soddisfatte! +':'regras satisfeitas! +'} ${sat*100} pts.`:
+    `${fail} ${IT()?'regola/e violata/e':'regra(s) violada(s)'}. ${IT()?'Ogni puzzle ha soluzione!':'Cada puzzle tem solução!'}`;
   document.getElementById('resultModal').hidden=false;
-  if(perfect){sndWin();haptic(50);totalScore+=sat*100;if(window.confettiBurst)confettiBurst({count:30,hearts:true});}
-  else{sndBad();haptic([15,30,15]);}
+  renderLevelTabs();
 }
 
 function resetPuzzle(){document.getElementById('resultModal').hidden=true;loadPuzzle(curPuzzle);}
@@ -552,26 +648,33 @@ function nextPuzzle(){document.getElementById('resultModal').hidden=true;loadPuz
 function showFlash(msg,col){
   let el=document.getElementById('_flash');
   if(!el){el=document.createElement('div');el.id='_flash';document.body.appendChild(el);}
-  el.style.cssText=`position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:${col||'var(--sage)'};color:#fff;font-weight:700;font-size:.88rem;padding:.72rem 1.4rem;border-radius:999px;z-index:300;pointer-events:none;white-space:nowrap;text-align:center;max-width:90vw`;
+  el.style.cssText=`position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:${col||'var(--sage)'};color:#fff;font-weight:700;font-size:.86rem;padding:.7rem 1.35rem;border-radius:999px;z-index:300;pointer-events:none;text-align:center;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.18)`;
   el.textContent=msg;el.style.opacity='1';
-  clearTimeout(el._t);el._t=setTimeout(()=>{el.style.opacity='0';},1800);
+  clearTimeout(el._t);el._t=setTimeout(()=>{el.style.opacity='0';},2000);
 }
 
 async function doSave(){
   const name=(document.getElementById('pName').value||'').trim().slice(0,22);
   const msg=document.getElementById('saveMsg');
-  if(!name){msg.textContent='Coloque seu nome!';return;}
-  msg.textContent='Salvando...';
-  try{await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});msg.textContent='Salvo!';loadTop10();}
-  catch(e){msg.textContent='Erro ao salvar.';}
+  if(!name){msg.textContent=IT()?'Inserisci il tuo nome!':'Coloque seu nome!';return;}
+  msg.textContent=IT()?'Salvataggio...':'Salvando...';
+  try{
+    await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});
+    msg.textContent=IT()?'Salvato!':'Salvo!';loadTop10();
+  }catch(e){msg.textContent=IT()?'Errore.':'Erro ao salvar.';}
 }
+
 async function loadTop10(){
-  const list=document.getElementById('topList');list.innerHTML='<li><span class="name">Carregando...</span></li>';
-  try{const r=await fetch(`${API}?action=top10&jogo=${GAME_KEY}`);const d=await r.json();const arr=d.lista||[];
-    if(!arr.length){list.innerHTML='<li><span class="name">Seja o primeiro!</span></li>';return;}
+  const list=document.getElementById('topList');
+  list.innerHTML=`<li><span class="name">${IT()?'Caricamento...':'Carregando...'}</span></li>`;
+  try{
+    const r=await fetch(`${API}?action=top10&jogo=${GAME_KEY}`);
+    const d=await r.json();const arr=d.lista||[];
+    if(!arr.length){list.innerHTML=`<li><span class="name">${IT()?'Sii il primo!':'Seja o primeiro!'}</span></li>`;return;}
     list.innerHTML=arr.map((it,i)=>`<li><span class="pos">${i+1}</span><span class="name">${esc(it.nome)}</span><span class="pts">${it.pontos} pts</span></li>`).join('');
-  }catch(e){list.innerHTML='<li><span class="name">Placar indisponível.</span></li>';}
+  }catch(e){list.innerHTML=`<li><span class="name">${IT()?'Classifica non disponibile':'Placar indisponível.'}</span></li>`;}
 }
+
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
 loadTop10();
 </script>
