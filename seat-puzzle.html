@@ -154,26 +154,26 @@ const GUESTS=[
 ];
 
 // ── Seat positions calibrated from ACTUAL screenshot pixel analysis ──────────
-// Round table screenshot 834×902 → chair cushion centroids:
+// Round table screenshot 1346×962 → chair cushion centroids:
 const R6=[
-  {id:0,x:51.0,y:16.7}, // topo         screen(425,151)
-  {id:1,x:79.5,y:32.4}, // topo-dir     screen(663,292)
-  {id:2,x:80.7,y:69.3}, // baixo-dir    screen(673,625)
-  {id:3,x:52.5,y:83.4}, // base         screen(438,752)
-  {id:4,x:24.7,y:69.1}, // baixo-esq    screen(206,623)
-  {id:5,x:25.5,y:32.0}, // topo-esq     screen(213,289)
+  {id:0,x:51.0,y:17.5}, // topo        screen(687,169)
+  {id:1,x:79.0,y:32.6}, // topo-dir    screen(1064,314)
+  {id:2,x:80.2,y:68.6}, // baixo-dir   screen(1080,659)
+  {id:3,x:52.5,y:82.5}, // base        screen(706,794)
+  {id:4,x:25.2,y:68.6}, // baixo-esq   screen(339,660)
+  {id:5,x:25.9,y:32.4}, // topo-esq    screen(349,312)
 ];
 
-// Long table screenshot 1284×878 → chair cushion centroids:
+// Long table screenshot 1356×982 → chair cushion centroids:
 const L8=[
-  {id:0,x:12.7,y:16.2},{id:1,x:33.5,y:16.2},{id:2,x:67.1,y:16.1},{id:3,x:87.8,y:16.2},
-  {id:4,x:12.7,y:86.1},{id:5,x:33.5,y:86.1},{id:6,x:67.1,y:86.1},{id:7,x:87.8,y:86.1},
+  {id:0,x:13.7,y:17.6},{id:1,x:34.0,y:17.7},{id:2,x:66.8,y:17.5},{id:3,x:87.0,y:17.6},
+  {id:4,x:13.7,y:84.2},{id:5,x:34.0,y:84.4},{id:6,x:66.8,y:84.2},{id:7,x:87.0,y:84.2},
 ];
 
-// Two round tables: Mesa A (seats 0-4) left side, Mesa B (seats 5-9) right side
+// Two round tables screenshot 1362×972 → cushion centroids per table:
 const T2=[
-  {id:0,x:22.5,y:26.0},{id:1,x:35.0,y:14.5},{id:2,x:43.0,y:37.0},{id:3,x:35.0,y:56.5},{id:4,x:20.0,y:49.0},
-  {id:5,x:70.5,y:26.0},{id:6,x:83.0,y:14.5},{id:7,x:91.0,y:37.0},{id:8,x:83.0,y:56.5},{id:9,x:68.0,y:49.0},
+  {id:0,x:23.9,y:27.2},{id:1,x:36.1,y:15.9},{id:2,x:43.8,y:37.5},{id:3,x:36.0,y:56.4},{id:4,x:21.5,y:49.3}, // Mesa A
+  {id:5,x:70.5,y:27.2},{id:6,x:82.7,y:15.9},{id:7,x:90.5,y:37.6},{id:8,x:82.7,y:56.5},{id:9,x:68.1,y:49.3}, // Mesa B
 ];
 
 // ── Helper rule functions ────────────────────────────────────────────────────
@@ -590,7 +590,7 @@ function doClick(cx,cy){
   p.seats.forEach(s=>{
     const px=s.x/100*CW,py=s.y/100*CH;
     const d=Math.sqrt((cx-px)**2+(cy-py)**2);
-    if(d<40&&d<bestD){bestD=d;best=s.id;}
+    if(d<48&&d<bestD){bestD=d;best=s.id;}
   });
   if(best<0)return;
 
