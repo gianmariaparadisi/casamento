@@ -131,7 +131,7 @@
             <a href="hospedagem.html">Hospedagem</a>
           </div>
         </div>
-        <a href="jogos.html">Jogos</a>
+        <a href="jogos.html"><span data-it="Giochi">Jogos</span></a>
         <a href="index.html#rsvp" class="nav__cta">Confirmar presença</a>
       </nav>
       <button class="nav__hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
@@ -144,20 +144,20 @@
     <section class="cake-shell">
       <div class="cake-intro" style="position:relative">
           <img src="assets/img/cake-3tier.png" alt="" style="position:absolute;right:-20px;top:-10px;width:110px;opacity:.18;pointer-events:none">
-        <a class="back-link" href="jogos.html">← Voltar aos jogos</a>
-        <div class="cake-kicker">mini arcade</div>
-        <h1 class="cake-title">Empilha <span>o Bolo</span></h1>
+        <a class="back-link" href="jogos.html"><span data-it="← Torna ai giochi">← Voltar aos jogos</span></a>
+        <div class="cake-kicker"><span data-it="mini arcade">mini arcade</span></div>
+        <h1 class="cake-title"><span data-it="Impila">Empilha</span> <span><span data-it="la Torta">o Bolo</span></span></h1>
         <p class="cake-sub">Toque quando o andar estiver alinhado. O pedaço que sobra cai, o bolo afina e a confeitaria inteira fica progressivamente mais caótica.</p>
         <div class="cake-rules" aria-label="regras do jogo">
-          <div class="rule"><span><img src='assets/img/tile-bolo.png' alt=''></span><div><b>Timing</b><p>Quanto mais centralizado, mais pontos e mais confeitos.</p></div></div>
-          <div class="rule"><span><img src='assets/img/icon-sparkle.png' alt=''></span><div><b>Combo perfeito</b><p>Acertos quase exatos acendem glitter e dão bônus.</p></div></div>
-          <div class="rule"><span><img src='assets/img/icon-trophy.png' alt=''></span><div><b>Ranking</b><p>Usa o mesmo placar do jogo antigo: chave <strong>bolo</strong>.</p></div></div>
+          <div class="rule"><span><img src='assets/img/tile-bolo.png' alt=''></span><div><b><span data-it="Tempismo">Timing</span></b><p><span data-it="Più è centrato, più punti e più coriandoli.">Quanto mais centralizado, mais pontos e mais confeitos.</span></p></div></div>
+          <div class="rule"><span><img src='assets/img/icon-sparkle.png' alt=''></span><div><b><span data-it="Combo perfetto">Combo perfeito</span></b><p><span data-it="Colpi quasi esatti accendono glitter e danno bonus.">Acertos quase exatos acendem glitter e dão bônus.</span></p></div></div>
+          <div class="rule"><span><img src='assets/img/icon-trophy.png' alt=''></span><div><b><span data-it="Classifica">Ranking</span></b><p>Usa o mesmo placar do jogo antigo: chave <strong>bolo</strong>.</p></div></div>
         </div>
       </div>
 
       <div class="cake-panel">
         <div class="cake-topbar">
-          <div class="pill">Andares <strong id="scoreTxt">0</strong></div>
+          <div class="pill"><span data-it="Piani">Andares</span> <strong id="scoreTxt">0</strong></div>
           <div class="pill">Combo <strong id="comboTxt">0</strong></div>
           <div class="pill">Largura <strong id="widthTxt">100%</strong></div>
         </div>
@@ -355,7 +355,7 @@
         pauseBtn.textContent = "Continuar";
         showOverlay("Pausa", "O bolo está esperando seu timing.", [
           {label:"Continuar", fn:"togglePause()", ghost:false},
-          {label:"Novo jogo", fn:"startGame()", ghost:true}
+          {label:(window.I18N&&window.I18N.lang==='it'?"Nuova partita":"Novo jogo"), fn:"startGame()", ghost:true}
         ]);
       }else if(state === "paused"){
         hideOverlay();
@@ -402,8 +402,10 @@
         addFloatingText(`perfeito +${bonus}`, W/2, moving.y - 16, "#B86F52");
         burstSparkles(W/2, moving.y + 12, 32, true);
         comboGlow = combo % 3 === 0 ? 1 : .55;
+        if(window.GS){GS.good();GS.hGood();}
       }else{
         combo = 0;
+        if(window.GS){GS.pop();GS.hTap();}
         const points = Math.max(1, Math.round((overlap / baseW) * 10));
         score += points;
         currentPoints = score;
@@ -413,7 +415,7 @@
           const cutX = cutLeft ? moving.x : right;
           spawnFallingPiece(cutX, moving.y, cutW, moving.h, moving.color, moving.dir);
         }
-        if(delta < top.w * .12) addFloatingText("quase!", W/2, moving.y - 16, "#C89B45");
+        if(delta < top.w * .12) addFloatingText((window.I18N&&window.I18N.lang==='it'?"quasi!":"quase!"), W/2, moving.y - 16, "#C89B45");
       }
       layers.push({x:newX, y:moving.y, w:newW, h:layerH, color:moving.color, landed:true, perfect});
       burstCrumbs(newX + newW/2, moving.y + layerH/2, 12 + Math.min(18, layers.length));
@@ -435,9 +437,10 @@
       }
       state = "over";
       unlockScroll();
+      if(window.GS){score>=90?GS.win():GS.lose();score>=90?GS.hWin():GS.hLose();}
       tapHelper.classList.remove("show");
       cancelAnimationFrame(raf);
-      const msg = score >= 180 ? "Bolo monumental. A confeitaria pediu seu contato." : score >= 90 ? "Bolo bonito, alto e perigosamente instável." : score >= 35 ? "Tem bolo. Não está reto, mas tem charme." : "O bolo ficou minimalista. Quase conceitual.";
+      const msg = score >= 180 ? (window.I18N&&window.I18N.lang==='it'?"Torta monumentale. La pasticceria ha chiesto il tuo contatto.":"Bolo monumental. A confeitaria pediu seu contato.") : score >= 90 ? (window.I18N&&window.I18N.lang==='it'?"Torta bella, alta e pericolosamente instabile.":"Bolo bonito, alto e perigosamente instável.") : score >= 35 ? (window.I18N&&window.I18N.lang==='it'?"C'è torta. Non è dritta, ma ha fascino.":"Tem bolo. Não está reto, mas tem charme.") : (window.I18N&&window.I18N.lang==='it'?"La torta è diventata minimalista. Quasi concettuale.":"O bolo ficou minimalista. Quase conceitual.");
       // Troca ícone do overlay baseado na pontuação
       const iconEl = document.querySelector('.cake-card__icon');
       if(iconEl){
@@ -734,7 +737,7 @@
         const r = await fetch(JOGOS_API,{method:"POST",body:JSON.stringify({action:"score",jogo:"bolo",nome,pontos:score})});
         const j = await r.json();
         if(!j || !j.sucesso) throw new Error("Falha");
-        saved = true; input.disabled = true; btn.textContent = "Salvo ✓"; msg.textContent = "Recorde salvo!";
+        saved = true; input.disabled = true; btn.textContent = "Salvo"; msg.textContent = "Recorde salvo!";
         loadTop10();
       }catch(e){
         btn.disabled = false; btn.textContent = "Salvar"; msg.textContent = "Não conseguimos salvar. Tente novamente.";
@@ -779,5 +782,6 @@
   </script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/delights.js"></script>
+  <script src="assets/js/scroll-to-game.js"></script>
 </body>
 </html>

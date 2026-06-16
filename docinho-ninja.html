@@ -81,10 +81,10 @@
 <body class="game-page">
   <nav class="game-nav"><div class="game-nav__inner"><a class="game-back" href="jogos.html">← Voltar aos jogos</a><div class="game-brand">Tiago & Gian</div></div></nav>
   <main class="game-shell">
-    <p class="game-kicker">Arcade</p>
-    <h1 class="game-title">Docinho Ninja</h1>
+    <p class="game-kicker" data-it="Arcade"><span data-it="Arcade">Arcade</span></p>
+    <h1 class="game-title" data-it="Dolcetto Ninja"><span data-it="Dolcetto Ninja">Docinho Ninja</span></h1>
     <p class="game-sub">Corte docinhos desenhados à mão — nada de emoji apagado. Quando corta, o docinho realmente se parte.</p>
-    <div class="hud"><div class="hud__pill">Score: <strong id="score">0</strong></div><div class="hud__pill">Vidas: <strong id="lives">3</strong></div><div class="hud__pill">Tempo: <strong id="time">30</strong>s</div></div>
+    <div class="hud"><div class="hud__pill">Score: <strong id="score">0</strong></div><div class="hud__pill">data-it="Vite:" Vidas: <strong id="lives">3</strong></div><div class="hud__pill">Tempo: <strong id="time">30</strong>s</div></div>
 
     <div class="_char-sel" style="display:flex;gap:.75rem;justify-content:center;align-items:center;margin:.75rem 0 .5rem">
       <span style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">Jogar como</span>
@@ -99,10 +99,10 @@
     </div>
     <section class="game-panel ninja-wrap">
       <canvas id="gameCanvas" width="620" height="760"></canvas>
-      <div class="modal" id="startModal"><div class="modal__card"><div class="modal__icon"><img src="assets/img/icon-docinho-ninja.png" alt=""></div><h2 class="modal__title">Corte os docinhos</h2><p class="modal__text">Arraste o dedo/mouse para cortar. Evite taças quebradas e pratos vazios.</p><button class="game-btn game-btn--main" id="startBtn">Começar</button></div></div>
-      <div class="modal" id="endModal" hidden><div class="modal__card"><div class="modal__icon" id="endIcon"></div><h2 class="modal__title" id="endTitle">Mesa encerrada</h2><p class="modal__text" id="endText"></p><button class="game-btn game-btn--main" id="againBtn">Jogar de novo</button><div class="save-box"><div class="save-box__row"><input class="save-input" id="playerName" placeholder="Seu nome" maxlength="22"/><button class="game-btn" id="saveBtn">Salvar</button></div><p class="save-msg" id="saveMsg"></p></div></div></div>
+      <div class="modal" id="startModal"><div class="modal__card"><div class="modal__icon"><img src="assets/img/icon-docinho-ninja.png" alt=""></div><h2 class="modal__title"><span data-it="Taglia i dolcetti">Corte os docinhos</span></h2><p class="modal__text"><span data-it="Scorri il dito/mouse per tagliare. Evita i bicchieri rotti.">Arraste o dedo/mouse para cortar. Evite taças quebradas e pratos vazios.</span></p><button class="game-btn game-btn--main" id="startBtn">Começar</button></div></div>
+      <div class="modal" id="endModal" hidden><div class="modal__card"><div class="modal__icon" id="endIcon"></div><h2 class="modal__title" id="endTitle"><span data-it="Tavola chiusa">Mesa encerrada</span></h2><p class="modal__text" id="endText"></p><button class="game-btn game-btn--main" id="againBtn">Jogar de novo</button><div class="save-box"><div class="save-box__row"><input class="save-input" id="playerName" placeholder="Seu nome" maxlength="22"/><button class="game-btn" id="saveBtn">Salvar</button></div><p class="save-msg" id="saveMsg"></p></div></div></div>
     </section>
-    <p class="slice-tip">Faça swipes longos para combos. Docinhos raros dourados valem mais.</p>
+    <p class="slice-tip"><span data-it="Fai swipe lunghi per i combo. I dolcetti dorati rari valgono di più.">Faça swipes longos para combos. Docinhos raros dourados valem mais.</span></p>
     <section class="top10"><h3>Top 10</h3><ol id="topList"></ol></section>
   </main>
   <script>
@@ -183,9 +183,10 @@
     function loop(ts){const dt=Math.min((ts-last)/16.67,2);last=ts;if(state==="play"){timeLeft-=dt/60;spawnT-=dt;if(spawnT<=0){spawn(); if(Math.random()<.33)spawn(); spawnT=Math.max(14,38-score/80); } items.forEach(it=>{it.x+=it.vx*dt;it.y+=it.vy*dt;it.vy+=it.g*dt;it.rot+=it.vr*dt;}); items=items.filter(it=>it.y<H+80&&it.x>-80&&it.x<W+80&&!it.cut); halves.forEach(h=>{h.x+=h.vx*dt;h.y+=h.vy*dt;h.vy+=.28*dt;h.rot+=h.vr*dt;h.life-=dt;}); halves=halves.filter(h=>h.life>0&&h.y<H+100); particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.04*dt;p.life-=dt;}); particles=particles.filter(p=>p.life>0); slashes.forEach(s=>s.life-=dt);slashes=slashes.filter(s=>s.life>0); if(timeLeft<=0||lives<=0)finish();}
       draw(); if(state==="play")raf=requestAnimationFrame(loop);
     }
-    function finish(){state="idle";cancelAnimationFrame(raf);unlockScroll();endModal.hidden=false;endIcon.innerHTML=score>=500?"<img src='assets/img/icon-trophy.png' alt=''>":score>=250?"<img src='assets/img/sweet-golden.png' alt=''>":"<img src='assets/img/icon-docinho-ninja.png' alt=''>";endTitle.textContent=score>=500?"Ninja oficial dos docinhos":"Mesa encerrada";endText.textContent=`Você fez ${score} pontos. ${score>=500?"A confeitaria está de joelhos.":score>=250?"Mandou muito bem na mesa de doces.":"Ainda dá tempo de treinar antes da festa."}`;}
+    function finish(){state="idle";cancelAnimationFrame(raf);unlockScroll();if(window.GS){score>=500?GS.win():GS.lose();score>=500?GS.hWin():GS.hLose();}endModal.hidden=false;endIcon.innerHTML=score>=500?"<img src='assets/img/icon-trophy.png' alt=''>":score>=250?"<img src='assets/img/sweet-golden.png' alt=''>":"<img src='assets/img/icon-docinho-ninja.png' alt=''>";endTitle.textContent=score>=500?(window.I18N&&window.I18N.lang==='it'?"Ninja ufficiale dei dolcetti":"Ninja oficial dos docinhos"):(window.I18N&&window.I18N.lang==='it'?"Tavola chiusa":"Mesa encerrada");endText.textContent=`Você fez ${score} pontos. ${score>=500?(window.I18N&&window.I18N.lang==='it'?"La pasticceria è in ginocchio.":"A confeitaria está de joelhos."):score>=250?(window.I18N&&window.I18N.lang==='it'?"Ottima prestazione al buffet di dolci.":"Mandou muito bem na mesa de doces."):(window.I18N&&window.I18N.lang==='it'?"C'è ancora tempo per allenarsi prima della festa.":"Ainda dá tempo de treinar antes da festa.")}`;}
+
     function segmentDistance(px,py,x1,y1,x2,y2){const A=px-x1,B=py-y1,C=x2-x1,D=y2-y1;const dot=A*C+B*D,len=C*C+D*D;let t=len?dot/len:0;t=Math.max(0,Math.min(1,t));const x=x1+C*t,y=y1+D*t;return Math.hypot(px-x,py-y);}
-    function cutAt(x1,y1,x2,y2){if(state!=="play")return; slashes.push({x1,y1,x2,y2,life:10}); let cutThis=0; for(const it of items){if(it.cut)continue; const dist=segmentDistance(it.x,it.y,x1,y1,x2,y2); const rr=(it.type==="eclair"?42:34)*1.44; if(dist<rr){it.cut=true; if(it.bad){lives--;score=Math.max(0,score-35);burst(it.x,it.y,"#B35A4C",24);} else {cutThis++; const pts=it.type==="golden"?80:15; score+=pts; splitSweet(it); burst(it.x,it.y,it.type==="golden"?"#D7A33D":"#C57A4A",it.type==="golden"?42:24);} }} if(cutThis>=3){
+    function cutAt(x1,y1,x2,y2){if(state!=="play")return; slashes.push({x1,y1,x2,y2,life:10}); let cutThis=0; for(const it of items){if(it.cut)continue; const dist=segmentDistance(it.x,it.y,x1,y1,x2,y2); const rr=(it.type==="eclair"?42:34)*1.44; if(dist<rr){it.cut=true; if(it.bad){lives--;score=Math.max(0,score-35);burst(it.x,it.y,"#B35A4C",24);if(window.GS){GS.bad();GS.hBad();}} else {cutThis++; const pts=it.type==="golden"?80:15; score+=pts; splitSweet(it); burst(it.x,it.y,it.type==="golden"?"#D7A33D":"#C57A4A",it.type==="golden"?42:24);if(window.GS){GS.pop();GS.hTap();}} }} if(cutThis>=3){
           score+=cutThis*12; combo=cutThis;
           // Sparkle burst visual no canvas
           const _sImg2=_sweetImgs['golden']?.[0];
@@ -303,5 +304,6 @@
   </script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/delights.js"></script>
+  <script src="assets/js/scroll-to-game.js"></script>
 </body>
 </html>

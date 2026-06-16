@@ -30,26 +30,40 @@
 
     .wordle-cell {
       width: 52px; height: 52px;
-      border: 2px solid var(--line-green);
-      border-radius: 6px;
+      border-radius: 9px;
       display:flex; align-items:center; justify-content:center;
       font-family: var(--font-display);
-      font-size: 1.6rem; font-weight: 500;
-      color: var(--text-main);
+      font-size: 1.7rem; font-weight: 700;
+      color: #5A4020;
       text-transform: uppercase;
-      background: var(--white);
+      position: relative; overflow: hidden;
+      border: 2px solid rgba(216,205,188,.6);
+      background: rgba(255,255,255,.85);
+      box-shadow: 0 3px 10px rgba(82,57,34,.09);
       transition: transform .1s;
     }
-    .wordle-cell.filled { border-color: var(--sage); }
-    .wordle-cell.active { border-color: var(--sage-dark); }
+    .wordle-cell::before {
+      content:'';
+      position:absolute;inset:0;
+      background: url('assets/img/match-card-back.png') center/cover no-repeat;
+      opacity: 0.18;
+      pointer-events:none;
+    }
+    .wordle-cell .wc-letter {
+      position:relative;z-index:1;
+    }
+    .wordle-cell.filled { border-color: var(--sage); background: rgba(245,250,240,.9); }
+    .wordle-cell.active { border-color: var(--sage-dark); box-shadow:0 0 0 2px rgba(100,140,80,.25); }
     .wordle-cell.pop { animation: word-pop .12s ease; }
     @keyframes word-pop { 0%{transform:scale(1)} 40%{transform:scale(1.08)} 100%{transform:scale(1)} }
 
     .wordle-cell.flipping { transform: rotateX(90deg); transition: transform .25s ease-in; }
-    .wordle-cell.flipped { transform: rotateX(0); transition: transform .25s ease-out; border-color: transparent; }
-    .wordle-cell.correct { background: var(--sage-dark); color: #fff; }
-    .wordle-cell.present { background: #D9B65C; color: #fff; }
-    .wordle-cell.absent  { background: #BFC4BA; color: #fff; }
+    .wordle-cell.flipped  { transform: rotateX(0); transition: transform .25s ease-out; border-color: transparent; }
+    /* Revealed states: card back hidden, solid color background */
+    .wordle-cell.correct::before,.wordle-cell.present::before,.wordle-cell.absent::before { display:none; }
+    .wordle-cell.correct { background: var(--sage-dark); color: #fff; font-weight:700; border-color:transparent; }
+    .wordle-cell.present { background: #C8953A; color: #fff; font-weight:700; border-color:transparent; }
+    .wordle-cell.absent  { background: rgba(160,145,125,.75); color: #fff; font-weight:700; border-color:transparent; }
 
     @media(max-width:400px){
       .wordle-cell { width: 44px; height: 44px; font-size: 1.3rem; }
@@ -154,14 +168,14 @@
 
   <div class="word-page">
     <div class="word-header">
-      <p class="word-header__eyebrow">🗝️ Segredo do dia</p>
-      <h1 class="word-header__title">Wordle<br><em>do Casamento</em></h1>
-      <p class="word-header__sub">Uma palavra nova a cada dia, relacionada ao nosso casamento. Você tem 6 tentativas.</p>
+      <p class="word-header__eyebrow"><img src="assets/img/icon-key.png" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:-.18em;margin-right:.3em"><span data-it="Segreto del giorno">Segredo do dia</span></p>
+      <h1 class="word-header__title"><span data-it="Wordle">Wordle</span><br><em><span data-it="del Matrimonio">do Casamento</span></em></h1>
+      <p class="word-header__sub"><span data-it="Una parola nuova ogni giorno, legata al nostro matrimonio. Hai 6 tentativi.">Uma palavra nova a cada dia, relacionada ao nosso casamento. Você tem 6 tentativas.</span></p>
       <p class="word-header__date" id="wordleDate"></p>
     </div>
 
     <div id="wordleLoading" class="word-loading">
-      <span class="spinner"></span> Carregando a palavra de hoje…
+      <span class="spinner"></span> <span data-it="Caricamento della parola di oggi…">Carregando a palavra de hoje…</span>
     </div>
 
     <div id="wordleGame" style="display:none">
@@ -176,7 +190,7 @@
         <h2 class="wordle-result__title" id="resultTitle"></h2>
         <p class="wordle-result__sub" id="resultWord"></p>
         <div class="wordle-result__share">
-          <button class="btn btn--outline-green btn--sm" onclick="compartilharWordle()">Compartilhar resultado</button>
+          <button class="btn btn--outline-green btn--sm" onclick="compartilharWordle()"><span data-it="Condividi risultato">Compartilhar resultado</span></button>
         </div>
       </div>
       <div style="text-align:center;margin-top:1rem">
@@ -186,7 +200,7 @@
 
     <div id="wordleErro" style="display:none">
       <p style="text-align:center;color:var(--text-muted);font-size:.9rem;padding:2rem 0">
-        Não encontramos uma palavra para hoje.<br>Volte em breve! 😊
+        <span data-it="Non abbiamo trovato una parola per oggi.">Não encontramos uma palavra para hoje.</span><br><span data-it="Torna presto!">Volte em breve!</span> <img src="assets/img/icon-sparkle.png" alt="" style="width:1.2em;height:1.2em;object-fit:contain;vertical-align:-.2em">
       </p>
       <div style="text-align:center">
         <a href="jogos.html" class="btn btn--outline btn--sm">← Voltar aos jogos</a>
@@ -206,6 +220,7 @@
     </div>
   </footer>
 
+  <script src="assets/js/game-sounds.js"></script>
   <script src="assets/js/app.js"></script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/delights.js"></script>
@@ -339,19 +354,21 @@
     if (jogoFinalizado) return;
     var linha = tentativas.length;
     if (k === "⌫") {
-      if (tentativaAtual.length > 0) { tentativaAtual.pop(); renderizarAtual(); }
+      if (tentativaAtual.length > 0) { tentativaAtual.pop(); renderizarAtual(); if(window.GS)GS.move(); }
     } else if (k === "ENTER") {
-      if (tentativaAtual.length < LETRAS) { setMsg("Palavra muito curta.", "erro"); shake(linha); return; }
+      if (tentativaAtual.length < LETRAS) { setMsg((window.I18N&&window.I18N.lang==='it'?"Parola troppo corta.":"Palavra muito curta."), "erro"); shake(linha); if(window.GS){GS.bad();GS.hBad();} return; }
       var palpite = tentativaAtual.join("");
       if (VALIDAS.size > 0 && !VALIDAS.has(palpite)) {
-        setMsg("Essa palavra não está na nossa lista.", "erro");
+        setMsg((window.I18N&&window.I18N.lang==='it'?"Questa parola non è nella nostra lista.":"Essa palavra não está na nossa lista."), "erro");
         shake(linha);
+        if(window.GS){GS.bad();GS.hBad();}
         return;
       }
       confirmarTentativa();
     } else if (tentativaAtual.length < LETRAS) {
       tentativaAtual.push(k);
       renderizarAtual();
+      if(window.GS)GS.pop();
       popCell(linha, tentativaAtual.length - 1);
     }
   }
@@ -361,7 +378,7 @@
     for (var c = 0; c < LETRAS; c++) {
       var cell = document.getElementById("cell-" + linha + "-" + c);
       var letra = tentativaAtual[c] || "";
-      cell.textContent = letra;
+      cell.innerHTML = letra ? '<span class="wc-letter">'+letra+'</span>' : '';
       cell.className = "wordle-cell" + (letra ? " filled" : "") + (c === tentativaAtual.length - 1 && letra ? " active" : "");
     }
   }
@@ -406,7 +423,7 @@
       });
       if (guess === PALAVRA) {
         jogoFinalizado = true;
-        var msgs = ["Perfeito! 🎉","Incrível!","Muito bem!","Acertou!","Quase fácil demais 😄","Na última!"];
+        var msgs = ["Perfeito!",(window.I18N&&window.I18N.lang==='it'?"Incredibile!":"Incrível!"),(window.I18N&&window.I18N.lang==='it'?"Molto bene!":"Muito bem!"),(window.I18N&&window.I18N.lang==='it'?"Indovinato!":"Acertou!"),(window.I18N&&window.I18N.lang==='it'?"Quasi troppo facile!":"Quase fácil demais!"),(window.I18N&&window.I18N.lang==='it'?"All'ultimo tentativo!":"Na última!")];
         setTimeout(function() { mostrarResultado(true, msgs[Math.min(linha, 5)]); }, 400);
       } else if (tentativas.length >= MAX_TENTATIVAS) {
         jogoFinalizado = true;
@@ -436,9 +453,11 @@
       var cell = document.getElementById("cell-" + linha + "-" + c);
       setTimeout(function() {
         cell.classList.add("flipping");
+        if(window.GS)GS.flip();
         setTimeout(function() {
-          cell.textContent = guess[c];
+          cell.innerHTML = '<span class="wc-letter">'+guess[c]+'</span>';
           cell.className = "wordle-cell " + res + " flipped";
+          if(res==="correct"&&window.GS)GS.hTap();
           if (c === LETRAS - 1) setTimeout(cb, 200);
         }, 250);
       }, c * 120);
@@ -472,14 +491,15 @@
   }
 
   function mostrarResultado(ganhou, msg) {
+    if(window.GS){ganhou?GS.win():GS.lose();ganhou?GS.hWin():GS.hLose();}
     document.getElementById("wordleGame").style.display   = "none";
     document.getElementById("wordleResult").style.display = "block";
     document.getElementById("resultIcon").innerHTML  = ganhou ? "<img src='assets/img/icon-confetti-burst.png' alt=''>" : "<img src='assets/img/icon-heart-broken.png' alt=''>";
     if(ganhou) confettiRain();
     document.getElementById("resultTitle").textContent = ganhou ? msg : "Quase!";
     document.getElementById("resultWord").textContent  = ganhou
-      ? "Você acertou em " + tentativas.length + " tentativa" + (tentativas.length > 1 ? "s" : "") + "!"
-      : "A palavra era: " + PALAVRA;
+      ? (window.I18N&&window.I18N.lang==='it'?"Hai indovinato in ":"Você acertou em ") + tentativas.length + (window.I18N&&window.I18N.lang==='it'?" tentativo":" tentativa") + (tentativas.length > 1 ? "s" : "") + "!"
+      : (window.I18N&&window.I18N.lang==='it'?"La parola era: ":"A palavra era: ") + PALAVRA;
   }
 
   window.compartilharWordle = function() {

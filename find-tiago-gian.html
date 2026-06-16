@@ -69,23 +69,23 @@
     <div class="game-brand">Tiago & Gian</div>
   </div></nav>
   <main class="game-shell">
-    <p class="game-kicker">Objeto Escondido</p>
-    <h1 class="game-title">Find Tiago & Gian</h1>
-    <p class="game-sub">Encontre os 10 itens escondidos! A cena está repleta de objetos para te confundir. Clique diretamente sobre o item!</p>
+    <p class="game-kicker" data-it="Oggetto Nascosto"><span data-it="Oggetto Nascosto">Objeto Escondido</span></p>
+    <h1 class="game-title" data-it="Trova Tiago &amp; Gian"><span data-it="Trova Tiago & Gian">Find Tiago & Gian</span></h1>
+    <p class="game-sub"><span data-it="Trova 10 oggetti nascosti! La scena è piena di falsi indizi. Clicca direttamente sull'oggetto!">Encontre os 10 itens escondidos! A cena está repleta de objetos para te confundir. Clique diretamente sobre o item!</span></p>
     <div class="hud">
-      <div class="hud__pill">Encontrados: <strong id="foundCount">0</strong>/10</div>
+      <div class="hud__pill"><span data-it="Trovati:">Encontrados:</span> <strong id="foundCount">0</strong>/10</div>
       <div class="hud__pill">⏱ <strong id="timerEl">0</strong>s</div>
-      <div class="hud__pill">Cliques: <strong id="clickCount">0</strong></div>
+      <div class="hud__pill"><span data-it="Clic:">Cliques:</span> <strong id="clickCount">0</strong></div>
     </div>
     <div class="scene-tabs" id="sceneTabs"></div>
     <div class="game-area">
       <div class="scene-wrap"><canvas id="sceneCanvas"></canvas></div>
       <div class="checklist" id="checklist">
-        <h3>Encontre:</h3>
+        <h3><span data-it="Trova:">Encontre:</span></h3>
         <div id="checkItems"></div>
         <div class="hint-wrap">
-          <button class="hint-btn" onclick="useHint()"><img src="assets/img/find-hint-star.png" alt=""> Dica</button>
-          <span style="font-size:.62rem;color:#A47845" id="hintCount">3 dicas</span>
+          <button class="hint-btn" onclick="useHint()"><img src="assets/img/find-hint-star.png" alt=""> <span data-it="Indizio">Dica</span></button>
+          <span style="font-size:.62rem;color:#A47845" id="hintCount"><span data-it="3 indizi">3 dicas</span></span>
         </div>
       </div>
     </div>
@@ -96,18 +96,18 @@
     <div class="modal__card">
       <div class="modal__icon"><img src="assets/img/find-magnifier.png" alt=""></div>
       <h2 class="modal__title">Find Tiago & Gian</h2>
-      <p class="modal__text">Encontre 10 itens escondidos em cada cena! Cada cena tem mais de 60 objetos para te confundir — clique exatamente sobre o item certo. 3 dicas disponíveis por cena!</p>
-      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startFind()">🔍 Começar</button></div>
+      <p class="modal__text"><span data-it="Trova 10 oggetti in ogni scena! Ogni scena ha più di 60 oggetti per confonderti — clicca esattamente sull'oggetto. 3 indizi per scena!">Encontre 10 itens escondidos em cada cena! Cada cena tem mais de 60 objetos para te confundir — clique exatamente sobre o item certo. 3 dicas disponíveis por cena!</span></p>
+      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startFind()"><img src="assets/img/find-magnifier.png" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:-.18em"> Começar</button></div>
     </div>
   </div>
   <div class="modal" id="winModal" hidden>
     <div class="modal__card">
       <div class="modal__icon"><img src="assets/img/find-complete-scene.png" alt=""></div>
-      <h2 class="modal__title" id="winTitle">Tudo encontrado! ⭐</h2>
+      <h2 class="modal__title" id="winTitle"><span data-it="Tutto trovato!">Tudo encontrado!</span></h2>
       <p class="modal__text" id="winText"></p>
       <div class="btn-row" style="margin-bottom:.65rem">
-        <button class="game-btn" onclick="nextScene()">Próxima cena →</button>
-        <button class="game-btn game-btn--main" onclick="document.getElementById('winModal').hidden=true">Ver placar</button>
+        <button class="game-btn" onclick="nextScene()"><span data-it="Scena successiva →">Próxima cena →</span></button>
+        <button class="game-btn game-btn--main" onclick="document.getElementById('winModal').hidden=true"><span data-it="Vedi classifica">Ver placar</span></button>
       </div>
       <div class="save-box">
         <div class="save-box__row"><input class="save-input" id="pName" placeholder="Seu nome" maxlength="22"/><button class="game-btn" onclick="doSave()">Salvar</button></div>
@@ -192,45 +192,70 @@ function generateDecoys(objectZones){
 }
 
 const SCENES=[
-  {id:"farm",name:"Fazenda",img:"scene-farm.png",
+  {id:"farm",name:(window.I18N&&window.I18N.lang==='it'?"Fattoria":"Fazenda"),img:"scene-farm.png",
    objects:[
-     {id:"rings",    name:"Alianças",  x:17,y:58,sz:48},{id:"bouquet",  name:"Buquê",     x:72,y:48,sz:52},
-     {id:"champagne",name:"Champagne", x:86,y:33,sz:44},{id:"tiago",   name:"Tiago",     x:36,y:82,sz:56},
-     {id:"gian",     name:"Gian",      x:58,y:75,sz:56},{id:"cat",     name:"Gatinho",   x:91,y:84,sz:44},
-     {id:"bowtie",   name:"Gravata",   x:24,y:34,sz:42},{id:"key",     name:"Chave",     x:62,y:26,sz:38},
-     {id:"macaron",  name:"Macaron",   x:44,y:60,sz:44},{id:"passport",name:"Passaporte",x:79,y:68,sz:42},
+     {id:"rings",    name:(window.I18N&&window.I18N.lang==='it'?"Fedi nuziali":"Alianças"),  x:68,y:11,sz:44},
+     {id:"bouquet",  name:(window.I18N&&window.I18N.lang==='it'?"Bouquet":"Buquê"),     x:54,y:24,sz:50},
+     {id:"champagne",name:"Champagne", x:44,y:57,sz:42},
+     {id:"tiago",    name:"Tiago",     x:18,y:63,sz:56},
+     {id:"gian",     name:"Gian",      x:25,y:68,sz:56},
+     {id:"cat",      name:(window.I18N&&window.I18N.lang==='it'?"Gattino":"Gatinho"),   x:32,y:62,sz:44},
+     {id:"bowtie",   name:(window.I18N&&window.I18N.lang==='it'?"Cravatta":"Gravata"),   x:61,y:19,sz:38},
+     {id:"key",      name:(window.I18N&&window.I18N.lang==='it'?"Chiave":"Chave"),     x:84,y:82,sz:36},
+     {id:"macaron",  name:"Macaron",   x:39,y:26,sz:44},
+     {id:"passport", name:(window.I18N&&window.I18N.lang==='it'?"Passaporto":"Passaporte"),x:52,y:56,sz:40},
    ]},
-  {id:"ceremony",name:"Cerimônia",img:"scene-ceremony.png",
+  {id:"ceremony",name:(window.I18N&&window.I18N.lang==='it'?"Cerimonia":"Cerimônia"),img:"scene-ceremony.png",
    objects:[
-     {id:"rings",    name:"Alianças",  x:49,y:19,sz:46},{id:"bouquet", name:"Buquê",     x:21,y:74,sz:52},
-     {id:"bowtie",   name:"Gravata",   x:76,y:56,sz:44},{id:"tiago",  name:"Tiago",     x:40,y:82,sz:56},
-     {id:"gian",     name:"Gian",      x:63,y:82,sz:56},{id:"key",    name:"Chave",     x:88,y:37,sz:38},
-     {id:"champagne",name:"Champagne", x:12,y:44,sz:44},{id:"macaron",name:"Macaron",   x:55,y:64,sz:44},
-     {id:"passport", name:"Passaporte",x:30,y:52,sz:42},{id:"camera", name:"Câmera",    x:82,y:72,sz:42},
+     {id:"rings",    name:"Alianças",  x:67,y:82,sz:44},
+     {id:"bouquet",  name:"Buquê",     x:54,y:11,sz:50},
+     {id:"bowtie",   name:"Gravata",   x:23,y:52,sz:38},
+     {id:"tiago",    name:"Tiago",     x:45,y:11,sz:56},
+     {id:"gian",     name:"Gian",      x:67,y:12,sz:56},
+     {id:"key",      name:"Chave",     x:31,y:81,sz:36},
+     {id:"champagne",name:"Champagne", x:90,y:17,sz:42},
+     {id:"macaron",  name:"Macaron",   x:54,y:90,sz:44},
+     {id:"passport", name:"Passaporte",x:33,y:10,sz:40},
+     {id:"camera",   name:"Câmera",    x:22,y:22,sz:42},
    ]},
-  {id:"reception",name:"Recepção",img:"scene-reception.png",
+  {id:"reception",name:(window.I18N&&window.I18N.lang==='it'?"Ricevimento":"Recepção"),img:"scene-reception.png",
    objects:[
-     {id:"champagne",name:"Champagne", x:17,y:42,sz:46},{id:"macaron",name:"Macaron",   x:81,y:64,sz:46},
-     {id:"camera",   name:"Câmera",    x:55,y:27,sz:44},{id:"bouquet",name:"Buquê",     x:28,y:78,sz:52},
-     {id:"gian",     name:"Gian",      x:68,y:84,sz:56},{id:"tiago", name:"Tiago",     x:43,y:71,sz:56},
-     {id:"key",      name:"Chave",     x:90,y:52,sz:38},{id:"rings", name:"Alianças",  x:38,y:45,sz:46},
-     {id:"suitcase", name:"Malinha",   x:73,y:35,sz:44},{id:"bowtie",name:"Gravata",   x:14,y:65,sz:42},
+     {id:"champagne",name:"Champagne", x:88,y:45,sz:42},
+     {id:"macaron",  name:"Macaron",   x:10,y:11,sz:44},
+     {id:"camera",   name:"Câmera",    x:18,y:73,sz:42},
+     {id:"bouquet",  name:"Buquê",     x:13,y:57,sz:50},
+     {id:"gian",     name:"Gian",      x:13,y:66,sz:56},
+     {id:"tiago",    name:"Tiago",     x:10,y:75,sz:56},
+     {id:"key",      name:"Chave",     x:81,y:84,sz:36},
+     {id:"rings",    name:"Alianças",  x:13,y:85,sz:44},
+     {id:"suitcase", name:(window.I18N&&window.I18N.lang==='it'?"Valigia":"Malinha"),   x:91,y:85,sz:46},
+     {id:"bowtie",   name:"Gravata",   x:57,y:31,sz:38},
    ]},
-  {id:"italy",name:"Itália",img:"scene-italy.png",
+  {id:"italy",name:(window.I18N&&window.I18N.lang==='it'?"Italia":"Itália"),img:"scene-italy.png",
    objects:[
-     {id:"passport", name:"Passaporte",x:64,y:44,sz:44},{id:"camera", name:"Câmera",    x:24,y:32,sz:44},
-     {id:"cat",      name:"Gatinho",   x:88,y:80,sz:46},{id:"suitcase",name:"Malinha",  x:15,y:72,sz:48},
-     {id:"macaron",  name:"Macaron",   x:76,y:26,sz:44},{id:"bowtie",name:"Gravata",   x:47,y:86,sz:42},
-     {id:"rings",    name:"Alianças",  x:34,y:62,sz:44},{id:"bouquet",name:"Buquê",    x:59,y:54,sz:50},
-     {id:"key",      name:"Chave",     x:82,y:46,sz:38},{id:"champagne",name:"Champagne",x:10,y:52,sz:44},
+     {id:"passport", name:"Passaporte",x:27,y:41,sz:40},
+     {id:"camera",   name:"Câmera",    x:84,y:27,sz:42},
+     {id:"cat",      name:"Gatinho",   x:54,y:87,sz:44},
+     {id:"suitcase", name:"Malinha",   x:85,y:8, sz:46},
+     {id:"macaron",  name:"Macaron",   x:60,y:23,sz:44},
+     {id:"bowtie",   name:"Gravata",   x:53,y:59,sz:38},
+     {id:"rings",    name:"Alianças",  x:85,y:48,sz:44},
+     {id:"bouquet",  name:"Buquê",     x:81,y:15,sz:50},
+     {id:"key",      name:"Chave",     x:16,y:70,sz:36},
+     {id:"champagne",name:"Champagne", x:74,y:53,sz:42},
    ]},
-  {id:"honeymoon",name:"Lua de Mel",img:"scene-honeymoon.png",
+  {id:"honeymoon",name:(window.I18N&&window.I18N.lang==='it'?"Luna di Miele":"Lua de Mel"),img:"scene-honeymoon.png",
    objects:[
-     {id:"rings",    name:"Alianças",  x:51,y:30,sz:44},{id:"champagne",name:"Champagne",x:82,y:46,sz:46},
-     {id:"suitcase", name:"Malinha",   x:19,y:67,sz:48},{id:"camera",  name:"Câmera",   x:67,y:75,sz:44},
-     {id:"gian",     name:"Gian",      x:36,y:82,sz:56},{id:"tiago",   name:"Tiago",   x:58,y:84,sz:56},
-     {id:"bouquet",  name:"Buquê",     x:28,y:50,sz:50},{id:"macaron", name:"Macaron", x:76,y:58,sz:44},
-     {id:"key",      name:"Chave",     x:45,y:48,sz:38},{id:"passport",name:"Passaporte",x:12,y:38,sz:44},
+     {id:"rings",    name:"Alianças",  x:77,y:79,sz:44},
+     {id:"champagne",name:"Champagne", x:23,y:45,sz:42},
+     {id:"suitcase", name:"Malinha",   x:38,y:83,sz:46},
+     {id:"camera",   name:"Câmera",    x:32,y:49,sz:42},
+     {id:"gian",     name:"Gian",      x:41,y:51,sz:56},
+     {id:"tiago",    name:"Tiago",     x:54,y:8, sz:56},
+     {id:"bouquet",  name:"Buquê",     x:68,y:8, sz:50},
+     {id:"macaron",  name:"Macaron",   x:65,y:21,sz:44},
+     {id:"key",      name:"Chave",     x:82,y:86,sz:36},
+     {id:"passport", name:"Passaporte",x:51,y:62,sz:40},
    ]},
 ];
 
@@ -267,7 +292,7 @@ let curScene=0,foundSet=new Set(),clicks=0,hints=3,timerSec=0,timerInt=null;
 let totalScore=0,finalScore=0,hintActive=false,hintObj=null,hintTimer=0,animRaf;
 let ripples=[]; // click feedback
 
-function startFind(){document.getElementById('startModal').hidden=true;loadScene(0);loadTop10();}
+function startFind(){document.getElementById('startModal').hidden=true;const panel=document.querySelector('.scene-wrap');if(window.scrollToGame&&panel){const nav=document.querySelector('.game-nav');scrollToGame(panel,nav?nav.getBoundingClientRect().height:56,()=>{loadScene(0);loadTop10();});}else{loadScene(0);loadTop10();}}
 
 function loadScene(idx){
   curScene=idx;foundSet=new Set();clicks=0;hints=3;timerSec=0;hintActive=false;ripples=[];
@@ -431,7 +456,7 @@ function sceneComplete(){
   clearInterval(timerInt);
   const bonus=hints*80+Math.max(0,350-clicks*7)+Math.max(0,600-timerSec*3);
   const pts=600+bonus;totalScore+=pts;finalScore=totalScore;
-  document.getElementById('winTitle').textContent='Tudo encontrado! ⭐';
+  document.getElementById('winTitle').textContent='Tudo encontrado!';
   document.getElementById('winText').textContent=`${SCENES[curScene].name} | ${timerSec}s | ${clicks} cliques | +${pts} pts | Total: ${totalScore}`;
   document.getElementById('winModal').hidden=false;
   if(window.confettiBurst)confettiBurst({count:30,hearts:true});
@@ -444,7 +469,7 @@ async function doSave(){
   const msg=document.getElementById('saveMsg');
   if(!name){msg.textContent='Coloque seu nome!';return;}
   msg.textContent='Salvando...';
-  try{await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});msg.textContent='Salvo! ⭐';loadTop10();}
+  try{await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});msg.textContent='Salvo!';loadTop10();}
   catch(e){msg.textContent='Erro ao salvar.';}
 }
 async function loadTop10(){
@@ -458,5 +483,6 @@ function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&l
 </script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/delights.js"></script>
+  <script src="assets/js/scroll-to-game.js"></script>
 </body>
 </html>

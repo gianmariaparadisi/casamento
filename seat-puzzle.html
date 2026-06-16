@@ -76,11 +76,11 @@
     <div class="game-brand">Tiago & Gian</div>
   </div></nav>
   <main class="game-shell">
-    <p class="game-kicker">Puzzle Social</p>
-    <h1 class="game-title">Is This Seat Taken?</h1>
-    <p class="game-sub">Arranje os convidados satisfazendo TODAS as regras. Clique num convidado, depois numa cadeira. Cada puzzle tem solução única!</p>
+    <p class="game-kicker" data-it="Puzzle Sociale"><span data-it="Puzzle Sociale">Puzzle Social</span></p>
+    <h1 class="game-title" data-it="È Libero Questo Posto?"><span data-it="È Libero Questo Posto?">Is This Seat Taken?</span></h1>
+    <p class="game-sub" data-it="Sistema gli ospiti soddisfacendo TUTTE le regole. Clicca su un ospite, poi su una sedia.">Arranje os convidados satisfazendo TODAS as regras. Clique num convidado, depois numa cadeira. Cada puzzle tem solução única!</p>
     <div class="hud">
-      <div class="hud__pill">Regras: <strong id="satisfiedCount">0</strong>/<strong id="totalRules">0</strong></div>
+      <div class="hud__pill"><span data-it="Regole:">Regras:</span> <strong id="satisfiedCount">0</strong>/<strong id="totalRules">0</strong></div>
       <div class="hud__pill">Score: <strong id="scoreEl">0</strong></div>
       <div class="hud__pill">Puzzle <strong id="lvlEl">1</strong>/5</div>
     </div>
@@ -89,15 +89,15 @@
       <div>
         <div class="table-stage"><canvas id="tableCanvas"></canvas></div>
         <div class="puzzle-btns">
-          <button class="game-btn" onclick="resetPuzzle()">🔄 Recomeçar</button>
-          <button class="game-btn" onclick="showHint()">💡 Dica</button>
-          <button class="game-btn game-btn--main" onclick="checkSolution()">✓ Verificar</button>
+          <button class="game-btn" onclick="resetPuzzle()"><img src="assets/img/icon-sparkle.png" alt="" style="width:1em;height:1em;object-fit:contain;vertical-align:-.15em"> <span data-it="Ricomincia">Recomeçar</span></button>
+          <button class="game-btn" onclick="showHint()"><img src="assets/img/find-hint-star.png" alt="" style="width:1em;height:1em;object-fit:contain;vertical-align:-.15em"> Dica</button>
+          <button class="game-btn game-btn--main" onclick="checkSolution()"><img src="assets/img/icon-check-decorative.png" alt="" style="width:1em;height:1em;object-fit:contain;vertical-align:-.15em"> <span data-it="Verifica">Verificar</span></button>
         </div>
       </div>
       <div class="right-panel">
-        <div class="guest-pool"><h3>Convidados</h3><div class="guest-list" id="guestList"></div></div>
-        <div class="rules-box"><h4>Regras</h4><div id="rulesList"></div></div>
-        <div class="score-live"><span>Pontuação</span><strong id="livePts">0</strong></div>
+        <div class="guest-pool"><h3><span data-it="Ospiti">Convidados</span></h3><div class="guest-list" id="guestList"></div></div>
+        <div class="rules-box"><h4><span data-it="Regole">Regras</span></h4><div id="rulesList"></div></div>
+        <div class="score-live"><span><span data-it="Punteggio">Pontuação</span></span><strong id="livePts">0</strong></div>
       </div>
     </div>
     <section class="top10" style="max-width:460px;margin:1.2rem auto 0"><h3>Top 10</h3><ol id="topList"></ol></section>
@@ -107,8 +107,8 @@
     <div class="modal__card">
       <div class="modal__icon"><img src="assets/img/seat-table-round.png" alt=""></div>
       <h2 class="modal__title">Is This Seat Taken?</h2>
-      <p class="modal__text">Coloque cada convidado numa cadeira satisfazendo TODAS as regras. Cada puzzle tem uma solução possível. Clique num convidado → clique na cadeira. Use 💡 para uma dica se travar!</p>
-      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startSeat()">🪑 Começar</button></div>
+      <p class="modal__text">Coloque cada convidado numa cadeira satisfazendo TODAS as regras. Cada puzzle tem uma solução possível. Clique num convidado → clique na cadeira. Use <img src="assets/img/find-hint-star.png" alt="dica" style="width:1em;height:1em;object-fit:contain;vertical-align:-.15em"> <span data-it="per un indizio se sei bloccato!">para uma dica se travar!</span></p>
+      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startSeat()"><img src="assets/img/seat-chair-empty.png" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:-.18em"> Começar</button></div>
     </div>
   </div>
   <div class="modal" id="resultModal" hidden>
@@ -117,8 +117,8 @@
       <h2 class="modal__title" id="resTitle">Perfeito!</h2>
       <p class="modal__text" id="resText"></p>
       <div class="btn-row" style="margin-bottom:.62rem">
-        <button class="game-btn" onclick="resetPuzzle()">↩ Tentar de novo</button>
-        <button class="game-btn game-btn--main" onclick="nextPuzzle()">Próximo ›</button>
+        <button class="game-btn" onclick="resetPuzzle()"><span data-it="↩ Riprova">↩ Tentar de novo</span></button>
+        <button class="game-btn game-btn--main" onclick="nextPuzzle()"><span data-it="Prossimo ›">Próximo ›</span></button>
       </div>
       <div class="save-box">
         <div class="save-box__row"><input class="save-input" id="pName" placeholder="Seu nome" maxlength="22"/><button class="game-btn" onclick="doSave()">Salvar</button></div>
@@ -139,42 +139,44 @@ function sndPartial(){beep(440,.08,.07);}
 function haptic(p){try{navigator.vibrate&&navigator.vibrate(p||15);}catch(e){}}
 
 const GUESTS=[
-  {id:"groom-a",   name:"Tiago",     img:"guest-groom-a.png"},
-  {id:"groom-b",   name:"Gian",      img:"guest-groom-b.png"},
-  {id:"grandma",   name:"Vovó",      img:"guest-grandma.png"},
-  {id:"grandpa",   name:"Vovô",      img:"guest-grandpa.png"},
-  {id:"aunt",      name:"Tia Rosa",  img:"guest-aunt.png"},
-  {id:"uncle",     name:"Tio Marco", img:"guest-uncle.png"},
-  {id:"cousin",    name:"Primo",     img:"guest-cousin.png"},
-  {id:"friend",    name:"Amiga",     img:"guest-friend.png"},
-  {id:"bestman",   name:"Padrinho",  img:"guest-bestman.png"},
-  {id:"bridesmaid",name:"Madrinha",  img:"guest-bridesmaid.png"},
+  {id:"groom-a",   name:(window.I18N&&window.I18N.lang==='it'?"Tiago":"Tiago"),     img:"guest-groom-a.png"},
+  {id:"groom-b",   name:(window.I18N&&window.I18N.lang==='it'?"Gian":"Gian"),      img:"guest-groom-b.png"},
+  {id:"grandma",   name:(window.I18N&&window.I18N.lang==='it'?"Nonna":"Vovó"),      img:"guest-grandma.png"},
+  {id:"grandpa",   name:(window.I18N&&window.I18N.lang==='it'?"Nonno":"Vovô"),      img:"guest-grandpa.png"},
+  {id:"aunt",      name:(window.I18N&&window.I18N.lang==='it'?"Zia Rosa":"Tia Rosa"),  img:"guest-aunt.png"},
+  {id:"uncle",     name:(window.I18N&&window.I18N.lang==='it'?"Zio Marco":"Tio Marco"), img:"guest-uncle.png"},
+  {id:"cousin",    name:(window.I18N&&window.I18N.lang==='it'?"Cugino":"Primo"),     img:"guest-cousin.png"},
+  {id:"friend",    name:(window.I18N&&window.I18N.lang==='it'?"Amica":"Amiga"),     img:"guest-friend.png"},
+  {id:"bestman",   name:(window.I18N&&window.I18N.lang==='it'?"Padrino":"Padrinho"),  img:"guest-bestman.png"},
+  {id:"bridesmaid",name:(window.I18N&&window.I18N.lang==='it'?"Madrina":"Madrinha"),  img:"guest-bridesmaid.png"},
 ];
 
 // SEATS on round table (6): positions as % of canvas CW×CH
 // Based on seat-table-round.png: table center ~50%,50%, chairs around perimeter
+// Positions calibrated by pixel analysis of actual PNG assets
+// Mesa redonda 243×259 → canvas 480×340 (pad=24, scale=1.1274, tx=103, ty=24)
 const R6=[
-  {id:0,x:50,y:9},   // top
-  {id:1,x:83,y:27},  // top-right
-  {id:2,x:83,y:68},  // bottom-right
-  {id:3,x:50,y:86},  // bottom
-  {id:4,x:17,y:68},  // bottom-left
-  {id:5,x:17,y:27},  // top-left
+  {id:0,x:48.9,y:17.0}, // topo       — pixel (117,30)
+  {id:1,x:66.8,y:31.9}, // topo-dir   — pixel (193,75)
+  {id:2,x:67.5,y:67.4}, // baixo-dir  — pixel (196,182)
+  {id:3,x:49.9,y:80.7}, // base       — pixel (121,222)
+  {id:4,x:32.5,y:67.1}, // baixo-esq  — pixel (47,181)
+  {id:5,x:33.0,y:31.6}, // topo-esq   — pixel (49,74)
 ];
 
-// Long table (8): seats-table-long.png – 4 top row, 4 bottom row
+// Mesa longa 361×227 → canvas 480×340 (pad=24, scale=1.1967, tx=24, ty=34.2)
+// 4 cadeiras topo (y≈17%) e 4 base (y≈82%), espaçadas em x
 const L8=[
-  {id:0,x:14,y:16},{id:1,x:36,y:16},{id:2,x:64,y:16},{id:3,x:86,y:16},
-  {id:4,x:14,y:82},{id:5,x:36,y:82},{id:6,x:64,y:82},{id:7,x:86,y:82},
+  {id:0,x:13.7,y:17.1},{id:1,x:33.7,y:17.1},{id:2,x:66.1,y:17.1},{id:3,x:86.0,y:17.1},
+  {id:4,x:13.7,y:82.2},{id:5,x:33.7,y:82.2},{id:6,x:66.1,y:82.2},{id:7,x:86.0,y:82.2},
 ];
 
-// Two round tables: TableA = seats 0-4 (left side), TableB = seats 5-9 (right side)
-// We draw two small round tables side by side
+// Duas mesas redondas: cada uma com sz=201.6px
+// Mesa A centro em CW*0.25=120, Mesa B centro em CW*0.73=350.4
+// scale_t2 = 201.6/259 = 0.778; offA=(19.2,69.2), offB=(249.6,69.2)
 const T2=[
-  // Table A (left): 5 seats
-  {id:0,x:18,y:18},{id:1,x:35,y:8},{id:2,x:42,y:28},{id:3,x:35,y:45},{id:4,x:18,y:40},
-  // Table B (right): 5 seats
-  {id:5,x:58,y:18},{id:6,x:75,y:8},{id:7,x:82,y:28},{id:8,x:75,y:45},{id:9,x:58,y:40},
+  {id:0,x:23.0,y:27.2},{id:1,x:35.3,y:37.5},{id:2,x:35.8,y:62.0},{id:3,x:23.6,y:71.2},{id:4,x:11.6,y:61.8}, // Mesa A
+  {id:5,x:71.0,y:27.2},{id:6,x:83.3,y:37.5},{id:7,x:83.8,y:62.0},{id:8,x:71.6,y:71.2},{id:9,x:59.6,y:61.8}, // Mesa B
 ];
 
 function adjRound(sa,sb,seats){
@@ -205,8 +207,8 @@ const PUZZLES=[
     tableImg:"seat-table-round.png", tableType:"round", seats:R6,
     guestIds:["groom-a","groom-b","grandma","grandpa","aunt","uncle"],
     rules:[
-      {type:"adj",a:"groom-a",b:"groom-b",must:true, seats:R6, icon:"hint-couple.png",   label:"Tiago e Gian lado a lado"},
-      {type:"adj",a:"grandma",b:"grandpa",must:true, seats:R6, icon:"hint-family.png",   label:"Vovó e Vovô juntos"},
+      {type:"adj",a:"groom-a",b:"groom-b",must:true, seats:R6, icon:"hint-couple.png",   label:(window.I18N&&window.I18N.lang==='it'?"Tiago e Gian fianco a fianco":"Tiago e Gian lado a lado")},
+      {type:"adj",a:"grandma",b:"grandpa",must:true, seats:R6, icon:"hint-family.png",   label:(window.I18N&&window.I18N.lang==='it'?"Nonna e Nonno insieme":"Vovó e Vovô juntos")},
       {type:"adj",a:"aunt",  b:"uncle",  must:true, seats:R6, icon:"hint-family.png",   label:"Tia e Tio juntos"},
       {type:"adj",a:"groom-a",b:"uncle", must:false,seats:R6, icon:"hint-ex.png",       label:"Tiago não ao lado do Tio"},
       {type:"adj",a:"grandma",b:"groom-a",must:false,seats:R6,icon:"hint-ex.png",       label:"Vovó não ao lado do Tiago"},
@@ -221,11 +223,11 @@ const PUZZLES=[
     tableImg:"seat-table-round.png", tableType:"round", seats:R6,
     guestIds:["groom-a","groom-b","bestman","bridesmaid","grandma","friend"],
     rules:[
-      {type:"adj",a:"groom-a",b:"groom-b",   must:true, seats:R6,icon:"hint-couple.png",   label:"Noivos juntos"},
-      {type:"adj",a:"bestman",b:"groom-a",   must:true, seats:R6,icon:"hint-dancefloor.png",label:"Padrinho ao lado do Tiago"},
-      {type:"adj",a:"bridesmaid",b:"groom-b",must:true, seats:R6,icon:"hint-dancefloor.png",label:"Madrinha ao lado do Gian"},
-      {type:"adj",a:"bestman",b:"bridesmaid",must:false,seats:R6,icon:"hint-ex.png",        label:"Padrinho e Madrinha NÃO juntos"},
-      {type:"adj",a:"grandma",b:"friend",    must:true, seats:R6,icon:"hint-family.png",    label:"Vovó ao lado da Amiga"},
+      {type:"adj",a:"groom-a",b:"groom-b",   must:true, seats:R6,icon:"hint-couple.png",   label:(window.I18N&&window.I18N.lang==='it'?"Sposi insieme":"Noivos juntos")},
+      {type:"adj",a:"bestman",b:"groom-a",   must:true, seats:R6,icon:"hint-dancefloor.png",label:(window.I18N&&window.I18N.lang==='it'?"Padrino accanto a Tiago":"Padrinho ao lado do Tiago")},
+      {type:"adj",a:"bridesmaid",b:"groom-b",must:true, seats:R6,icon:"hint-dancefloor.png",label:(window.I18N&&window.I18N.lang==='it'?"Madrina accanto a Gian":"Madrinha ao lado do Gian")},
+      {type:"adj",a:"bestman",b:"bridesmaid",must:false,seats:R6,icon:"hint-ex.png",        label:(window.I18N&&window.I18N.lang==='it'?"Padrino e Madrina NON insieme":"Padrinho e Madrinha NÃO juntos")},
+      {type:"adj",a:"grandma",b:"friend",    must:true, seats:R6,icon:"hint-family.png",    label:(window.I18N&&window.I18N.lang==='it'?"Nonna accanto all'Amica":"Vovó ao lado da Amiga")},
     ],
     bgImg:"seat-bg-reception.png",
   },
@@ -239,9 +241,9 @@ const PUZZLES=[
       {type:"adj",a:"groom-a",b:"groom-b",must:true, seats:R6,icon:"hint-couple.png",    label:"Noivos juntos"},
       {type:"adj",a:"grandpa",b:"groom-a",must:true, seats:R6,icon:"hint-family.png",    label:"Vovô ao lado do Tiago"},
       {type:"adj",a:"aunt",  b:"uncle",  must:false,seats:R6,icon:"hint-ex.png",         label:"Tia e Tio SEPARADOS (ex!)"},
-      {type:"opp",a:"groom-a",b:"cousin",must:true, seats:R6,icon:"hint-dancefloor.png", label:"Tiago em frente ao Primo"},
-      {type:"adj",a:"aunt",  b:"groom-b",must:false,seats:R6,icon:"hint-ex.png",         label:"Tia não ao lado do Gian"},
-      {type:"adj",a:"uncle", b:"groom-b",must:true, seats:R6,icon:"hint-family.png",     label:"Tio ao lado do Gian"},
+      {type:"opp",a:"groom-a",b:"cousin",must:true, seats:R6,icon:"hint-dancefloor.png", label:(window.I18N&&window.I18N.lang==='it'?"Tiago di fronte al Cugino":"Tiago em frente ao Primo")},
+      {type:"adj",a:"aunt",  b:"groom-b",must:false,seats:R6,icon:"hint-ex.png",         label:(window.I18N&&window.I18N.lang==='it'?"Zia non accanto a Gian":"Tia não ao lado do Gian")},
+      {type:"adj",a:"uncle", b:"groom-b",must:true, seats:R6,icon:"hint-family.png",     label:(window.I18N&&window.I18N.lang==='it'?"Zio accanto a Gian":"Tio ao lado do Gian")},
     ],
     bgImg:"seat-bg-garden.png",
   },
@@ -252,12 +254,12 @@ const PUZZLES=[
     tableImg:"seat-table-long.png", tableType:"long", seats:L8,
     guestIds:["groom-a","groom-b","grandma","grandpa","bestman","bridesmaid","aunt","cousin"],
     rules:[
-      {type:"opp_long",a:"groom-a",b:"groom-b",must:true, icon:"hint-couple.png",    label:"Noivos um de frente para o outro"},
+      {type:"opp_long",a:"groom-a",b:"groom-b",must:true, icon:"hint-couple.png",    label:(window.I18N&&window.I18N.lang==='it'?"Sposi uno di fronte all'altro":"Noivos um de frente para o outro")},
       {type:"adj_long",a:"bestman",b:"groom-a",must:true, icon:"hint-dancefloor.png",label:"Padrinho ao lado do Tiago"},
       {type:"adj_long",a:"bridesmaid",b:"groom-b",must:true,icon:"hint-dancefloor.png",label:"Madrinha ao lado do Gian"},
-      {type:"adj_long",a:"grandma",b:"grandpa",must:true, icon:"hint-family.png",    label:"Vovós juntos"},
-      {type:"opp_long",a:"grandma",b:"grandpa",must:true, icon:"hint-family.png",    label:"Vovós em frente um ao outro"},
-      {type:"adj_long",a:"aunt",b:"groom-a",must:false,   icon:"hint-ex.png",        label:"Tia NÃO ao lado do Tiago"},
+      {type:"adj_long",a:"grandma",b:"grandpa",must:true, icon:"hint-family.png",    label:(window.I18N&&window.I18N.lang==='it'?"Nonni insieme":"Vovós juntos")},
+      {type:"opp_long",a:"grandma",b:"grandpa",must:true, icon:"hint-family.png",    label:(window.I18N&&window.I18N.lang==='it'?"Nonni uno di fronte all'altro":"Vovós em frente um ao outro")},
+      {type:"adj_long",a:"aunt",b:"groom-a",must:false,   icon:"hint-ex.png",        label:(window.I18N&&window.I18N.lang==='it'?"Zia NON accanto a Tiago":"Tia NÃO ao lado do Tiago")},
     ],
     bgImg:"seat-bg-garden.png",
   },
@@ -269,12 +271,12 @@ const PUZZLES=[
     guestIds:["groom-a","groom-b","grandma","grandpa","bestman","bridesmaid","aunt","uncle","cousin","friend"],
     rules:[
       {type:"diff_table",a:"groom-a",b:"groom-b",must:true, icon:"hint-dancefloor.png",label:"Noivos em mesas diferentes (tradição!)"},
-      {type:"same_table",a:"grandma",b:"grandpa",must:true, icon:"hint-family.png",   label:"Vovós na mesma mesa"},
-      {type:"same_table",a:"bestman",b:"groom-a",must:true, icon:"hint-couple.png",   label:"Padrinho na mesa do Tiago"},
-      {type:"same_table",a:"bridesmaid",b:"groom-b",must:true,icon:"hint-couple.png", label:"Madrinha na mesa do Gian"},
-      {type:"same_table",a:"grandma",b:"groom-b",must:true, icon:"hint-family.png",   label:"Vovós com Gian"},
-      {type:"diff_table",a:"aunt",b:"uncle",must:true,      icon:"hint-ex.png",       label:"Tia e Tio em mesas SEPARADAS"},
-      {type:"same_table",a:"aunt",b:"groom-a",must:true,    icon:"hint-family.png",   label:"Tia na mesa do Tiago"},
+      {type:"same_table",a:"grandma",b:"grandpa",must:true, icon:"hint-family.png",   label:(window.I18N&&window.I18N.lang==='it'?"Nonni allo stesso tavolo":"Vovós na mesma mesa")},
+      {type:"same_table",a:"bestman",b:"groom-a",must:true, icon:"hint-couple.png",   label:(window.I18N&&window.I18N.lang==='it'?"Padrino al tavolo di Tiago":"Padrinho na mesa do Tiago")},
+      {type:"same_table",a:"bridesmaid",b:"groom-b",must:true,icon:"hint-couple.png", label:(window.I18N&&window.I18N.lang==='it'?"Madrina al tavolo di Gian":"Madrinha na mesa do Gian")},
+      {type:"same_table",a:"grandma",b:"groom-b",must:true, icon:"hint-family.png",   label:(window.I18N&&window.I18N.lang==='it'?"Nonni con Gian":"Vovós com Gian")},
+      {type:"diff_table",a:"aunt",b:"uncle",must:true,      icon:"hint-ex.png",       label:(window.I18N&&window.I18N.lang==='it'?"Zia e Zio a tavoli SEPARATI":"Tia e Tio em mesas SEPARADAS")},
+      {type:"same_table",a:"aunt",b:"groom-a",must:true,    icon:"hint-family.png",   label:(window.I18N&&window.I18N.lang==='it'?"Zia al tavolo di Tiago":"Tia na mesa do Tiago")},
     ],
     bgImg:"seat-bg-reception.png",
   },
@@ -289,7 +291,7 @@ const ICACHE={};function loadImg(src){if(ICACHE[src])return ICACHE[src];const i=
 
 let curPuzzle=0,seating={},selectedGuest=null,totalScore=0,finalScore=0,drawRaf;
 
-function startSeat(){document.getElementById('startModal').hidden=true;loadPuzzle(0);loadTop10();}
+function startSeat(){document.getElementById('startModal').hidden=true;const panel=document.querySelector('.table-stage');if(window.scrollToGame&&panel){const nav=document.querySelector('.game-nav');scrollToGame(panel,nav?nav.getBoundingClientRect().height:56,()=>{loadPuzzle(0);loadTop10();});}else{loadPuzzle(0);loadTop10();}}
 
 function loadPuzzle(idx){
   curPuzzle=idx;seating={};selectedGuest=null;
@@ -528,14 +530,14 @@ function showHint(){
 
 function checkSolution(){
   const p=PUZZLES[curPuzzle];
-  if(Object.keys(seating).length<p.guestIds.length){showFlash('Sente todos os convidados primeiro!','rgba(200,160,80,.9)');sndBad();return;}
+  if(Object.keys(seating).length<p.guestIds.length){showFlash((window.I18N&&window.I18N.lang==='it'?'Sistema tutti gli ospiti prima!':'Sente todos os convidados primeiro!'),'rgba(200,160,80,.9)');sndBad();return;}
   const rs=evalRules(p,seating);
   const sat=rs.filter(v=>v===true).length;
   const fail=rs.filter(v=>v===false).length;
   const perfect=sat===p.rules.length;
   finalScore=totalScore+(sat*100);
   document.getElementById('resIcon').innerHTML=perfect?'<img src="assets/img/seat-success-burst.png" alt="">':'<img src="assets/img/seat-failure-burst.png" alt="">';
-  document.getElementById('resTitle').textContent=perfect?'Mesa Perfeita! 🎊':`${sat}/${p.rules.length} regras OK`;
+  document.getElementById('resTitle').textContent=perfect?(window.I18N&&window.I18N.lang==='it'?'Tavolo Perfetto!':'Mesa Perfeita!'):`${sat}/${p.rules.length} regras OK`;
   document.getElementById('resText').textContent=perfect
     ?`Todas as ${p.rules.length} regras satisfeitas! +${sat*100} pontos.`
     :`${fail} regra${fail!==1?'s':''} violada${fail!==1?'s':''}. Reveja e tente de novo — cada puzzle tem solução!`;
@@ -560,7 +562,7 @@ async function doSave(){
   const msg=document.getElementById('saveMsg');
   if(!name){msg.textContent='Coloque seu nome!';return;}
   msg.textContent='Salvando...';
-  try{await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});msg.textContent='Salvo! 🎉';loadTop10();}
+  try{await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});msg.textContent='Salvo!';loadTop10();}
   catch(e){msg.textContent='Erro ao salvar.';}
 }
 async function loadTop10(){
@@ -575,5 +577,6 @@ loadTop10();
 </script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/delights.js"></script>
+  <script src="assets/js/scroll-to-game.js"></script>
 </body>
 </html>

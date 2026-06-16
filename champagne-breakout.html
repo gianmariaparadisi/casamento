@@ -82,10 +82,10 @@
 <body class="game-page">
   <nav class="game-nav"><div class="game-nav__inner"><a class="game-back" href="jogos.html">← Voltar aos jogos</a><div class="game-brand">Tiago & Gian</div></div></nav>
   <main class="game-shell">
-    <p class="game-kicker">Arcade</p>
-    <h1 class="game-title">Champagne Problems</h1>
-    <p class="game-sub">A rolha estoura da garrafa e vira a bolinha. Quebre os blocos com glitter, bolhas e caos elegante.</p>
-    <div class="hud"><div class="hud__pill">Score: <strong id="score">0</strong></div><div class="hud__pill">Vidas: <strong id="lives">3</strong></div><div class="hud__pill">Nível: <strong id="level">1</strong></div></div>
+    <p class="game-kicker" data-it="Arcade"><span data-it="Arcade">Arcade</span></p>
+    <h1 class="game-title" data-it="Champagne Problems"><span data-it="Champagne Problems">Champagne Problems</span></h1>
+    <p class="game-sub"><span data-it="Il tappo schizza dalla bottiglia e diventa la pallina. Rompi i blocchi con glitter e bolle.">A rolha estoura da garrafa e vira a bolinha. Quebre os blocos com glitter, bolhas e caos elegante.</span></p>
+    <div class="hud"><div class="hud__pill">Score: <strong id="score">0</strong></div><div class="hud__pill">data-it="Vite:" Vidas: <strong id="lives">3</strong></div><div class="hud__pill">data-it="Livello:" Nível: <strong id="level">1</strong></div></div>
     <section class="game-panel breakout-wrap">
 
     <div class="_char-sel" style="display:flex;gap:.75rem;justify-content:center;align-items:center;margin:.75rem 0 .5rem">
@@ -100,10 +100,10 @@
       </button>
     </div>
       <canvas id="gameCanvas" width="620" height="760"></canvas>
-      <div class="modal" id="startModal"><div class="modal__card"><div class="modal__icon"><img src="assets/img/tile-champagne.png" alt=""></div><h2 class="modal__title">Estourar o champagne</h2><p class="modal__text">Segure e arraste a raquete. A tampa da garrafa vira a bolinha depois do estouro.</p><button class="game-btn game-btn--main" id="startBtn">Começar</button></div></div>
+      <div class="modal" id="startModal"><div class="modal__card"><div class="modal__icon"><img src="assets/img/tile-champagne.png" alt=""></div><h2 class="modal__title"><span data-it="Stappare lo champagne">Estourar o champagne</span></h2><p class="modal__text"><span data-it="Tieni e trascina la racchetta. Il tappo diventa la pallina dopo lo stappare.">Segure e arraste a raquete. A tampa da garrafa vira a bolinha depois do estouro.</span></p><button class="game-btn game-btn--main" id="startBtn">Começar</button></div></div>
       <div class="modal" id="endModal" hidden><div class="modal__card"><div class="modal__icon" id="endIcon"></div><h2 class="modal__title" id="endTitle">Brinde perfeito</h2><p class="modal__text" id="endText"></p><button class="game-btn game-btn--main" id="againBtn">Jogar de novo</button><div class="save-box"><div class="save-box__row"><input class="save-input" id="playerName" placeholder="Seu nome" maxlength="22"/><button class="game-btn" id="saveBtn">Salvar</button></div><p class="save-msg" id="saveMsg"></p></div></div></div>
     </section>
-    <p class="spark-note">Dica: acerte blocos dourados para soltar mais glitter.</p>
+    <p class="spark-note"><span data-it="Suggerimento: colpisci i blocchi dorati per liberare più glitter.">Dica: acerte blocos dourados para soltar mais glitter.</span></p>
     <section class="top10"><h3>Top 10</h3><ol id="topList"></ol></section>
   </main>
   <script>
@@ -212,19 +212,19 @@
       }
     }
     function loop(ts){const dt=Math.min((ts-last)/16.67,2);last=ts; if(state==="intro"){const t=Math.min((ts-introStart)/1200,1); if(t<.08) popBurst(W*.48,H-142); ball.x=W*.48+68*t; ball.y=H-142-215*t+45*t*t; if(Math.random()<.75)spawnParticle(ball.x,ball.y,Math.random()*Math.PI*2,1+Math.random()*3,"bubble"); if(t>=1)launchAfterIntro();} else if(state==="play") update(dt); updateParticles(dt); draw(); if(state!=="idle") raf=requestAnimationFrame(loop);}
-    function update(dt){ball.x+=ball.vx*dt;ball.y+=ball.vy*dt; if(ball.x<ball.r){ball.x=ball.r;ball.vx=Math.abs(ball.vx);} if(ball.x>W-ball.r){ball.x=W-ball.r;ball.vx=-Math.abs(ball.vx);} if(ball.y<ball.r+8){ball.y=ball.r+8;ball.vy=Math.abs(ball.vy);} if(ball.y>H+40){lives--;updateHud(); if(lives<=0)return finish(false); resetBall();state="intro";introStart=performance.now();}
+    function update(dt){ball.x+=ball.vx*dt;ball.y+=ball.vy*dt; if(ball.x<ball.r){ball.x=ball.r;ball.vx=Math.abs(ball.vx);if(window.GS)GS.move();} if(ball.x>W-ball.r){ball.x=W-ball.r;ball.vx=-Math.abs(ball.vx);if(window.GS)GS.move();} if(ball.y<ball.r+8){ball.y=ball.r+8;ball.vy=Math.abs(ball.vy);if(window.GS)GS.move();} if(ball.y>H+40){lives--;updateHud();if(window.GS){GS.bad();GS.hBad();} if(lives<=0)return finish(false); resetBall();state="intro";introStart=performance.now();}
       if(ball.y+ball.r>paddle.y&&ball.y-ball.r<paddle.y+paddle.h&&ball.x>paddle.x&&ball.x<paddle.x+paddle.w&&ball.vy>0){ _nextFace();const hit=(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2);ball.vx=hit*5.2;ball.vy=-Math.sqrt(Math.max(14,ball.speed*ball.speed-ball.vx*ball.vx));for(let i=0;i<12;i++)spawnParticle(ball.x,paddle.y,Math.PI*1.5+(Math.random()-.5),1+Math.random()*3,"glitter");}
-      for(let i=bricks.length-1;i>=0;i--){const b=bricks[i]; if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h){const px=ball.x-ball.vx*dt, py=ball.y-ball.vy*dt; if(px<b.x||px>b.x+b.w)ball.vx*=-1; else ball.vy*=-1; b.hits--; brickBurst(b); score += b.type===4?55: b.type===5?70:20; if(b.hits<=0)bricks.splice(i,1); updateHud(); break;}}
-      if(!bricks.length){level++;score+=150;updateHud(); if(level>3) finish(true); else {makeLevel();state="intro";introStart=performance.now();}}
+      for(let i=bricks.length-1;i>=0;i--){const b=bricks[i]; if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h){const px=ball.x-ball.vx*dt, py=ball.y-ball.vy*dt; if(px<b.x||px>b.x+b.w)ball.vx*=-1; else ball.vy*=-1; b.hits--; brickBurst(b); score += b.type===4?55: b.type===5?70:20; if(b.hits<=0){bricks.splice(i,1);if(window.GS){GS.pop();GS.hTap();}} else if(window.GS){GS.move();} updateHud(); break;}}
+      if(!bricks.length){level++;score+=150;updateHud(); if(level>3) finish(true); else {if(window.GS){GS.good();GS.hGood();}makeLevel();state="intro";introStart=performance.now();}}
     }
     function updateParticles(dt){particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.06*dt;p.life-=dt;p.rot+=.08*dt;});particles=particles.filter(p=>p.life>0); if(Math.random()<.35){bubbles.push({x:Math.random()*W,y:H+10,r:2+Math.random()*5,vy:.45+Math.random()*1.2,life:240});} bubbles.forEach(b=>{b.y-=b.vy*dt;b.life-=dt;});bubbles=bubbles.filter(b=>b.life>0&&b.y>-20);}
     function finish(win){
       state="idle";cancelAnimationFrame(raf);unlockScroll();endModal.hidden=false;
+      if(window.GS){win?GS.win():GS.lose();win?GS.hWin():GS.hLose();}
       endIcon.innerHTML=win?"<img src='assets/img/icon-toast-glasses.png' alt=''>":"<img src='assets/img/tile-champagne.png' alt=''>";
-      // Mostrar toast splash ou bottle side como fundo decorativo
       if(win && _toastImg.complete && _toastImg.naturalWidth>0){
         ctx.globalAlpha=.18; ctx.drawImage(_toastImg, W/2-120, H/2-140, 240, 240); ctx.globalAlpha=1;
-      }endTitle.textContent=win?"Brinde perfeito!":"A rolha escapou…";endText.textContent=win?`Você limpou tudo com ${score} pontos e muito glitter.`:`Você fez ${score} pontos. Mais uma rodada resolve esses champagne problems.`;}
+      }endTitle.textContent=win?(window.I18N&&window.I18N.lang==='it'?"Brindisi perfetto!":"Brinde perfeito!"):(window.I18N&&window.I18N.lang==='it'?"Il tappo è scappato…":"A rolha escapou…");endText.textContent=win?`Você limpou tudo com ${score} pontos e muito glitter.`:`Você fez ${score} pontos. Mais uma rodada resolve esses champagne problems.`;}
     function drawBottle(t=0){
       ctx.save();ctx.translate(W*.39,H-120);
       if(_bottleImg.complete && _bottleImg.naturalWidth>0){
@@ -294,5 +294,6 @@
   </script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/delights.js"></script>
+  <script src="assets/js/scroll-to-game.js"></script>
 </body>
 </html>

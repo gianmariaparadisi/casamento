@@ -59,19 +59,19 @@
     <div class="game-brand">Tiago & Gian</div>
   </div></nav>
   <main class="game-shell">
-    <p class="game-kicker">Shooter Arcade</p>
-    <h1 class="game-title">MOUm! <span style="font-weight:300">Macaron Mayhem</span></h1>
-    <p class="game-sub">Atire nos macarons. Evite os macarrões. São mais parecidos do que parecem!</p>
+    <p class="game-kicker" data-it="Shooter Arcade"><span data-it="Shooter Arcade">Shooter Arcade</span></p>
+    <h1 class="game-title">MOUm! <span style="font-weight:300"><span data-it="Macaron Mayhem">Macaron Mayhem</span></span></h1>
+    <p class="game-sub"><span data-it="Spara solo ai macaron. Evita i maccheroni. Sono più simili di quanto sembri!">Atire nos macarons. Evite os macarrões. São mais parecidos do que parecem!</span></p>
     <div class="hud">
       <div class="hud__pill"><img src="assets/img/moum-lives-icon.png" alt=""> <strong id="livesEl">3</strong></div>
       <div class="hud__pill">Score: <strong id="scoreEl">0</strong></div>
       <div class="hud__pill">⏱ <strong id="timerEl">60</strong>s</div>
-      <div class="hud__pill" id="comboPill" style="display:none">🔥 ×<strong id="comboVal">2</strong></div>
+      <div class="hud__pill" id="comboPill" style="display:none"><img src="assets/img/fx-gold-sparkles.png" alt="" style="width:1rem;height:1rem;object-fit:contain;vertical-align:-.15em"> ×<strong id="comboVal">2</strong></div>
     </div>
 
     <!-- Char selector -->
     <div style="display:flex;gap:.65rem;justify-content:center;align-items:center;margin:.6rem 0">
-      <span style="font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">Confeiteiro</span>
+      <span style="font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)"><span data-it="Pasticcere">Confeiteiro</span></span>
       <button class="_cb" data-c="gian" onclick="setPerson('gian')" style="display:flex;align-items:center;gap:.35rem;font-size:.85rem;font-weight:600;padding:.4rem .9rem;border-radius:999px;border:2px solid var(--sage);background:var(--sage);color:white;cursor:pointer;transition:all .15s">
         <img src="assets/img/gianface01.png" style="width:20px;height:20px;border-radius:50%;object-fit:cover"> Gian
       </button>
@@ -86,8 +86,8 @@
         <div class="modal__card">
           <div class="modal__icon"><img src="assets/img/moum-title-logo.png" alt="MOUm!"></div>
           <h2 class="modal__title">MOUm!</h2>
-          <p class="modal__text">Clique/toque nos macarons para eliminá-los.<br>Evite os macarrões — penalidade de 250pts!<br>Deixar um macaron cair = perder uma vida. 3 vidas, 60 segundos.</p>
-          <button class="game-btn game-btn--main" id="startBtn">🍬 Começar</button>
+          <p class="modal__text"><span data-it="Clicca/tocca i macaron per eliminarli.">Clique/toque nos macarons para eliminá-los.</span><br><span data-it="Evita i maccheroni — penalità di 250 punti!">Evite os macarrões — penalidade de 250pts!</span><br><span data-it="3 vite, 60 secondi. Lasciare cadere un macaron = perdere una vita.">Deixar um macaron cair = perder uma vida. 3 vidas, 60 segundos.</span></p>
+          <button class="game-btn game-btn--main" id="startBtn"><img src="assets/img/moum-lives-icon.png" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:-.18em"> Começar</button>
         </div>
       </div>
       <div class="modal" id="endModal" hidden>
@@ -96,10 +96,10 @@
           <h2 class="modal__title" id="endTitle">Fim!</h2>
           <p class="modal__text" id="endText"></p>
           <div class="endstats">
-            <div><span>Macarons</span><strong id="sHits">0</strong></div>
-            <div><span>Macarrões</span><strong id="sMiss">0</strong></div>
-            <div><span>Maior combo</span><strong id="sCombo">0</strong></div>
-            <div><span>Precisão</span><strong id="sAcc">0%</strong></div>
+            <div><span><span data-it="Macaron">Macarons</span></span><strong id="sHits">0</strong></div>
+            <div><span><span data-it="Maccheroni">Macarrões</span></span><strong id="sMiss">0</strong></div>
+            <div><span><span data-it="Combo massimo">Maior combo</span></span><strong id="sCombo">0</strong></div>
+            <div><span><span data-it="Precisione">Precisão</span></span><strong id="sAcc">0%</strong></div>
           </div>
           <div class="btn-row"><button class="game-btn game-btn--main" id="againBtn">Jogar novamente</button></div>
           <div class="save-box">
@@ -109,7 +109,7 @@
         </div>
       </div>
     </section>
-    <p class="moum-tip">Modo Confeiteiro Confuso ativa após 5000 pts 😵</p>
+    <p class="moum-tip"><span data-it="Modalità Pasticcere Confuso si attiva dopo 5000 punti">Modo Confeiteiro Confuso ativa após 5000 pts</span> <img src="assets/img/moum-lives-lost.png" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:-.2em"></p>
     <section class="top10"><h3>Top 10</h3><ol id="topList"></ol></section>
   </main>
 <script>
@@ -234,7 +234,7 @@ function fireBullet(){
       r:6,life:80,multi:count>1
     });
   }
-  if(multiShot>0){multiShot--;if(multiShot===0)addToast(W/2,H*.6,'⚡ Multi-shot acabou',true);}
+  if(multiShot>0){multiShot--;if(multiShot===0)addToast(W/2,H*.6,(window.I18N&&window.I18N.lang==='it'?'Triplo colpo terminato':'Multi-shot acabou'),true);}
   totalShots++;
   haptic(8);
 }
@@ -257,7 +257,7 @@ function loop(ts){
       if(it.dead)continue;
       if(it.y-it.size/2>H){
         it.dead=true;
-        if(it.isMac){lives--;combo=0;sndEscape();haptic([10,20,10]);addToast(W/2,H/2,'Fugiu! 😱',true);if(lives<=0)endGame();}
+        if(it.isMac){lives--;combo=0;sndEscape();haptic([10,20,10]);addToast(W/2,H/2,(window.I18N&&window.I18N.lang==='it'?'Scappato!':'Fugiu!'),true);if(lives<=0)endGame();}
       }
     }
     items=items.filter(i=>!i.dead);
@@ -282,7 +282,7 @@ function loop(ts){
     explosions=explosions.filter(e=>e.t<18);
     toasts.forEach(t=>t.life-=dt);toasts=toasts.filter(t=>t.life>0);
     // Confuso mode
-    if(!confuso&&score>=5000){confuso=true;items.forEach(it=>{it.mirror=Math.random()<.5;it.cScale=0.8+Math.random()*.45;});addToast(W/2,H*.35,'😵 Modo Confuso!',false);}
+    if(!confuso&&score>=5000){confuso=true;items.forEach(it=>{it.mirror=Math.random()<.5;it.cScale=0.8+Math.random()*.45;});addToast(W/2,H*.35,'<img src="assets/img/moum-lives-lost.png" alt="" style="width:1.1em;height:1.1em;object-fit:contain;vertical-align:-.2em"> Modo Confuso!',false);}
     if(timeLeft<=0||lives<=0)endGame();
     updateHudDOM();
   }
@@ -297,7 +297,7 @@ function hitItem(it){
     // ★ POWERUP: CLEAR ALL (golden sparkle macaron)
     if(it.isPowerClear){
       score+=500;
-      addToast(W/2,H*.38,'✨ LIMPEZA TOTAL! +500','false');
+      addToast(W/2,H*.38,(window.I18N&&window.I18N.lang==='it'?'PULIZIA TOTALE! +500':'LIMPEZA TOTAL! +500'),'false');
       sndCombo(5);haptic([20,30,20,30,20]);
       // Explode every item on screen
       items.forEach(i=>{if(!i.dead){addExplosion(i.x,i.y,i.isMac);spawnParticles(i.x,i.y,'gold');i.dead=true;}});
@@ -309,7 +309,7 @@ function hitItem(it){
     else if(it.isPowerMulti){
       multiShot=12; // 12 extra triple-shot bullets
       score+=200;
-      addToast(it.x,it.y-30,'⚡ TRIPLE SHOT!',false);
+      addToast(it.x,it.y-30,(window.I18N&&window.I18N.lang==='it'?'TRIPLO COLPO!':'TRIPLE SHOT!'),false);
       sndCombo(3);haptic([10,20,10]);
       spawnParticles(it.x,it.y,'gold');
     }
@@ -319,7 +319,7 @@ function hitItem(it){
       score+=pts;sndHit();haptic(20);nextFace();
       addExplosion(it.x,it.y,true);
       spawnParticles(it.x,it.y,'gold');
-      const msgs=['Delícia!','MOUm!','Perfeito!','🍬 Sim!'];
+      const msgs=[(window.I18N&&window.I18N.lang==='it'?'Che bontà!':'Delícia!'),'MOUm!','Perfeito!','🍬 Sim!'];
       addToast(it.x,it.y-30,msgs[Math.floor(Math.random()*msgs.length)],false);
       if(combo>=2){sndCombo(combo);document.getElementById('comboPill').style.display='flex';document.getElementById('comboVal').textContent=combo;}
     }
@@ -327,7 +327,7 @@ function hitItem(it){
     misses++;combo=0;score=Math.max(0,score-250);sndMiss();haptic([15,40,15]);
     addExplosion(it.x,it.y,false);
     spawnParticles(it.x,it.y,'noodle');
-    addToast(it.x,it.y-30,'Isso é macarrão!',true);
+    addToast(it.x,it.y-30,(window.I18N&&window.I18N.lang==='it'?'Questo è maccherone!':'Isso é macarrão!'),true);
     document.getElementById('comboPill').style.display='none';
   }
   updateHudDOM();
@@ -353,7 +353,7 @@ function endGame(){
   document.getElementById('sMiss').textContent=misses;
   document.getElementById('sCombo').textContent=maxCombo;
   document.getElementById('sAcc').textContent=acc+'%';
-  document.getElementById('endTitle').textContent=score>=3000?'MOUm! Confeiteiro mestre!':'MOUm! Fim de jogo';
+  document.getElementById('endTitle').textContent=score>=3000?(window.I18N&&window.I18N.lang==='it'?'MOUm! Pasticcere maestro!':'MOUm! Confeiteiro mestre!'):(window.I18N&&window.I18N.lang==='it'?'MOUm! Fine del gioco':'MOUm! Fim de jogo');
   document.getElementById('endText').textContent=score>=3000
     ?`Incrível! ${score} pontos — você nasceu para isso.`
     :`${score} pontos. Os macarrões te enganaram ${misses} vez${misses!==1?'es':''}!`;
@@ -601,5 +601,6 @@ idleDraw();loadTop10();
 </script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/delights.js"></script>
+  <script src="assets/js/scroll-to-game.js"></script>
 </body>
 </html>
