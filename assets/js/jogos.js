@@ -476,6 +476,7 @@ async function carregarPreviewRecorde(){
     {key:"moum-macaron",el:"record-moum-preview"},
     {key:"find-tiago-gian",el:"record-find-preview"},
     {key:"seat-puzzle",el:"record-seat-preview"},
+    {key:"vespa",      el:"record-vespa-preview"},
   ];
   for(const j of jogos){
     const el=document.getElementById(j.el); if(!el) continue;
