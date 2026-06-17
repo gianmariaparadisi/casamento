@@ -94,7 +94,10 @@
 
 
 
-    /* overscroll suave */
+    @keyframes soon-pulse {
+      0%,100% { opacity:.55; transform:scale(1); }
+      50%      { opacity:1;   transform:scale(1.08); }
+    }
     html, body { overscroll-behavior: none; } /* scroll lock gerenciado por JS */
   </style>
 </head>
@@ -139,14 +142,17 @@
     </div>
     <div class="container" style="padding-bottom:80px">
       <div class="jogos-grid">
-        <!-- Snake do Tiago (página dedicada) -->
-        <a href="snake.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
-          <span class="jogo-card__icon"><img src="assets/img/icon-snake-mascot.png" alt="" loading="lazy"></span>
-          <h2 class="jogo-card__title" data-it="Snake di Tiago">Snake do Tiago</h2>
-          <p class="jogo-card__desc" data-it="Guida Tiago tra gli hamburger. Più mangia, più veloce diventa.">Guie o Tiago pelos hambúrgueres. Quanto mais ele come, mais rápido fica.</p>
-          <p class="jogo-card__record" id="record-snake-preview" data-it="Caricamento…">Carregando…</p>
-          <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
-        </a>
+
+        <!-- Em Breve — novo jogo todo início de mês -->
+        <div class="jogo-card reveal jogo-card--soon" style="cursor:default;opacity:.88">
+          <span class="jogo-card__icon">
+            <img src="assets/img/icon-sparkle.png" alt="" loading="lazy" style="animation:soon-pulse 2.4s ease-in-out infinite">
+          </span>
+          <h2 class="jogo-card__title" data-it="Un nuovo gioco ogni mese" style="font-size:1.1rem">Um novo jogo todo início de mês</h2>
+          <p class="jogo-card__desc" data-it="A breve, un nuovo gioco qui.">Em breve, um novo jogo aqui.</p>
+          <p class="jogo-card__record" id="soon-countdown" style="background:var(--bg-green);color:var(--sage-dark);font-size:.8rem">Calculando…</p>
+          <span class="btn btn--outline btn--sm" style="pointer-events:none;opacity:.55" data-it="Presto">Em breve</span>
+        </div>
 
         <!-- Wordle do dia -->
         <a href="wordle.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
@@ -163,6 +169,15 @@
           <h2 class="jogo-card__title" data-it="Connessioni">Conexões</h2>
           <p class="jogo-card__desc" data-it="Trova i 4 gruppi di 4 parole collegate. Ispirato a NYT Connections.">Encontre os 4 grupos de 4 palavras que se conectam. Inspirado no NYT Connections.</p>
           <p class="jogo-card__record" id="record-connect4-preview" data-it="Caricamento…">Carregando…</p>
+          <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
+        </a>
+
+        <!-- Snake do Tiago -->
+        <a href="snake.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
+          <span class="jogo-card__icon"><img src="assets/img/icon-snake-mascot.png" alt="" loading="lazy"></span>
+          <h2 class="jogo-card__title" data-it="Snake di Tiago">Snake do Tiago</h2>
+          <p class="jogo-card__desc" data-it="Guida Tiago tra gli hamburger. Più mangia, più veloce diventa.">Guie o Tiago pelos hambúrgueres. Quanto mais ele come, mais rápido fica.</p>
+          <p class="jogo-card__record" id="record-snake-preview" data-it="Caricamento…">Carregando…</p>
           <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
         </a>
 
@@ -236,7 +251,6 @@
           <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
         </a>
 
-  
         <!-- Is This Seat Taken? -->
         <a href="seat-puzzle.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
           <span class="jogo-card__icon"><img src="assets/img/seat-table-round.png" alt="" loading="lazy"></span>
@@ -419,6 +433,25 @@
 
     // Also check on resize (viewport height change)
     window.addEventListener('resize', update, { passive: true });
+  })();
+  </script>
+
+  <script>
+  // Countdown: dias até o 1º dia do próximo mês
+  (function(){
+    const el = document.getElementById('soon-countdown');
+    if(!el) return;
+    const now  = new Date();
+    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const diff = Math.ceil((next - now) / (1000 * 60 * 60 * 24));
+    const it   = window.I18N && window.I18N.lang === 'it';
+    if(diff <= 0){
+      el.textContent = it ? 'Nuovo gioco oggi!' : 'Novo jogo hoje!';
+    } else if(diff === 1){
+      el.textContent = it ? 'Manca 1 giorno' : 'Falta 1 dia';
+    } else {
+      el.textContent = it ? `Mancano ${diff} giorni` : `Faltam ${diff} dias`;
+    }
   })();
   </script>
 </body>
