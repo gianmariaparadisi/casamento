@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Cruzadinha — Tiago e Gian</title>
+
+  <!-- Open Graph / WhatsApp / iMessage preview -->
+  <meta property="og:type"         content="website" />
+  <meta property="og:title"        content="Mini Cruzadinha — Tiago e Gian" />
+  <meta property="og:description"  content="Uma cruzadinha 5x5 nova a cada dia, sempre com um tema diferente." />
+  <meta property="og:url"          content="https://gianmariaparadisi.github.io/casamento/mini-crossword.html" />
+  <meta property="og:site_name"    content="Tiago e Gian · 12.12.2026" />
+  <meta name="twitter:card"        content="summary" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { background: var(--bg-main); }
+
+    .cw-page { max-width: 720px; margin-inline: auto; padding: 100px 16px 80px; }
+
+    .cw-header { text-align:center;margin-bottom:1.5rem; }
+    .cw-header__eyebrow { font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--sage);margin-bottom:.4rem; }
+    .cw-header__title { font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--text-main);margin-bottom:.25rem; }
+    .cw-header__tema { font-size:1.05rem;color:var(--terracotta);font-weight:600;margin-bottom:.35rem; }
+    .cw-header__sub { font-size:.82rem;color:var(--text-muted);line-height:1.6; }
+    .cw-header__meta { display:flex;justify-content:center;gap:.6rem;align-items:center;margin-top:.6rem;flex-wrap:wrap; }
+    .cw-badge { font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--sage-dark);background:var(--bg-green);padding:.25rem .65rem;border-radius:20px;border:1px solid var(--line-green); }
+    .cw-badge--demo { color:var(--terracotta);background:#FBF0E2;border-color:#E9CFA0; }
+    .cw-timer { font-size:.78rem;color:var(--text-muted);font-weight:500;font-variant-numeric:tabular-nums; }
+
+    .cw-loading { text-align:center;padding:3rem 0;color:var(--text-muted);font-size:.9rem; }
+
+    /* ─── GRADE ──────────────────────────────────────── */
+    .cw-board-wrap { display:flex;flex-direction:column;align-items:center;gap:1.5rem; }
+    .cw-grid {
+      display:grid;
+      gap:4px;
+      margin-inline:auto;
+      touch-action: manipulation;
+    }
+    .cw-cell {
+      position:relative;
+      width: 56px; height: 56px;
+      border-radius: 6px;
+      background: rgba(255,255,255,.9);
+      border: 1.5px solid rgba(216,205,188,.7);
+      box-shadow: 0 2px 8px rgba(82,57,34,.07);
+    }
+    .cw-cell.block { background: var(--text-main); border-color: var(--text-main); box-shadow:none; }
+    .cw-cell__num {
+      position:absolute; top:2px; left:4px;
+      font-size:.56rem; font-weight:600; color:var(--sage-dark);
+      font-family: var(--font-body); line-height:1; pointer-events:none;
+    }
+    .cw-cell input {
+      width:100%; height:100%; border:none; background:transparent;
+      text-align:center; text-transform:uppercase;
+      font-family: var(--font-display); font-weight:700; font-size:1.5rem;
+      color:#5A4020; border-radius:6px; padding-top:6px;
+      caret-color: var(--sage-dark);
+    }
+    .cw-cell input:focus { outline:none; }
+    .cw-cell.active-word input { background: rgba(122,155,110,.14); }
+    .cw-cell.active-cell input { background: rgba(122,155,110,.32); }
+    .cw-cell.correct input { background: var(--sage-dark); color:#fff; }
+    .cw-cell.correct { border-color: var(--sage-dark); }
+    .cw-cell.wrong input { background: rgba(184,123,62,.18); color: var(--terracotta-hover); }
+    .cw-cell.wrong { border-color: var(--terracotta); animation: cw-shake .3s ease; }
+    @keyframes cw-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+
+    @media(max-width:420px){
+      .cw-cell { width: 48px; height: 48px; }
+      .cw-cell input { font-size:1.25rem; }
+    }
+    @media(max-width:360px){
+      .cw-cell { width: 42px; height: 42px; }
+      .cw-cell input { font-size:1.1rem; }
+    }
+
+    .cw-actions { display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap; }
+    .cw-reveal-link { display:block;text-align:center;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:none;margin-top:.25rem; }
+    .cw-reveal-link:hover { color:var(--terracotta); }
+
+    .cw-msg { text-align:center;font-size:.87rem;min-height:1.4em;color:var(--text-muted); }
+    .cw-msg--erro { color:var(--terracotta); }
+    .cw-msg--ok   { color:var(--sage-dark); }
+
+    /* ─── CLUES ──────────────────────────────────────── */
+    .cw-clues { display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;width:100%;max-width:520px; }
+    @media(max-width:520px){ .cw-clues { grid-template-columns:1fr; } }
+    .cw-clues__col h3 { font-family:var(--font-display);font-size:1.1rem;font-weight:500;color:var(--sage-dark);margin-bottom:.5rem;border-bottom:1px solid var(--line-green);padding-bottom:.3rem; }
+    .cw-clues__list { list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.45rem; }
+    .cw-clue { font-size:.84rem;line-height:1.45;color:var(--text-main);cursor:pointer;padding:.2rem .35rem;border-radius:6px;transition:background .12s; }
+    .cw-clue:hover { background: var(--bg-green); }
+    .cw-clue.active { background: var(--bg-green); color:var(--sage-dark);font-weight:600; }
+    .cw-clue b { font-weight:700;color:var(--sage-dark);margin-right:.3rem; }
+
+    /* ─── RESULTADO ──────────────────────────────────── */
+    .cw-result { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:1.75rem;text-align:center;box-shadow:var(--shadow-green);margin-top:1rem; }
+    .cw-result__icon img { width:5.5rem;height:5.5rem;object-fit:contain;display:block;margin:0 auto; }
+    .cw-result__title { font-family:var(--font-display);font-size:1.6rem;font-weight:300;margin:.5rem 0 .25rem; }
+    .cw-result__sub { font-size:.84rem;color:var(--text-muted);margin-bottom:1rem; }
+    .cw-result__share { margin-top:.5rem; }
+    .confetti-rain{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
+    .confetti-rain__piece{position:absolute;top:-10%;width:28px;height:28px;object-fit:contain;animation:confettiFall linear forwards;}
+    @keyframes confettiFall{
+      0%{transform:translateY(0) rotate(0deg);opacity:1;}
+      100%{transform:translateY(110vh) rotate(360deg);opacity:.85;}
+    }
+
+    html, body { overscroll-behavior: none; }
+  </style>
+</head>
+<body>
+
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo-wrap">
+        <img src="assets/img/monograma_light.png" alt="" class="site-logo site-logo--mono" aria-hidden="true">
+        <span>Tiago e Gian</span>
+      </a>
+      <nav class="nav__links" id="navLinks">
+        <a href="index.html#evento">O Dia</a>
+        <a href="index.html#cerimonia">Local & Orientações</a>
+        <a href="presentes.html">Presentes</a>
+        <div class="nav__dropdown">
+          <button class="nav__dropdown-toggle" aria-haspopup="true">
+            Informações
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav__dropdown-menu">
+            <a href="padrinhos.html">Para os Padrinhos</a>
+            <a href="transfer.html">Transfer</a>
+            <a href="hospedagem.html">Hospedagem</a>
+          </div>
+        </div>
+        <a href="jogos.html" class="nav__key" aria-label="Segredo">
+          <img src="assets/img/icon-key.png" alt="" style="width:20px;height:20px;object-fit:contain;vertical-align:middle">
+        </a>
+        <a href="index.html#rsvp" class="nav__cta">Confirmar presença</a>
+      </nav>
+      <button class="nav__hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="cw-page">
+    <div class="cw-header">
+      <p class="cw-header__eyebrow">Mini Cruzadinha do dia</p>
+      <h1 class="cw-header__title">Mini Cruzadinha</h1>
+      <p class="cw-header__tema" id="cwTema"></p>
+      <p class="cw-header__sub">Uma grade 5×5 com tema novo a cada dia. Preencha tudo e clique em Verificar.</p>
+      <div class="cw-header__meta">
+        <span class="cw-badge" id="cwDateBadge"></span>
+        <span class="cw-timer" id="cwTimer">00:00</span>
+      </div>
+    </div>
+
+    <div id="cwLoading" class="cw-loading">
+      <span class="spinner"></span> Carregando a cruzadinha de hoje…
+    </div>
+
+    <div id="cwGame" style="display:none">
+      <div class="cw-board-wrap">
+        <div class="cw-grid" id="cwGrid"></div>
+        <p class="cw-msg" id="cwMsg"></p>
+        <div class="cw-actions">
+          <button class="btn btn--primary btn--sm" id="cwBtnVerificar">Verificar</button>
+          <button class="btn btn--outline btn--sm" id="cwBtnLimpar">Limpar</button>
+        </div>
+        <button class="cw-reveal-link" id="cwBtnRevelar">Revelar solução</button>
+
+        <div class="cw-clues">
+          <div class="cw-clues__col">
+            <h3>Horizontais</h3>
+            <ul class="cw-clues__list" id="cwAcrossList"></ul>
+          </div>
+          <div class="cw-clues__col">
+            <h3>Verticais</h3>
+            <ul class="cw-clues__list" id="cwDownList"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="cwResult" style="display:none">
+      <div class="cw-result">
+        <div class="cw-result__icon"><img src="assets/img/icon-confetti-burst.png" alt=""></div>
+        <h2 class="cw-result__title">Resolvido!</h2>
+        <p class="cw-result__sub" id="cwResultSub"></p>
+        <div class="cw-result__share">
+          <button class="btn btn--outline-green btn--sm" id="cwBtnCompartilhar">Compartilhar resultado</button>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:1rem">
+        <a href="jogos.html" class="btn btn--outline btn--sm">← Voltar aos jogos</a>
+      </div>
+    </div>
+
+    <div id="cwErro" style="display:none">
+      <p style="text-align:center;color:var(--text-muted);font-size:.9rem;padding:2rem 0">
+        Não encontramos uma cruzadinha para hoje.<br>Volte em breve! <img src="assets/img/icon-sparkle.png" alt="" style="width:1.6em;height:1.6em;object-fit:contain;vertical-align:-.28em">
+      </p>
+      <div style="text-align:center">
+        <a href="jogos.html" class="btn btn--outline btn--sm">← Voltar aos jogos</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="flourish-wrap" style="padding:1.5rem 0 0"><img src="assets/img/footer-flourish.png" alt="" style="max-width:440px;width:85%;display:inline-block"></div>
+  <div class="divider-wrap" style="padding:.5rem 0"><img src="assets/img/divider-terracota.png" alt="" style="max-width:200px;width:50%;display:inline-block;opacity:.45"></div>
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__names" aria-label="Tiago e Gian">
+      <img src="assets/img/logohorizontal_light.png" alt="Tiago e Gian" class="site-logo site-logo--footer">
+    </p>
+      <p class="footer__date">12 · 12 · 2026</p>
+      <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
+    </div>
+  </footer>
+
+  <script src="assets/js/game-sounds.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/delights.js"></script>
+  <script>
+  /* ══════════════════════════════════════════════════════════
+     MINI CRUZADINHA, Tiago e Gian
+     Espera da API (action=cruzadinha): puzzle 5x5 com blocos,
+     entradas "across"/"down" ({row,col,answer,clue}).
+     Se a API não responder (ou ainda não houver puzzle cadastrado
+     para hoje), usa um puzzle de demonstração embutido — assim
+     este arquivo já funciona sozinho, sem depender da planilha.
+  ══════════════════════════════════════════════════════════ */
+
+  const SIZE = 5;
+
+  // ── Puzzle de demonstração (tema: Lua de mel) ──────────────
+  // Grade (●=bloco):
+  //   A L T A R
+  //   M ● R ● O
+  //   A N E I S
+  //   D ● M ● A
+  //   O A S I S
+  const DEMO_PUZZLE = {
+    tema: "Lua de mel",
+    blocks: [[1,1],[1,3],[3,1],[3,3]],
+    across: [
+      { row:0, col:0, answer:"ALTAR", clue:"Onde os votos do casamento são feitos" },
+      { row:2, col:0, answer:"ANEIS", clue:"Trocados durante a cerimônia" },
+      { row:4, col:0, answer:"OASIS", clue:"Refúgio verde em pleno deserto — ou a sensação de lua de mel" }
+    ],
+    down: [
+      { row:0, col:0, answer:"AMADO", clue:"Sinônimo de querido, no masculino" },
+      { row:0, col:2, answer:"TREMS", clue:"Viajam sobre trilhos" },
+      { row:0, col:4, answer:"ROSAS", clue:"Flores clássicas do buquê da noiva" }
+    ]
+  };
+
+  let PUZZLE = null;
+  let usandoDemo = false;
+  let blocks = new Set();
+  let solution = [];
+  let numbers = {};            // "r,c" -> número da grade
+  let acrossEntries = [];
+  let downEntries = [];
+  let cellEls = [];             // cellEls[r][c] -> elemento .cw-cell (ou null se bloco)
+  let inputEls = [];            // inputEls[r][c] -> <input> (ou null se bloco)
+  let curDir = "across";
+  let curEntry = null;
+  let jogoFinalizado = false;
+  let cronometro = null, segundos = 0, cronometroIniciado = false;
+  let tentativasVerificar = 0;
+
+  function hoje() {
+    var d = new Date();
+    return String(d.getDate()).padStart(2,'0') + "/" + String(d.getMonth()+1).padStart(2,'0') + "/" + d.getFullYear();
+  }
+
+  function carregarPuzzle() {
+    var cbName = "cb_cw_" + Date.now();
+    var url = API_URL + "?action=cruzadinha&data=" + encodeURIComponent(hoje()) + "&callback=" + cbName;
+
+    var timer = setTimeout(function() {
+      delete window[cbName];
+      usarDemo();
+    }, 6000);
+
+    window[cbName] = function(json) {
+      clearTimeout(timer);
+      delete window[cbName];
+      var s = document.getElementById("_cwscript");
+      if (s) s.remove();
+      if (json && json.puzzle && Array.isArray(json.puzzle.across) && Array.isArray(json.puzzle.down)) {
+        iniciarPuzzle(json.puzzle, false);
+      } else {
+        usarDemo();
+      }
+    };
+
+    var script = document.createElement("script");
+    script.id  = "_cwscript";
+    script.src = url;
+    script.onerror = function() {
+      clearTimeout(timer);
+      delete window[cbName];
+      usarDemo();
+    };
+    document.head.appendChild(script);
+  }
+
+  function usarDemo() {
+    iniciarPuzzle(DEMO_PUZZLE, true);
+  }
+
+  function iniciarPuzzle(puzzle, demo) {
+    PUZZLE = puzzle;
+    usandoDemo = demo;
+    document.getElementById("cwLoading").style.display = "none";
+    document.getElementById("cwGame").style.display     = "block";
+    document.getElementById("cwTema").textContent = puzzle.tema || "";
+    document.getElementById("cwDateBadge").textContent = demo
+      ? "Modo de teste — puzzle de exemplo"
+      : new Date().toLocaleDateString("pt-BR", { day:"numeric", month:"long" });
+    if (demo) document.getElementById("cwDateBadge").classList.add("cw-badge--demo");
+
+    montarEstado(puzzle);
+    construirGrid();
+    construirClues();
+    focarPrimeiraCelula();
+  }
+
+  /* Constrói blocos, grade-solução e numeração a partir do puzzle */
+  function montarEstado(puzzle) {
+    blocks = new Set((puzzle.blocks || []).map(function(b){ return b[0] + "," + b[1]; }));
+    solution = Array.from({length: SIZE}, function(){ return Array(SIZE).fill(null); });
+
+    acrossEntries = (puzzle.across || []).map(function(e){
+      return { dir:"across", row:e.row, col:e.col, answer:e.answer.toUpperCase(), clue:e.clue, len:e.answer.length };
+    });
+    downEntries = (puzzle.down || []).map(function(e){
+      return { dir:"down", row:e.row, col:e.col, answer:e.answer.toUpperCase(), clue:e.clue, len:e.answer.length };
+    });
+
+    acrossEntries.forEach(function(e){
+      for (var i=0;i<e.len;i++){ solution[e.row][e.col+i] = e.answer[i]; }
+    });
+    downEntries.forEach(function(e){
+      for (var i=0;i<e.len;i++){
+        var r = e.row+i, c = e.col;
+        var ch = e.answer[i];
+        if (solution[r][c] && solution[r][c] !== ch) {
+          console.warn("Cruzadinha: conflito de letras na célula", r, c, solution[r][c], "vs", ch);
+        }
+        solution[r][c] = ch;
+      }
+    });
+
+    // Numeração padrão de cruzadinha
+    numbers = {};
+    var n = 1;
+    for (var r=0;r<SIZE;r++){
+      for (var c=0;c<SIZE;c++){
+        if (isBlock(r,c)) continue;
+        var startAcross = (c===0 || isBlock(r,c-1)) && (c+1<SIZE && !isBlock(r,c+1));
+        var startDown   = (r===0 || isBlock(r-1,c)) && (r+1<SIZE && !isBlock(r+1,c));
+        if (startAcross || startDown) { numbers[r+","+c] = n++; }
+      }
+    }
+  }
+
+  function isBlock(r,c){ return blocks.has(r+","+c); }
+
+  function construirGrid() {
+    var grid = document.getElementById("cwGrid");
+    grid.innerHTML = "";
+    grid.style.gridTemplateColumns = "repeat(" + SIZE + ", auto)";
+    cellEls = Array.from({length:SIZE}, function(){ return Array(SIZE).fill(null); });
+    inputEls = Array.from({length:SIZE}, function(){ return Array(SIZE).fill(null); });
+
+    for (var r=0;r<SIZE;r++){
+      for (var c=0;c<SIZE;c++){
+        var cell = document.createElement("div");
+        cell.className = "cw-cell";
+        if (isBlock(r,c)) {
+          cell.classList.add("block");
+          grid.appendChild(cell);
+          continue;
+        }
+        var num = numbers[r+","+c];
+        if (num) {
+          var lab = document.createElement("span");
+          lab.className = "cw-cell__num";
+          lab.textContent = num;
+          cell.appendChild(lab);
+        }
+        var input = document.createElement("input");
+        input.maxLength = 1;
+        input.autocomplete = "off";
+        input.autocapitalize = "characters";
+        input.inputMode = "text";
+        input.dataset.r = r;
+        input.dataset.c = c;
+        input.addEventListener("focus", onCellFocus);
+        input.addEventListener("click", onCellClick);
+        input.addEventListener("keydown", onCellKeydown);
+        input.addEventListener("input", onCellInput);
+        cell.appendChild(input);
+        grid.appendChild(cell);
+        cellEls[r][c] = cell;
+        inputEls[r][c] = input;
+      }
+    }
+  }
+
+  function entriesAt(r,c,dir){
+    var list = dir === "across" ? acrossEntries : downEntries;
+    return list.find(function(e){
+      if (e.dir === "across") return e.row===r && c>=e.col && c<e.col+e.len;
+      return e.col===c && r>=e.row && r<e.row+e.len;
+    });
+  }
+
+  function cellsOfEntry(e){
+    var cells = [];
+    for (var i=0;i<e.len;i++){
+      cells.push(e.dir==="across" ? [e.row, e.col+i] : [e.row+i, e.col]);
+    }
+    return cells;
+  }
+
+  function clearHighlight(){
+    for (var r=0;r<SIZE;r++) for (var c=0;c<SIZE;c++){
+      if (cellEls[r][c]) cellEls[r][c].classList.remove("active-word","active-cell");
+    }
+    document.querySelectorAll(".cw-clue.active").forEach(function(el){ el.classList.remove("active"); });
+  }
+
+  function highlight(r,c,dir){
+    clearHighlight();
+    var entry = entriesAt(r,c,dir);
+    if (!entry) { dir = dir === "across" ? "down" : "across"; entry = entriesAt(r,c,dir); }
+    if (!entry) return;
+    curDir = dir; curEntry = entry;
+    cellsOfEntry(entry).forEach(function(rc){
+      var el = cellEls[rc[0]][rc[1]];
+      if (el) el.classList.add("active-word");
+    });
+    if (cellEls[r][c]) cellEls[r][c].classList.add("active-cell");
+    var clueEl = document.querySelector('.cw-clue[data-dir="'+dir+'"][data-row="'+entry.row+'"][data-col="'+entry.col+'"]');
+    if (clueEl) clueEl.classList.add("active");
+  }
+
+  function onCellFocus(e){
+    var r = +e.target.dataset.r, c = +e.target.dataset.c;
+    highlight(r,c,curDir);
+  }
+
+  function onCellClick(e){
+    var r = +e.target.dataset.r, c = +e.target.dataset.c;
+    if (curEntry && curEntry === entriesAt(r,c,curDir)) {
+      // já está focado nesta palavra: clicar de novo alterna direção (se houver outra)
+      var outroDir = curDir === "across" ? "down" : "across";
+      if (entriesAt(r,c,outroDir)) { highlight(r,c,outroDir); return; }
+    }
+    highlight(r,c,curDir);
+  }
+
+  function moveTo(r,c){
+    if (r<0||r>=SIZE||c<0||c>=SIZE||isBlock(r,c)) return false;
+    var input = inputEls[r][c];
+    if (input) { input.focus(); }
+    return true;
+  }
+
+  function onCellKeydown(e){
+    var r = +e.target.dataset.r, c = +e.target.dataset.c;
+    if (e.key === "ArrowRight") { e.preventDefault(); curDir="across"; if(!moveTo(r,c+1)) highlight(r,c,"across"); else highlight(r,c+1,"across"); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); curDir="across"; if(moveTo(r,c-1)) highlight(r,c-1,"across"); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); curDir="down"; if(moveTo(r+1,c)) highlight(r+1,c,"down"); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); curDir="down"; if(moveTo(r-1,c)) highlight(r-1,c,"down"); }
+    else if (e.key === "Backspace") {
+      if (!e.target.value) {
+        e.preventDefault();
+        var prev = curDir==="across" ? [r,c-1] : [r-1,c];
+        if (moveTo(prev[0],prev[1])) {
+          inputEls[prev[0]][prev[1]].value = "";
+          highlight(prev[0],prev[1],curDir);
+        }
+      }
+    }
+  }
+
+  function onCellInput(e){
+    var r = +e.target.dataset.r, c = +e.target.dataset.c;
+    var v = e.target.value.toUpperCase().replace(/[^A-ZÀ-Ú]/g,"");
+    e.target.value = v;
+    if (e.target.classList.contains("wrong")) { e.target.parentElement.classList.remove("wrong"); }
+    if (!v) return;
+    iniciarCronometro();
+    if (window.GS) GS.pop();
+    var next = curDir === "across" ? [r,c+1] : [r+1,c];
+    if (moveTo(next[0], next[1])) highlight(next[0], next[1], curDir);
+  }
+
+  function focarPrimeiraCelula(){
+    for (var r=0;r<SIZE;r++) for (var c=0;c<SIZE;c++){
+      if (!isBlock(r,c)) { highlight(r,c,"across"); return; }
+    }
+  }
+
+  function construirClues(){
+    var acrossList = document.getElementById("cwAcrossList");
+    var downList    = document.getElementById("cwDownList");
+    acrossList.innerHTML = ""; downList.innerHTML = "";
+
+    var acrossSorted = acrossEntries.slice().sort(function(a,b){ return numbers[a.row+","+a.col] - numbers[b.row+","+b.col]; });
+    var downSorted    = downEntries.slice().sort(function(a,b){ return numbers[a.row+","+a.col] - numbers[b.row+","+b.col]; });
+
+    acrossSorted.forEach(function(e){ acrossList.appendChild(clueLi(e)); });
+    downSorted.forEach(function(e){ downList.appendChild(clueLi(e)); });
+  }
+
+  function clueLi(e){
+    var li = document.createElement("li");
+    li.className = "cw-clue";
+    li.dataset.dir = e.dir; li.dataset.row = e.row; li.dataset.col = e.col;
+    li.innerHTML = "<b>" + numbers[e.row+","+e.col] + "</b>" + e.clue;
+    li.addEventListener("click", function(){
+      highlight(e.row, e.col, e.dir);
+      var input = inputEls[e.row][e.col];
+      if (input) input.focus();
+    });
+    return li;
+  }
+
+  function iniciarCronometro(){
+    if (cronometroIniciado) return;
+    cronometroIniciado = true;
+    cronometro = setInterval(function(){
+      segundos++;
+      var m = String(Math.floor(segundos/60)).padStart(2,"0");
+      var s = String(segundos%60).padStart(2,"0");
+      document.getElementById("cwTimer").textContent = m + ":" + s;
+    }, 1000);
+  }
+  function pararCronometro(){ if (cronometro) clearInterval(cronometro); }
+
+  function setMsg(txt, tipo){
+    var el = document.getElementById("cwMsg");
+    el.textContent = txt;
+    el.className = "cw-msg" + (tipo ? " cw-msg--"+tipo : "");
+  }
+
+  function verificar(){
+    if (jogoFinalizado) return;
+    tentativasVerificar++;
+    var totalAbertas = 0, totalCorretas = 0, algumaPreenchida = false;
+
+    for (var r=0;r<SIZE;r++){
+      for (var c=0;c<SIZE;c++){
+        if (isBlock(r,c)) continue;
+        totalAbertas++;
+        var input = inputEls[r][c];
+        var cell  = cellEls[r][c];
+        var val = input.value.trim();
+        if (!val) continue;
+        algumaPreenchida = true;
+        if (val === solution[r][c]) {
+          totalCorretas++;
+          cell.classList.add("correct");
+          cell.classList.remove("wrong");
+          input.disabled = true;
+        } else {
+          cell.classList.add("wrong");
+          cell.classList.remove("correct");
+        }
+      }
+    }
+
+    if (!algumaPreenchida) { setMsg("Preencha pelo menos uma palavra antes de verificar.", "erro"); return; }
+
+    if (totalCorretas === totalAbertas) {
+      finalizar(true);
+    } else {
+      setMsg("Algumas letras ainda não estão certas. Continue tentando!", "erro");
+      if (window.GS) { GS.bad(); GS.hBad(); }
+    }
+  }
+
+  function limpar(){
+    if (jogoFinalizado) return;
+    for (var r=0;r<SIZE;r++){
+      for (var c=0;c<SIZE;c++){
+        if (isBlock(r,c)) continue;
+        inputEls[r][c].value = "";
+        inputEls[r][c].disabled = false;
+        cellEls[r][c].classList.remove("correct","wrong");
+      }
+    }
+    setMsg("");
+    focarPrimeiraCelula();
+  }
+
+  function revelar(){
+    if (jogoFinalizado) { return; }
+    for (var r=0;r<SIZE;r++){
+      for (var c=0;c<SIZE;c++){
+        if (isBlock(r,c)) continue;
+        inputEls[r][c].value = solution[r][c];
+        inputEls[r][c].disabled = true;
+        cellEls[r][c].classList.add("correct");
+        cellEls[r][c].classList.remove("wrong");
+      }
+    }
+    finalizar(false);
+  }
+
+  function finalizar(venceu){
+    jogoFinalizado = true;
+    pararCronometro();
+    if (window.GS) { venceu ? GS.win() : GS.good(); if (venceu && GS.hWin) GS.hWin(); }
+    document.getElementById("cwGame").style.display   = "none";
+    document.getElementById("cwResult").style.display = "block";
+    document.querySelector(".cw-result__title").textContent = venceu ? "Resolvido!" : "Aqui está a solução";
+    var m = String(Math.floor(segundos/60)).padStart(2,"0");
+    var s = String(segundos%60).padStart(2,"0");
+    document.getElementById("cwResultSub").textContent = venceu
+      ? "Você completou “" + (PUZZLE.tema||"") + "” em " + m + ":" + s + "."
+      : "“" + (PUZZLE.tema||"") + "” — até a próxima!";
+    if (venceu) confettiRain();
+  }
+
+  function confettiRain(){
+    const wrap = document.createElement("div");
+    wrap.className = "confetti-rain";
+    const n = 24;
+    for(let i=0;i<n;i++){
+      const img = document.createElement("img");
+      const piece = String((i % 12) + 1).padStart(2,"0");
+      img.src = `assets/img/confetti-piece-${piece}.png`;
+      img.className = "confetti-rain__piece";
+      img.alt = "";
+      const left = Math.random()*100;
+      const duration = 2.6 + Math.random()*1.8;
+      const delay = Math.random()*0.6;
+      const size = 18 + Math.random()*18;
+      img.style.left = left + "vw";
+      img.style.width = size + "px";
+      img.style.height = size + "px";
+      img.style.animationDuration = duration + "s";
+      img.style.animationDelay = delay + "s";
+      wrap.appendChild(img);
+    }
+    document.body.appendChild(wrap);
+    setTimeout(() => wrap.remove(), 5000);
+  }
+
+  document.getElementById("cwBtnVerificar").addEventListener("click", verificar);
+  document.getElementById("cwBtnLimpar").addEventListener("click", limpar);
+  document.getElementById("cwBtnRevelar").addEventListener("click", revelar);
+  document.getElementById("cwBtnCompartilhar").addEventListener("click", function(){
+    var m = String(Math.floor(segundos/60)).padStart(2,"0");
+    var s = String(segundos%60).padStart(2,"0");
+    var txt = "Resolvi a Mini Cruzadinha “" + (PUZZLE.tema||"") + "” do casamento de Tiago & Gian em " + m + ":" + s + "! 🌿\n\nhttps://gianmariaparadisi.github.io/casamento/mini-crossword.html";
+    if (navigator.share) {
+      navigator.share({ text: txt }).catch(function(){});
+    } else {
+      navigator.clipboard.writeText(txt).then(function(){
+        var btn = document.getElementById("cwBtnCompartilhar");
+        var orig = btn.textContent;
+        btn.textContent = "Copiado!";
+        setTimeout(function(){ btn.textContent = orig; }, 2000);
+      });
+    }
+  });
+
+  carregarPuzzle();
+  </script>
+</body>
+</html>
