@@ -143,7 +143,7 @@
     canvas{
       display:block;
       width:100%;
-      height:auto;
+      height:min(68svh, 760px);
       aspect-ratio:16/9;
       background:#9fd8d0;
       touch-action:none;
@@ -418,24 +418,35 @@
     @keyframes shake{0%,100%{transform:translate3d(0,0,0)}18%{transform:translate3d(-7px,0,0)}36%{transform:translate3d(6px,0,0)}54%{transform:translate3d(-4px,0,0)}72%{transform:translate3d(3px,0,0)}}
 
     @media (max-width:720px){
-      .page{align-items:flex-start;padding:10px}
-      .topbar{align-items:flex-start}
-      .brand-badge{width:36px;height:36px}
+      .page{align-items:flex-start;padding:8px}
+      .runner-shell{gap:10px}
+      .topbar{align-items:flex-start;gap:8px}
+      .brand-badge{width:34px;height:34px}
+      .brand-title small{font-size:.6rem}
+      .brand-title h1{font-size:1.35rem}
       .top-actions .pill-btn span{display:none}
-      .pill-btn{padding:10px 12px}
-      .hud{inset:9px 9px auto 9px}
-      .chip{min-width:62px;padding:7px 8px;border-radius:14px}
-      .chip strong{font-size:.9rem}
-      .lives{font-size:.92rem;padding:7px 8px;border-radius:14px}
-      .power-pill{font-size:.64rem;padding:7px 8px;border-radius:14px}
-      .modal{border-radius:22px;padding:20px 16px}
-      .modal .mini{grid-template-columns:1fr;gap:6px;margin:12px 0}
+      .pill-btn{padding:9px 10px;font-size:.72rem}
+      .game-card{border-radius:22px}
+      canvas{height:min(76svh, calc(100svh - 148px));aspect-ratio:9/16}
+      .hud{inset:8px 8px auto 8px;gap:6px}
+      .hud-left,.hud-right{gap:6px}
+      .chip{min-width:58px;padding:6px 7px;border-radius:13px}
+      .chip span{font-size:.54rem;margin-bottom:3px}
+      .chip strong{font-size:.82rem}
+      .lives{font-size:.84rem;padding:6px 7px;border-radius:13px}
+      .power-pill{font-size:.58rem;padding:6px 7px;border-radius:13px}
+      .message-stack{top:15%;width:min(88%,360px)}
+      .toast{font-size:.68rem;padding:8px 12px}
+      .modal{border-radius:22px;padding:18px 14px}
+      .modal h2{font-size:1.75rem}
+      .modal p{font-size:.9rem}
+      .modal .mini{grid-template-columns:1fr;gap:6px;margin:10px 0}
       .mini-card{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px}
       .mini-card strong{font-size:1rem;margin:0}
       .result-grid{grid-template-columns:1fr;gap:6px}
       .tips{grid-template-columns:1fr}
       .mobile-controls{display:grid}
-      .footer-note{font-size:.72rem}
+      .footer-note{font-size:.7rem}
     }
 
     @media (prefers-reduced-motion:reduce){
@@ -570,42 +581,46 @@
     const STORAGE_BEST = 'tg-vespa-runner-best';
 
     const ASSET = 'assets/img/';
-    const imgList = {
-      vespa: 'vespa_player.png',
-      sky: 'bg_sky.png',
-      sea: 'bg_sea.png',
-      cliffs: 'bg_cliffs_village.png',
-      road: 'road_straight.png',
-      roadLeft: 'road_curve_left.png',
-      roadRight: 'road_curve_right.png',
-      sun: 'deco_sun.png',
-      lemonTreeL: 'deco_lemon_tree_left.png',
-      lemonTreeR: 'deco_lemon_tree_right.png',
-      bus: 'obstacle-positano-onibus.png',
-      goat: 'obstacle-positano-cabra.png',
-      tourist: 'obstacle-positano-turista.png',
-      lemon: 'obstacle-positano-limao-caindo.png',
-      limoncello: 'collect-positano-limoncello.png',
-      flowers: 'collect-positano-flores.png',
-      heart: 'collect-positano-coracao.png',
-      postcard: 'collect-positano-postal.png',
-      shield: 'powerup-shield.png',
-      turbo: 'powerup-turbo.png',
-      magnet: 'powerup-magnet.png  .png',
-      slowmo: 'powerup-slowmo.png  .png',
-      pickupFx: 'fx-pickup-burst.png',
-      crashFx: 'fx-crash-puff.png',
-      sparkleFx: 'fx-sparkle-burst.png',
-      shieldFx: 'fx-shield-bubble.png  .png'
+    const imgSources = {
+      vespa: ['vespa_player.png'],
+      sky: ['bg_sky.png'],
+      sea: ['bg_sea.png'],
+      cliffs: ['bg_cliffs_village.png'],
+      road: ['road_straight.png'],
+      roadLeft: ['road_curve_left.png'],
+      roadRight: ['road_curve_right.png'],
+      sun: ['deco_sun.png'],
+      lemonTreeL: ['deco_lemon_tree_left.png'],
+      lemonTreeR: ['deco_lemon_tree_right.png'],
+      bus: ['obstacle-positano-onibus.png','obstacle_bus.png'],
+      goat: ['obstacle-positano-cabra.png','obstacle_goat.png'],
+      tourist: ['obstacle-positano-turista.png','obstacle_tourist.png'],
+      lemon: ['obstacle-positano-limao-caindo.png','obstacle_falling_lemon.png'],
+      limoncello: ['collect-positano-limoncello.png'],
+      flowers: ['collect-positano-flores.png'],
+      heart: ['collect-positano-coracao.png'],
+      postcard: ['collect-positano-postal.png'],
+      shield: ['powerup-shield.png'],
+      turbo: ['powerup-turbo.png'],
+      magnet: ['powerup-magnet.png','powerup-magnet.png  .png'],
+      slowmo: ['powerup-slowmo.png','powerup-slowmo.png  .png'],
+      pickupFx: ['fx-pickup-burst.png'],
+      crashFx: ['fx-crash-puff.png'],
+      sparkleFx: ['fx-sparkle-burst.png'],
+      shieldFx: ['fx-shield-bubble.png','fx-shield-bubble.png  .png']
     };
 
     const images = {};
-    Object.entries(imgList).forEach(([key, file]) => {
+    function loadImageCandidates(img, candidates, i = 0) {
+      if (i >= candidates.length) { img.ok = false; return; }
+      img.onload = () => { img.ok = true; img.datasetSrc = candidates[i]; };
+      img.onerror = () => loadImageCandidates(img, candidates, i + 1);
+      img.src = ASSET + candidates[i];
+    }
+    Object.entries(imgSources).forEach(([key, candidates]) => {
       const img = new Image();
       img.decoding = 'async';
-      img.src = ASSET + file;
-      img.onload = () => { img.ok = true; };
-      img.onerror = () => { img.ok = false; };
+      loadImageCandidates(img, candidates);
       images[key] = img;
     });
 
@@ -690,16 +705,17 @@
 
     function resize() {
       const rect = canvas.getBoundingClientRect();
+      const isPortraitMobile = window.innerWidth <= 720 && window.innerHeight > window.innerWidth;
       dpr = Math.min(window.devicePixelRatio || 1, DPR_LIMIT);
-      W = Math.max(360, rect.width);
-      H = Math.max(240, rect.height || rect.width * 9 / 16);
+      W = Math.max(320, rect.width);
+      H = Math.max(320, rect.height || (isPortraitMobile ? rect.width * 16 / 9 : rect.width * 9 / 16));
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      scale = W / 1280;
-      game.groundY = H * 0.78;
-      player.x = W * 0.15;
-      player.w = clamp(W * 0.105, 78, 120);
+      scale = Math.min(W / 1280, H / 720);
+      game.groundY = H * (isPortraitMobile ? 0.84 : 0.78);
+      player.x = W * (isPortraitMobile ? 0.22 : 0.15);
+      player.w = clamp(W * (isPortraitMobile ? 0.16 : 0.105), 82, 120);
       player.h = player.w * 1.28;
       if (state !== 'running') {
         player.y = game.groundY - player.h;
