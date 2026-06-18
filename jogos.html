@@ -99,43 +99,6 @@
       50%      { opacity:1;   transform:scale(1.08); }
     }
     html, body { overscroll-behavior: none; } /* scroll lock gerenciado por JS */
-
-    /* ─── MÚSICA AMBIENTE ───────────────────────────────── */
-    .music-toggle {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: var(--sage);
-      border: none;
-      box-shadow: var(--shadow-green);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 60;
-      -webkit-tap-highlight-color: transparent;
-      transition: transform .2s ease, background .2s ease;
-    }
-    .music-toggle:hover { transform: scale(1.07); background: var(--sage-dark); }
-    .music-toggle:active { transform: scale(.94); }
-    .music-toggle:not(.is-playing) { animation: musicPulseRing 2.6s ease-in-out infinite; }
-    @keyframes musicPulseRing {
-      0%,100% { box-shadow: var(--shadow-green), 0 0 0 0 rgba(122,155,110,.45); }
-      50%     { box-shadow: var(--shadow-green), 0 0 0 9px rgba(122,155,110,0); }
-    }
-    .music-toggle__note { width:24px;height:24px;color:#fff; }
-    .music-toggle.is-playing .music-toggle__note { display:none; }
-    .music-toggle__bars { display:none;align-items:flex-end;gap:3px;height:20px; }
-    .music-toggle.is-playing .music-toggle__bars { display:flex; }
-    .music-toggle__bars span { display:block;width:4px;background:#fff;border-radius:2px;animation:musicBar .9s ease-in-out infinite; }
-    .music-toggle__bars span:nth-child(1){height:8px;animation-delay:0s;}
-    .music-toggle__bars span:nth-child(2){height:18px;animation-delay:.15s;}
-    .music-toggle__bars span:nth-child(3){height:12px;animation-delay:.3s;}
-    @keyframes musicBar { 0%,100%{transform:scaleY(.4);} 50%{transform:scaleY(1);} }
-    @media(max-width:480px){ .music-toggle { right:14px;bottom:14px;width:50px;height:50px; } }
   </style>
 </head>
 <body>
@@ -169,13 +132,6 @@
       </button>
     </div>
   </header>
-
-  <!-- ══ MÚSICA AMBIENTE ══ -->
-  <audio id="bgMusic" src="assets/audio/caruso-instrumental.mp3" loop preload="none"></audio>
-  <button id="musicToggle" class="music-toggle" type="button" aria-label="Tocar música ambiente" title="Tocar música ambiente">
-    <svg class="music-toggle__note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-    <span class="music-toggle__bars"><span></span><span></span><span></span></span>
-  </button>
 
   <!-- ══ MENU ══ -->
   <div id="arena-menu">
@@ -481,33 +437,6 @@
   </script>
 
   <script>
-  // Música ambiente: toca/pausa via botão flutuante (autoplay com som é bloqueado pelo navegador)
-  (function(){
-    "use strict";
-    const btn   = document.getElementById('musicToggle');
-    const audio = document.getElementById('bgMusic');
-    if (!btn || !audio) return;
-    audio.volume = 0.35;
-
-    function setPlayingUI(tocando){
-      btn.classList.toggle('is-playing', tocando);
-      const label = tocando ? 'Pausar música' : 'Tocar música ambiente';
-      btn.setAttribute('aria-label', label);
-      btn.setAttribute('title', label);
-    }
-
-    btn.addEventListener('click', function(){
-      if (audio.paused) {
-        audio.play().then(function(){ setPlayingUI(true); }).catch(function(){ setPlayingUI(false); });
-      } else {
-        audio.pause();
-        setPlayingUI(false);
-      }
-    });
-  })();
-  </script>
-
-  <script>
   // Countdown: dias até o 1º dia do próximo mês
   (function(){
     const el = document.getElementById('soon-countdown');
@@ -525,5 +454,6 @@
     }
   })();
   </script>
+  <script src="assets/js/bg-music.js"></script>
 </body>
 </html>
