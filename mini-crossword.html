@@ -475,7 +475,45 @@
   function moveTo(r,c){
     if (r<0||r>=SIZE||c<0||c>=SIZE||isBlock(r,c)) return false;
     var input = inputEls[r][c];
-    if (input) { input.focus(); }
+    if (!input || input.disabled) return false;
+    input.focus();
+    return true;
+  }
+
+  function celulaValida(r,c){ return r>=0 && r<SIZE && c>=0 && c<SIZE && !isBlock(r,c); }
+  function passo(r,c,dir){ return dir==="across" ? [r,c+1] : [r+1,c]; }
+  function passoTras(r,c,dir){ return dir==="across" ? [r,c-1] : [r-1,c]; }
+
+  /* Anda na direção a partir de (r,c) até achar a próxima célula vazia,
+     pulando células já preenchidas. Retorna null se bater num bloco/borda
+     antes de achar uma vazia. */
+  function proximaLivre(r,c,dir){
+    var pos = [r,c];
+    while (true){
+      pos = passo(pos[0],pos[1],dir);
+      if (!celulaValida(pos[0],pos[1])) return null;
+      if (!inputEls[pos[0]][pos[1]].value) return pos;
+    }
+  }
+
+  /* Anda para trás a partir de (r,c) até achar a célula anterior editável
+     (pula células já validadas/travadas em verde, sem tocar nelas). */
+  function anteriorEditavel(r,c,dir){
+    var pos = [r,c];
+    while (true){
+      pos = passoTras(pos[0],pos[1],dir);
+      if (!celulaValida(pos[0],pos[1])) return null;
+      if (!inputEls[pos[0]][pos[1]].disabled) return pos;
+    }
+  }
+
+  function isGridFull(){
+    for (var r=0;r<SIZE;r++){
+      for (var c=0;c<SIZE;c++){
+        if (isBlock(r,c)) continue;
+        if (!inputEls[r][c].value) return false;
+      }
+    }
     return true;
   }
 
@@ -488,9 +526,10 @@
     else if (e.key === "Backspace") {
       if (!e.target.value) {
         e.preventDefault();
-        var prev = curDir==="across" ? [r,c-1] : [r-1,c];
-        if (moveTo(prev[0],prev[1])) {
+        var prev = anteriorEditavel(r,c,curDir);
+        if (prev && moveTo(prev[0],prev[1])) {
           inputEls[prev[0]][prev[1]].value = "";
+          cellEls[prev[0]][prev[1]].classList.remove("wrong");
           highlight(prev[0],prev[1],curDir);
         }
       }
@@ -505,8 +544,9 @@
     if (!v) return;
     iniciarCronometro();
     if (window.GS) GS.pop();
-    var next = curDir === "across" ? [r,c+1] : [r+1,c];
-    if (moveTo(next[0], next[1])) highlight(next[0], next[1], curDir);
+    var alvo = proximaLivre(r,c,curDir) || passo(r,c,curDir);
+    if (moveTo(alvo[0], alvo[1])) highlight(alvo[0], alvo[1], curDir);
+    if (isGridFull()) verificar(true);
   }
 
   function focarPrimeiraCelula(){
@@ -535,7 +575,7 @@
     li.addEventListener("click", function(){
       highlight(e.row, e.col, e.dir);
       var input = inputEls[e.row][e.col];
-      if (input) input.focus();
+      if (input && !input.disabled) input.focus();
     });
     return li;
   }
@@ -558,7 +598,7 @@
     el.className = "cw-msg" + (tipo ? " cw-msg--"+tipo : "");
   }
 
-  function verificar(){
+  function verificar(auto){
     if (jogoFinalizado) return;
     tentativasVerificar++;
     var totalAbertas = 0, totalCorretas = 0, algumaPreenchida = false;
@@ -584,12 +624,15 @@
       }
     }
 
-    if (!algumaPreenchida) { setMsg("Preencha pelo menos uma palavra antes de verificar.", "erro"); return; }
+    if (!algumaPreenchida) {
+      if (!auto) setMsg("Preencha pelo menos uma palavra antes de verificar.", "erro");
+      return;
+    }
 
     if (totalCorretas === totalAbertas) {
       finalizar(true);
     } else {
-      setMsg("Algumas letras ainda não estão certas. Continue tentando!", "erro");
+      setMsg(auto ? "Quase lá... mas ainda não acertou tudo." : "Algumas letras ainda não estão certas. Continue tentando!", "erro");
       if (window.GS) { GS.bad(); GS.hBad(); }
     }
   }
@@ -662,7 +705,7 @@
     setTimeout(() => wrap.remove(), 5000);
   }
 
-  document.getElementById("cwBtnVerificar").addEventListener("click", verificar);
+  document.getElementById("cwBtnVerificar").addEventListener("click", function(){ verificar(false); });
   document.getElementById("cwBtnLimpar").addEventListener("click", limpar);
   document.getElementById("cwBtnRevelar").addEventListener("click", revelar);
   document.getElementById("cwBtnCompartilhar").addEventListener("click", function(){
