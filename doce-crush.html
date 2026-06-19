@@ -26,35 +26,37 @@
     /* Board */
     .dc-board-wrap{width:min(96%,var(--board-max,560px));margin:.85rem auto 0;aspect-ratio:1;position:relative;background:rgba(255,255,255,.5);border:1px solid rgba(216,205,188,.85);border-radius:18px;box-shadow:0 10px 32px rgba(82,57,34,.10);overflow:hidden;touch-action:none;transition:width .35s ease;}
     .candy{position:absolute;width:calc(100%/var(--cols,8));height:calc(100%/var(--cols,8));box-sizing:border-box;display:flex;align-items:center;justify-content:center;transition:top .22s cubic-bezier(.4,0,.2,1),left .22s cubic-bezier(.4,0,.2,1),opacity .18s ease;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
-    .candy-svg{width:88%;height:88%;display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));transition:transform .15s;}
     .candy-img{position:absolute;inset:6%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));transition:transform .15s;pointer-events:none;}
-    .candy-overlay{position:absolute;inset:6%;pointer-events:none;}
+    /* Overlay padrão (ex.: embrulhado) — ocupa a mesma caixa quadrada do doce */
     .candy-overlay-img{position:absolute;inset:6%;object-fit:contain;pointer-events:none;}
-    .gift-badge{position:absolute;top:2%;right:2%;width:1.05rem;height:1.05rem;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));pointer-events:none;color:#B98538;}
+    /* Bastão de combo (listra) NÃO é uma imagem quadrada: a horizontal é larga e baixa,
+       a vertical é estreita e alta. Por isso cada uma ganha sua própria caixa —
+       em vez de forçar no mesmo inset:6% quadrado do doce — e fica centralizada
+       no eixo curto, esticando no eixo longo. */
+    .candy-overlay-img.ov-h{inset:auto;left:3%;right:3%;top:50%;height:30%;width:auto;transform:translateY(-50%);}
+    .candy-overlay-img.ov-v{inset:auto;top:3%;bottom:3%;left:50%;width:30%;height:auto;transform:translateX(-50%);}
+    .gift-badge{position:absolute;top:2%;right:2%;width:1.05rem;height:1.05rem;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));pointer-events:none;}
     .gift-badge .dc-icon{width:100%;height:100%;}
-    .dc-icon{position:relative;display:inline-flex;width:1.05rem;height:1.05rem;}
-    .dc-icon svg{width:100%;height:100%;display:block;}
-    .dc-icon-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;}
+    .dc-icon{display:inline-block;width:1.05rem;height:1.05rem;object-fit:contain;vertical-align:middle;}
 
     /* Inventory, estoque & toast */
     .dc-inventory{display:flex;align-items:center;gap:.5rem;justify-content:center;margin:.65rem auto 0;flex-wrap:wrap;}
     .dc-inv-label{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gm);}
     .dc-inv-slot{position:relative;width:2.6rem;height:2.6rem;border-radius:14px;background:rgba(255,255,255,.6);border:1px dashed rgba(216,205,188,.95);display:flex;align-items:center;justify-content:center;font-size:1.25rem;cursor:pointer;transition:transform .15s,background .15s;color:#BBAA92;padding:0;}
-    .dc-inv-slot .dc-icon{width:1.3rem;height:1.3rem;color:#8E5A26;}
+    .dc-inv-slot .dc-icon{width:1.3rem;height:1.3rem;}
     .dc-inv-slot.filled{border-style:solid;border-color:rgba(184,137,56,.55);background:rgba(255,255,255,.88);color:inherit;}
     .dc-inv-slot.filled:hover{transform:translateY(-2px) scale(1.06);}
     .dc-inv-slot.dc-inv-stock{border-style:solid;border-color:rgba(111,168,220,.5);background:rgba(255,255,255,.88);}
     .dc-inv-count{position:absolute;bottom:-4px;right:-4px;background:#8E2738;color:#fff;font-size:.6rem;font-weight:700;border-radius:999px;min-width:1.05rem;height:1.05rem;display:flex;align-items:center;justify-content:center;padding:0 .15rem;}
     .dc-toast{text-align:center;font-size:.78rem;font-weight:600;color:#8E2738;min-height:1.1em;margin:.5rem auto 0;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;}
     .dc-toast.show{opacity:1;transform:translateY(0);}
-    .candy.selected .candy-svg,.candy.selected .candy-img{transform:scale(1.12);filter:drop-shadow(0 0 7px #F4D35E) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
+    .candy.selected .candy-img{transform:scale(1.12);filter:drop-shadow(0 0 7px #F4D35E) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
     .candy.clearing{animation:candyPop .22s ease forwards;pointer-events:none;}
     .candy.wrong-shake{animation:wrongShake .3s ease;}
-    .candy.special-pop .candy-svg,.candy.special-pop .candy-img{animation:specialPop .26s ease;}
-    .candy.is-wildcard .candy-svg,.candy.is-wildcard .candy-img{animation:wildcardPulse 1.5s ease-in-out infinite;filter:drop-shadow(0 0 7px #FFD86B) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
+    .candy.special-pop .candy-img{animation:specialPop .26s ease;}
+    .candy.is-wildcard .candy-img{animation:wildcardPulse 1.5s ease-in-out infinite;filter:drop-shadow(0 0 7px #FFD86B) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
     @keyframes wildcardPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
     .dc-multi-badge{position:absolute;top:8px;right:8px;z-index:6;background:rgba(255,255,255,.92);border:1px solid rgba(184,137,56,.55);border-radius:999px;padding:.22rem .55rem;font-size:.74rem;font-weight:700;color:#8E2738;display:flex;align-items:center;gap:.28rem;box-shadow:0 4px 10px rgba(82,57,34,.15);}
-    .dc-multi-badge .dc-icon{color:#C08E42;}
     .dc-multi-badge.blink{animation:multiBlink .5s steps(1) infinite;}
     @keyframes multiBlink{50%{opacity:.18}}
     .score-pop{position:absolute;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:600;color:#B98538;font-size:1rem;pointer-events:none;animation:scoreFloat .7s ease forwards;z-index:5;}
@@ -200,18 +202,8 @@ let elapsedPlayed=0, expandIndex=0, pendingExpansion=false;
 let freezeUntil=0, multiplierUntil=0, multiplierStack=1, inventory=[], pendingPowerupOffer=null;
 let stock={shuffle:0, magnet:0};
 
-/* ---------- ícones (PNG com fallback automático em SVG inline) ---------- */
+/* ---------- ícones (PNG, sem fallback) ---------- */
 const IMG_DIR='assets/img/';
-const ICONS={
-  snow:'<svg viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/></g></svg>',
-  sparkle:'<svg viewBox="0 0 24 24"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="currentColor"/></svg>',
-  shuffle:'<svg viewBox="0 0 24 24"><path d="M4 7h4l4 10h4M4 17h4l2-5M16 7h4M16 7l-2-2M16 7l-2 2M20 17l-2-2M20 17l-2 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  magnet:'<svg viewBox="0 0 24 24"><path d="M7 4H4v7a8 8 0 0016 0V4h-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M7 4v7a5 5 0 0010 0V4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
-  rainbow:'<svg viewBox="0 0 24 24"><path d="M3 18a9 9 0 0118 0" fill="none" stroke="#E76F6F" stroke-width="2"/><path d="M5.5 18a6.5 6.5 0 0113 0" fill="none" stroke="#F2C14E" stroke-width="2"/><path d="M8 18a4 4 0 018 0" fill="none" stroke="#6FA8DC" stroke-width="2"/></svg>',
-  gift:'<svg viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1.5" fill="currentColor" opacity=".85"/><rect x="4" y="6" width="16" height="4" rx="1" fill="currentColor"/><path d="M12 6v14M12 6c-1.2-3-5-3-5 0s3.8 1.2 5 0M12 6c1.2-3 5-3 5 0s-3.8 1.2-5 0" fill="none" stroke="#fff" stroke-width="1.2"/></svg>',
-  hourglass:'<svg viewBox="0 0 24 24"><path d="M6 3h12M6 21h12M7 3c0 6 5 7 5 9s-5 3-5 9M17 3c0 6-5 7-5 9s5 3 5 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-};
-// PNG correspondente a cada ícone (com fallback pro SVG de ICONS se o arquivo não existir)
 const ICON_IMG_FILES={
   hourglass:'doce-crush-icone-tempo.png',
   snow:'doce-crush-icone-congelar.png',
@@ -223,9 +215,8 @@ const ICON_IMG_FILES={
 };
 function iconImg(name){
   const file=ICON_IMG_FILES[name];
-  const fallback=ICONS[name]||''; // SVG fica por baixo como fallback
-  const img=file?`<img src="${IMG_DIR+file}" class="dc-icon-img" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`:'';
-  return `<span class="dc-icon">${fallback}${img}</span>`;
+  if(!file) return '';
+  return `<img src="${IMG_DIR+file}" class="dc-icon" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`;
 }
 
 /* ---------- power-ups ---------- */
@@ -395,81 +386,31 @@ function sndTick(){beep(880,.04,.05);}
 function sndWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.15,.1),i*80));}
 function haptic(ms){try{navigator.vibrate&&navigator.vibrate(ms||15);}catch(e){}}
 
-/* ---------- candy SVG (placeholders) ---------- */
-const BASE_INNER=[
-  // 0 eclair (bege)
-  '<rect x="8" y="38" width="84" height="26" rx="13" fill="#D9B98A"/><rect x="14" y="44" width="72" height="7" rx="3.5" fill="#FFF3DC" opacity=".85"/><path d="M16 40 Q30 48 44 40 T72 40 T96 40" stroke="#9C7748" stroke-width="3" fill="none" opacity=".5"/>',
-  // 1 macaron amarelo-limão
-  '<ellipse cx="50" cy="34" rx="36" ry="22" fill="#F7D654"/><ellipse cx="50" cy="68" rx="36" ry="22" fill="#F7D654"/><rect x="14" y="46" width="72" height="14" fill="#FFF9E0"/>',
-  // 2 brigadeiro (marrom)
-  '<circle cx="50" cy="54" r="34" fill="#4A2C1B"/><circle cx="38" cy="40" r="8" fill="#6B4226" opacity=".55"/><rect x="40" y="20" width="4" height="10" fill="#fff" transform="rotate(20 42 25)"/><rect x="58" y="24" width="4" height="10" fill="#fff" transform="rotate(-15 60 29)"/><rect x="48" y="66" width="4" height="10" fill="#fff" transform="rotate(50 50 71)"/>',
-  // 3 camafeu (branco, com cereja)
-  '<circle cx="50" cy="56" r="32" fill="#F7F1E3"/><circle cx="50" cy="56" r="32" fill="none" stroke="#E3D8BE" stroke-width="2" opacity=".6"/><rect x="48" y="18" width="3" height="9" fill="#3F6B3A"/><circle cx="50" cy="27" r="7" fill="#8E2738"/>',
-  // 4 (expansão 1) bombom de pistache (todo verdinho)
-  '<circle cx="50" cy="58" r="32" fill="#7CA653"/><circle cx="50" cy="58" r="32" fill="none" stroke="#5C7E3A" stroke-width="2" opacity=".4"/><ellipse cx="40" cy="34" rx="7" ry="4" fill="#9CC76B" transform="rotate(-20 40 34)"/><ellipse cx="52" cy="28" rx="6" ry="3.5" fill="#A9D27A" transform="rotate(10 52 28)"/><ellipse cx="62" cy="36" rx="6" ry="3.5" fill="#8FC15E" transform="rotate(35 62 36)"/><circle cx="36" cy="66" r="6" fill="#9CC76B" opacity=".6"/>',
-  // 5 (expansão 2) tortinha de frutas
-  '<circle cx="50" cy="58" r="34" fill="#E9C99A"/><circle cx="50" cy="58" r="26" fill="#FFF6E2"/><circle cx="38" cy="50" r="7" fill="#8E2738"/><circle cx="58" cy="48" r="6" fill="#3A4B8C"/><circle cx="50" cy="68" r="6" fill="#3F6B3A"/><circle cx="64" cy="64" r="5" fill="#D9B23C"/>',
-  // 6 (expansão 3) donut rosa com sprinkles
-  '<circle cx="50" cy="54" r="36" fill="#F58FB0"/><circle cx="50" cy="54" r="14" fill="#FBF7EF"/><rect x="30" y="24" width="6" height="3" fill="#3A4B8C" transform="rotate(20 33 25)"/><rect x="45" y="18" width="6" height="3" fill="#3F6B3A" transform="rotate(-10 48 19)"/><rect x="62" y="24" width="6" height="3" fill="#D9B23C" transform="rotate(35 65 25)"/><rect x="70" y="40" width="6" height="3" fill="#8E2738" transform="rotate(70 73 41)"/><rect x="68" y="62" width="6" height="3" fill="#3A4B8C" transform="rotate(-30 71 63)"/><rect x="50" y="76" width="6" height="3" fill="#D9B23C" transform="rotate(10 53 77)"/><rect x="28" y="68" width="6" height="3" fill="#3F6B3A" transform="rotate(50 31 69)"/>',
-  // 7 (expansão 4) doce de physalis
-  '<path d="M50 8 L60 30 L86 26 L66 44 L78 66 L52 56 L40 80 L38 54 L14 58 L32 38 L18 18 L44 26 Z" fill="#E8D9B0"/><circle cx="50" cy="50" r="16" fill="#E8902B"/><path d="M50 34 A16 16 0 0 1 66 50 L50 50 Z" fill="#4A2C1B"/>',
-  // 8 (expansão 5) brigadeiro azul
-  '<circle cx="50" cy="54" r="34" fill="#2F5FA8"/><circle cx="38" cy="40" r="8" fill="#3E73C2" opacity=".55"/><rect x="40" y="20" width="4" height="10" fill="#fff" transform="rotate(20 42 25)"/><rect x="58" y="24" width="4" height="10" fill="#fff" transform="rotate(-15 60 29)"/><rect x="48" y="66" width="4" height="10" fill="#fff" transform="rotate(50 50 71)"/>'
-];
-// "barra de combo" — bastão de doce cremoso com listras douradas na diagonal e brilho de glacê,
-// atravessando a linha (H) ou coluna (V) inteira da casinha para marcar o combo de 4.
-const STRIPE_H='<rect x="2" y="38" width="96" height="24" rx="12" fill="#FFF6E5"/><rect x="2" y="38" width="96" height="24" rx="12" fill="none" stroke="#E8902B" stroke-width="2" opacity=".4"/><rect x="6" y="38" width="8" height="24" fill="#E8902B" opacity=".85" transform="rotate(28 10 50)"/><rect x="24" y="38" width="8" height="24" fill="#E8902B" opacity=".85" transform="rotate(28 28 50)"/><rect x="42" y="38" width="8" height="24" fill="#E8902B" opacity=".85" transform="rotate(28 46 50)"/><rect x="60" y="38" width="8" height="24" fill="#E8902B" opacity=".85" transform="rotate(28 64 50)"/><rect x="78" y="38" width="8" height="24" fill="#E8902B" opacity=".85" transform="rotate(28 82 50)"/><rect x="2" y="40" width="96" height="6" rx="3" fill="#FFFFFF" opacity=".65"/>';
-const STRIPE_V='<rect x="38" y="2" width="24" height="96" rx="12" fill="#FFF6E5"/><rect x="38" y="2" width="24" height="96" rx="12" fill="none" stroke="#E8902B" stroke-width="2" opacity=".4"/><rect x="38" y="6" width="24" height="8" fill="#E8902B" opacity=".85" transform="rotate(28 50 10)"/><rect x="38" y="24" width="24" height="8" fill="#E8902B" opacity=".85" transform="rotate(28 50 28)"/><rect x="38" y="42" width="24" height="8" fill="#E8902B" opacity=".85" transform="rotate(28 50 46)"/><rect x="38" y="60" width="24" height="8" fill="#E8902B" opacity=".85" transform="rotate(28 50 64)"/><rect x="38" y="78" width="24" height="8" fill="#E8902B" opacity=".85" transform="rotate(28 50 82)"/><rect x="40" y="2" width="6" height="96" rx="3" fill="#FFFFFF" opacity=".65"/>';
-const WRAPPED='<rect x="8" y="8" width="84" height="84" fill="none" stroke="#FFD86B" stroke-width="6" rx="16"/><circle cx="8" cy="8" r="5" fill="#FFD86B"/><circle cx="92" cy="8" r="5" fill="#FFD86B"/><circle cx="8" cy="92" r="5" fill="#FFD86B"/><circle cx="92" cy="92" r="5" fill="#FFD86B"/>';
-// "bomba" — um doce mesmo (trufa de chocolate com mecha aceza), não um ícone de bomba genérico
-const BOMB_INNER='<circle cx="50" cy="60" r="32" fill="#3B2415"/><circle cx="50" cy="60" r="32" fill="none" stroke="#241408" stroke-width="2" opacity=".5"/><ellipse cx="40" cy="48" rx="8" ry="5" fill="#5C3A21" opacity=".5"/><rect x="47" y="14" width="5" height="22" rx="2" fill="#C8893B" transform="rotate(8 49 25)"/><path d="M53 8 C58 2 64 4 62 12 C68 8 70 16 62 18 C66 24 58 24 56 16 Z" fill="#F2A33C"/><path d="M54 10 C57 6 61 8 59 13 C63 10 64 15 59 16 Z" fill="#FFE17D"/>';
-// bem-casado — doce raro (5+ em linha) que funciona como super power-up
-const BEMCASADO_INNER='<circle cx="34" cy="50" r="28" fill="#E9C9A0"/><circle cx="66" cy="50" r="28" fill="#E9C9A0"/><rect x="0" y="44" width="100" height="12" fill="#8E2738" opacity=".85" transform="rotate(-8 50 50)"/><circle cx="50" cy="50" r="6" fill="#8E2738"/>';
-// doce coringa — explode com um toque, sem precisar de combo
-const WILDCARD_INNER='<polygon points="50,6 61,38 95,38 67,58 78,92 50,71 22,92 33,58 5,38 39,38" fill="#FFD86B" stroke="#fff" stroke-width="3"/><circle cx="50" cy="50" r="13" fill="#8E2738"/><circle cx="50" cy="50" r="13" fill="none" stroke="#fff" stroke-width="2" opacity=".6"/>';
-
-function candyInnerSVG(c){
-  if(c.special==='wildcard') return WILDCARD_INNER;
-  if(c.special==='bemcasado') return BEMCASADO_INNER;
-  if(c.special==='bomb') return BOMB_INNER;
-  let s=BASE_INNER[c.type];
-  if(c.special==='stripe-h') s+=STRIPE_H;
-  else if(c.special==='stripe-v') s+=STRIPE_V;
-  else if(c.special==='wrapped') s+=WRAPPED;
-  return s;
-}
-/* ---------- imagens dos doces (PNG, com fallback automático pro SVG acima) ---------- */
-// índice = c.type (mesma ordem de CANDY_NAMES/BASE_INNER)
+/* ---------- imagens dos doces (PNG, sem fallback) ---------- */
+// índice = c.type (mesma ordem de CANDY_NAMES)
 const CANDY_IMG_FILES=['doce-crush-eclair.png','doce-crush-macaron.png','doce-crush-brigadeiro.png','doce-crush-camafeu.png','doce-crush-pistache.png','doce-crush-tortinha.png','doce-crush-donut.png','doce-crush-physalis.png','doce-crush-brigadeiro-azul.png'];
 const SPECIAL_IMG_FILES={wildcard:'doce-crush-coringa.png',bemcasado:'doce-crush-bemcasado.png',bomb:'doce-crush-bomba.png'};
 // overlays — desenhados por cima do doce base quando ele ganha um special "parcial" (listra/embrulhado)
 const OVERLAY_IMG_FILES={'stripe-h':'doce-crush-listra-h.png','stripe-v':'doce-crush-listra-v.png','wrapped':'doce-crush-embrulho.png'};
+// classe extra pro overlay de listra: a barra h/v não é quadrada, então ganha uma caixa própria (ver CSS .ov-h/.ov-v)
+const OVERLAY_IMG_CLASS={'stripe-h':'ov-h','stripe-v':'ov-v'};
 function candyImgSrc(c){
   const name=(c.special&&SPECIAL_IMG_FILES[c.special])?SPECIAL_IMG_FILES[c.special]:CANDY_IMG_FILES[c.type];
   return IMG_DIR+name;
 }
-function specialOverlaySVG(c){
-  if(c.special==='stripe-h') return STRIPE_H;
-  if(c.special==='stripe-v') return STRIPE_V;
-  if(c.special==='wrapped') return WRAPPED;
-  return '';
-}
 function specialOverlayImg(c){
   const file=OVERLAY_IMG_FILES[c.special];
   if(!file) return '';
-  return `<img src="${IMG_DIR+file}" class="candy-overlay-img" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`;
+  const extra=OVERLAY_IMG_CLASS[c.special]?(' '+OVERLAY_IMG_CLASS[c.special]):'';
+  return `<img src="${IMG_DIR+file}" class="candy-overlay-img${extra}" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`;
 }
 function candyHTML(c){
   let badge='';
   if(c.gift==='time') badge='<span class="gift-badge">'+iconImg('hourglass')+'</span>';
   else if(c.gift==='powerup') badge='<span class="gift-badge">'+iconImg('gift')+'</span>';
-  // SVG fica por baixo como fallback; se o PNG carregar, ele cobre o SVG. Se falhar (onerror), some e o SVG aparece.
-  const fallbackSvg=`<svg viewBox="0 0 100 100" class="candy-svg">${candyInnerSVG(c)}</svg>`;
   const img=`<img src="${candyImgSrc(c)}" class="candy-img" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`;
-  const ovSvg=specialOverlaySVG(c);
-  const overlaySvg=ovSvg?`<svg viewBox="0 0 100 100" class="candy-overlay">${ovSvg}</svg>`:'';
   const overlayImg=specialOverlayImg(c);
-  return fallbackSvg+img+overlaySvg+overlayImg+badge;
+  return img+overlayImg+badge;
 }
 
 /* ---------- helpers ---------- */
