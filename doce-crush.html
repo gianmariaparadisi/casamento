@@ -24,13 +24,27 @@
     .hud__pill strong{color:var(--gi);font-weight:600;}
 
     /* Board */
-    .dc-board-wrap{width:min(96%,560px);margin:.85rem auto 0;aspect-ratio:1;position:relative;background:rgba(255,255,255,.5);border:1px solid rgba(216,205,188,.85);border-radius:18px;box-shadow:0 10px 32px rgba(82,57,34,.10);overflow:hidden;touch-action:none;}
-    .candy{position:absolute;width:12.5%;height:12.5%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;transition:top .22s cubic-bezier(.4,0,.2,1),left .22s cubic-bezier(.4,0,.2,1);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
+    .dc-board-wrap{width:min(96%,var(--board-max,560px));margin:.85rem auto 0;aspect-ratio:1;position:relative;background:rgba(255,255,255,.5);border:1px solid rgba(216,205,188,.85);border-radius:18px;box-shadow:0 10px 32px rgba(82,57,34,.10);overflow:hidden;touch-action:none;transition:width .35s ease;}
+    .candy{position:absolute;width:calc(100%/var(--cols,8));height:calc(100%/var(--cols,8));box-sizing:border-box;display:flex;align-items:center;justify-content:center;transition:top .22s cubic-bezier(.4,0,.2,1),left .22s cubic-bezier(.4,0,.2,1),opacity .18s ease;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
     .candy-svg{width:88%;height:88%;display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));transition:transform .15s;}
-    .candy.selected .candy-svg{transform:scale(1.12);filter:drop-shadow(0 0 7px #F4D35E) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
+    .candy-img{position:absolute;inset:6%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));transition:transform .15s;pointer-events:none;}
+    .candy-overlay{position:absolute;inset:6%;pointer-events:none;}
+    .gift-badge{position:absolute;top:0;right:2%;font-size:.85rem;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));pointer-events:none;}
+
+    /* Inventory & toast */
+    .dc-inventory{display:flex;align-items:center;gap:.5rem;justify-content:center;margin:.65rem auto 0;}
+    .dc-inv-label{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gm);}
+    .dc-inv-slot{width:2.6rem;height:2.6rem;border-radius:14px;background:rgba(255,255,255,.6);border:1px dashed rgba(216,205,188,.95);display:flex;align-items:center;justify-content:center;font-size:1.25rem;cursor:pointer;transition:transform .15s,background .15s;color:#BBAA92;padding:0;}
+    .dc-inv-slot.filled{border-style:solid;border-color:rgba(184,137,56,.55);background:rgba(255,255,255,.88);color:inherit;}
+    .dc-inv-slot.filled:hover{transform:translateY(-2px) scale(1.06);}
+    .dc-toast{text-align:center;font-size:.78rem;font-weight:600;color:#8E2738;min-height:1.1em;margin:.5rem auto 0;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;}
+    .dc-toast.show{opacity:1;transform:translateY(0);}
+    .candy.selected .candy-svg,.candy.selected .candy-img{transform:scale(1.12);filter:drop-shadow(0 0 7px #F4D35E) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
     .candy.clearing{animation:candyPop .22s ease forwards;pointer-events:none;}
     .candy.wrong-shake{animation:wrongShake .3s ease;}
-    .candy.special-pop .candy-svg{animation:specialPop .26s ease;}
+    .candy.special-pop .candy-svg,.candy.special-pop .candy-img{animation:specialPop .26s ease;}
+    .candy.is-wildcard .candy-svg,.candy.is-wildcard .candy-img{animation:wildcardPulse 1.5s ease-in-out infinite;filter:drop-shadow(0 0 7px #FFD86B) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
+    @keyframes wildcardPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
     .score-pop{position:absolute;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:600;color:#B98538;font-size:1rem;pointer-events:none;animation:scoreFloat .7s ease forwards;z-index:5;}
     @keyframes candyPop{0%{transform:scale(1);opacity:1}55%{transform:scale(1.3);opacity:.75}100%{transform:scale(.15);opacity:0}}
     @keyframes specialPop{0%{transform:scale(1)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
@@ -82,6 +96,12 @@
       <div class="hud__pill"><span data-it="Punti:">Pontos:</span> <strong id="dcScore">0</strong></div>
       <div class="hud__pill"><span data-it="Combo:">Combo:</span> <strong id="dcCombo">x1</strong></div>
     </div>
+    <div class="dc-inventory">
+      <span class="dc-inv-label" data-it="Riserva:">Reserva:</span>
+      <button class="dc-inv-slot" id="invSlot0" onclick="useInventorySlot(0)">—</button>
+      <button class="dc-inv-slot" id="invSlot1" onclick="useInventorySlot(1)">—</button>
+    </div>
+    <div class="dc-toast" id="dcToast"></div>
     <div class="dc-board-wrap" id="board"></div>
     <div style="display:flex;gap:.5rem;justify-content:center;margin-top:.9rem">
       <button class="game-btn" onclick="restartGame()" data-it="Nuova partita">Nova partida</button>
@@ -98,10 +118,25 @@
         <ul>
           <li><span data-it="4 in fila → striscia (libera fila o colonna).">4 em linha → listra (libera a fileira ou coluna).</span></li>
           <li><span data-it="Forma a L o T → incartato (esplode un'area 3×3).">Forma de L ou T → embrulhado (estoura uma área 3×3).</span></li>
-          <li><span data-it="5 in fila → bomba di colore (scambiala con un dolce per eliminare tutti quelli di quel tipo).">5 em linha → bomba de cor (troque com um doce para eliminar todos daquele tipo).</span></li>
+          <li><span data-it="5 in fila → doce-bomba (troca com um doce para eliminar todos daquele tipo) ou, raramente, um Bem-Casado!">5 em linha → doce-bomba (troque com um doce para eliminar todos daquele tipo) ou, raramente, um Bem-Casado!</span></li>
+          <li><span data-it="O Bem-Casado é raro: ao trocar, elimina duas cores do tabuleiro e te dá um power-up de brinde!">💞 O Bem-Casado é raro: ao trocar, elimina duas cores do tabuleiro inteiro e ainda te dá um power-up de brinde!</span></li>
+          <li><span data-it="Doce coringa ✨ explode com um único toque, sem precisar de trio!">Doce coringa ✨ explode com um único toque, sem precisar de trio!</span></li>
+          <li><span data-it="Dolci con 🎁 o ⏱️ nascondono premi — combinali!">Doces com 🎁 ou ⏱️ escondem prêmios — combine-os!</span></li>
+          <li><span data-it="Combo grandi liberano power-up: guardane fino a 2 e usali quando vuoi.">Combos grandes liberam power-ups: guarde até 2 e use quando quiser.</span></li>
+          <li><span data-it="Inventario pieno? Scegli quale usare prima di perdere il nuovo!">Inventário cheio? Escolha qual usar antes de perder o novo!</span></li>
+          <li><span data-it="Il tabellone cresce a ogni 5 mila punti e libera un dolce nuovo a ogni espansione!">O tabuleiro cresce a cada 5 mil pontos e libera um doce novo a cada expansão!</span></li>
         </ul>
       </div>
       <div class="btn-row"><button class="game-btn game-btn--main" onclick="startGame()" data-it="Inizia">Começar</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="invFullModal" hidden>
+    <div class="modal__card">
+      <h2 class="modal__title" data-it="Inventario pieno!">Inventário cheio!</h2>
+      <p class="modal__text" style="text-align:center" data-it="Hai guadagnato un nuovo power-up, ma il tuo inventario ha solo 2 spazi. Usa uno dei power-up guardati per liberare spazio, oppure scarta il nuovo.">Você ganhou um novo power-up, mas seu inventário só tem 2 espaços. Use um power-up guardado para abrir espaço, ou descarte o novo.</p>
+      <div class="btn-row" id="invFullChoices" style="margin-bottom:.6rem"></div>
+      <div class="btn-row"><button class="game-btn" onclick="resolveInventoryFullModal('discard')" data-it="Scarta il nuovo">Descartar o novo</button></div>
     </div>
   </div>
 
@@ -133,14 +168,127 @@
 "use strict";
 const API="https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
 const GAME_KEY="doce-crush";
-const ROWS=8, COLS=8, NTYPES=6, CELL=100/COLS;
+const START_ROWS=6, START_COLS=6;
+let ROWS=START_ROWS, COLS=START_COLS; let NTYPES=4; const MAX_NTYPES=9; let CELL=100/COLS;
 const TOTAL_TIME=90;
+const SCORE_MARKS=[5000,10000,15000,20000,25000]; const GRID_CAP=START_COLS+SCORE_MARKS.length;
+const CANDY_NAMES=['Eclair','Macaron de Limão','Brigadeiro','Camafeu','Bombom de Pistache','Tortinha de Frutas','Donut Rosa','Doce de Physalis','Brigadeiro Azul'];
 
 const boardEl=document.getElementById('board');
 let board=[], elMap={}, idSeq=1;
 let tapSelected=null, pointerDownCell=null, startX=0, startY=0, moved=false;
 let locked=false, gameActive=false;
 let score=0, timeLeft=TOTAL_TIME, timer=null, maxCombo=0, totalCleared=0, finalScore=0, chainStep=0;
+let triggeredThresholds=new Set();
+let elapsedPlayed=0, expandIndex=0, pendingExpansion=false;
+let freezeUntil=0, multiplierUntil=0, inventory=[], pendingPowerupOffer=null;
+
+/* ---------- power-ups ---------- */
+const POWERUPS={
+  time:    {emoji:'⏱️', label:'Tempo Extra', requiresIdle:false, apply:()=>{ timeLeft+=3; updateHud(); showToast('⏱️ +3s de tempo!'); }},
+  freeze:  {emoji:'❄️', label:'Congelar',    requiresIdle:false, apply:()=>{ freezeUntil=Date.now()+6000; showToast('❄️ Tempo congelado por 6s!'); }},
+  multi:   {emoji:'✨', label:'Pontos x2',   requiresIdle:false, apply:()=>{ multiplierUntil=Date.now()+10000; showToast('✨ Pontos em dobro por 10s!'); }},
+  shuffle: {emoji:'🔀', label:'Embaralhar',  requiresIdle:true,  apply:()=>{ shuffleBoard(); }},
+  magnet:  {emoji:'🧲', label:'Ímã',         requiresIdle:true,  apply:()=>{ magnetMatch(); }},
+  rainbow: {emoji:'🌈', label:'Bomba de Cor',requiresIdle:true,  apply:()=>{ grantRandomBomb(); }}
+};
+const POWERUP_IDS=Object.keys(POWERUPS);
+
+function recalcCell(){ CELL=100/COLS; boardEl.style.setProperty('--cols',COLS); }
+/* frequência de power-ups cai progressivamente com as expansões: 100% no início, 20% na expansão 5 */
+function powerupFreqMult(){ return Math.max(0.2, 1-0.16*expandIndex); }
+function maybeGift(candy){
+  const roll=Math.random();
+  const pf=powerupFreqMult();
+  if(roll<0.07) candy.gift='time';
+  else if(roll<0.07+0.07*pf) candy.gift='powerup';
+  if(!candy.special && Math.random()<0.018) candy.special='wildcard';
+  return candy;
+}
+function grantPowerup(){
+  const id=POWERUP_IDS[rnd(POWERUP_IDS.length)];
+  if(inventory.length<2){ inventory.push(id); renderInventory(); showToast('🎁 +Power-up: '+POWERUPS[id].label); haptic(20); }
+  else if(!pendingPowerupOffer){ pendingPowerupOffer=id; }
+}
+function openInventoryFullModal(){
+  clearInterval(timer);
+  const box=document.getElementById('invFullChoices');
+  box.innerHTML=inventory.map((id,i)=>`<button class="game-btn game-btn--main" onclick="resolveInventoryFullModal('use',${i})">${POWERUPS[id].emoji} Usar ${POWERUPS[id].label}</button>`).join('');
+  document.getElementById('invFullModal').hidden=false;
+}
+function resolveInventoryFullModal(action,slot){
+  document.getElementById('invFullModal').hidden=true;
+  locked=false;
+  if(action==='use' && slot!=null){
+    const id=inventory[slot];
+    if(id){
+      inventory.splice(slot,1); renderInventory();
+      POWERUPS[id].apply();
+      if(pendingPowerupOffer && inventory.length<2){ inventory.push(pendingPowerupOffer); showToast('🎁 +Power-up: '+POWERUPS[pendingPowerupOffer].label); }
+    }
+  } else {
+    showToast('🎁 Power-up descartado.');
+  }
+  pendingPowerupOffer=null;
+  renderInventory();
+  if(gameActive) timer=setInterval(tick,1000);
+}
+function renderInventory(){
+  for(let i=0;i<2;i++){
+    const el=document.getElementById('invSlot'+i);
+    if(!el) continue;
+    const id=inventory[i];
+    if(id){ el.textContent=POWERUPS[id].emoji; el.title=POWERUPS[id].label; el.classList.add('filled'); }
+    else { el.textContent='—'; el.removeAttribute('title'); el.classList.remove('filled'); }
+  }
+}
+function useInventorySlot(i){
+  if(!gameActive) return;
+  const id=inventory[i]; if(!id) return;
+  const def=POWERUPS[id];
+  if(def.requiresIdle && locked){ showToast('⏳ Aguarde o tabuleiro acalmar...'); return; }
+  inventory.splice(i,1); renderInventory();
+  def.apply();
+}
+function showToast(text){
+  const t=document.getElementById('dcToast'); if(!t) return;
+  t.textContent=text; t.classList.remove('show');
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>t.classList.add('show')); });
+  clearTimeout(t._hideTimer);
+  t._hideTimer=setTimeout(()=>t.classList.remove('show'),1900);
+}
+function swapDataOnly(r1,c1,r2,c2){ const t=board[r1][c1]; board[r1][c1]=board[r2][c2]; board[r2][c2]=t; }
+function magnetMatch(){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    for(const [nr,nc] of [[r,c+1],[r+1,c]]){
+      if(!inBounds(nr,nc)) continue;
+      swapDataOnly(r,c,nr,nc);
+      const has=findClusters(board).length>0;
+      swapDataOnly(r,c,nr,nc);
+      if(has){ showToast('🧲 Combo encontrado!'); attemptSwap(r,c,nr,nc); return; }
+    }
+  }
+  showToast('🧲 Nenhum combo disponível agora.');
+}
+function shuffleBoard(){
+  Object.values(elMap).forEach(el=>{ el.style.opacity='0'; });
+  setTimeout(()=>{ board=createBoard(); renderFull(); },190);
+}
+function grantRandomBomb(){
+  const candidates=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c] && !board[r][c].special) candidates.push([r,c]); }
+  if(!candidates.length){ showToast('🌈 Sem espaço pra bomba agora.'); return; }
+  const [r,c]=candidates[rnd(candidates.length)];
+  const candy=board[r][c]; candy.special='bomb'; updateCandyVisual(candy);
+  const el=elMap[candy.id]; if(el){ el.classList.add('special-pop'); setTimeout(()=>el.classList.remove('special-pop'),260); }
+  showToast('🌈 Bomba de cor criada!'); sndSpecial();
+}
+function pickRandomTypeOnBoard(){
+  const types=new Set();
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c]) types.add(board[r][c].type); }
+  const arr=Array.from(types);
+  return arr.length?arr[rnd(arr.length)]:null;
+}
 
 /* ---------- sound ---------- */
 let _ac=null;
@@ -156,25 +304,38 @@ function haptic(ms){try{navigator.vibrate&&navigator.vibrate(ms||15);}catch(e){}
 
 /* ---------- candy SVG (placeholders) ---------- */
 const BASE_INNER=[
-  // 0 brigadeiro
+  // 0 eclair (bege)
+  '<rect x="8" y="38" width="84" height="26" rx="13" fill="#D9B98A"/><rect x="14" y="44" width="72" height="7" rx="3.5" fill="#FFF3DC" opacity=".85"/><path d="M16 40 Q30 48 44 40 T72 40 T96 40" stroke="#9C7748" stroke-width="3" fill="none" opacity=".5"/>',
+  // 1 macaron amarelo-limão
+  '<ellipse cx="50" cy="34" rx="36" ry="22" fill="#F7D654"/><ellipse cx="50" cy="68" rx="36" ry="22" fill="#F7D654"/><rect x="14" y="46" width="72" height="14" fill="#FFF9E0"/>',
+  // 2 brigadeiro (marrom)
   '<circle cx="50" cy="54" r="34" fill="#4A2C1B"/><circle cx="38" cy="40" r="8" fill="#6B4226" opacity=".55"/><rect x="40" y="20" width="4" height="10" fill="#fff" transform="rotate(20 42 25)"/><rect x="58" y="24" width="4" height="10" fill="#fff" transform="rotate(-15 60 29)"/><rect x="48" y="66" width="4" height="10" fill="#fff" transform="rotate(50 50 71)"/>',
-  // 1 macaron
-  '<ellipse cx="50" cy="34" rx="36" ry="22" fill="#F2A6C6"/><ellipse cx="50" cy="68" rx="36" ry="22" fill="#F2A6C6"/><rect x="14" y="46" width="72" height="14" fill="#FFF3DC"/>',
-  // 2 eclair
-  '<rect x="8" y="36" width="84" height="30" rx="15" fill="#C8893B"/><rect x="14" y="44" width="72" height="8" rx="4" fill="#FFF3DC" opacity=".85"/><path d="M16 40 Q30 50 44 40 T72 40 T96 40" stroke="#5C3A21" stroke-width="3" fill="none" opacity=".5"/>',
-  // 3 bem-casado
-  '<circle cx="34" cy="50" r="28" fill="#E9C9A0"/><circle cx="66" cy="50" r="28" fill="#E9C9A0"/><rect x="0" y="44" width="100" height="12" fill="#8E2738" opacity=".85" transform="rotate(-8 50 50)"/><circle cx="50" cy="50" r="6" fill="#8E2738"/>',
-  // 4 champagne
-  '<path d="M38 14 L62 14 L54 50 L54 78 L64 86 L36 86 L46 78 L46 50 Z" fill="#D9B23C"/><circle cx="48" cy="40" r="2.5" fill="#FFF7DD"/><circle cx="52" cy="30" r="2" fill="#FFF7DD"/><circle cx="49" cy="22" r="1.6" fill="#FFF7DD"/>',
-  // 5 chocolate heart
-  '<path d="M50 82 C20 60 8 40 8 26 C8 12 20 4 32 8 C40 11 46 18 50 24 C54 18 60 11 68 8 C80 4 92 12 92 26 C92 40 80 60 50 82 Z" fill="#8E2738"/><ellipse cx="36" cy="26" rx="10" ry="6" fill="#fff" opacity=".25"/>'
+  // 3 camafeu (branco, com cereja)
+  '<circle cx="50" cy="56" r="32" fill="#F7F1E3"/><circle cx="50" cy="56" r="32" fill="none" stroke="#E3D8BE" stroke-width="2" opacity=".6"/><rect x="48" y="18" width="3" height="9" fill="#3F6B3A"/><circle cx="50" cy="27" r="7" fill="#8E2738"/>',
+  // 4 (expansão 1) bombom de pistache (todo verdinho)
+  '<circle cx="50" cy="58" r="32" fill="#7CA653"/><circle cx="50" cy="58" r="32" fill="none" stroke="#5C7E3A" stroke-width="2" opacity=".4"/><ellipse cx="40" cy="34" rx="7" ry="4" fill="#9CC76B" transform="rotate(-20 40 34)"/><ellipse cx="52" cy="28" rx="6" ry="3.5" fill="#A9D27A" transform="rotate(10 52 28)"/><ellipse cx="62" cy="36" rx="6" ry="3.5" fill="#8FC15E" transform="rotate(35 62 36)"/><circle cx="36" cy="66" r="6" fill="#9CC76B" opacity=".6"/>',
+  // 5 (expansão 2) tortinha de frutas
+  '<circle cx="50" cy="58" r="34" fill="#E9C99A"/><circle cx="50" cy="58" r="26" fill="#FFF6E2"/><circle cx="38" cy="50" r="7" fill="#8E2738"/><circle cx="58" cy="48" r="6" fill="#3A4B8C"/><circle cx="50" cy="68" r="6" fill="#3F6B3A"/><circle cx="64" cy="64" r="5" fill="#D9B23C"/>',
+  // 6 (expansão 3) donut rosa com sprinkles
+  '<circle cx="50" cy="54" r="36" fill="#F58FB0"/><circle cx="50" cy="54" r="14" fill="#FBF7EF"/><rect x="30" y="24" width="6" height="3" fill="#3A4B8C" transform="rotate(20 33 25)"/><rect x="45" y="18" width="6" height="3" fill="#3F6B3A" transform="rotate(-10 48 19)"/><rect x="62" y="24" width="6" height="3" fill="#D9B23C" transform="rotate(35 65 25)"/><rect x="70" y="40" width="6" height="3" fill="#8E2738" transform="rotate(70 73 41)"/><rect x="68" y="62" width="6" height="3" fill="#3A4B8C" transform="rotate(-30 71 63)"/><rect x="50" y="76" width="6" height="3" fill="#D9B23C" transform="rotate(10 53 77)"/><rect x="28" y="68" width="6" height="3" fill="#3F6B3A" transform="rotate(50 31 69)"/>',
+  // 7 (expansão 4) doce de physalis
+  '<path d="M50 8 L60 30 L86 26 L66 44 L78 66 L52 56 L40 80 L38 54 L14 58 L32 38 L18 18 L44 26 Z" fill="#E8D9B0"/><circle cx="50" cy="50" r="16" fill="#E8902B"/><path d="M50 34 A16 16 0 0 1 66 50 L50 50 Z" fill="#4A2C1B"/>',
+  // 8 (expansão 5) brigadeiro azul
+  '<circle cx="50" cy="54" r="34" fill="#2F5FA8"/><circle cx="38" cy="40" r="8" fill="#3E73C2" opacity=".55"/><rect x="40" y="20" width="4" height="10" fill="#fff" transform="rotate(20 42 25)"/><rect x="58" y="24" width="4" height="10" fill="#fff" transform="rotate(-15 60 29)"/><rect x="48" y="66" width="4" height="10" fill="#fff" transform="rotate(50 50 71)"/>'
 ];
 const STRIPE_H='<rect x="0" y="42" width="100" height="16" fill="#FFFFFF" opacity=".55"/><rect x="0" y="46" width="100" height="8" fill="#FFD86B" opacity=".9"/>';
 const STRIPE_V='<rect x="42" y="0" width="16" height="100" fill="#FFFFFF" opacity=".55"/><rect x="46" y="0" width="8" height="100" fill="#FFD86B" opacity=".9"/>';
 const WRAPPED='<rect x="8" y="8" width="84" height="84" fill="none" stroke="#FFD86B" stroke-width="6" rx="16"/><circle cx="8" cy="8" r="5" fill="#FFD86B"/><circle cx="92" cy="8" r="5" fill="#FFD86B"/><circle cx="8" cy="92" r="5" fill="#FFD86B"/><circle cx="92" cy="92" r="5" fill="#FFD86B"/>';
-const BOMB_INNER='<circle cx="50" cy="50" r="40" fill="#2B2630"/><circle cx="50" cy="50" r="40" fill="none" stroke="#fff" stroke-width="2" opacity=".15"/><circle cx="50" cy="26" r="6" fill="#F2A6C6"/><circle cx="72" cy="40" r="6" fill="#D9B23C"/><circle cx="68" cy="66" r="6" fill="#8E2738"/><circle cx="36" cy="70" r="6" fill="#4A2C1B"/><circle cx="26" cy="42" r="6" fill="#C8893B"/><circle cx="50" cy="50" r="10" fill="#fff" opacity=".85"/>';
+// "bomba" — um doce mesmo (trufa de chocolate com mecha aceza), não um ícone de bomba genérico
+const BOMB_INNER='<circle cx="50" cy="60" r="32" fill="#3B2415"/><circle cx="50" cy="60" r="32" fill="none" stroke="#241408" stroke-width="2" opacity=".5"/><ellipse cx="40" cy="48" rx="8" ry="5" fill="#5C3A21" opacity=".5"/><rect x="47" y="14" width="5" height="22" rx="2" fill="#C8893B" transform="rotate(8 49 25)"/><path d="M53 8 C58 2 64 4 62 12 C68 8 70 16 62 18 C66 24 58 24 56 16 Z" fill="#F2A33C"/><path d="M54 10 C57 6 61 8 59 13 C63 10 64 15 59 16 Z" fill="#FFE17D"/>';
+// bem-casado — doce raro (5+ em linha) que funciona como super power-up
+const BEMCASADO_INNER='<circle cx="34" cy="50" r="28" fill="#E9C9A0"/><circle cx="66" cy="50" r="28" fill="#E9C9A0"/><rect x="0" y="44" width="100" height="12" fill="#8E2738" opacity=".85" transform="rotate(-8 50 50)"/><circle cx="50" cy="50" r="6" fill="#8E2738"/>';
+// doce coringa — explode com um toque, sem precisar de combo
+const WILDCARD_INNER='<polygon points="50,6 61,38 95,38 67,58 78,92 50,71 22,92 33,58 5,38 39,38" fill="#FFD86B" stroke="#fff" stroke-width="3"/><circle cx="50" cy="50" r="13" fill="#8E2738"/><circle cx="50" cy="50" r="13" fill="none" stroke="#fff" stroke-width="2" opacity=".6"/>';
 
 function candyInnerSVG(c){
+  if(c.special==='wildcard') return WILDCARD_INNER;
+  if(c.special==='bemcasado') return BEMCASADO_INNER;
   if(c.special==='bomb') return BOMB_INNER;
   let s=BASE_INNER[c.type];
   if(c.special==='stripe-h') s+=STRIPE_H;
@@ -182,7 +343,32 @@ function candyInnerSVG(c){
   else if(c.special==='wrapped') s+=WRAPPED;
   return s;
 }
-function candyHTML(c){return `<svg viewBox="0 0 100 100" class="candy-svg">${candyInnerSVG(c)}</svg>`;}
+/* ---------- candy image assets (com fallback automático pro SVG acima) ---------- */
+const CANDY_IMG_DIR='assets/img/';
+// índice = c.type (mesma ordem de CANDY_NAMES/BASE_INNER)
+const CANDY_IMG_FILES=['doce-crush-eclair.png','doce-crush-macaron.png','doce-crush-brigadeiro.png','doce-crush-camafeu.png','doce-crush-pistache.png','doce-crush-tortinha.png','doce-crush-donut.png','doce-crush-physalis.png','doce-crush-brigadeiro-azul.png'];
+const SPECIAL_IMG_FILES={wildcard:'doce-crush-coringa.png',bemcasado:'doce-crush-bemcasado.png',bomb:'doce-crush-bomba.png'};
+function candyImgSrc(c){
+  const name=(c.special&&SPECIAL_IMG_FILES[c.special])?SPECIAL_IMG_FILES[c.special]:CANDY_IMG_FILES[c.type];
+  return CANDY_IMG_DIR+name;
+}
+function specialOverlaySVG(c){
+  if(c.special==='stripe-h') return STRIPE_H;
+  if(c.special==='stripe-v') return STRIPE_V;
+  if(c.special==='wrapped') return WRAPPED;
+  return '';
+}
+function candyHTML(c){
+  let badge='';
+  if(c.gift==='time') badge='<span class="gift-badge">⏱️</span>';
+  else if(c.gift==='powerup') badge='<span class="gift-badge">🎁</span>';
+  // SVG fica por baixo como fallback; se o PNG carregar, ele cobre o SVG. Se falhar (onerror), some e o SVG aparece.
+  const fallbackSvg=`<svg viewBox="0 0 100 100" class="candy-svg">${candyInnerSVG(c)}</svg>`;
+  const img=`<img src="${candyImgSrc(c)}" class="candy-img" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`;
+  const ov=specialOverlaySVG(c);
+  const overlay=ov?`<svg viewBox="0 0 100 100" class="candy-overlay">${ov}</svg>`:'';
+  return fallbackSvg+img+overlay+badge;
+}
 
 /* ---------- helpers ---------- */
 function rnd(n){return Math.floor(Math.random()*n);}
@@ -201,7 +387,7 @@ function createBoard(){
         (c>=2 && b[r][c-1] && b[r][c-1].type===type && b[r][c-2] && b[r][c-2].type===type) ||
         (r>=2 && b[r-1][c] && b[r-1][c].type===type && b[r-2][c] && b[r-2][c].type===type)
       );
-      b[r][c]=makeCandy(type);
+      b[r][c]=maybeGift(makeCandy(type));
     }
   }
   return b;
@@ -272,7 +458,7 @@ function chooseSpecial(cluster, swapCells){
     if(!pos) pos=inter||cells[0];
     return {special:'wrapped',pos};
   }
-  if(cells.length>=5){ if(!pos) pos=cells[Math.floor(cells.length/2)]; return {special:'bomb',pos}; }
+  if(cells.length>=5){ if(!pos) pos=cells[Math.floor(cells.length/2)]; const special=Math.random()<0.25?'bemcasado':'bomb'; return {special,pos}; }
   if(cells.length===4){ const dir=hasH?'h':'v'; if(!pos) pos=cells[Math.floor(cells.length/2)]; return {special:dir==='h'?'stripe-h':'stripe-v',pos}; }
   return {special:null,pos:null};
 }
@@ -293,6 +479,7 @@ function createCandyEl(r,c,candy,spawnAbove){
   el.className='candy';
   el.dataset.r=r; el.dataset.c=c; el.dataset.id=candy.id;
   el.innerHTML=candyHTML(candy);
+  el.classList.toggle('is-wildcard',candy.special==='wildcard');
   if(spawnAbove){
     el.style.transition='none';
     el.style.top=cellPct(r-spawnAbove);
@@ -306,7 +493,7 @@ function createCandyEl(r,c,candy,spawnAbove){
     elMap[candy.id]=el;
   }
 }
-function updateCandyVisual(candy){ const el=elMap[candy.id]; if(el) el.innerHTML=candyHTML(candy); }
+function updateCandyVisual(candy){ const el=elMap[candy.id]; if(el){ el.innerHTML=candyHTML(candy); el.classList.toggle('is-wildcard',candy.special==='wildcard'); } }
 function moveCandyEl(candy,r,c){ const el=elMap[candy.id]; if(!el) return; el.dataset.r=r; el.dataset.c=c; setPos(el,r,c); }
 function removeCandyEl(candy){ const el=elMap[candy.id]; if(!el) return; el.classList.add('clearing'); setTimeout(()=>{ if(el.parentNode) el.remove(); delete elMap[candy.id]; },230); }
 
@@ -329,6 +516,8 @@ function cellFromEvent(e){ const el=e.target.closest('.candy'); if(!el) return n
 boardEl.addEventListener('pointerdown',e=>{
   if(locked||!gameActive) return;
   const cell=cellFromEvent(e); if(!cell) return;
+  const candy=board[cell.r]&&board[cell.r][cell.c];
+  if(candy&&candy.special==='wildcard'){ clearTapHighlight(); triggerWildcard(cell.r,cell.c); return; }
   pointerDownCell=cell; startX=e.clientX; startY=e.clientY; moved=false;
 });
 boardEl.addEventListener('pointermove',e=>{
@@ -360,6 +549,16 @@ function handleTap(r,c){
 function setTapHighlight(r,c){ tapSelected={r,c}; const candy=board[r][c]; if(candy){ const el=elMap[candy.id]; if(el) el.classList.add('selected'); } }
 function clearTapHighlight(){ if(tapSelected){ const candy=board[tapSelected.r][tapSelected.c]; if(candy){ const el=elMap[candy.id]; if(el) el.classList.remove('selected'); } } tapSelected=null; }
 
+function triggerWildcard(r,c){
+  if(!gameActive||locked) return;
+  locked=true; chainStep=0; triggeredThresholds=new Set();
+  sndSpecial(); haptic(25);
+  const toClear=new Set();
+  areaEffect('wrapped',r,c).forEach(([ar,ac])=>toClear.add(ar+','+ac));
+  toClear.add(r+','+c);
+  processClear(toClear,[],[r,c]);
+}
+
 /* ---------- swap resolution ---------- */
 function swapBoardCells(r1,c1,r2,c2){
   const tmp=board[r1][c1]; board[r1][c1]=board[r2][c2]; board[r2][c2]=tmp;
@@ -372,7 +571,7 @@ function attemptSwap(r1,c1,r2,c2){
   if(!inBounds(r1,c1)||!inBounds(r2,c2)) return;
   const a=board[r1][c1], b=board[r2][c2];
   if(!a||!b) return;
-  locked=true; chainStep=0;
+  locked=true; chainStep=0; triggeredThresholds=new Set();
   swapBoardCells(r1,c1,r2,c2);
   sndSwap();
   setTimeout(()=>resolveSwapOutcome(r1,c1,r2,c2,a,b),220);
@@ -381,9 +580,13 @@ function attemptSwap(r1,c1,r2,c2){
 function resolveSwapOutcome(r1,c1,r2,c2,aOrig,bOrig){
   if(!gameActive) return;
   const aIsBomb=aOrig.special==='bomb', bIsBomb=bOrig.special==='bomb';
-  let toClear=new Set(), specials=[], direct=false;
+  const aIsBC=aOrig.special==='bemcasado', bIsBC=bOrig.special==='bemcasado';
+  let toClear=new Set(), specials=[], direct=false, bcTriggered=false;
 
-  if(aIsBomb && bIsBomb){
+  if((aIsBomb&&bIsBC)||(aIsBC&&bIsBomb)||(aIsBC&&bIsBC)){
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) toClear.add(r+','+c);
+    direct=true; bcTriggered=true;
+  } else if(aIsBomb && bIsBomb){
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) toClear.add(r+','+c);
     direct=true;
   } else if(aIsBomb||bIsBomb){
@@ -392,12 +595,21 @@ function resolveSwapOutcome(r1,c1,r2,c2,aOrig,bOrig){
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c]&&board[r][c].type===otherType) toClear.add(r+','+c); }
     toClear.add(bombAt[0]+','+bombAt[1]);
     direct=true; sndSpecial();
+  } else if(aIsBC||bIsBC){
+    const bcAt=aIsBC?[r2,c2]:[r1,c1];
+    const otherType=aIsBC?bOrig.type:aOrig.type;
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c]&&board[r][c].type===otherType) toClear.add(r+','+c); }
+    const secondType=pickRandomTypeOnBoard();
+    if(secondType!=null && secondType!==otherType){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c]&&board[r][c].type===secondType) toClear.add(r+','+c); } }
+    toClear.add(bcAt[0]+','+bcAt[1]);
+    direct=true; bcTriggered=true; sndSpecial();
   } else if(aOrig.special && bOrig.special){
     areaEffect(aOrig.special,r2,c2).forEach(([r,c])=>toClear.add(r+','+c));
     areaEffect(bOrig.special,r1,c1).forEach(([r,c])=>toClear.add(r+','+c));
     direct=true; sndSpecial();
   }
 
+  if(bcTriggered){ showToast('💞 Bem-Casado! +1 power-up de brinde!'); grantPowerup(); if(window.confettiBurst) confettiBurst({count:24,hearts:true}); }
   if(direct){ processClear(toClear,specials,[r1,c1,r2,c2]); return; }
 
   const swapCellsArr=[[r1,c1],[r2,c2]];
@@ -425,6 +637,7 @@ function resolveSwapOutcome(r1,c1,r2,c2,aOrig,bOrig){
 
 function processClear(toClear,specials,anchorCells){
   if(!gameActive) return;
+  chainStep++;
   const specialPosKeys=new Set(specials.map(s=>s.pos?s.pos[0]+','+s.pos[1]:null));
   let added=true,guard=0;
   while(added&&guard<50){
@@ -432,17 +645,46 @@ function processClear(toClear,specials,anchorCells){
     for(const key of Array.from(toClear)){
       const [r,c]=key.split(',').map(Number);
       const candy=board[r][c];
-      if(candy&&candy.special&&candy.special!=='bomb'&&!specialPosKeys.has(key)){
+      if(candy&&candy.special&&candy.special!=='bomb'&&candy.special!=='bemcasado'&&candy.special!=='wildcard'&&!specialPosKeys.has(key)){
         const area=areaEffect(candy.special,r,c);
         for(const [ar,ac] of area){ const ak=ar+','+ac; if(!toClear.has(ak)){ toClear.add(ak); added=true; } }
       }
     }
   }
-  let clearedCount=0;
+
+  /* combo-driven bonus effects: bigger chains = more dynamism */
+  let bonusMsg=null;
+  if(chainStep>=5 && !triggeredThresholds.has(5)){
+    triggeredThresholds.add(5);
+    const type=pickRandomTypeOnBoard();
+    if(type!=null){
+      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c]&&board[r][c].type===type) toClear.add(r+','+c); }
+      bonusMsg='⚡ Bomba Relâmpago!';
+    }
+  }
+  if(chainStep>=7 && !triggeredThresholds.has(7)){
+    triggeredThresholds.add(7);
+    for(let i=0;i<3;i++){
+      const rr=rnd(ROWS), cc=rnd(COLS);
+      areaEffect('wrapped',rr,cc).forEach(([ar,ac])=>toClear.add(ar+','+ac));
+    }
+    bonusMsg='💥 Chuva de Bombas!';
+  }
+  if(chainStep>=3 && !triggeredThresholds.has('combo3') && Math.random()<0.85*powerupFreqMult()){
+    triggeredThresholds.add('combo3');
+    grantPowerup();
+  }
+  if(bonusMsg) showToast(bonusMsg);
+
+  let clearedCount=0, timeBonus=0, powerupGrants=0;
   for(const key of toClear){
     const [r,c]=key.split(',').map(Number);
     const candy=board[r][c];
-    if(candy && !specialPosKeys.has(key)){ removeCandyEl(candy); board[r][c]=null; clearedCount++; }
+    if(candy && !specialPosKeys.has(key)){
+      if(candy.gift==='time') timeBonus+=2;
+      else if(candy.gift==='powerup') powerupGrants++;
+      removeCandyEl(candy); board[r][c]=null; clearedCount++;
+    }
   }
   for(const {pos,special,type} of specials){
     if(!pos) continue;
@@ -453,10 +695,14 @@ function processClear(toClear,specials,anchorCells){
     const el=elMap[candy.id];
     if(el){ el.classList.add('special-pop'); setTimeout(()=>el.classList.remove('special-pop'),260); }
   }
-  chainStep++;
+  if(timeBonus){ timeLeft+=timeBonus; showToast('⏱️ +'+timeBonus+'s!'); }
+  for(let i=0;i<powerupGrants;i++) grantPowerup();
+
   totalCleared+=clearedCount;
-  const gained=clearedCount*10*chainStep;
+  const mult=(Date.now()<multiplierUntil)?2:1;
+  const gained=clearedCount*10*chainStep*mult;
   score+=gained;
+  checkExpansion();
   maxCombo=Math.max(maxCombo,chainStep);
   updateHud();
   if(clearedCount>0){
@@ -471,21 +717,28 @@ function processClear(toClear,specials,anchorCells){
 function doGravityAndContinue(){
   if(!gameActive) return;
   applyGravityAnimated();
-  setTimeout(()=>{
-    if(!gameActive) return;
-    const nextClusters=findClusters(board);
-    if(nextClusters.length){
-      let toClear=new Set(), specials=[];
-      for(const cluster of nextClusters){
-        const {special,pos}=chooseSpecial(cluster,null);
-        for(const [r,c] of cluster.cells){ if(special&&pos&&r===pos[0]&&c===pos[1]) continue; toClear.add(r+','+c); }
-        if(special) specials.push({pos,special,type:cluster.type});
-      }
-      processClear(toClear,specials,null);
-    } else {
-      locked=false;
+  setTimeout(settleBoard,260);
+}
+
+function settleBoard(){
+  if(!gameActive) return;
+  const nextClusters=findClusters(board);
+  if(nextClusters.length){
+    let toClear=new Set(), specials=[];
+    for(const cluster of nextClusters){
+      const {special,pos}=chooseSpecial(cluster,null);
+      for(const [r,c] of cluster.cells){ if(special&&pos&&r===pos[0]&&c===pos[1]) continue; toClear.add(r+','+c); }
+      if(special) specials.push({pos,special,type:cluster.type});
     }
-  },260);
+    processClear(toClear,specials,null);
+  } else if(pendingExpansion){
+    pendingExpansion=false;
+    expandGrid();
+  } else if(pendingPowerupOffer){
+    openInventoryFullModal();
+  } else {
+    locked=false;
+  }
 }
 
 function applyGravityAnimated(){
@@ -496,7 +749,7 @@ function applyGravityAnimated(){
     for(const candy of survivors){ board[r][c]=candy; moveCandyEl(candy,r,c); r--; }
     let spawnCount=0;
     while(r>=0){
-      const candy=makeCandy(rnd(NTYPES));
+      const candy=maybeGift(makeCandy(rnd(NTYPES)));
       board[r][c]=candy;
       spawnCount++;
       createCandyEl(r,c,candy,spawnCount);
@@ -505,14 +758,51 @@ function applyGravityAnimated(){
   }
 }
 
+/* ---------- grid expansion ---------- */
+function checkExpansion(){
+  if(expandIndex>=SCORE_MARKS.length || COLS>=GRID_CAP) return;
+  if(score>=SCORE_MARKS[expandIndex]){
+    expandIndex++;
+    if(locked) pendingExpansion=true; else expandGrid();
+  }
+}
+
+function expandGrid(){
+  if(!gameActive) return;
+  locked=true; chainStep=0; triggeredThresholds=new Set();
+  const oldRows=ROWS, oldCols=COLS;
+  ROWS++; COLS++;
+  recalcCell();
+  boardEl.style.setProperty('--board-max',(480+(COLS-START_COLS)*16)+'px');
+  let newCandyMsg='';
+  if(NTYPES<MAX_NTYPES){ NTYPES++; newCandyMsg=' — novo doce: '+CANDY_NAMES[NTYPES-1]+'! 🍬'; }
+  for(let r=0;r<oldRows;r++){ board[r].push(maybeGift(makeCandy(rnd(NTYPES)))); }
+  board.push([]);
+  for(let c=0;c<COLS;c++){ board[oldRows][c]=maybeGift(makeCandy(rnd(NTYPES))); }
+  for(let r=0;r<oldRows;r++)for(let c=0;c<oldCols;c++){
+    const candy=board[r][c]; if(candy){ const el=elMap[candy.id]; if(el) setPos(el,r,c); }
+  }
+  for(let r=0;r<oldRows;r++) createCandyEl(r,oldCols,board[r][oldCols],2);
+  for(let c=0;c<COLS;c++) createCandyEl(oldRows,c,board[oldRows][c],2);
+  showToast('📐 Tabuleiro expandiu! '+ROWS+'×'+COLS+newCandyMsg);
+  if(window.confettiBurst) confettiBurst({count:18});
+  sndSpecial(); haptic(30);
+  setTimeout(settleBoard,420);
+}
+
 /* ---------- game lifecycle ---------- */
 function startGame(){ document.getElementById('startModal').hidden=true; restartGame(); }
 
 function restartGame(){
   clearInterval(timer);
   document.getElementById('endModal').hidden=true;
+  document.getElementById('invFullModal').hidden=true;
   score=0; timeLeft=TOTAL_TIME; maxCombo=0; totalCleared=0; chainStep=0;
   tapSelected=null; pointerDownCell=null; locked=false; gameActive=true;
+  triggeredThresholds=new Set(); elapsedPlayed=0; expandIndex=0; pendingExpansion=false;
+  freezeUntil=0; multiplierUntil=0; inventory=[]; pendingPowerupOffer=null; renderInventory();
+  ROWS=START_ROWS; COLS=START_COLS; NTYPES=4; recalcCell();
+  boardEl.style.setProperty('--board-max','480px');
   board=createBoard();
   renderFull();
   updateHud();
@@ -521,8 +811,12 @@ function restartGame(){
 
 function tick(){
   if(!gameActive) return;
-  timeLeft--; updateHud();
-  if(timeLeft<=10 && timeLeft>0) sndTick();
+  elapsedPlayed++;
+  checkExpansion();
+  const frozen=Date.now()<freezeUntil;
+  if(!frozen) timeLeft--;
+  updateHud();
+  if(timeLeft<=10 && timeLeft>0 && !frozen) sndTick();
   if(timeLeft<=0) endGame();
 }
 
