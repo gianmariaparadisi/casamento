@@ -27,10 +27,14 @@
     .dc-board-wrap{width:min(96%,var(--board-max,560px));margin:.85rem auto 0;aspect-ratio:1;position:relative;background:rgba(255,255,255,.5);border:1px solid rgba(216,205,188,.85);border-radius:18px;box-shadow:0 10px 32px rgba(82,57,34,.10);overflow:hidden;touch-action:none;transition:width .35s ease;}
     .candy{position:absolute;width:calc(100%/var(--cols,8));height:calc(100%/var(--cols,8));box-sizing:border-box;display:flex;align-items:center;justify-content:center;transition:top .22s cubic-bezier(.4,0,.2,1),left .22s cubic-bezier(.4,0,.2,1),opacity .18s ease;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
     .candy-svg{width:88%;height:88%;display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));transition:transform .15s;}
+    .candy-img{position:absolute;inset:6%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));transition:transform .15s;pointer-events:none;}
+    .candy-overlay{position:absolute;inset:6%;pointer-events:none;}
+    .candy-overlay-img{position:absolute;inset:6%;object-fit:contain;pointer-events:none;}
     .gift-badge{position:absolute;top:2%;right:2%;width:1.05rem;height:1.05rem;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));pointer-events:none;color:#B98538;}
-    .gift-badge svg{width:100%;height:100%;display:block;}
-    .dc-icon{display:inline-flex;width:1.05rem;height:1.05rem;}
+    .gift-badge .dc-icon{width:100%;height:100%;}
+    .dc-icon{position:relative;display:inline-flex;width:1.05rem;height:1.05rem;}
     .dc-icon svg{width:100%;height:100%;display:block;}
+    .dc-icon-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;}
 
     /* Inventory, estoque & toast */
     .dc-inventory{display:flex;align-items:center;gap:.5rem;justify-content:center;margin:.65rem auto 0;flex-wrap:wrap;}
@@ -43,11 +47,11 @@
     .dc-inv-count{position:absolute;bottom:-4px;right:-4px;background:#8E2738;color:#fff;font-size:.6rem;font-weight:700;border-radius:999px;min-width:1.05rem;height:1.05rem;display:flex;align-items:center;justify-content:center;padding:0 .15rem;}
     .dc-toast{text-align:center;font-size:.78rem;font-weight:600;color:#8E2738;min-height:1.1em;margin:.5rem auto 0;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;}
     .dc-toast.show{opacity:1;transform:translateY(0);}
-    .candy.selected .candy-svg{transform:scale(1.12);filter:drop-shadow(0 0 7px #F4D35E) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
+    .candy.selected .candy-svg,.candy.selected .candy-img{transform:scale(1.12);filter:drop-shadow(0 0 7px #F4D35E) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
     .candy.clearing{animation:candyPop .22s ease forwards;pointer-events:none;}
     .candy.wrong-shake{animation:wrongShake .3s ease;}
-    .candy.special-pop .candy-svg{animation:specialPop .26s ease;}
-    .candy.is-wildcard .candy-svg{animation:wildcardPulse 1.5s ease-in-out infinite;filter:drop-shadow(0 0 7px #FFD86B) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
+    .candy.special-pop .candy-svg,.candy.special-pop .candy-img{animation:specialPop .26s ease;}
+    .candy.is-wildcard .candy-svg,.candy.is-wildcard .candy-img{animation:wildcardPulse 1.5s ease-in-out infinite;filter:drop-shadow(0 0 7px #FFD86B) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
     @keyframes wildcardPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
     .dc-multi-badge{position:absolute;top:8px;right:8px;z-index:6;background:rgba(255,255,255,.92);border:1px solid rgba(184,137,56,.55);border-radius:999px;padding:.22rem .55rem;font-size:.74rem;font-weight:700;color:#8E2738;display:flex;align-items:center;gap:.28rem;box-shadow:0 4px 10px rgba(82,57,34,.15);}
     .dc-multi-badge .dc-icon{color:#C08E42;}
@@ -196,19 +200,33 @@ let elapsedPlayed=0, expandIndex=0, pendingExpansion=false;
 let freezeUntil=0, multiplierUntil=0, multiplierStack=1, inventory=[], pendingPowerupOffer=null;
 let stock={shuffle:0, magnet:0};
 
-/* ---------- ícones inline (sem arquivos externos, sem emoji) ---------- */
+/* ---------- ícones (PNG com fallback automático em SVG inline) ---------- */
+const IMG_DIR='assets/img/';
 const ICONS={
-  clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l4 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
   snow:'<svg viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/></g></svg>',
   sparkle:'<svg viewBox="0 0 24 24"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="currentColor"/></svg>',
   shuffle:'<svg viewBox="0 0 24 24"><path d="M4 7h4l4 10h4M4 17h4l2-5M16 7h4M16 7l-2-2M16 7l-2 2M20 17l-2-2M20 17l-2 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   magnet:'<svg viewBox="0 0 24 24"><path d="M7 4H4v7a8 8 0 0016 0V4h-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M7 4v7a5 5 0 0010 0V4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
   rainbow:'<svg viewBox="0 0 24 24"><path d="M3 18a9 9 0 0118 0" fill="none" stroke="#E76F6F" stroke-width="2"/><path d="M5.5 18a6.5 6.5 0 0113 0" fill="none" stroke="#F2C14E" stroke-width="2"/><path d="M8 18a4 4 0 018 0" fill="none" stroke="#6FA8DC" stroke-width="2"/></svg>',
   gift:'<svg viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1.5" fill="currentColor" opacity=".85"/><rect x="4" y="6" width="16" height="4" rx="1" fill="currentColor"/><path d="M12 6v14M12 6c-1.2-3-5-3-5 0s3.8 1.2 5 0M12 6c1.2-3 5-3 5 0s-3.8 1.2-5 0" fill="none" stroke="#fff" stroke-width="1.2"/></svg>',
-  heart:'<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.6-9.4-9C1 7.7 2.4 5 5.3 5c2 0 3.4 1.3 4.1 2.6C10.1 6.3 11.5 5 13.5 5c2.9 0 4.3 2.7 2.7 6-2.4 4.4-9.4 9-9.4 9z" fill="currentColor"/></svg>',
   hourglass:'<svg viewBox="0 0 24 24"><path d="M6 3h12M6 21h12M7 3c0 6 5 7 5 9s-5 3-5 9M17 3c0 6-5 7-5 9s5 3 5 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 };
-function iconSpan(name){ return `<span class="dc-icon">${ICONS[name]||''}</span>`; }
+// PNG correspondente a cada ícone (com fallback pro SVG de ICONS se o arquivo não existir)
+const ICON_IMG_FILES={
+  hourglass:'doce-crush-icone-tempo.png',
+  snow:'doce-crush-icone-congelar.png',
+  sparkle:'doce-crush-icone-pontosx2.png',
+  shuffle:'doce-crush-icone-embaralhar.png',
+  magnet:'doce-crush-icone-ima.png',
+  rainbow:'doce-crush-icone-bombadecor.png',
+  gift:'doce-crush-selo-presente.png'
+};
+function iconImg(name){
+  const file=ICON_IMG_FILES[name];
+  const fallback=ICONS[name]||''; // SVG fica por baixo como fallback
+  const img=file?`<img src="${IMG_DIR+file}" class="dc-icon-img" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`:'';
+  return `<span class="dc-icon">${fallback}${img}</span>`;
+}
 
 /* ---------- power-ups ---------- */
 // time/freeze/multi: automáticos (aplicam na hora, sem ocupar inventário)
@@ -265,7 +283,7 @@ function renderStock(id){
   if(!btn) return;
   if(stock[id]>0){
     btn.hidden=false;
-    btn.innerHTML=`${iconSpan(POWERUPS[id].icon)}<span class="dc-inv-count">${stock[id]}</span>`;
+    btn.innerHTML=`${iconImg(POWERUPS[id].icon)}<span class="dc-inv-count">${stock[id]}</span>`;
     btn.title=POWERUPS[id].label;
   } else { btn.hidden=true; btn.innerHTML=''; }
 }
@@ -281,13 +299,13 @@ function updateMultiBadge(){
   const active=Date.now()<multiplierUntil;
   if(!active){ el.hidden=true; el.classList.remove('blink'); return; }
   el.hidden=false;
-  el.innerHTML=`${iconSpan('sparkle')}<span>x${multiplierStack}</span>`;
+  el.innerHTML=`${iconImg('sparkle')}<span>x${multiplierStack}</span>`;
   el.classList.toggle('blink', (multiplierUntil-Date.now())<3000);
 }
 function openInventoryFullModal(){
   clearInterval(timer);
   const box=document.getElementById('invFullChoices');
-  box.innerHTML=inventory.map((id,i)=>`<button class="game-btn game-btn--main" onclick="resolveInventoryFullModal('use',${i})">${iconSpan(POWERUPS[id].icon)} Usar ${POWERUPS[id].label}</button>`).join('');
+  box.innerHTML=inventory.map((id,i)=>`<button class="game-btn game-btn--main" onclick="resolveInventoryFullModal('use',${i})">${iconImg(POWERUPS[id].icon)} Usar ${POWERUPS[id].label}</button>`).join('');
   document.getElementById('invFullModal').hidden=false;
 }
 function resolveInventoryFullModal(action,slot){
@@ -312,7 +330,7 @@ function renderInventory(){
     const el=document.getElementById('invSlot'+i);
     if(!el) continue;
     const id=inventory[i];
-    if(id){ el.innerHTML=iconSpan(POWERUPS[id].icon); el.title=POWERUPS[id].label; el.classList.add('filled'); }
+    if(id){ el.innerHTML=iconImg(POWERUPS[id].icon); el.title=POWERUPS[id].label; el.classList.add('filled'); }
     else { el.textContent='—'; el.removeAttribute('title'); el.classList.remove('filled'); }
   }
 }
@@ -420,11 +438,38 @@ function candyInnerSVG(c){
   else if(c.special==='wrapped') s+=WRAPPED;
   return s;
 }
+/* ---------- imagens dos doces (PNG, com fallback automático pro SVG acima) ---------- */
+// índice = c.type (mesma ordem de CANDY_NAMES/BASE_INNER)
+const CANDY_IMG_FILES=['doce-crush-eclair.png','doce-crush-macaron.png','doce-crush-brigadeiro.png','doce-crush-camafeu.png','doce-crush-pistache.png','doce-crush-tortinha.png','doce-crush-donut.png','doce-crush-physalis.png','doce-crush-brigadeiro-azul.png'];
+const SPECIAL_IMG_FILES={wildcard:'doce-crush-coringa.png',bemcasado:'doce-crush-bemcasado.png',bomb:'doce-crush-bomba.png'};
+// overlays — desenhados por cima do doce base quando ele ganha um special "parcial" (listra/embrulhado)
+const OVERLAY_IMG_FILES={'stripe-h':'doce-crush-listra-h.png','stripe-v':'doce-crush-listra-v.png','wrapped':'doce-crush-embrulho.png'};
+function candyImgSrc(c){
+  const name=(c.special&&SPECIAL_IMG_FILES[c.special])?SPECIAL_IMG_FILES[c.special]:CANDY_IMG_FILES[c.type];
+  return IMG_DIR+name;
+}
+function specialOverlaySVG(c){
+  if(c.special==='stripe-h') return STRIPE_H;
+  if(c.special==='stripe-v') return STRIPE_V;
+  if(c.special==='wrapped') return WRAPPED;
+  return '';
+}
+function specialOverlayImg(c){
+  const file=OVERLAY_IMG_FILES[c.special];
+  if(!file) return '';
+  return `<img src="${IMG_DIR+file}" class="candy-overlay-img" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`;
+}
 function candyHTML(c){
   let badge='';
-  if(c.gift==='time') badge='<span class="gift-badge">'+ICONS.hourglass+'</span>';
-  else if(c.gift==='powerup') badge='<span class="gift-badge">'+ICONS.gift+'</span>';
-  return `<svg viewBox="0 0 100 100" class="candy-svg">${candyInnerSVG(c)}</svg>`+badge;
+  if(c.gift==='time') badge='<span class="gift-badge">'+iconImg('hourglass')+'</span>';
+  else if(c.gift==='powerup') badge='<span class="gift-badge">'+iconImg('gift')+'</span>';
+  // SVG fica por baixo como fallback; se o PNG carregar, ele cobre o SVG. Se falhar (onerror), some e o SVG aparece.
+  const fallbackSvg=`<svg viewBox="0 0 100 100" class="candy-svg">${candyInnerSVG(c)}</svg>`;
+  const img=`<img src="${candyImgSrc(c)}" class="candy-img" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`;
+  const ovSvg=specialOverlaySVG(c);
+  const overlaySvg=ovSvg?`<svg viewBox="0 0 100 100" class="candy-overlay">${ovSvg}</svg>`:'';
+  const overlayImg=specialOverlayImg(c);
+  return fallbackSvg+img+overlaySvg+overlayImg+badge;
 }
 
 /* ---------- helpers ---------- */
