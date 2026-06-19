@@ -478,6 +478,7 @@ async function carregarPreviewRecorde(){
     {key:"seat-puzzle",el:"record-seat-preview"},
     {key:"vespa",      el:"record-vespa-preview"},
     {key:"flight-lisboa", el:"record-flight-preview"},
+    {key:"doce-crush",   el:"record-doce-preview"},
   ];
   for(const j of jogos){
     const el=document.getElementById(j.el); if(!el) continue;
