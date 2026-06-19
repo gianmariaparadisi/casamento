@@ -27,6 +27,9 @@
     .dc-board-wrap{width:min(96%,var(--board-max,560px));margin:.85rem auto 0;aspect-ratio:1;position:relative;background:rgba(255,255,255,.5);border:1px solid rgba(216,205,188,.85);border-radius:18px;box-shadow:0 10px 32px rgba(82,57,34,.10);overflow:hidden;touch-action:none;transition:width .35s ease;}
     .candy{position:absolute;width:calc(100%/var(--cols,8));height:calc(100%/var(--cols,8));box-sizing:border-box;display:flex;align-items:center;justify-content:center;transition:top .22s cubic-bezier(.4,0,.2,1),left .22s cubic-bezier(.4,0,.2,1),opacity .18s ease;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
     .candy-img{position:absolute;inset:6%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));transition:transform .15s;pointer-events:none;}
+    /* a bomba de cor é mais estreita/alta que os outros doces (proporção bem diferente) — caixa maior
+       pra ela não ficar pequena/encolhida no centro da célula, comparada aos vizinhos */
+    .candy-img.is-bomb{inset:1%;}
     /* Overlay padrão (ex.: embrulhado) — ocupa a mesma caixa quadrada do doce */
     .candy-overlay-img{position:absolute;inset:6%;object-fit:contain;pointer-events:none;}
     /* Bastão de combo (listra) NÃO é uma imagem quadrada: a horizontal é larga e baixa,
@@ -48,8 +51,9 @@
     .dc-inv-slot.filled:hover{transform:translateY(-2px) scale(1.06);}
     .dc-inv-slot.dc-inv-stock{border-style:solid;border-color:rgba(111,168,220,.5);background:rgba(255,255,255,.88);}
     .dc-inv-count{position:absolute;bottom:-4px;right:-4px;background:#8E2738;color:#fff;font-size:.6rem;font-weight:700;border-radius:999px;min-width:1.05rem;height:1.05rem;display:flex;align-items:center;justify-content:center;padding:0 .15rem;}
-    .dc-toast{text-align:center;font-size:.78rem;font-weight:600;color:#8E2738;min-height:1.1em;margin:.5rem auto 0;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;}
+    .dc-toast{display:flex;align-items:center;justify-content:center;gap:.4rem;text-align:center;font-size:.78rem;font-weight:600;color:#8E2738;min-height:1.1em;margin:.5rem auto 0;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;}
     .dc-toast.show{opacity:1;transform:translateY(0);}
+    .dc-toast-img{width:1.6rem;height:1.6rem;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));}
     .candy.selected .candy-img{transform:scale(1.12);filter:drop-shadow(0 0 7px #F4D35E) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
     .candy.clearing{animation:candyPop .22s ease forwards;pointer-events:none;}
     .candy.wrong-shake{animation:wrongShake .3s ease;}
@@ -142,7 +146,7 @@
           <li><span data-it="Dolci com um pequeno selo escondem prêmios — combinali!">Doces com um pequeno selo escondem prêmios — combine-os!</span></li>
           <li><span data-it="Tempo extra, congelar e pontos x2 aplicam-se na hora (o x2 acumula em dobro se vier de novo). Embaralhar e ímã ficam guardados sem limite na reserva.">Tempo extra, congelar e pontos x2 aplicam-se na hora (o x2 acumula em dobro se vier de novo). Embaralhar e ímã ficam guardados sem limite na reserva.</span></li>
           <li><span data-it="Bomba de cor vai para a reserva (até 2). Reserva cheia? Escolha qual usar antes de perder a nova!">Bomba de cor vai para a reserva (até 2). Reserva cheia? Escolha qual usar antes de perder a nova!</span></li>
-          <li><span data-it="Il tabellone cresce a ogni 5 mila punti e libera un dolce nuovo a ogni espansione!">O tabuleiro cresce a cada 5 mil pontos e libera um doce novo a cada expansão!</span></li>
+          <li><span data-it="Ogni 5 mila punti sblocchi qualcosa di nuovo — dolci extra e, in alcuni traguardi, un tabellone più grande!">A cada 5 mil pontos você desbloqueia algo novo — doces extras e, em alguns marcos, um tabuleiro maior!</span></li>
         </ul>
       </div>
       <div class="btn-row"><button class="game-btn game-btn--main" onclick="startGame()" data-it="Inizia">Começar</button></div>
@@ -187,10 +191,24 @@
 const API="https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
 const GAME_KEY="doce-crush";
 const START_ROWS=6, START_COLS=6;
-let ROWS=START_ROWS, COLS=START_COLS; let NTYPES=4; const MAX_NTYPES=9; let CELL=100/COLS;
+let ROWS=START_ROWS, COLS=START_COLS; let NTYPES=4; const MAX_NTYPES=12; let CELL=100/COLS;
 const TOTAL_TIME=90;
-const SCORE_MARKS=[5000,10000,15000,20000,25000]; const GRID_CAP=START_COLS+SCORE_MARKS.length;
-const CANDY_NAMES=['Eclair','Macaron de Limão','Brigadeiro','Camafeu','Bombom de Pistache','Tortinha de Frutas','Donut Rosa','Doce de Physalis','Brigadeiro Azul'];
+/* cada marca de pontuação pode liberar um doce novo e/ou crescer o tabuleiro — ver EXPAND_SPEC.
+   a 6ª marca é de propósito "vazia" (nenhum dos dois), só um respiro no ritmo. */
+const SCORE_MARKS=[5000,10000,15000,20000,25000,30000,35000,40000,45000];
+const EXPAND_SPEC=[
+  {candy:true,  grid:true},  // 1ª: novo doce + tabuleiro maior
+  {candy:true,  grid:false}, // 2ª: só novo doce
+  {candy:true,  grid:true},  // 3ª: novo doce + tabuleiro maior
+  {candy:true,  grid:false}, // 4ª: só novo doce
+  {candy:true,  grid:true},  // 5ª: novo doce + tabuleiro maior
+  {candy:false, grid:false}, // 6ª: nada
+  {candy:true,  grid:false}, // 7ª: só novo doce
+  {candy:true,  grid:true},  // 8ª: novo doce + tabuleiro maior
+  {candy:true,  grid:false}  // 9ª: só novo doce
+];
+const GRID_CAP=START_COLS+EXPAND_SPEC.filter(s=>s.grid).length;
+const CANDY_NAMES=['Eclair','Macaron de Limão','Brigadeiro','Camafeu','Bombom de Pistache','Tortinha de Frutas','Donut Rosa','Doce de Physalis','Brigadeiro Azul','Torta de Limão','Cereja','Pirâmide Roxa'];
 
 const boardEl=document.getElementById('board');
 let board=[], elMap={}, idSeq=1;
@@ -198,7 +216,7 @@ let tapSelected=null, pointerDownCell=null, startX=0, startY=0, moved=false;
 let locked=false, gameActive=false;
 let score=0, timeLeft=TOTAL_TIME, timer=null, maxCombo=0, totalCleared=0, finalScore=0, chainStep=0;
 let triggeredThresholds=new Set();
-let elapsedPlayed=0, expandIndex=0, pendingExpansion=false;
+let elapsedPlayed=0, expandIndex=0, pendingGridGrowths=0;
 let freezeUntil=0, multiplierUntil=0, multiplierStack=1, inventory=[], pendingPowerupOffer=null;
 let stock={shuffle:0, magnet:0};
 
@@ -333,12 +351,13 @@ function useInventorySlot(i){
   inventory.splice(i,1); renderInventory();
   def.apply();
 }
-function showToast(text){
+function showToast(text,imgSrc){
   const t=document.getElementById('dcToast'); if(!t) return;
-  t.textContent=text; t.classList.remove('show');
+  t.innerHTML=imgSrc?(`<img src="${imgSrc}" class="dc-toast-img" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`+esc(text)):esc(text);
+  t.classList.remove('show');
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>t.classList.add('show')); });
   clearTimeout(t._hideTimer);
-  t._hideTimer=setTimeout(()=>t.classList.remove('show'),1900);
+  t._hideTimer=setTimeout(()=>t.classList.remove('show'),imgSrc?2400:1900);
 }
 function swapDataOnly(r1,c1,r2,c2){ const t=board[r1][c1]; board[r1][c1]=board[r2][c2]; board[r2][c2]=t; }
 function magnetMatch(){
@@ -384,11 +403,12 @@ function sndSpecial(){beep(1000,.1,.08);setTimeout(()=>beep(1300,.14,.07),70);}
 function sndWrong(){beep(200,.16,.07,'sawtooth');}
 function sndTick(){beep(880,.04,.05);}
 function sndWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.15,.1),i*80));}
+function sndNewCandy(){beep(880,.08,.07);setTimeout(()=>beep(1180,.1,.06),60);}
 function haptic(ms){try{navigator.vibrate&&navigator.vibrate(ms||15);}catch(e){}}
 
 /* ---------- imagens dos doces (PNG, sem fallback) ---------- */
 // índice = c.type (mesma ordem de CANDY_NAMES)
-const CANDY_IMG_FILES=['doce-crush-eclair.png','doce-crush-macaron.png','doce-crush-brigadeiro.png','doce-crush-camafeu.png','doce-crush-pistache.png','doce-crush-tortinha.png','doce-crush-donut.png','doce-crush-physalis.png','doce-crush-brigadeiro-azul.png'];
+const CANDY_IMG_FILES=['doce-crush-eclair.png','doce-crush-macaron.png','doce-crush-brigadeiro.png','doce-crush-camafeu.png','doce-crush-pistache.png','doce-crush-tortinha.png','doce-crush-donut.png','doce-crush-physalis.png','doce-crush-brigadeiro-azul.png','doce-crush-torta-limao.png','doce-crush-cereja.png','doce-crush-piramide-roxa.png'];
 const SPECIAL_IMG_FILES={wildcard:'doce-crush-coringa.png',bemcasado:'doce-crush-bemcasado.png',bomb:'doce-crush-bomba.png'};
 // overlays — desenhados por cima do doce base quando ele ganha um special "parcial" (listra/embrulhado)
 const OVERLAY_IMG_FILES={'stripe-h':'doce-crush-listra-h.png','stripe-v':'doce-crush-listra-v.png','wrapped':'doce-crush-embrulho.png'};
@@ -408,7 +428,8 @@ function candyHTML(c){
   let badge='';
   if(c.gift==='time') badge='<span class="gift-badge">'+iconImg('hourglass')+'</span>';
   else if(c.gift==='powerup') badge='<span class="gift-badge">'+iconImg('gift')+'</span>';
-  const img=`<img src="${candyImgSrc(c)}" class="candy-img" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`;
+  const bombClass=c.special==='bomb'?' is-bomb':'';
+  const img=`<img src="${candyImgSrc(c)}" class="candy-img${bombClass}" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`;
   const overlayImg=specialOverlayImg(c);
   return img+overlayImg+badge;
 }
@@ -780,9 +801,9 @@ function settleBoard(){
       if(special) specials.push({pos,special,type:cluster.type});
     }
     processClear(toClear,specials,null);
-  } else if(pendingExpansion){
-    pendingExpansion=false;
-    expandGrid();
+  } else if(pendingGridGrowths>0 && COLS<GRID_CAP){
+    pendingGridGrowths--;
+    growGrid();
   } else if(pendingPowerupOffer){
     openInventoryFullModal();
   } else {
@@ -808,23 +829,41 @@ function applyGravityAnimated(){
 }
 
 /* ---------- grid expansion ---------- */
+// checa de forma recorrente (loop) pra não perder marcas quando o placar
+// salta de uma vez por duas ou mais (ex.: combo grande cruza 2 SCORE_MARKS junto)
 function checkExpansion(){
-  if(expandIndex>=SCORE_MARKS.length || COLS>=GRID_CAP) return;
-  if(score>=SCORE_MARKS[expandIndex]){
+  while(expandIndex<EXPAND_SPEC.length && score>=SCORE_MARKS[expandIndex]){
+    const spec=EXPAND_SPEC[expandIndex];
     expandIndex++;
-    if(locked) pendingExpansion=true; else expandGrid();
+    if(spec.candy) unlockNewCandy();
+    if(spec.grid) pendingGridGrowths++;
+  }
+  tryGrowPendingGrid();
+}
+
+function tryGrowPendingGrid(){
+  if(pendingGridGrowths>0 && !locked && COLS<GRID_CAP){
+    pendingGridGrowths--;
+    growGrid();
   }
 }
 
-function expandGrid(){
+function unlockNewCandy(){
+  if(NTYPES>=MAX_NTYPES) return;
+  NTYPES++;
+  const name=CANDY_NAMES[NTYPES-1];
+  showToast('Doce novo: '+name+'!', IMG_DIR+CANDY_IMG_FILES[NTYPES-1]);
+  if(window.confettiBurst) confettiBurst({count:16});
+  sndNewCandy(); haptic(18);
+}
+
+function growGrid(){
   if(!gameActive) return;
   locked=true; chainStep=0; triggeredThresholds=new Set();
   const oldRows=ROWS, oldCols=COLS;
   ROWS++; COLS++;
   recalcCell();
   boardEl.style.setProperty('--board-max',(480+(COLS-START_COLS)*16)+'px');
-  let newCandyMsg='';
-  if(NTYPES<MAX_NTYPES){ NTYPES++; newCandyMsg=' — novo doce: '+CANDY_NAMES[NTYPES-1]+'!'; }
   for(let r=0;r<oldRows;r++){ board[r].push(maybeGift(makeCandy(rnd(NTYPES)))); }
   board.push([]);
   for(let c=0;c<COLS;c++){ board[oldRows][c]=maybeGift(makeCandy(rnd(NTYPES))); }
@@ -833,7 +872,7 @@ function expandGrid(){
   }
   for(let r=0;r<oldRows;r++) createCandyEl(r,oldCols,board[r][oldCols],2);
   for(let c=0;c<COLS;c++) createCandyEl(oldRows,c,board[oldRows][c],2);
-  showToast('Tabuleiro expandiu! '+ROWS+'×'+COLS+newCandyMsg);
+  showToast('Tabuleiro expandiu! '+ROWS+'×'+COLS);
   if(window.confettiBurst) confettiBurst({count:32,hearts:true});
   sndSpecial(); haptic(30);
   setTimeout(settleBoard,420);
@@ -848,7 +887,7 @@ function restartGame(){
   document.getElementById('invFullModal').hidden=true;
   score=0; timeLeft=TOTAL_TIME; maxCombo=0; totalCleared=0; chainStep=0;
   tapSelected=null; pointerDownCell=null; locked=false; gameActive=true;
-  triggeredThresholds=new Set(); elapsedPlayed=0; expandIndex=0; pendingExpansion=false;
+  triggeredThresholds=new Set(); elapsedPlayed=0; expandIndex=0; pendingGridGrowths=0;
   freezeUntil=0; multiplierUntil=0; multiplierStack=1; inventory=[]; pendingPowerupOffer=null; renderInventory();
   stock={shuffle:0,magnet:0}; renderStock('shuffle'); renderStock('magnet'); updateMultiBadge();
   ROWS=START_ROWS; COLS=START_COLS; NTYPES=4; recalcCell();
