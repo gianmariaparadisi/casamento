@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doce Crush — Tiago e Gian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="assets/css/style.css"/>
+  <style>
+    :root{--gi:#2A2820;--gm:#6C6258;--gl:#D8CDBC;--gc:#FBF7EF;--gg:#C8A050;}
+    body.game-page{min-height:100svh;background:radial-gradient(circle at 14% 0%,rgba(255,255,255,.92),transparent 28rem),radial-gradient(circle at 82% 14%,rgba(246,214,151,.34),transparent 26rem),linear-gradient(180deg,#FBF7EF 0%,#F2E7D7 55%,#EFE1D0 100%);color:var(--gi);}
+    .game-nav{position:sticky;top:0;z-index:20;background:rgba(251,247,239,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(216,205,188,.7);}
+    .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:13px 0;}
+    .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.84rem;color:var(--gm);}
+    .game-back{font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;color:#766553;text-decoration:underline;text-underline-offset:4px;}
+    .game-shell{width:92%;max-width:680px;margin:0 auto;padding:28px 0 80px;}
+    .game-kicker{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:#A47845;text-align:center;margin-bottom:.4rem;}
+    .game-title{font-family:var(--font-display);font-size:clamp(2rem,7vw,3.6rem);font-weight:300;line-height:.95;text-align:center;margin-bottom:.6rem;}
+    .game-sub{max-width:460px;margin:0 auto 1rem;text-align:center;color:var(--gm);font-size:.88rem;line-height:1.65;}
+    .hud{display:flex;gap:.55rem;justify-content:center;flex-wrap:wrap;margin:.7rem auto;}
+    .hud__pill{background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.85);border-radius:999px;padding:.4rem .78rem;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:#665B4D;display:flex;align-items:center;gap:.3rem;}
+    .hud__pill strong{color:var(--gi);font-weight:600;}
+
+    /* Board */
+    .dc-board-wrap{width:min(94%,480px);margin:.85rem auto 0;aspect-ratio:1;position:relative;background:rgba(255,255,255,.5);border:1px solid rgba(216,205,188,.85);border-radius:18px;box-shadow:0 10px 32px rgba(82,57,34,.10);overflow:hidden;touch-action:none;}
+    .candy{position:absolute;width:12.5%;height:12.5%;box-sizing:border-box;padding:6%;display:flex;align-items:center;justify-content:center;transition:top .22s cubic-bezier(.4,0,.2,1),left .22s cubic-bezier(.4,0,.2,1);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
+    .candy-svg{width:100%;height:100%;display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));transition:transform .15s;}
+    .candy.selected .candy-svg{transform:scale(1.12);filter:drop-shadow(0 0 7px #F4D35E) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
+    .candy.clearing{animation:candyPop .22s ease forwards;pointer-events:none;}
+    .candy.wrong-shake{animation:wrongShake .3s ease;}
+    .candy.special-pop .candy-svg{animation:specialPop .26s ease;}
+    .score-pop{position:absolute;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:600;color:#B98538;font-size:1rem;pointer-events:none;animation:scoreFloat .7s ease forwards;z-index:5;}
+    @keyframes candyPop{0%{transform:scale(1);opacity:1}55%{transform:scale(1.3);opacity:.75}100%{transform:scale(.15);opacity:0}}
+    @keyframes specialPop{0%{transform:scale(1)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
+    @keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+    @keyframes scoreFloat{0%{opacity:0;transform:translate(-50%,-30%) scale(.8)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-120%) scale(1)}}
+
+    /* Modals */
+    .modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:rgba(251,247,239,.9);backdrop-filter:blur(8px);}
+    .modal[hidden]{display:none;}
+    .modal__card{width:min(92%,420px);background:rgba(255,255,255,.96);border:1px solid rgba(216,205,188,.95);border-radius:22px;padding:1.6rem;text-align:center;box-shadow:0 22px 70px rgba(82,57,34,.18);max-height:88vh;overflow:auto;}
+    .modal__icon img{width:4.5rem;height:4.5rem;object-fit:contain;display:block;margin:0 auto .6rem;}
+    .modal__title{font-family:var(--font-display);font-size:2rem;font-weight:300;margin-bottom:.45rem;}
+    .modal__text{color:var(--gm);font-size:.88rem;line-height:1.65;margin-bottom:.9rem;text-align:left;}
+    .modal__text ul{margin:.4rem 0 0;padding-left:1.1rem;}
+    .modal__text li{margin-bottom:.3rem;}
+    .game-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(180,137,70,.35);background:#fff;color:#5A4C3D;padding:.72rem 1.3rem;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 8px 24px rgba(110,80,45,.09);cursor:pointer;transition:all .15s;gap:.35rem;}
+    .game-btn:hover{transform:translateY(-1px);background:#FFF9EF;}
+    .game-btn--main{background:linear-gradient(135deg,#D6B167,#B98538);color:white;border-color:transparent;}
+    .game-btn--main:hover{background:linear-gradient(135deg,#E0BB71,#C08E42);}
+    .btn-row{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
+    .endstats{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin:.75rem 0;text-align:left;}
+    .endstats div{background:rgba(255,255,255,.65);border:1px solid rgba(216,205,188,.8);border-radius:11px;padding:.45rem .6rem;font-size:.76rem;}
+    .endstats strong{display:block;font-size:1.1rem;color:#8E2738;font-family:var(--font-display);font-weight:500;}
+    .endstats span{color:var(--gm);}
+    .save-box{margin-top:.85rem;background:rgba(255,255,255,.6);border:1px solid rgba(216,205,188,.8);border-radius:14px;padding:.78rem;}
+    .save-box__row{display:flex;gap:.45rem;}
+    .save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.9);border-radius:999px;background:#fff;padding:.65rem .88rem;font:inherit;font-size:.87rem;outline:none;}
+    .save-msg{font-size:.73rem;color:var(--gm);margin-top:.32rem;min-height:1em;}
+    .top10{margin-top:1.1rem;background:rgba(255,255,255,.42);border:1px solid rgba(216,205,188,.75);border-radius:14px;padding:.82rem;}
+    .top10 h3{font-family:var(--font-display);font-size:1.2rem;font-weight:400;margin-bottom:.45rem;text-align:center;}
+    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.28rem;}
+    .top10 li{display:flex;align-items:center;gap:.55rem;background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.6);border-radius:10px;padding:.42rem .6rem;font-size:.83rem;}
+    .top10 .pos{font-family:var(--font-display);font-size:.95rem;width:1.3rem;text-align:center;color:#A47845;}
+    .top10 .name{flex:1;font-weight:500;}.top10 .pts{font-weight:700;color:#7B4B22;}
+    @media(max-width:480px){.save-box__row{flex-direction:column}.game-btn{width:100%}}
+  </style>
+</head>
+<body class="game-page">
+  <nav class="game-nav"><div class="game-nav__inner">
+    <a class="game-back" href="jogos.html" data-it="← Torna ai giochi">← Voltar aos jogos</a>
+    <div class="game-brand">Tiago & Gian</div>
+  </div></nav>
+  <main class="game-shell">
+    <p class="game-kicker" data-it="Doce Combo">Doce Combo</p>
+    <h1 class="game-title">Doce Crush</h1>
+    <p class="game-sub" data-it="Combina 3 o più dolci uguali per fare combo! Crea strisce, incarti e bombe di colore. Tempo limitato — buona fortuna!">Combine 3 ou mais doces iguais para fazer combo! Crie listras, embrulhados e bombas de cor. Tempo limitado — boa sorte!</p>
+    <div class="hud">
+      <div class="hud__pill"><span data-it="Tempo:">Tempo:</span> <strong id="dcTimer">90</strong>s</div>
+      <div class="hud__pill"><span data-it="Punti:">Pontos:</span> <strong id="dcScore">0</strong></div>
+      <div class="hud__pill"><span data-it="Combo:">Combo:</span> <strong id="dcCombo">x1</strong></div>
+    </div>
+    <div class="dc-board-wrap" id="board"></div>
+    <div style="display:flex;gap:.5rem;justify-content:center;margin-top:.9rem">
+      <button class="game-btn" onclick="restartGame()" data-it="Nuova partita">Nova partida</button>
+    </div>
+    <section class="top10"><h3>Top 10</h3><ol id="topList"></ol></section>
+  </main>
+
+  <div class="modal" id="startModal">
+    <div class="modal__card">
+      <div class="modal__icon"><img src="assets/img/sweet-truffle-01.png" alt=""></div>
+      <h2 class="modal__title">Doce Crush</h2>
+      <div class="modal__text">
+        <span data-it="Tocca o arrastra due dolci vicini per scambiarli. Combina 3 o più uguali per fare punti.">Toque ou arraste dois doces vizinhos para trocá-los. Combine 3 ou mais iguais para pontuar.</span>
+        <ul>
+          <li><span data-it="4 in fila → striscia (libera fila o colonna).">4 em linha → listra (libera a fileira ou coluna).</span></li>
+          <li><span data-it="Forma a L o T → incartato (esplode un'area 3×3).">Forma de L ou T → embrulhado (estoura uma área 3×3).</span></li>
+          <li><span data-it="5 in fila → bomba di colore (scambiala con un dolce per eliminare tutti quelli di quel tipo).">5 em linha → bomba de cor (troque com um doce para eliminar todos daquele tipo).</span></li>
+        </ul>
+      </div>
+      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startGame()" data-it="Inizia">Começar</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="endModal" hidden>
+    <div class="modal__card">
+      <div class="modal__icon"><img src="assets/img/icon-confetti-burst.png" alt=""></div>
+      <h2 class="modal__title" data-it="Tempo scaduto!">Tempo esgotado!</h2>
+      <p class="modal__text" style="text-align:center" data-it="Ottimo lavoro tra i dolci!">Ótimo trabalho entre os doces!</p>
+      <div class="endstats">
+        <div><span data-it="Punti">Pontos</span><strong id="sScoreD">—</strong></div>
+        <div><span data-it="Miglior combo">Maior combo</span><strong id="sComboD">—</strong></div>
+        <div><span data-it="Dolci esplosi">Doces estourados</span><strong id="sClearD">—</strong></div>
+        <div><span data-it="Tempo">Modo</span><strong data-it="Arcade">Arcade</strong></div>
+      </div>
+      <div class="btn-row" style="margin-bottom:.7rem">
+        <button class="game-btn game-btn--main" onclick="restartGame()" data-it="Gioca di nuovo">Jogar novamente</button>
+      </div>
+      <div class="save-box">
+        <div class="save-box__row">
+          <input class="save-input" id="playerName" placeholder="Seu nome" data-it-placeholder="Il tuo nome" maxlength="22"/>
+          <button class="game-btn" onclick="doSave()" data-it="Salva">Salvar</button>
+        </div>
+        <p class="save-msg" id="saveMsg"></p>
+      </div>
+    </div>
+  </div>
+
+<script>
+"use strict";
+const API="https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+const GAME_KEY="doce-crush";
+const ROWS=8, COLS=8, NTYPES=6, CELL=100/COLS;
+const TOTAL_TIME=90;
+
+const boardEl=document.getElementById('board');
+let board=[], elMap={}, idSeq=1;
+let tapSelected=null, pointerDownCell=null, startX=0, startY=0, moved=false;
+let locked=false, gameActive=false;
+let score=0, timeLeft=TOTAL_TIME, timer=null, maxCombo=0, totalCleared=0, finalScore=0, chainStep=0;
+
+/* ---------- sound ---------- */
+let _ac=null;
+function ac(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();return _ac;}
+function beep(f,dur,vol,type){try{const c=ac(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(vol||.09,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur);}catch(e){}}
+function sndSwap(){beep(520,.06,.05);}
+function sndMatch(chain){const base=700+Math.min(chain,6)*60;beep(base,.08,.09);if(chain>1)setTimeout(()=>beep(base+220,.1,.07),60);}
+function sndSpecial(){beep(1000,.1,.08);setTimeout(()=>beep(1300,.14,.07),70);}
+function sndWrong(){beep(200,.16,.07,'sawtooth');}
+function sndTick(){beep(880,.04,.05);}
+function sndWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.15,.1),i*80));}
+function haptic(ms){try{navigator.vibrate&&navigator.vibrate(ms||15);}catch(e){}}
+
+/* ---------- candy SVG (placeholders) ---------- */
+const BASE_INNER=[
+  // 0 brigadeiro
+  '<circle cx="50" cy="54" r="34" fill="#4A2C1B"/><circle cx="38" cy="40" r="8" fill="#6B4226" opacity=".55"/><rect x="40" y="20" width="4" height="10" fill="#fff" transform="rotate(20 42 25)"/><rect x="58" y="24" width="4" height="10" fill="#fff" transform="rotate(-15 60 29)"/><rect x="48" y="66" width="4" height="10" fill="#fff" transform="rotate(50 50 71)"/>',
+  // 1 macaron
+  '<ellipse cx="50" cy="34" rx="36" ry="22" fill="#F2A6C6"/><ellipse cx="50" cy="68" rx="36" ry="22" fill="#F2A6C6"/><rect x="14" y="46" width="72" height="14" fill="#FFF3DC"/>',
+  // 2 eclair
+  '<rect x="8" y="36" width="84" height="30" rx="15" fill="#C8893B"/><rect x="14" y="44" width="72" height="8" rx="4" fill="#FFF3DC" opacity=".85"/><path d="M16 40 Q30 50 44 40 T72 40 T96 40" stroke="#5C3A21" stroke-width="3" fill="none" opacity=".5"/>',
+  // 3 bem-casado
+  '<circle cx="34" cy="50" r="28" fill="#E9C9A0"/><circle cx="66" cy="50" r="28" fill="#E9C9A0"/><rect x="0" y="44" width="100" height="12" fill="#8E2738" opacity=".85" transform="rotate(-8 50 50)"/><circle cx="50" cy="50" r="6" fill="#8E2738"/>',
+  // 4 champagne
+  '<path d="M38 14 L62 14 L54 50 L54 78 L64 86 L36 86 L46 78 L46 50 Z" fill="#D9B23C"/><circle cx="48" cy="40" r="2.5" fill="#FFF7DD"/><circle cx="52" cy="30" r="2" fill="#FFF7DD"/><circle cx="49" cy="22" r="1.6" fill="#FFF7DD"/>',
+  // 5 chocolate heart
+  '<path d="M50 82 C20 60 8 40 8 26 C8 12 20 4 32 8 C40 11 46 18 50 24 C54 18 60 11 68 8 C80 4 92 12 92 26 C92 40 80 60 50 82 Z" fill="#8E2738"/><ellipse cx="36" cy="26" rx="10" ry="6" fill="#fff" opacity=".25"/>'
+];
+const STRIPE_H='<rect x="0" y="42" width="100" height="16" fill="#FFFFFF" opacity=".55"/><rect x="0" y="46" width="100" height="8" fill="#FFD86B" opacity=".9"/>';
+const STRIPE_V='<rect x="42" y="0" width="16" height="100" fill="#FFFFFF" opacity=".55"/><rect x="46" y="0" width="8" height="100" fill="#FFD86B" opacity=".9"/>';
+const WRAPPED='<rect x="8" y="8" width="84" height="84" fill="none" stroke="#FFD86B" stroke-width="6" rx="16"/><circle cx="8" cy="8" r="5" fill="#FFD86B"/><circle cx="92" cy="8" r="5" fill="#FFD86B"/><circle cx="8" cy="92" r="5" fill="#FFD86B"/><circle cx="92" cy="92" r="5" fill="#FFD86B"/>';
+const BOMB_INNER='<circle cx="50" cy="50" r="40" fill="#2B2630"/><circle cx="50" cy="50" r="40" fill="none" stroke="#fff" stroke-width="2" opacity=".15"/><circle cx="50" cy="26" r="6" fill="#F2A6C6"/><circle cx="72" cy="40" r="6" fill="#D9B23C"/><circle cx="68" cy="66" r="6" fill="#8E2738"/><circle cx="36" cy="70" r="6" fill="#4A2C1B"/><circle cx="26" cy="42" r="6" fill="#C8893B"/><circle cx="50" cy="50" r="10" fill="#fff" opacity=".85"/>';
+
+function candyInnerSVG(c){
+  if(c.special==='bomb') return BOMB_INNER;
+  let s=BASE_INNER[c.type];
+  if(c.special==='stripe-h') s+=STRIPE_H;
+  else if(c.special==='stripe-v') s+=STRIPE_V;
+  else if(c.special==='wrapped') s+=WRAPPED;
+  return s;
+}
+function candyHTML(c){return `<svg viewBox="0 0 100 100" class="candy-svg">${candyInnerSVG(c)}</svg>`;}
+
+/* ---------- helpers ---------- */
+function rnd(n){return Math.floor(Math.random()*n);}
+function makeCandy(type,special){return {id:idSeq++,type,special:special||null};}
+function inBounds(r,c){return r>=0&&r<ROWS&&c>=0&&c<COLS;}
+function isAdjacent(r1,c1,r2,c2){return (Math.abs(r1-r2)+Math.abs(c1-c2))===1;}
+function cellPct(i){return (i*CELL)+'%';}
+
+function createBoard(){
+  const b=[];
+  for(let r=0;r<ROWS;r++){
+    b.push([]);
+    for(let c=0;c<COLS;c++){
+      let type;
+      do{ type=rnd(NTYPES); } while(
+        (c>=2 && b[r][c-1] && b[r][c-1].type===type && b[r][c-2] && b[r][c-2].type===type) ||
+        (r>=2 && b[r-1][c] && b[r-1][c].type===type && b[r-2][c] && b[r-2][c].type===type)
+      );
+      b[r][c]=makeCandy(type);
+    }
+  }
+  return b;
+}
+
+/* ---------- match logic (ported & validated) ---------- */
+function findClusters(bd){
+  const matched=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  const runs=[];
+  for(let r=0;r<ROWS;r++){
+    let c=0;
+    while(c<COLS){
+      const t=bd[r][c]?bd[r][c].type:null;
+      if(t===null){c++;continue;}
+      let c2=c;
+      while(c2+1<COLS && bd[r][c2+1] && bd[r][c2+1].type===t) c2++;
+      const len=c2-c+1;
+      if(len>=3){const cells=[];for(let cc=c;cc<=c2;cc++){matched[r][cc]=true;cells.push([r,cc]);}runs.push({dir:'h',type:t,cells});}
+      c=c2+1;
+    }
+  }
+  for(let c=0;c<COLS;c++){
+    let r=0;
+    while(r<ROWS){
+      const t=bd[r][c]?bd[r][c].type:null;
+      if(t===null){r++;continue;}
+      let r2=r;
+      while(r2+1<ROWS && bd[r2+1][c] && bd[r2+1][c].type===t) r2++;
+      const len=r2-r+1;
+      if(len>=3){const cells=[];for(let rr=r;rr<=r2;rr++){matched[rr][c]=true;cells.push([rr,c]);}runs.push({dir:'v',type:t,cells});}
+      r=r2+1;
+    }
+  }
+  if(!runs.length) return [];
+  const visited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  const clusters=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(!matched[r][c]||visited[r][c]) continue;
+    const type=bd[r][c].type;
+    const stack=[[r,c]],cells=[];
+    visited[r][c]=true;
+    while(stack.length){
+      const [cr,cc]=stack.pop();
+      cells.push([cr,cc]);
+      for(const [nr,nc] of [[cr-1,cc],[cr+1,cc],[cr,cc-1],[cr,cc+1]]){
+        if(inBounds(nr,nc)&&matched[nr][nc]&&!visited[nr][nc]&&bd[nr][nc].type===type){visited[nr][nc]=true;stack.push([nr,nc]);}
+      }
+    }
+    const cellSet=new Set(cells.map(([rr,cc])=>rr+','+cc));
+    const clusterRuns=runs.filter(run=>run.type===type && run.cells.every(([rr,cc])=>cellSet.has(rr+','+cc)));
+    const hasH=clusterRuns.some(r=>r.dir==='h'), hasV=clusterRuns.some(r=>r.dir==='v');
+    clusters.push({cells,type,hasH,hasV,runs:clusterRuns});
+  }
+  return clusters;
+}
+
+function chooseSpecial(cluster, swapCells){
+  const {cells,hasH,hasV,runs}=cluster;
+  const cellKey=([r,c])=>r+','+c;
+  const swapSet=new Set((swapCells||[]).map(cellKey));
+  let pos=null;
+  for(const cell of cells){ if(swapSet.has(cellKey(cell))){pos=cell;break;} }
+  if(hasH&&hasV){
+    const hCells=new Set(runs.filter(r=>r.dir==='h').flatMap(r=>r.cells).map(cellKey));
+    const vCells=new Set(runs.filter(r=>r.dir==='v').flatMap(r=>r.cells).map(cellKey));
+    let inter=null;
+    for(const cell of cells){ if(hCells.has(cellKey(cell))&&vCells.has(cellKey(cell))){inter=cell;break;} }
+    if(!pos) pos=inter||cells[0];
+    return {special:'wrapped',pos};
+  }
+  if(cells.length>=5){ if(!pos) pos=cells[Math.floor(cells.length/2)]; return {special:'bomb',pos}; }
+  if(cells.length===4){ const dir=hasH?'h':'v'; if(!pos) pos=cells[Math.floor(cells.length/2)]; return {special:dir==='h'?'stripe-h':'stripe-v',pos}; }
+  return {special:null,pos:null};
+}
+
+function areaEffect(special,r,c){
+  const cells=[];
+  if(special==='stripe-h'){ for(let cc=0;cc<COLS;cc++) cells.push([r,cc]); }
+  else if(special==='stripe-v'){ for(let rr=0;rr<ROWS;rr++) cells.push([rr,c]); }
+  else if(special==='wrapped'){ for(let rr=r-1;rr<=r+1;rr++) for(let cc=c-1;cc<=c+1;cc++) if(inBounds(rr,cc)) cells.push([rr,cc]); }
+  return cells;
+}
+
+/* ---------- rendering ---------- */
+function setPos(el,r,c){ el.style.top=cellPct(r); el.style.left=cellPct(c); }
+
+function createCandyEl(r,c,candy,spawnAbove){
+  const el=document.createElement('div');
+  el.className='candy';
+  el.dataset.r=r; el.dataset.c=c; el.dataset.id=candy.id;
+  el.innerHTML=candyHTML(candy);
+  if(spawnAbove){
+    el.style.transition='none';
+    el.style.top=cellPct(r-spawnAbove);
+    el.style.left=cellPct(c);
+    boardEl.appendChild(el);
+    elMap[candy.id]=el;
+    requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ el.style.transition=''; el.style.top=cellPct(r); }); });
+  } else {
+    setPos(el,r,c);
+    boardEl.appendChild(el);
+    elMap[candy.id]=el;
+  }
+}
+function updateCandyVisual(candy){ const el=elMap[candy.id]; if(el) el.innerHTML=candyHTML(candy); }
+function moveCandyEl(candy,r,c){ const el=elMap[candy.id]; if(!el) return; el.dataset.r=r; el.dataset.c=c; setPos(el,r,c); }
+function removeCandyEl(candy){ const el=elMap[candy.id]; if(!el) return; el.classList.add('clearing'); setTimeout(()=>{ if(el.parentNode) el.remove(); delete elMap[candy.id]; },230); }
+
+function renderFull(){ boardEl.innerHTML=''; elMap={}; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) createCandyEl(r,c,board[r][c]); }
+
+function popScore(r,c,amount){
+  if(amount<=0) return;
+  const el=document.createElement('div');
+  el.className='score-pop';
+  el.textContent='+'+amount;
+  el.style.left=((c+0.5)*CELL)+'%';
+  el.style.top=((r+0.5)*CELL)+'%';
+  boardEl.appendChild(el);
+  setTimeout(()=>{ if(el.parentNode) el.remove(); },720);
+}
+
+/* ---------- input ---------- */
+function cellFromEvent(e){ const el=e.target.closest('.candy'); if(!el) return null; return {r:+el.dataset.r,c:+el.dataset.c}; }
+
+boardEl.addEventListener('pointerdown',e=>{
+  if(locked||!gameActive) return;
+  const cell=cellFromEvent(e); if(!cell) return;
+  pointerDownCell=cell; startX=e.clientX; startY=e.clientY; moved=false;
+});
+boardEl.addEventListener('pointermove',e=>{
+  if(!pointerDownCell||moved||locked) return;
+  const dx=e.clientX-startX, dy=e.clientY-startY;
+  if(Math.hypot(dx,dy)<18) return;
+  moved=true;
+  let nr=pointerDownCell.r, nc=pointerDownCell.c;
+  if(Math.abs(dx)>Math.abs(dy)) nc+= dx>0?1:-1; else nr+= dy>0?1:-1;
+  const from=pointerDownCell; pointerDownCell=null;
+  clearTapHighlight();
+  if(inBounds(nr,nc)) attemptSwap(from.r,from.c,nr,nc);
+});
+boardEl.addEventListener('pointerup',e=>{
+  if(!pointerDownCell) return;
+  if(!moved){ const {r,c}=pointerDownCell; pointerDownCell=null; handleTap(r,c); }
+  else pointerDownCell=null;
+});
+boardEl.addEventListener('pointercancel',()=>{ pointerDownCell=null; });
+
+function handleTap(r,c){
+  if(locked||!gameActive) return;
+  if(tapSelected){
+    if(tapSelected.r===r&&tapSelected.c===c){ clearTapHighlight(); return; }
+    if(isAdjacent(tapSelected.r,tapSelected.c,r,c)){ const t=tapSelected; clearTapHighlight(); attemptSwap(t.r,t.c,r,c); return; }
+    clearTapHighlight(); setTapHighlight(r,c);
+  } else setTapHighlight(r,c);
+}
+function setTapHighlight(r,c){ tapSelected={r,c}; const candy=board[r][c]; if(candy){ const el=elMap[candy.id]; if(el) el.classList.add('selected'); } }
+function clearTapHighlight(){ if(tapSelected){ const candy=board[tapSelected.r][tapSelected.c]; if(candy){ const el=elMap[candy.id]; if(el) el.classList.remove('selected'); } } tapSelected=null; }
+
+/* ---------- swap resolution ---------- */
+function swapBoardCells(r1,c1,r2,c2){
+  const tmp=board[r1][c1]; board[r1][c1]=board[r2][c2]; board[r2][c2]=tmp;
+  moveCandyEl(board[r1][c1],r1,c1);
+  moveCandyEl(board[r2][c2],r2,c2);
+}
+
+function attemptSwap(r1,c1,r2,c2){
+  if(!gameActive||locked) return;
+  if(!inBounds(r1,c1)||!inBounds(r2,c2)) return;
+  const a=board[r1][c1], b=board[r2][c2];
+  if(!a||!b) return;
+  locked=true; chainStep=0;
+  swapBoardCells(r1,c1,r2,c2);
+  sndSwap();
+  setTimeout(()=>resolveSwapOutcome(r1,c1,r2,c2,a,b),220);
+}
+
+function resolveSwapOutcome(r1,c1,r2,c2,aOrig,bOrig){
+  if(!gameActive) return;
+  const aIsBomb=aOrig.special==='bomb', bIsBomb=bOrig.special==='bomb';
+  let toClear=new Set(), specials=[], direct=false;
+
+  if(aIsBomb && bIsBomb){
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) toClear.add(r+','+c);
+    direct=true;
+  } else if(aIsBomb||bIsBomb){
+    const bombAt=aIsBomb?[r2,c2]:[r1,c1];
+    const otherType=aIsBomb?bOrig.type:aOrig.type;
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c]&&board[r][c].type===otherType) toClear.add(r+','+c); }
+    toClear.add(bombAt[0]+','+bombAt[1]);
+    direct=true; sndSpecial();
+  } else if(aOrig.special && bOrig.special){
+    areaEffect(aOrig.special,r2,c2).forEach(([r,c])=>toClear.add(r+','+c));
+    areaEffect(bOrig.special,r1,c1).forEach(([r,c])=>toClear.add(r+','+c));
+    direct=true; sndSpecial();
+  }
+
+  if(direct){ processClear(toClear,specials,[r1,c1,r2,c2]); return; }
+
+  const swapCellsArr=[[r1,c1],[r2,c2]];
+  const clusters=findClusters(board);
+  if(!clusters.length){
+    swapBoardCells(r1,c1,r2,c2); // revert
+    [board[r1][c1],board[r2][c2]].forEach(candy=>{
+      const el=elMap[candy.id];
+      if(el){ el.classList.add('wrong-shake'); setTimeout(()=>el.classList.remove('wrong-shake'),320); }
+    });
+    sndWrong(); haptic([10,30,10]);
+    locked=false;
+    return;
+  }
+  for(const cluster of clusters){
+    const {special,pos}=chooseSpecial(cluster,swapCellsArr);
+    for(const [r,c] of cluster.cells){
+      if(special&&pos&&r===pos[0]&&c===pos[1]) continue;
+      toClear.add(r+','+c);
+    }
+    if(special) specials.push({pos,special,type:cluster.type});
+  }
+  processClear(toClear,specials,[r1,c1,r2,c2]);
+}
+
+function processClear(toClear,specials,anchorCells){
+  if(!gameActive) return;
+  const specialPosKeys=new Set(specials.map(s=>s.pos?s.pos[0]+','+s.pos[1]:null));
+  let added=true,guard=0;
+  while(added&&guard<50){
+    added=false; guard++;
+    for(const key of Array.from(toClear)){
+      const [r,c]=key.split(',').map(Number);
+      const candy=board[r][c];
+      if(candy&&candy.special&&candy.special!=='bomb'&&!specialPosKeys.has(key)){
+        const area=areaEffect(candy.special,r,c);
+        for(const [ar,ac] of area){ const ak=ar+','+ac; if(!toClear.has(ak)){ toClear.add(ak); added=true; } }
+      }
+    }
+  }
+  let clearedCount=0;
+  for(const key of toClear){
+    const [r,c]=key.split(',').map(Number);
+    const candy=board[r][c];
+    if(candy && !specialPosKeys.has(key)){ removeCandyEl(candy); board[r][c]=null; clearedCount++; }
+  }
+  for(const {pos,special,type} of specials){
+    if(!pos) continue;
+    const [r,c]=pos;
+    let candy=board[r][c];
+    if(!candy){ candy=makeCandy(type,special); board[r][c]=candy; createCandyEl(r,c,candy); }
+    else { candy.special=special; updateCandyVisual(candy); }
+    const el=elMap[candy.id];
+    if(el){ el.classList.add('special-pop'); setTimeout(()=>el.classList.remove('special-pop'),260); }
+  }
+  chainStep++;
+  totalCleared+=clearedCount;
+  const gained=clearedCount*10*chainStep;
+  score+=gained;
+  maxCombo=Math.max(maxCombo,chainStep);
+  updateHud();
+  if(clearedCount>0){
+    sndMatch(chainStep);
+    const [ar,ac]=anchorCells?[anchorCells[0],anchorCells[1]]:[Math.floor(ROWS/2),Math.floor(COLS/2)];
+    popScore(ar,ac,gained);
+    if(chainStep>=4 && window.confettiBurst) confettiBurst({count:14});
+  }
+  setTimeout(doGravityAndContinue,240);
+}
+
+function doGravityAndContinue(){
+  if(!gameActive) return;
+  applyGravityAnimated();
+  setTimeout(()=>{
+    if(!gameActive) return;
+    const nextClusters=findClusters(board);
+    if(nextClusters.length){
+      let toClear=new Set(), specials=[];
+      for(const cluster of nextClusters){
+        const {special,pos}=chooseSpecial(cluster,null);
+        for(const [r,c] of cluster.cells){ if(special&&pos&&r===pos[0]&&c===pos[1]) continue; toClear.add(r+','+c); }
+        if(special) specials.push({pos,special,type:cluster.type});
+      }
+      processClear(toClear,specials,null);
+    } else {
+      locked=false;
+    }
+  },260);
+}
+
+function applyGravityAnimated(){
+  for(let c=0;c<COLS;c++){
+    const survivors=[];
+    for(let r=ROWS-1;r>=0;r--){ if(board[r][c]) survivors.push(board[r][c]); }
+    let r=ROWS-1;
+    for(const candy of survivors){ board[r][c]=candy; moveCandyEl(candy,r,c); r--; }
+    let spawnCount=0;
+    while(r>=0){
+      const candy=makeCandy(rnd(NTYPES));
+      board[r][c]=candy;
+      spawnCount++;
+      createCandyEl(r,c,candy,spawnCount);
+      r--;
+    }
+  }
+}
+
+/* ---------- game lifecycle ---------- */
+function startGame(){ document.getElementById('startModal').hidden=true; restartGame(); }
+
+function restartGame(){
+  clearInterval(timer);
+  document.getElementById('endModal').hidden=true;
+  score=0; timeLeft=TOTAL_TIME; maxCombo=0; totalCleared=0; chainStep=0;
+  tapSelected=null; pointerDownCell=null; locked=false; gameActive=true;
+  board=createBoard();
+  renderFull();
+  updateHud();
+  timer=setInterval(tick,1000);
+}
+
+function tick(){
+  if(!gameActive) return;
+  timeLeft--; updateHud();
+  if(timeLeft<=10 && timeLeft>0) sndTick();
+  if(timeLeft<=0) endGame();
+}
+
+function updateHud(){
+  document.getElementById('dcTimer').textContent=Math.max(0,timeLeft);
+  document.getElementById('dcScore').textContent=score;
+  document.getElementById('dcCombo').textContent='x'+Math.max(1,maxCombo);
+}
+
+function endGame(){
+  if(!gameActive) return;
+  gameActive=false; clearInterval(timer); locked=true; tapSelected=null;
+  finalScore=score;
+  document.getElementById('sScoreD').textContent=finalScore+' pts';
+  document.getElementById('sComboD').textContent='x'+Math.max(1,maxCombo);
+  document.getElementById('sClearD').textContent=totalCleared;
+  document.getElementById('endModal').hidden=false;
+  sndWin(); haptic(50);
+  if(window.confettiBurst) confettiBurst({count:40,hearts:true});
+}
+
+/* ---------- leaderboard ---------- */
+async function doSave(){
+  const name=(document.getElementById('playerName').value||'').trim().slice(0,22);
+  const msg=document.getElementById('saveMsg');
+  if(!name){ msg.textContent='Coloque seu nome!'; return; }
+  msg.textContent='Salvando...';
+  try{ await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})}); msg.textContent='Salvo!'; loadTop10(); }
+  catch(e){ msg.textContent='Erro ao salvar.'; }
+}
+async function loadTop10(){
+  const list=document.getElementById('topList');
+  list.innerHTML='<li><span class="name">Carregando...</span></li>';
+  try{
+    const r=await fetch(`${API}?action=top10&jogo=${GAME_KEY}`);
+    const d=await r.json();
+    const arr=d.lista||[];
+    if(!arr.length){ list.innerHTML='<li><span class="name">Seja o primeiro!</span></li>'; return; }
+    list.innerHTML=arr.map((it,i)=>`<li><span class="pos">${i+1}</span><span class="name">${esc(it.nome)}</span><span class="pts">${it.pontos} pts</span></li>`).join('');
+  }catch(e){ list.innerHTML='<li><span class="name">Placar indisponível.</span></li>'; }
+}
+function esc(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+loadTop10();
+</script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/delights.js"></script>
+  <script src="assets/js/scroll-to-game.js"></script>
+  <script src="assets/js/bg-music.js"></script>
+</body>
+</html>
