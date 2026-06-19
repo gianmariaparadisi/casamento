@@ -27,24 +27,32 @@
     .dc-board-wrap{width:min(96%,var(--board-max,560px));margin:.85rem auto 0;aspect-ratio:1;position:relative;background:rgba(255,255,255,.5);border:1px solid rgba(216,205,188,.85);border-radius:18px;box-shadow:0 10px 32px rgba(82,57,34,.10);overflow:hidden;touch-action:none;transition:width .35s ease;}
     .candy{position:absolute;width:calc(100%/var(--cols,8));height:calc(100%/var(--cols,8));box-sizing:border-box;display:flex;align-items:center;justify-content:center;transition:top .22s cubic-bezier(.4,0,.2,1),left .22s cubic-bezier(.4,0,.2,1),opacity .18s ease;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
     .candy-svg{width:88%;height:88%;display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));transition:transform .15s;}
-    .candy-img{position:absolute;inset:6%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));transition:transform .15s;pointer-events:none;}
-    .candy-overlay{position:absolute;inset:6%;pointer-events:none;}
-    .gift-badge{position:absolute;top:0;right:2%;font-size:.85rem;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));pointer-events:none;}
+    .gift-badge{position:absolute;top:2%;right:2%;width:1.05rem;height:1.05rem;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));pointer-events:none;color:#B98538;}
+    .gift-badge svg{width:100%;height:100%;display:block;}
+    .dc-icon{display:inline-flex;width:1.05rem;height:1.05rem;}
+    .dc-icon svg{width:100%;height:100%;display:block;}
 
-    /* Inventory & toast */
-    .dc-inventory{display:flex;align-items:center;gap:.5rem;justify-content:center;margin:.65rem auto 0;}
+    /* Inventory, estoque & toast */
+    .dc-inventory{display:flex;align-items:center;gap:.5rem;justify-content:center;margin:.65rem auto 0;flex-wrap:wrap;}
     .dc-inv-label{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gm);}
-    .dc-inv-slot{width:2.6rem;height:2.6rem;border-radius:14px;background:rgba(255,255,255,.6);border:1px dashed rgba(216,205,188,.95);display:flex;align-items:center;justify-content:center;font-size:1.25rem;cursor:pointer;transition:transform .15s,background .15s;color:#BBAA92;padding:0;}
+    .dc-inv-slot{position:relative;width:2.6rem;height:2.6rem;border-radius:14px;background:rgba(255,255,255,.6);border:1px dashed rgba(216,205,188,.95);display:flex;align-items:center;justify-content:center;font-size:1.25rem;cursor:pointer;transition:transform .15s,background .15s;color:#BBAA92;padding:0;}
+    .dc-inv-slot .dc-icon{width:1.3rem;height:1.3rem;color:#8E5A26;}
     .dc-inv-slot.filled{border-style:solid;border-color:rgba(184,137,56,.55);background:rgba(255,255,255,.88);color:inherit;}
     .dc-inv-slot.filled:hover{transform:translateY(-2px) scale(1.06);}
+    .dc-inv-slot.dc-inv-stock{border-style:solid;border-color:rgba(111,168,220,.5);background:rgba(255,255,255,.88);}
+    .dc-inv-count{position:absolute;bottom:-4px;right:-4px;background:#8E2738;color:#fff;font-size:.6rem;font-weight:700;border-radius:999px;min-width:1.05rem;height:1.05rem;display:flex;align-items:center;justify-content:center;padding:0 .15rem;}
     .dc-toast{text-align:center;font-size:.78rem;font-weight:600;color:#8E2738;min-height:1.1em;margin:.5rem auto 0;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;}
     .dc-toast.show{opacity:1;transform:translateY(0);}
-    .candy.selected .candy-svg,.candy.selected .candy-img{transform:scale(1.12);filter:drop-shadow(0 0 7px #F4D35E) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
+    .candy.selected .candy-svg{transform:scale(1.12);filter:drop-shadow(0 0 7px #F4D35E) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
     .candy.clearing{animation:candyPop .22s ease forwards;pointer-events:none;}
     .candy.wrong-shake{animation:wrongShake .3s ease;}
-    .candy.special-pop .candy-svg,.candy.special-pop .candy-img{animation:specialPop .26s ease;}
-    .candy.is-wildcard .candy-svg,.candy.is-wildcard .candy-img{animation:wildcardPulse 1.5s ease-in-out infinite;filter:drop-shadow(0 0 7px #FFD86B) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
+    .candy.special-pop .candy-svg{animation:specialPop .26s ease;}
+    .candy.is-wildcard .candy-svg{animation:wildcardPulse 1.5s ease-in-out infinite;filter:drop-shadow(0 0 7px #FFD86B) drop-shadow(0 2px 3px rgba(0,0,0,.18));}
     @keyframes wildcardPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+    .dc-multi-badge{position:absolute;top:8px;right:8px;z-index:6;background:rgba(255,255,255,.92);border:1px solid rgba(184,137,56,.55);border-radius:999px;padding:.22rem .55rem;font-size:.74rem;font-weight:700;color:#8E2738;display:flex;align-items:center;gap:.28rem;box-shadow:0 4px 10px rgba(82,57,34,.15);}
+    .dc-multi-badge .dc-icon{color:#C08E42;}
+    .dc-multi-badge.blink{animation:multiBlink .5s steps(1) infinite;}
+    @keyframes multiBlink{50%{opacity:.18}}
     .score-pop{position:absolute;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:600;color:#B98538;font-size:1rem;pointer-events:none;animation:scoreFloat .7s ease forwards;z-index:5;}
     @keyframes candyPop{0%{transform:scale(1);opacity:1}55%{transform:scale(1.3);opacity:.75}100%{transform:scale(.15);opacity:0}}
     @keyframes specialPop{0%{transform:scale(1)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
@@ -100,9 +108,13 @@
       <span class="dc-inv-label" data-it="Riserva:">Reserva:</span>
       <button class="dc-inv-slot" id="invSlot0" onclick="useInventorySlot(0)">—</button>
       <button class="dc-inv-slot" id="invSlot1" onclick="useInventorySlot(1)">—</button>
+      <button class="dc-inv-slot dc-inv-stock" id="stock-shuffle" onclick="useStock('shuffle')" hidden></button>
+      <button class="dc-inv-slot dc-inv-stock" id="stock-magnet" onclick="useStock('magnet')" hidden></button>
     </div>
     <div class="dc-toast" id="dcToast"></div>
-    <div class="dc-board-wrap" id="board"></div>
+    <div class="dc-board-wrap" id="board">
+      <div class="dc-multi-badge" id="dcMultiBadge" hidden></div>
+    </div>
     <div style="display:flex;gap:.5rem;justify-content:center;margin-top:.9rem">
       <button class="game-btn" onclick="restartGame()" data-it="Nuova partita">Nova partida</button>
     </div>
@@ -119,11 +131,11 @@
           <li><span data-it="4 in fila → striscia (libera fila o colonna).">4 em linha → listra (libera a fileira ou coluna).</span></li>
           <li><span data-it="Forma a L o T → incartato (esplode un'area 3×3).">Forma de L ou T → embrulhado (estoura uma área 3×3).</span></li>
           <li><span data-it="5 in fila → doce-bomba (troca com um doce para eliminar todos daquele tipo) ou, raramente, um Bem-Casado!">5 em linha → doce-bomba (troque com um doce para eliminar todos daquele tipo) ou, raramente, um Bem-Casado!</span></li>
-          <li><span data-it="O Bem-Casado é raro: ao trocar, elimina duas cores do tabuleiro e te dá um power-up de brinde!">💞 O Bem-Casado é raro: ao trocar, elimina duas cores do tabuleiro inteiro e ainda te dá um power-up de brinde!</span></li>
-          <li><span data-it="Doce coringa ✨ explode com um único toque, sem precisar de trio!">Doce coringa ✨ explode com um único toque, sem precisar de trio!</span></li>
-          <li><span data-it="Dolci con 🎁 o ⏱️ nascondono premi — combinali!">Doces com 🎁 ou ⏱️ escondem prêmios — combine-os!</span></li>
-          <li><span data-it="Combo grandi liberano power-up: guardane fino a 2 e usali quando vuoi.">Combos grandes liberam power-ups: guarde até 2 e use quando quiser.</span></li>
-          <li><span data-it="Inventario pieno? Scegli quale usare prima di perdere il nuovo!">Inventário cheio? Escolha qual usar antes de perder o novo!</span></li>
+          <li><span data-it="O Bem-Casado é raro: ao trocar, elimina duas cores do tabuleiro e te dá um power-up de brinde!">O Bem-Casado é raro: ao trocar, elimina duas cores do tabuleiro inteiro e ainda te dá um power-up de brinde!</span></li>
+          <li><span data-it="Doce coringa explode com um único toque, sem precisar de trio!">Doce coringa explode com um único toque, sem precisar de trio!</span></li>
+          <li><span data-it="Dolci com um pequeno selo escondem prêmios — combinali!">Doces com um pequeno selo escondem prêmios — combine-os!</span></li>
+          <li><span data-it="Tempo extra, congelar e pontos x2 aplicam-se na hora (o x2 acumula em dobro se vier de novo). Embaralhar e ímã ficam guardados sem limite na reserva.">Tempo extra, congelar e pontos x2 aplicam-se na hora (o x2 acumula em dobro se vier de novo). Embaralhar e ímã ficam guardados sem limite na reserva.</span></li>
+          <li><span data-it="Bomba de cor vai para a reserva (até 2). Reserva cheia? Escolha qual usar antes de perder a nova!">Bomba de cor vai para a reserva (até 2). Reserva cheia? Escolha qual usar antes de perder a nova!</span></li>
           <li><span data-it="Il tabellone cresce a ogni 5 mila punti e libera un dolce nuovo a ogni espansione!">O tabuleiro cresce a cada 5 mil pontos e libera um doce novo a cada expansão!</span></li>
         </ul>
       </div>
@@ -181,18 +193,43 @@ let locked=false, gameActive=false;
 let score=0, timeLeft=TOTAL_TIME, timer=null, maxCombo=0, totalCleared=0, finalScore=0, chainStep=0;
 let triggeredThresholds=new Set();
 let elapsedPlayed=0, expandIndex=0, pendingExpansion=false;
-let freezeUntil=0, multiplierUntil=0, inventory=[], pendingPowerupOffer=null;
+let freezeUntil=0, multiplierUntil=0, multiplierStack=1, inventory=[], pendingPowerupOffer=null;
+let stock={shuffle:0, magnet:0};
+
+/* ---------- ícones inline (sem arquivos externos, sem emoji) ---------- */
+const ICONS={
+  clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l4 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  snow:'<svg viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/></g></svg>',
+  sparkle:'<svg viewBox="0 0 24 24"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="currentColor"/></svg>',
+  shuffle:'<svg viewBox="0 0 24 24"><path d="M4 7h4l4 10h4M4 17h4l2-5M16 7h4M16 7l-2-2M16 7l-2 2M20 17l-2-2M20 17l-2 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  magnet:'<svg viewBox="0 0 24 24"><path d="M7 4H4v7a8 8 0 0016 0V4h-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M7 4v7a5 5 0 0010 0V4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+  rainbow:'<svg viewBox="0 0 24 24"><path d="M3 18a9 9 0 0118 0" fill="none" stroke="#E76F6F" stroke-width="2"/><path d="M5.5 18a6.5 6.5 0 0113 0" fill="none" stroke="#F2C14E" stroke-width="2"/><path d="M8 18a4 4 0 018 0" fill="none" stroke="#6FA8DC" stroke-width="2"/></svg>',
+  gift:'<svg viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1.5" fill="currentColor" opacity=".85"/><rect x="4" y="6" width="16" height="4" rx="1" fill="currentColor"/><path d="M12 6v14M12 6c-1.2-3-5-3-5 0s3.8 1.2 5 0M12 6c1.2-3 5-3 5 0s-3.8 1.2-5 0" fill="none" stroke="#fff" stroke-width="1.2"/></svg>',
+  heart:'<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.6-9.4-9C1 7.7 2.4 5 5.3 5c2 0 3.4 1.3 4.1 2.6C10.1 6.3 11.5 5 13.5 5c2.9 0 4.3 2.7 2.7 6-2.4 4.4-9.4 9-9.4 9z" fill="currentColor"/></svg>',
+  hourglass:'<svg viewBox="0 0 24 24"><path d="M6 3h12M6 21h12M7 3c0 6 5 7 5 9s-5 3-5 9M17 3c0 6-5 7-5 9s5 3 5 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+function iconSpan(name){ return `<span class="dc-icon">${ICONS[name]||''}</span>`; }
 
 /* ---------- power-ups ---------- */
+// time/freeze/multi: automáticos (aplicam na hora, sem ocupar inventário)
+// shuffle/magnet: acumulam infinito num "estoque" separado (sem cap), só raros
+// rainbow: continua no inventário de 2 espaços (uso manual)
 const POWERUPS={
-  time:    {emoji:'⏱️', label:'Tempo Extra', requiresIdle:false, apply:()=>{ timeLeft+=3; updateHud(); showToast('⏱️ +3s de tempo!'); }},
-  freeze:  {emoji:'❄️', label:'Congelar',    requiresIdle:false, apply:()=>{ freezeUntil=Date.now()+6000; showToast('❄️ Tempo congelado por 6s!'); }},
-  multi:   {emoji:'✨', label:'Pontos x2',   requiresIdle:false, apply:()=>{ multiplierUntil=Date.now()+10000; showToast('✨ Pontos em dobro por 10s!'); }},
-  shuffle: {emoji:'🔀', label:'Embaralhar',  requiresIdle:true,  apply:()=>{ shuffleBoard(); }},
-  magnet:  {emoji:'🧲', label:'Ímã',         requiresIdle:true,  apply:()=>{ magnetMatch(); }},
-  rainbow: {emoji:'🌈', label:'Bomba de Cor',requiresIdle:true,  apply:()=>{ grantRandomBomb(); }}
+  time:    {icon:'hourglass', label:'Tempo Extra', requiresIdle:false, apply:()=>{ timeLeft+=3; updateHud(); showToast('+3s de tempo!'); }},
+  freeze:  {icon:'snow',      label:'Congelar',     requiresIdle:false, apply:()=>{ freezeUntil=Date.now()+6000; showToast('Tempo congelado por 6s!'); }},
+  multi:   {icon:'sparkle',   label:'Pontos x2',    requiresIdle:false, apply:()=>{
+    const now=Date.now();
+    multiplierStack=(now<multiplierUntil)?multiplierStack*2:2;
+    multiplierUntil=now+10000;
+    updateMultiBadge();
+    showToast('Pontos x'+multiplierStack+' ativado!');
+  }},
+  shuffle: {icon:'shuffle', label:'Embaralhar',  requiresIdle:true,  apply:()=>{ shuffleBoard(); }},
+  magnet:  {icon:'magnet',  label:'Ímã',         requiresIdle:true,  apply:()=>{ magnetMatch(); }},
+  rainbow: {icon:'rainbow', label:'Bomba de Cor',requiresIdle:true,  apply:()=>{ grantRandomBomb(); }}
 };
-const POWERUP_IDS=Object.keys(POWERUPS);
+// peso relativo de sorteio — shuffle a 10% e magnet a 20% do que era (uniforme) antes
+const POWERUP_WEIGHTS={time:1, freeze:1, multi:1, rainbow:1, shuffle:0.1, magnet:0.2};
 
 function recalcCell(){ CELL=100/COLS; boardEl.style.setProperty('--cols',COLS); }
 /* frequência de power-ups cai progressivamente com as expansões: 100% no início, 20% na expansão 5 */
@@ -205,15 +242,52 @@ function maybeGift(candy){
   if(!candy.special && Math.random()<0.018) candy.special='wildcard';
   return candy;
 }
+function pickWeightedPowerup(){
+  const ids=Object.keys(POWERUP_WEIGHTS);
+  const total=ids.reduce((s,id)=>s+POWERUP_WEIGHTS[id],0);
+  let roll=Math.random()*total;
+  for(const id of ids){ roll-=POWERUP_WEIGHTS[id]; if(roll<=0) return id; }
+  return ids[ids.length-1];
+}
 function grantPowerup(){
-  const id=POWERUP_IDS[rnd(POWERUP_IDS.length)];
-  if(inventory.length<2){ inventory.push(id); renderInventory(); showToast('🎁 +Power-up: '+POWERUPS[id].label); haptic(20); }
+  const id=pickWeightedPowerup();
+  if(id==='time'||id==='freeze'||id==='multi'){ POWERUPS[id].apply(); return; }
+  if(id==='shuffle'||id==='magnet'){ grantStock(id); return; }
+  if(inventory.length<2){ inventory.push(id); renderInventory(); showToast('Novo power-up: '+POWERUPS[id].label+'!'); haptic(20); }
   else if(!pendingPowerupOffer){ pendingPowerupOffer=id; }
+}
+function grantStock(id){
+  stock[id]++; renderStock(id);
+  showToast('+1 '+POWERUPS[id].label+' guardado!'); haptic(20);
+}
+function renderStock(id){
+  const btn=document.getElementById('stock-'+id);
+  if(!btn) return;
+  if(stock[id]>0){
+    btn.hidden=false;
+    btn.innerHTML=`${iconSpan(POWERUPS[id].icon)}<span class="dc-inv-count">${stock[id]}</span>`;
+    btn.title=POWERUPS[id].label;
+  } else { btn.hidden=true; btn.innerHTML=''; }
+}
+function useStock(id){
+  if(!gameActive || !stock[id]) return;
+  if(POWERUPS[id].requiresIdle && locked){ showToast('Aguarde o tabuleiro acalmar...'); return; }
+  stock[id]--; renderStock(id);
+  POWERUPS[id].apply();
+}
+function updateMultiBadge(){
+  const el=document.getElementById('dcMultiBadge');
+  if(!el) return;
+  const active=Date.now()<multiplierUntil;
+  if(!active){ el.hidden=true; el.classList.remove('blink'); return; }
+  el.hidden=false;
+  el.innerHTML=`${iconSpan('sparkle')}<span>x${multiplierStack}</span>`;
+  el.classList.toggle('blink', (multiplierUntil-Date.now())<3000);
 }
 function openInventoryFullModal(){
   clearInterval(timer);
   const box=document.getElementById('invFullChoices');
-  box.innerHTML=inventory.map((id,i)=>`<button class="game-btn game-btn--main" onclick="resolveInventoryFullModal('use',${i})">${POWERUPS[id].emoji} Usar ${POWERUPS[id].label}</button>`).join('');
+  box.innerHTML=inventory.map((id,i)=>`<button class="game-btn game-btn--main" onclick="resolveInventoryFullModal('use',${i})">${iconSpan(POWERUPS[id].icon)} Usar ${POWERUPS[id].label}</button>`).join('');
   document.getElementById('invFullModal').hidden=false;
 }
 function resolveInventoryFullModal(action,slot){
@@ -224,10 +298,10 @@ function resolveInventoryFullModal(action,slot){
     if(id){
       inventory.splice(slot,1); renderInventory();
       POWERUPS[id].apply();
-      if(pendingPowerupOffer && inventory.length<2){ inventory.push(pendingPowerupOffer); showToast('🎁 +Power-up: '+POWERUPS[pendingPowerupOffer].label); }
+      if(pendingPowerupOffer && inventory.length<2){ inventory.push(pendingPowerupOffer); showToast('Novo power-up guardado: '+POWERUPS[pendingPowerupOffer].label+'!'); }
     }
   } else {
-    showToast('🎁 Power-up descartado.');
+    showToast('Power-up descartado.');
   }
   pendingPowerupOffer=null;
   renderInventory();
@@ -238,7 +312,7 @@ function renderInventory(){
     const el=document.getElementById('invSlot'+i);
     if(!el) continue;
     const id=inventory[i];
-    if(id){ el.textContent=POWERUPS[id].emoji; el.title=POWERUPS[id].label; el.classList.add('filled'); }
+    if(id){ el.innerHTML=iconSpan(POWERUPS[id].icon); el.title=POWERUPS[id].label; el.classList.add('filled'); }
     else { el.textContent='—'; el.removeAttribute('title'); el.classList.remove('filled'); }
   }
 }
@@ -246,7 +320,7 @@ function useInventorySlot(i){
   if(!gameActive) return;
   const id=inventory[i]; if(!id) return;
   const def=POWERUPS[id];
-  if(def.requiresIdle && locked){ showToast('⏳ Aguarde o tabuleiro acalmar...'); return; }
+  if(def.requiresIdle && locked){ showToast('Aguarde o tabuleiro acalmar...'); return; }
   inventory.splice(i,1); renderInventory();
   def.apply();
 }
@@ -265,10 +339,10 @@ function magnetMatch(){
       swapDataOnly(r,c,nr,nc);
       const has=findClusters(board).length>0;
       swapDataOnly(r,c,nr,nc);
-      if(has){ showToast('🧲 Combo encontrado!'); attemptSwap(r,c,nr,nc); return; }
+      if(has){ showToast('Ímã: combo encontrado!'); attemptSwap(r,c,nr,nc); return; }
     }
   }
-  showToast('🧲 Nenhum combo disponível agora.');
+  showToast('Ímã: nenhum combo disponível agora.');
 }
 function shuffleBoard(){
   Object.values(elMap).forEach(el=>{ el.style.opacity='0'; });
@@ -277,11 +351,12 @@ function shuffleBoard(){
 function grantRandomBomb(){
   const candidates=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c] && !board[r][c].special) candidates.push([r,c]); }
-  if(!candidates.length){ showToast('🌈 Sem espaço pra bomba agora.'); return; }
+  if(!candidates.length){ showToast('Sem espaço pra bomba de cor agora.'); return; }
   const [r,c]=candidates[rnd(candidates.length)];
   const candy=board[r][c]; candy.special='bomb'; updateCandyVisual(candy);
   const el=elMap[candy.id]; if(el){ el.classList.add('special-pop'); setTimeout(()=>el.classList.remove('special-pop'),260); }
-  showToast('🌈 Bomba de cor criada!'); sndSpecial();
+  showToast('Bomba de cor criada!'); sndSpecial();
+  if(window.confettiBurst) confettiBurst({count:20});
 }
 function pickRandomTypeOnBoard(){
   const types=new Set();
@@ -323,8 +398,10 @@ const BASE_INNER=[
   // 8 (expansão 5) brigadeiro azul
   '<circle cx="50" cy="54" r="34" fill="#2F5FA8"/><circle cx="38" cy="40" r="8" fill="#3E73C2" opacity=".55"/><rect x="40" y="20" width="4" height="10" fill="#fff" transform="rotate(20 42 25)"/><rect x="58" y="24" width="4" height="10" fill="#fff" transform="rotate(-15 60 29)"/><rect x="48" y="66" width="4" height="10" fill="#fff" transform="rotate(50 50 71)"/>'
 ];
-const STRIPE_H='<rect x="0" y="42" width="100" height="16" fill="#FFFFFF" opacity=".55"/><rect x="0" y="46" width="100" height="8" fill="#FFD86B" opacity=".9"/>';
-const STRIPE_V='<rect x="42" y="0" width="16" height="100" fill="#FFFFFF" opacity=".55"/><rect x="46" y="0" width="8" height="100" fill="#FFD86B" opacity=".9"/>';
+// "barra de combo" — bastão de doce cremoso com listras douradas na diagonal e brilho de glacê,
+// atravessando a linha (H) ou coluna (V) inteira da casinha para marcar o combo de 4.
+const STRIPE_H='<rect x="2" y="38" width="96" height="24" rx="12" fill="#FFF6E5"/><rect x="2" y="38" width="96" height="24" rx="12" fill="none" stroke="#E8902B" stroke-width="2" opacity=".4"/><rect x="6" y="38" width="8" height="24" fill="#E8902B" opacity=".85" transform="rotate(28 10 50)"/><rect x="24" y="38" width="8" height="24" fill="#E8902B" opacity=".85" transform="rotate(28 28 50)"/><rect x="42" y="38" width="8" height="24" fill="#E8902B" opacity=".85" transform="rotate(28 46 50)"/><rect x="60" y="38" width="8" height="24" fill="#E8902B" opacity=".85" transform="rotate(28 64 50)"/><rect x="78" y="38" width="8" height="24" fill="#E8902B" opacity=".85" transform="rotate(28 82 50)"/><rect x="2" y="40" width="96" height="6" rx="3" fill="#FFFFFF" opacity=".65"/>';
+const STRIPE_V='<rect x="38" y="2" width="24" height="96" rx="12" fill="#FFF6E5"/><rect x="38" y="2" width="24" height="96" rx="12" fill="none" stroke="#E8902B" stroke-width="2" opacity=".4"/><rect x="38" y="6" width="24" height="8" fill="#E8902B" opacity=".85" transform="rotate(28 50 10)"/><rect x="38" y="24" width="24" height="8" fill="#E8902B" opacity=".85" transform="rotate(28 50 28)"/><rect x="38" y="42" width="24" height="8" fill="#E8902B" opacity=".85" transform="rotate(28 50 46)"/><rect x="38" y="60" width="24" height="8" fill="#E8902B" opacity=".85" transform="rotate(28 50 64)"/><rect x="38" y="78" width="24" height="8" fill="#E8902B" opacity=".85" transform="rotate(28 50 82)"/><rect x="40" y="2" width="6" height="96" rx="3" fill="#FFFFFF" opacity=".65"/>';
 const WRAPPED='<rect x="8" y="8" width="84" height="84" fill="none" stroke="#FFD86B" stroke-width="6" rx="16"/><circle cx="8" cy="8" r="5" fill="#FFD86B"/><circle cx="92" cy="8" r="5" fill="#FFD86B"/><circle cx="8" cy="92" r="5" fill="#FFD86B"/><circle cx="92" cy="92" r="5" fill="#FFD86B"/>';
 // "bomba" — um doce mesmo (trufa de chocolate com mecha aceza), não um ícone de bomba genérico
 const BOMB_INNER='<circle cx="50" cy="60" r="32" fill="#3B2415"/><circle cx="50" cy="60" r="32" fill="none" stroke="#241408" stroke-width="2" opacity=".5"/><ellipse cx="40" cy="48" rx="8" ry="5" fill="#5C3A21" opacity=".5"/><rect x="47" y="14" width="5" height="22" rx="2" fill="#C8893B" transform="rotate(8 49 25)"/><path d="M53 8 C58 2 64 4 62 12 C68 8 70 16 62 18 C66 24 58 24 56 16 Z" fill="#F2A33C"/><path d="M54 10 C57 6 61 8 59 13 C63 10 64 15 59 16 Z" fill="#FFE17D"/>';
@@ -343,31 +420,11 @@ function candyInnerSVG(c){
   else if(c.special==='wrapped') s+=WRAPPED;
   return s;
 }
-/* ---------- candy image assets (com fallback automático pro SVG acima) ---------- */
-const CANDY_IMG_DIR='assets/img/';
-// índice = c.type (mesma ordem de CANDY_NAMES/BASE_INNER)
-const CANDY_IMG_FILES=['doce-crush-eclair.png','doce-crush-macaron.png','doce-crush-brigadeiro.png','doce-crush-camafeu.png','doce-crush-pistache.png','doce-crush-tortinha.png','doce-crush-donut.png','doce-crush-physalis.png','doce-crush-brigadeiro-azul.png'];
-const SPECIAL_IMG_FILES={wildcard:'doce-crush-coringa.png',bemcasado:'doce-crush-bemcasado.png',bomb:'doce-crush-bomba.png'};
-function candyImgSrc(c){
-  const name=(c.special&&SPECIAL_IMG_FILES[c.special])?SPECIAL_IMG_FILES[c.special]:CANDY_IMG_FILES[c.type];
-  return CANDY_IMG_DIR+name;
-}
-function specialOverlaySVG(c){
-  if(c.special==='stripe-h') return STRIPE_H;
-  if(c.special==='stripe-v') return STRIPE_V;
-  if(c.special==='wrapped') return WRAPPED;
-  return '';
-}
 function candyHTML(c){
   let badge='';
-  if(c.gift==='time') badge='<span class="gift-badge">⏱️</span>';
-  else if(c.gift==='powerup') badge='<span class="gift-badge">🎁</span>';
-  // SVG fica por baixo como fallback; se o PNG carregar, ele cobre o SVG. Se falhar (onerror), some e o SVG aparece.
-  const fallbackSvg=`<svg viewBox="0 0 100 100" class="candy-svg">${candyInnerSVG(c)}</svg>`;
-  const img=`<img src="${candyImgSrc(c)}" class="candy-img" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`;
-  const ov=specialOverlaySVG(c);
-  const overlay=ov?`<svg viewBox="0 0 100 100" class="candy-overlay">${ov}</svg>`:'';
-  return fallbackSvg+img+overlay+badge;
+  if(c.gift==='time') badge='<span class="gift-badge">'+ICONS.hourglass+'</span>';
+  else if(c.gift==='powerup') badge='<span class="gift-badge">'+ICONS.gift+'</span>';
+  return `<svg viewBox="0 0 100 100" class="candy-svg">${candyInnerSVG(c)}</svg>`+badge;
 }
 
 /* ---------- helpers ---------- */
@@ -497,7 +554,7 @@ function updateCandyVisual(candy){ const el=elMap[candy.id]; if(el){ el.innerHTM
 function moveCandyEl(candy,r,c){ const el=elMap[candy.id]; if(!el) return; el.dataset.r=r; el.dataset.c=c; setPos(el,r,c); }
 function removeCandyEl(candy){ const el=elMap[candy.id]; if(!el) return; el.classList.add('clearing'); setTimeout(()=>{ if(el.parentNode) el.remove(); delete elMap[candy.id]; },230); }
 
-function renderFull(){ boardEl.innerHTML=''; elMap={}; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) createCandyEl(r,c,board[r][c]); }
+function renderFull(){ boardEl.querySelectorAll('.candy').forEach(el=>el.remove()); elMap={}; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) createCandyEl(r,c,board[r][c]); }
 
 function popScore(r,c,amount){
   if(amount<=0) return;
@@ -553,6 +610,7 @@ function triggerWildcard(r,c){
   if(!gameActive||locked) return;
   locked=true; chainStep=0; triggeredThresholds=new Set();
   sndSpecial(); haptic(25);
+  if(window.confettiBurst) confettiBurst({count:18});
   const toClear=new Set();
   areaEffect('wrapped',r,c).forEach(([ar,ac])=>toClear.add(ar+','+ac));
   toClear.add(r+','+c);
@@ -595,6 +653,7 @@ function resolveSwapOutcome(r1,c1,r2,c2,aOrig,bOrig){
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c]&&board[r][c].type===otherType) toClear.add(r+','+c); }
     toClear.add(bombAt[0]+','+bombAt[1]);
     direct=true; sndSpecial();
+    if(window.confettiBurst) confettiBurst({count:22});
   } else if(aIsBC||bIsBC){
     const bcAt=aIsBC?[r2,c2]:[r1,c1];
     const otherType=aIsBC?bOrig.type:aOrig.type;
@@ -607,9 +666,10 @@ function resolveSwapOutcome(r1,c1,r2,c2,aOrig,bOrig){
     areaEffect(aOrig.special,r2,c2).forEach(([r,c])=>toClear.add(r+','+c));
     areaEffect(bOrig.special,r1,c1).forEach(([r,c])=>toClear.add(r+','+c));
     direct=true; sndSpecial();
+    if(window.confettiBurst) confettiBurst({count:26});
   }
 
-  if(bcTriggered){ showToast('💞 Bem-Casado! +1 power-up de brinde!'); grantPowerup(); if(window.confettiBurst) confettiBurst({count:24,hearts:true}); }
+  if(bcTriggered){ showToast('Bem-Casado! +1 power-up de brinde!'); grantPowerup(); if(window.confettiBurst) confettiBurst({count:36,hearts:true}); }
   if(direct){ processClear(toClear,specials,[r1,c1,r2,c2]); return; }
 
   const swapCellsArr=[[r1,c1],[r2,c2]];
@@ -659,7 +719,8 @@ function processClear(toClear,specials,anchorCells){
     const type=pickRandomTypeOnBoard();
     if(type!=null){
       for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c]&&board[r][c].type===type) toClear.add(r+','+c); }
-      bonusMsg='⚡ Bomba Relâmpago!';
+      bonusMsg='Bomba Relâmpago!';
+      if(window.confettiBurst) confettiBurst({count:30});
     }
   }
   if(chainStep>=7 && !triggeredThresholds.has(7)){
@@ -668,7 +729,8 @@ function processClear(toClear,specials,anchorCells){
       const rr=rnd(ROWS), cc=rnd(COLS);
       areaEffect('wrapped',rr,cc).forEach(([ar,ac])=>toClear.add(ar+','+ac));
     }
-    bonusMsg='💥 Chuva de Bombas!';
+    bonusMsg='Chuva de Bombas!';
+    if(window.confettiBurst) confettiBurst({count:42,hearts:true});
   }
   if(chainStep>=3 && !triggeredThresholds.has('combo3') && Math.random()<0.85*powerupFreqMult()){
     triggeredThresholds.add('combo3');
@@ -694,8 +756,9 @@ function processClear(toClear,specials,anchorCells){
     else { candy.special=special; updateCandyVisual(candy); }
     const el=elMap[candy.id];
     if(el){ el.classList.add('special-pop'); setTimeout(()=>el.classList.remove('special-pop'),260); }
+    if(window.confettiBurst) confettiBurst({count:10});
   }
-  if(timeBonus){ timeLeft+=timeBonus; showToast('⏱️ +'+timeBonus+'s!'); }
+  if(timeBonus){ timeLeft+=timeBonus; showToast('+'+timeBonus+'s de tempo!'); }
   for(let i=0;i<powerupGrants;i++) grantPowerup();
 
   totalCleared+=clearedCount;
@@ -709,7 +772,7 @@ function processClear(toClear,specials,anchorCells){
     sndMatch(chainStep);
     const [ar,ac]=anchorCells?[anchorCells[0],anchorCells[1]]:[Math.floor(ROWS/2),Math.floor(COLS/2)];
     popScore(ar,ac,gained);
-    if(chainStep>=4 && window.confettiBurst) confettiBurst({count:14});
+    if(chainStep>=4 && window.confettiBurst) confettiBurst({count:24,hearts:chainStep>=6});
   }
   setTimeout(doGravityAndContinue,240);
 }
@@ -775,7 +838,7 @@ function expandGrid(){
   recalcCell();
   boardEl.style.setProperty('--board-max',(480+(COLS-START_COLS)*16)+'px');
   let newCandyMsg='';
-  if(NTYPES<MAX_NTYPES){ NTYPES++; newCandyMsg=' — novo doce: '+CANDY_NAMES[NTYPES-1]+'! 🍬'; }
+  if(NTYPES<MAX_NTYPES){ NTYPES++; newCandyMsg=' — novo doce: '+CANDY_NAMES[NTYPES-1]+'!'; }
   for(let r=0;r<oldRows;r++){ board[r].push(maybeGift(makeCandy(rnd(NTYPES)))); }
   board.push([]);
   for(let c=0;c<COLS;c++){ board[oldRows][c]=maybeGift(makeCandy(rnd(NTYPES))); }
@@ -784,8 +847,8 @@ function expandGrid(){
   }
   for(let r=0;r<oldRows;r++) createCandyEl(r,oldCols,board[r][oldCols],2);
   for(let c=0;c<COLS;c++) createCandyEl(oldRows,c,board[oldRows][c],2);
-  showToast('📐 Tabuleiro expandiu! '+ROWS+'×'+COLS+newCandyMsg);
-  if(window.confettiBurst) confettiBurst({count:18});
+  showToast('Tabuleiro expandiu! '+ROWS+'×'+COLS+newCandyMsg);
+  if(window.confettiBurst) confettiBurst({count:32,hearts:true});
   sndSpecial(); haptic(30);
   setTimeout(settleBoard,420);
 }
@@ -800,7 +863,8 @@ function restartGame(){
   score=0; timeLeft=TOTAL_TIME; maxCombo=0; totalCleared=0; chainStep=0;
   tapSelected=null; pointerDownCell=null; locked=false; gameActive=true;
   triggeredThresholds=new Set(); elapsedPlayed=0; expandIndex=0; pendingExpansion=false;
-  freezeUntil=0; multiplierUntil=0; inventory=[]; pendingPowerupOffer=null; renderInventory();
+  freezeUntil=0; multiplierUntil=0; multiplierStack=1; inventory=[]; pendingPowerupOffer=null; renderInventory();
+  stock={shuffle:0,magnet:0}; renderStock('shuffle'); renderStock('magnet'); updateMultiBadge();
   ROWS=START_ROWS; COLS=START_COLS; NTYPES=4; recalcCell();
   boardEl.style.setProperty('--board-max','480px');
   board=createBoard();
@@ -816,6 +880,7 @@ function tick(){
   const frozen=Date.now()<freezeUntil;
   if(!frozen) timeLeft--;
   updateHud();
+  updateMultiBadge();
   if(timeLeft<=10 && timeLeft>0 && !frozen) sndTick();
   if(timeLeft<=0) endGame();
 }
