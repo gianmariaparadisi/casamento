@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mosaico — Tiago e Gian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="assets/css/style.css"/>
+  <style>
+    :root{--gi:#2A2820;--gm:#6C6258;--gl:#D8CDBC;--gc:#FBF7EF;--gg:#C8A050;--mz-c:#C8A050;}
+    body.game-page{min-height:100svh;background:radial-gradient(circle at 14% 0%,rgba(255,255,255,.92),transparent 28rem),radial-gradient(circle at 82% 14%,rgba(246,214,151,.34),transparent 26rem),linear-gradient(180deg,#FBF7EF 0%,#F2E7D7 55%,#EFE1D0 100%);color:var(--gi);}
+    .game-nav{position:sticky;top:0;z-index:20;background:rgba(251,247,239,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(216,205,188,.7);}
+    .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:13px 0;}
+    .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.84rem;color:var(--gm);}
+    .game-back{font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;color:#766553;text-decoration:underline;text-underline-offset:4px;}
+    .game-shell{width:92%;max-width:560px;margin:0 auto;padding:28px 0 80px;}
+    .game-kicker{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:#A47845;text-align:center;margin-bottom:.4rem;}
+    .game-title{font-family:var(--font-display);font-size:clamp(2rem,7vw,3.6rem);font-weight:300;line-height:.95;text-align:center;margin-bottom:.6rem;}
+    .game-sub{max-width:440px;margin:0 auto 1rem;text-align:center;color:var(--gm);font-size:.88rem;line-height:1.65;}
+    .hud{display:flex;gap:.55rem;justify-content:center;flex-wrap:wrap;margin:.7rem auto;}
+    .hud__pill{background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.85);border-radius:999px;padding:.4rem .78rem;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:#665B4D;display:flex;align-items:center;gap:.3rem;}
+    .hud__pill strong{color:var(--gi);font-weight:600;}
+
+    /* Tabuleiro */
+    .mz-board-wrap{width:min(96%,420px);margin:.9rem auto 0;}
+    .mz-board{display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(6,1fr);gap:7px;aspect-ratio:5/6;background:rgba(255,255,255,.4);border:1px solid rgba(216,205,188,.85);border-radius:18px;box-shadow:0 10px 32px rgba(82,57,34,.10);padding:8px;}
+    .mz-tile{position:relative;border-radius:11px;background:rgba(255,255,255,.78);border:1.5px solid rgba(216,205,188,.7);cursor:pointer;overflow:hidden;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease;-webkit-tap-highlight-color:transparent;}
+    .mz-tile:active{transform:scale(.93);}
+    .mz-tile.is-blank{cursor:default;background:rgba(255,255,255,.32);border-style:dashed;border-color:rgba(216,205,188,.5);}
+    .mz-tile.is-selected{border-color:var(--mz-c);box-shadow:0 0 0 3px color-mix(in srgb, var(--mz-c) 40%, transparent),0 6px 14px rgba(82,57,34,.18);transform:translateY(-2px);}
+    .mz-tile.is-match{animation:mzMatchFlash .32s ease;}
+    .mz-tile.is-miss{animation:mzMissShake .26s ease;}
+    @keyframes mzMatchFlash{0%{transform:scale(1)}45%{transform:scale(1.12)}100%{transform:scale(1)}}
+    @keyframes mzMissShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+    .mz-l{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+    .mz-l svg{width:100%;height:100%;display:block;}
+    .mz-l-bg{inset:3%;border-radius:8px;}
+    .mz-l-line{inset:5%;}
+    .mz-l-shape{inset:25%;}
+    .mz-l-accent{inset:39%;filter:drop-shadow(0 1px 1px rgba(0,0,0,.18));}
+
+    .mz-toast{display:flex;align-items:center;justify-content:center;gap:.4rem;text-align:center;font-size:.78rem;font-weight:600;color:#8E2738;min-height:1.1em;margin:.6rem auto 0;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;}
+    .mz-toast.show{opacity:1;transform:translateY(0);}
+    .mz-hint{text-align:center;font-size:.74rem;color:var(--gm);margin-top:.5rem;min-height:1.1em;}
+
+    /* Modals (igual ao padrão dos outros jogos) */
+    .modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:rgba(251,247,239,.9);backdrop-filter:blur(8px);}
+    .modal[hidden]{display:none;}
+    .modal__card{width:min(92%,420px);background:rgba(255,255,255,.96);border:1px solid rgba(216,205,188,.95);border-radius:22px;padding:1.6rem;text-align:center;box-shadow:0 22px 70px rgba(82,57,34,.18);max-height:88vh;overflow:auto;}
+    .modal__icon img{width:4.5rem;height:4.5rem;object-fit:contain;display:block;margin:0 auto .6rem;}
+    .modal__title{font-family:var(--font-display);font-size:2rem;font-weight:300;margin-bottom:.45rem;}
+    .modal__text{color:var(--gm);font-size:.88rem;line-height:1.65;margin-bottom:.9rem;text-align:left;}
+    .modal__text ul{margin:.4rem 0 0;padding-left:1.1rem;}
+    .modal__text li{margin-bottom:.3rem;}
+    .game-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(180,137,70,.35);background:#fff;color:#5A4C3D;padding:.72rem 1.3rem;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 8px 24px rgba(110,80,45,.09);cursor:pointer;transition:all .15s;gap:.35rem;}
+    .game-btn:hover{transform:translateY(-1px);background:#FFF9EF;}
+    .game-btn--main{background:linear-gradient(135deg,#D6B167,#B98538);color:white;border-color:transparent;}
+    .game-btn--main:hover{background:linear-gradient(135deg,#E0BB71,#C08E42);}
+    .btn-row{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
+    .endstats{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin:.75rem 0;text-align:left;}
+    .endstats div{background:rgba(255,255,255,.65);border:1px solid rgba(216,205,188,.8);border-radius:11px;padding:.45rem .6rem;font-size:.76rem;}
+    .endstats strong{display:block;font-size:1.1rem;color:#8E2738;font-family:var(--font-display);font-weight:500;}
+    .endstats span{color:var(--gm);}
+    .save-box{margin-top:.85rem;background:rgba(255,255,255,.6);border:1px solid rgba(216,205,188,.8);border-radius:14px;padding:.78rem;}
+    .save-box__row{display:flex;gap:.45rem;}
+    .save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.9);border-radius:999px;background:#fff;padding:.65rem .88rem;font:inherit;font-size:.87rem;outline:none;}
+    .save-msg{font-size:.73rem;color:var(--gm);margin-top:.32rem;min-height:1em;}
+    .top10{margin-top:1.1rem;background:rgba(255,255,255,.42);border:1px solid rgba(216,205,188,.75);border-radius:14px;padding:.82rem;}
+    .top10 h3{font-family:var(--font-display);font-size:1.2rem;font-weight:400;margin-bottom:.45rem;text-align:center;}
+    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.28rem;}
+    .top10 li{display:flex;align-items:center;gap:.55rem;background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.6);border-radius:10px;padding:.42rem .6rem;font-size:.83rem;}
+    .top10 .pos{font-family:var(--font-display);font-size:.95rem;width:1.3rem;text-align:center;color:#A47845;}
+    .top10 .name{flex:1;font-weight:500;}.top10 .pts{font-weight:700;color:#7B4B22;}
+    @media(max-width:480px){.save-box__row{flex-direction:column}.game-btn{width:100%}}
+  </style>
+</head>
+<body class="game-page">
+  <nav class="game-nav"><div class="game-nav__inner">
+    <a class="game-back" href="jogos.html" data-it="← Torna ai giochi">← Voltar aos jogos</a>
+    <div class="game-brand">Tiago & Gian</div>
+  </div></nav>
+  <main class="game-shell">
+    <p class="game-kicker" data-it="Puzzle del Giorno">Puzzle do Dia</p>
+    <h1 class="game-title">Mosaico</h1>
+    <p class="game-sub" data-it="Tocca una tile per selezionarla, poi tocca un'altra che condivide un elemento visivo con essa: gli elementi in comune si dissolvono e la catena continua dalla nuova tile. Pulisci il mosaico intero!">Toque numa peça pra selecioná-la, depois toque em outra que compartilhe um elemento visual com ela: os elementos em comum se dissolvem e a corrente continua a partir da nova peça. Limpe o mosaico todo!</p>
+    <div class="hud">
+      <div class="hud__pill"><span data-it="Mosse:">Jogadas:</span> <strong id="mzMoves">0</strong></div>
+      <div class="hud__pill"><span data-it="Combo:">Combo:</span> <strong id="mzCombo">x0</strong></div>
+      <div class="hud__pill"><span data-it="Record combo:">Maior combo:</span> <strong id="mzBest">0</strong></div>
+      <div class="hud__pill"><span data-it="Pulito:">Limpo:</span> <strong id="mzProgress">0%</strong></div>
+    </div>
+    <div class="mz-toast" id="mzToast"></div>
+    <div class="mz-board-wrap"><div class="mz-board" id="mzBoard"></div></div>
+    <p class="mz-hint" id="mzHint" data-it="Tocca una tile per iniziare una catena.">Toque numa peça pra começar uma corrente.</p>
+    <div style="display:flex;gap:.5rem;justify-content:center;margin-top:.9rem">
+      <button class="game-btn" onclick="restartGame()" data-it="Ricomincia">Reiniciar</button>
+    </div>
+    <section class="top10"><h3>Top 10</h3><ol id="topList"></ol></section>
+  </main>
+
+  <div class="modal" id="startModal">
+    <div class="modal__card">
+      <div class="modal__icon"><img src="assets/img/icon-sparkle.png" alt=""></div>
+      <h2 class="modal__title">Mosaico</h2>
+      <div class="modal__text">
+        <span data-it="Ogni tile può avere fino a 4 elementi visivi: fondo, forma, traccia fine e un piccolo accento centrale.">Cada peça pode ter até 4 elementos visuais: fundo, formato, traço fino e um pequeno accent central.</span>
+        <ul>
+          <li><span data-it="Tocca una tile per selezionarla (diventa la tile attiva della catena).">Toque numa peça pra selecioná-la (ela se torna a peça ativa da corrente).</span></li>
+          <li><span data-it="Tocca un'altra tile che condivide almeno un elemento: gli elementi in comune si dissolvono in entrambe e la catena continua dalla nuova tile.">Toque em outra peça que compartilhe pelo menos um elemento: os elementos em comum se dissolvem nas duas e a corrente continua a partir da nova peça.</span></li>
+          <li><span data-it="Se non condividono nulla, la catena si interrompe (non è un errore — puoi sempre ricominciare da qualsiasi tile).">Se não compartilharem nada, a corrente se interrompe (não é um erro — você sempre pode começar de novo a partir de qualquer peça).</span></li>
+          <li><span data-it="Tocca di nuovo la tile selezionata per deselezionarla e ricominciare da un'altra.">Toque de novo na peça selecionada pra desmarcá-la e começar de outra.</span></li>
+          <li><span data-it="Obiettivo: pulire tutte le 30 tile. Più lunga è la catena, più punti guadagni!">Objetivo: limpar as 30 peças. Quanto mais longa a corrente, mais pontos você ganha!</span></li>
+          <li><span data-it="Lo stesso puzzle vale per tutti, oggi — il tema (colore e variantes) cambia ogni giorno.">O mesmo puzzle vale pra todo mundo, hoje — o tema (cor e variantes) muda todo dia.</span></li>
+        </ul>
+      </div>
+      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startGame()" data-it="Inizia">Começar</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="endModal" hidden>
+    <div class="modal__card">
+      <div class="modal__icon"><img src="assets/img/icon-confetti-burst.png" alt=""></div>
+      <h2 class="modal__title" data-it="Mosaico pulito!">Mosaico limpo!</h2>
+      <p class="modal__text" style="text-align:center" data-it="Ottimo lavoro a trovare le connessioni di oggi!">Ótimo trabalho encontrando as conexões de hoje!</p>
+      <div class="endstats">
+        <div><span data-it="Punti">Pontos</span><strong id="sScoreD">—</strong></div>
+        <div><span data-it="Record combo">Maior combo</span><strong id="sComboD">—</strong></div>
+        <div><span data-it="Mosse">Jogadas</span><strong id="sMovesD">—</strong></div>
+        <div><span data-it="Modo">Modo</span><strong data-it="Quotidiano">Diário</strong></div>
+      </div>
+      <div class="btn-row" style="margin-bottom:.7rem">
+        <button class="game-btn game-btn--main" onclick="restartGame()" data-it="Gioca di nuovo">Jogar novamente</button>
+      </div>
+      <div class="save-box">
+        <div class="save-box__row">
+          <input class="save-input" id="playerName" placeholder="Seu nome" data-it-placeholder="Il tuo nome" maxlength="22"/>
+          <button class="game-btn" onclick="doSave()" data-it="Salva">Salvar</button>
+        </div>
+        <p class="save-msg" id="saveMsg"></p>
+      </div>
+    </div>
+  </div>
+
+<script>
+"use strict";
+const API="https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+const GAME_KEY="mosaico";
+const ROWS=6, COLS=5, TOTAL=ROWS*COLS;
+const LAYERS=['bg','shape','line','accent'];
+
+/* ---------- util: data do dia (mesmo formato usado pelo connect4: DD/MM/YYYY) ---------- */
+function hoje(){ const d=new Date(); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
+
+/* ---------- PRNG determinístico por seed (mesmo board pra todo mundo, no mesmo dia) ---------- */
+function mulberry32(seed){
+  return function(){
+    seed|=0; seed=seed+0x6D2B79F5|0;
+    let t=Math.imul(seed^seed>>>15,1|seed);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return ((t^t>>>14)>>>0)/4294967296;
+  };
+}
+function strHash(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+function shuffleArr(arr,rng){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
+function randEven(rng,min,max){ const lo=Math.ceil(min/2), hi=Math.floor(max/2); return (lo+Math.floor(rng()*(hi-lo+1)))*2; }
+
+/* ---------- geração do tabuleiro do dia ----------
+   Garantia de solucionabilidade: cada camada (bg/shape/line/accent) sempre
+   termina com uma contagem PAR de peças ativas no tabuleiro inteiro. Como
+   dentro de um mesmo dia todas as instâncias de uma camada são idênticas
+   (mesma cor + mesma variante), qualquer par de peças que tenha aquela
+   camada ativa sempre "casa" — então contagem par = sempre dá pra limpar
+   tudo em pares, sem peça órfã. */
+function genBoard(seedStr){
+  const rng=mulberry32(strHash(seedStr));
+  const tiles=Array.from({length:TOTAL},()=>({active:{bg:false,shape:false,line:false,accent:false}}));
+  const ranges={bg:[10,18],shape:[8,16],line:[8,16],accent:[6,14]};
+  for(const L of LAYERS){
+    const [mn,mx]=ranges[L];
+    const count=randEven(rng,mn,mx);
+    const idx=[...Array(TOTAL).keys()];
+    shuffleArr(idx,rng);
+    for(let k=0;k<count;k++) tiles[idx[k]].active[L]=true;
+  }
+  // conserto: nenhuma peça pode nascer totalmente "em branco" (sem nenhuma camada)
+  let guard=0;
+  while(guard++<500){
+    const blankIdx=tiles.findIndex(t=>LAYERS.every(L=>!t.active[L]));
+    if(blankIdx===-1) break;
+    const L=LAYERS[Math.floor(rng()*LAYERS.length)];
+    tiles[blankIdx].active[L]=true;
+    const candidates=[];
+    for(let i=0;i<TOTAL;i++){ if(i!==blankIdx && !tiles[i].active[L]) candidates.push(i); }
+    if(candidates.length===0) continue;
+    tiles[candidates[Math.floor(rng()*candidates.length)]].active[L]=true;
+  }
+  return tiles;
+}
+function totalActiveCount(tiles){ let n=0; for(const t of tiles) for(const L of LAYERS) if(t.active[L]) n++; return n; }
+function isBlank(t){ return LAYERS.every(L=>!t.active[L]); }
+
+/* ---------- tema do dia (cor + variantes), buscado na planilha; com fallback local ---------- */
+const FALLBACK_PALETTE=['#C8A050','#8FA876','#C07856','#A88BB0','#6FA0C2','#B86B7A'];
+function fallbackTema(seedStr){
+  const rng=mulberry32(strHash('tema-'+seedStr));
+  return {
+    cor: FALLBACK_PALETTE[Math.floor(rng()*FALLBACK_PALETTE.length)],
+    variante_formato: 1+Math.floor(rng()*10),
+    variante_traco: 1+Math.floor(rng()*10),
+    variante_central: 1+Math.floor(rng()*10)
+  };
+}
+async function carregarTema(seedStr){
+  try{
+    const ctrl=new AbortController();
+    const t=setTimeout(()=>ctrl.abort(),5000);
+    const r=await fetch(`${API}?action=tema&jogo=${GAME_KEY}&data=${encodeURIComponent(hoje())}`,{signal:ctrl.signal});
+    clearTimeout(t);
+    const j=await r.json();
+    if(j && j.achou){
+      return {
+        cor: String(j.cor||FALLBACK_PALETTE[0]),
+        variante_formato: Number(j.variante_formato)||1,
+        variante_traco: Number(j.variante_traco)||1,
+        variante_central: Number(j.variante_central)||1
+      };
+    }
+  }catch(e){ /* sem planilha configurada ainda, ou offline — usa o tema local */ }
+  return fallbackTema(seedStr);
+}
+
+/* ---------- helpers de cor ---------- */
+function hexToRgb(hex){
+  const m=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex||'');
+  if(!m) return {r:200,g:160,b:80};
+  return {r:parseInt(m[1],16),g:parseInt(m[2],16),b:parseInt(m[3],16)};
+}
+function rgba(hex,a){ const {r,g,b}=hexToRgb(hex); return `rgba(${r},${g},${b},${a})`; }
+
+/* ---------- visuais placeholder (SVG inline) ----------
+   Estes são RASCUNHOS — quando os PNGs reais chegarem (10 variantes pra
+   cada um de formato/traço/accent, todos numa cor neutra), basta trocar
+   o conteúdo de shapeMarkup/lineMarkup/accentMarkup por
+   <img src="assets/img/mosaico-formato-01.png" class="mz-mask" style="--mz-mask-color:...">
+   usando mask-image (ver comentário ao final do arquivo). Nomes sugeridos:
+   mosaico-formato-01..10.png · mosaico-traco-01..10.png · mosaico-central-01..10.png */
+function regularPolygon(cx,cy,r,sides,rotateDeg){
+  const pts=[];
+  for(let i=0;i<sides;i++){
+    const a=(Math.PI*2*i/sides)-Math.PI/2+(rotateDeg||0)*Math.PI/180;
+    pts.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));
+  }
+  return pts.join(' ');
+}
+function starPoints(cx,cy,rOuter,rInner,spikes){
+  const pts=[];
+  for(let i=0;i<spikes*2;i++){
+    const r=i%2===0?rOuter:rInner;
+    const a=(Math.PI*i/spikes)-Math.PI/2;
+    pts.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));
+  }
+  return pts.join(' ');
+}
+function shapeMarkup(idx,fill){
+  const f=`fill="${fill}"`;
+  switch(idx){
+    case 1: return `<circle cx="50" cy="50" r="42" ${f}/>`;
+    case 2: return `<polygon points="${regularPolygon(50,50,44,4,0)}" ${f}/>`; // diamante
+    case 3: return `<polygon points="${regularPolygon(50,50,42,6,0)}" ${f}/>`; // hexágono
+    case 4: return `<polygon points="${regularPolygon(50,50,44,5,0)}" ${f}/>`; // pentágono
+    case 5: return `<polygon points="${regularPolygon(50,50,46,3,0)}" ${f}/>`; // triângulo
+    case 6: return `<polygon points="${starPoints(50,50,44,19,5)}" ${f}/>`; // estrela 5 pontas
+    case 7: return `<path d="M50 82 C20 60 12 38 28 26 C40 17 50 28 50 38 C50 28 60 17 72 26 C88 38 80 60 50 82 Z" ${f}/>`; // coração
+    case 8: return `<path d="M50 12 C72 32 78 52 64 68 C56 77 44 77 36 68 C22 52 28 32 50 12 Z" ${f}/>`; // gota
+    case 9: return `<path d="M50 14 C76 22 86 48 70 70 C58 86 38 84 28 68 C14 46 26 20 50 14 Z" ${f}/>`; // folha
+    default: return `<path d="M14 64 A36 36 0 0 1 86 64 Z" ${f}/>`; // arco
+  }
+}
+function lineMarkup(idx,stroke){
+  const s=`stroke="${stroke}" stroke-width="3.4" fill="none" stroke-linecap="round"`;
+  const lines=[];
+  if(idx===1){ for(let i=-2;i<=8;i++){ const o=i*12; lines.push(`<line x1="${o-20}" y1="0" x2="${o+20}" y2="100" ${s}/>`); } }
+  else if(idx===2){ for(let i=-2;i<=8;i++){ const o=i*12; lines.push(`<line x1="${o+20}" y1="0" x2="${o-20}" y2="100" ${s}/>`); } }
+  else if(idx===3){ for(let i=1;i<6;i++){ lines.push(`<line x1="0" y1="${i*16}" x2="100" y2="${i*16}" ${s}/>`); } }
+  else if(idx===4){ for(let i=1;i<6;i++){ lines.push(`<line x1="${i*16}" y1="0" x2="${i*16}" y2="100" ${s}/>`); } }
+  else if(idx===5){ for(let i=1;i<5;i++){ lines.push(`<line x1="0" y1="${i*20}" x2="100" y2="${i*20-30}" ${s}/>`); lines.push(`<line x1="0" y1="${i*20}" x2="100" y2="${i*20+30}" ${s}/>`); } }
+  else if(idx===6){ let d='M0,30'; for(let x=0;x<=100;x+=20) d+=` L${x+10},${x%40===0?10:50}`; lines.push(`<path d="${d}" ${s}/>`); }
+  else if(idx===7){ let d='M0,50'; for(let x=0;x<=100;x+=16) d+=` L${x+8},${(x/16)%2===0?30:70}`; lines.push(`<path d="${d}" ${s}/>`); }
+  else if(idx===8){ for(let a=0;a<8;a++){ const r=(Math.PI*2*a/8); lines.push(`<circle cx="${50+38*Math.cos(r)}" cy="${50+38*Math.sin(r)}" r="3.2" fill="${stroke}"/>`); } }
+  else if(idx===9){ for(let a=0;a<8;a++){ const r=(Math.PI*2*a/8); lines.push(`<line x1="50" y1="50" x2="${50+44*Math.cos(r)}" y2="${50+44*Math.sin(r)}" ${s}/>`); } }
+  else { lines.push(`<circle cx="50" cy="50" r="44" stroke="${stroke}" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="30" stroke="${stroke}" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="16" stroke="${stroke}" stroke-width="3" fill="none"/>`); }
+  return lines.join('');
+}
+function accentMarkup(idx,fill,stroke){
+  const f=`fill="${fill}" stroke="${stroke}" stroke-width="3"`;
+  switch(idx){
+    case 1: return `<circle cx="50" cy="50" r="26" ${f}/>`;
+    case 2: return `<polygon points="${starPoints(50,50,30,12,4)}" ${f}/>`;
+    case 3: return `<path d="M50 10 L50 90 M10 50 L90 50" stroke="${fill}" stroke-width="14" stroke-linecap="round"/>`; // plus
+    case 4: return `<polygon points="${regularPolygon(50,50,30,3,0)}" ${f}/>`;
+    case 5: return `<polygon points="${regularPolygon(50,50,28,4,0)}" ${f}/>`;
+    case 6: return `<circle cx="50" cy="50" r="26" fill="none" stroke="${fill}" stroke-width="9"/>`;
+    case 7: return `<path d="M50 70 C32 56 28 42 38 35 C44 31 50 37 50 42 C50 37 56 31 62 35 C72 42 68 56 50 70 Z" ${f}/>`;
+    case 8: return `<rect x="24" y="24" width="52" height="52" rx="8" ${f}/>`;
+    case 9: return `<path d="M22 50 A28 28 0 0 1 78 50 Z" ${f}/>`;
+    default: return `<polygon points="${starPoints(50,50,30,8,6)}" ${f}/>`;
+  }
+}
+
+/* ---------- estado do jogo ---------- */
+let tiles=[], tema=null, current=null, comboCount=0, bestCombo=0, moves=0, score=0, gameActive=false, finished=false;
+const boardEl=document.getElementById('mzBoard');
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function beep(f,dur,vol,type){ try{ const c=ac(), t=c.currentTime, o=c.createOscillator(), g=c.createGain(); o.type=type||'sine'; o.frequency.value=f; g.gain.setValueAtTime(vol||.09,t); g.gain.exponentialRampToValueAtTime(.0001,t+dur); o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur); }catch(e){} }
+let _ac=null; function ac(){ return _ac||(_ac=new (window.AudioContext||window.webkitAudioContext)()); }
+function haptic(ms){ try{ navigator.vibrate&&navigator.vibrate(ms||15); }catch(e){} }
+function sndMatch(){ beep(660,.07,.07); }
+function sndCombo(){ beep(880,.06,.07); setTimeout(()=>beep(1100,.07,.06),50); }
+function sndMiss(){ beep(220,.09,.05,'triangle'); }
+function sndWin(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.16,.08),i*90)); }
+
+function showToast(text){
+  const t=document.getElementById('mzToast'); if(!t) return;
+  t.textContent=text; t.classList.remove('show');
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>t.classList.add('show')); });
+  clearTimeout(t._hideTimer);
+  t._hideTimer=setTimeout(()=>t.classList.remove('show'),1700);
+}
+function setHint(text){ const h=document.getElementById('mzHint'); if(h) h.textContent=text; }
+
+function renderBoard(){
+  boardEl.innerHTML='';
+  tiles.forEach((tile,i)=>{
+    const div=document.createElement('div');
+    div.className='mz-tile'+(isBlank(tile)?' is-blank':'')+(current===i?' is-selected':'');
+    div.dataset.i=i;
+    if(!isBlank(tile)){
+      let html='';
+      if(tile.active.bg) html+=`<span class="mz-l mz-l-bg" style="background:${rgba(tema.cor,.20)}"></span>`;
+      if(tile.active.line) html+=`<span class="mz-l mz-l-line"><svg viewBox="0 0 100 100">${lineMarkup(tema.variante_traco,rgba(tema.cor,.55))}</svg></span>`;
+      if(tile.active.shape) html+=`<span class="mz-l mz-l-shape"><svg viewBox="0 0 100 100">${shapeMarkup(tema.variante_formato,rgba(tema.cor,.88))}</svg></span>`;
+      if(tile.active.accent) html+=`<span class="mz-l mz-l-accent"><svg viewBox="0 0 100 100">${accentMarkup(tema.variante_central,tema.cor,'#FFF8EC')}</svg></span>`;
+      div.innerHTML=html;
+      div.addEventListener('click',()=>onTileTap(i));
+    }
+    boardEl.appendChild(div);
+  });
+}
+
+function updateHud(){
+  document.getElementById('mzMoves').textContent=moves;
+  document.getElementById('mzCombo').textContent='x'+comboCount;
+  document.getElementById('mzBest').textContent=bestCombo;
+  const startTotal=window._mzStartTotal||1;
+  const remaining=totalActiveCount(tiles);
+  const pct=Math.round((1-remaining/startTotal)*100);
+  document.getElementById('mzProgress').textContent=pct+'%';
+}
+
+function flashTile(i,cls){
+  const el=boardEl.children[i]; if(!el) return;
+  el.classList.add(cls);
+  setTimeout(()=>el.classList.remove(cls),320);
+}
+
+function onTileTap(i){
+  if(!gameActive||finished) return;
+  const tile=tiles[i];
+  if(isBlank(tile)) return;
+  if(current===null){
+    current=i; renderBoard(); setHint(I18N&&I18N.lang==='it' ? 'Tocca un’altra tile che condivide un elemento.' : 'Toque em outra peça que compartilhe um elemento.');
+    return;
+  }
+  if(current===i){
+    current=null; renderBoard(); setHint(I18N&&I18N.lang==='it' ? 'Tocca una tile per iniziare una catena.' : 'Toque numa peça pra começar uma corrente.');
+    return;
+  }
+  const shared=LAYERS.filter(L=>tiles[current].active[L]&&tile.active[L]);
+  moves++;
+  if(shared.length===0){
+    flashTile(current,'is-miss'); flashTile(i,'is-miss');
+    sndMiss(); haptic([8,20,8]);
+    comboCount=0;
+    current=i;
+    setHint(I18N&&I18N.lang==='it' ? 'Nessun elemento in comune — nuova catena da qui.' : 'Nenhum elemento em comum — nova corrente a partir daqui.');
+  } else {
+    shared.forEach(L=>{ tiles[current].active[L]=false; tile.active[L]=false; });
+    comboCount++; bestCombo=Math.max(bestCombo,comboCount);
+    score+=15*shared.length*comboCount;
+    flashTile(current,'is-match'); flashTile(i,'is-match');
+    if(comboCount>1) sndCombo(); else sndMatch();
+    haptic(16);
+    if(comboCount>0 && comboCount%3===0) showToast('Combo x'+comboCount+'!');
+    current=isBlank(tile)?null:i;
+    setHint(current===null ? (I18N&&I18N.lang==='it' ? 'Tocca una tile per iniziare una catena.' : 'Toque numa peça pra começar uma corrente.') : (I18N&&I18N.lang==='it' ? 'Continua la catena o tocca la tile selezionata per ricominciare.' : 'Continue a corrente ou toque na peça selecionada pra recomeçar.'));
+  }
+  renderBoard();
+  updateHud();
+  if(totalActiveCount(tiles)===0){ setTimeout(endGame,260); }
+}
+
+async function startGame(){
+  document.getElementById('startModal').hidden=true;
+  document.getElementById('endModal').hidden=true;
+  const seed=hoje()+'-'+GAME_KEY;
+  tiles=genBoard(seed);
+  window._mzStartTotal=totalActiveCount(tiles);
+  tema=await carregarTema(seed);
+  document.documentElement.style.setProperty('--mz-c',tema.cor);
+  current=null; comboCount=0; bestCombo=0; moves=0; score=0; finished=false; gameActive=true;
+  renderBoard(); updateHud();
+  setHint(I18N&&I18N.lang==='it' ? 'Tocca una tile per iniziare una catena.' : 'Toque numa peça pra começar uma corrente.');
+}
+
+function restartGame(){ startGame(); }
+
+function endGame(){
+  finished=true; gameActive=false;
+  if(window.confettiBurst) confettiBurst({count:40,hearts:true});
+  sndWin(); haptic(50);
+  document.getElementById('sScoreD').textContent=score;
+  document.getElementById('sComboD').textContent=bestCombo;
+  document.getElementById('sMovesD').textContent=moves;
+  document.getElementById('endModal').hidden=false;
+}
+
+async function doSave(){
+  const nameEl=document.getElementById('playerName'), msg=document.getElementById('saveMsg');
+  const name=(nameEl.value||'').trim();
+  if(!name){ msg.textContent='Digite seu nome!'; return; }
+  msg.textContent='Salvando...';
+  try{ await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:score})}); msg.textContent='Salvo!'; loadTop10(); }
+  catch(e){ msg.textContent='Erro ao salvar.'; }
+}
+
+async function loadTop10(){
+  const list=document.getElementById('topList'); if(!list) return;
+  try{
+    const r=await fetch(`${API}?action=top10&jogo=${GAME_KEY}`);
+    const d=await r.json();
+    if(!d?.lista?.length){ list.innerHTML='<li style="justify-content:center;color:var(--gm)">Sem recordes ainda</li>'; return; }
+    list.innerHTML=d.lista.map((it,i)=>`<li><span class="pos">${i+1}</span><span class="name">${esc(it.nome)}</span><span class="pts">${it.pontos} pts</span></li>`).join('');
+  }catch(e){ list.innerHTML='<li style="justify-content:center;color:var(--gm)">Não foi possível carregar</li>'; }
+}
+
+loadTop10();
+
+/* ---------------------------------------------------------------------------
+   FUTURO: trocar os SVGs placeholder pelos PNGs reais (quando subidos)
+   ---------------------------------------------------------------------------
+   Pra cada categoria (formato/traço/central), os PNGs devem ser silhuetas
+   numa cor neutra (preto ou branco) num fundo transparente. Em vez de
+   <svg>...</svg> dentro de shapeMarkup/lineMarkup/accentMarkup, use uma
+   <img> com mask-image apontando pro arquivo certo, tingida via CSS:
+
+   .mz-mask{
+     -webkit-mask-image: var(--mz-mask-src);
+     -webkit-mask-size: contain;
+     -webkit-mask-repeat: no-repeat;
+     -webkit-mask-position: center;
+     mask-image: var(--mz-mask-src);
+     mask-size: contain;
+     mask-repeat: no-repeat;
+     mask-position: center;
+     background-color: var(--mz-mask-color);
+     width:100%; height:100%; display:block;
+   }
+
+   E no JS: `<span class="mz-mask" style="--mz-mask-src:url('assets/img/mosaico-formato-0${idx}.png');--mz-mask-color:${corCalculada}"></span>`
+--------------------------------------------------------------------------- */
+</script>
+
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/delights.js"></script>
+  <script src="assets/js/scroll-to-game.js"></script>
+  <script src="assets/js/bg-music.js"></script>
+</body>
+</html>
