@@ -35,7 +35,7 @@
     @keyframes mzMatchFlash{0%{transform:scale(1)}45%{transform:scale(1.12)}100%{transform:scale(1)}}
     @keyframes mzMissShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
     .mz-l{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
-    .mz-l svg{width:100%;height:100%;display:block;}
+    .mz-mask{width:100%;height:100%;display:block;-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;mask-size:contain;mask-repeat:no-repeat;mask-position:center;}
     .mz-l-bg{inset:3%;border-radius:8px;}
     .mz-l-line{inset:5%;}
     .mz-l-shape{inset:25%;}
@@ -239,74 +239,13 @@ function hexToRgb(hex){
 }
 function rgba(hex,a){ const {r,g,b}=hexToRgb(hex); return `rgba(${r},${g},${b},${a})`; }
 
-/* ---------- visuais placeholder (SVG inline) ----------
-   Estes são RASCUNHOS — quando os PNGs reais chegarem (10 variantes pra
-   cada um de formato/traço/accent, todos numa cor neutra), basta trocar
-   o conteúdo de shapeMarkup/lineMarkup/accentMarkup por
-   <img src="assets/img/mosaico-formato-01.png" class="mz-mask" style="--mz-mask-color:...">
-   usando mask-image (ver comentário ao final do arquivo). Nomes sugeridos:
-   mosaico-formato-01..10.png · mosaico-traco-01..10.png · mosaico-central-01..10.png */
-function regularPolygon(cx,cy,r,sides,rotateDeg){
-  const pts=[];
-  for(let i=0;i<sides;i++){
-    const a=(Math.PI*2*i/sides)-Math.PI/2+(rotateDeg||0)*Math.PI/180;
-    pts.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));
-  }
-  return pts.join(' ');
-}
-function starPoints(cx,cy,rOuter,rInner,spikes){
-  const pts=[];
-  for(let i=0;i<spikes*2;i++){
-    const r=i%2===0?rOuter:rInner;
-    const a=(Math.PI*i/spikes)-Math.PI/2;
-    pts.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1));
-  }
-  return pts.join(' ');
-}
-function shapeMarkup(idx,fill){
-  const f=`fill="${fill}"`;
-  switch(idx){
-    case 1: return `<circle cx="50" cy="50" r="42" ${f}/>`;
-    case 2: return `<polygon points="${regularPolygon(50,50,44,4,0)}" ${f}/>`; // diamante
-    case 3: return `<polygon points="${regularPolygon(50,50,42,6,0)}" ${f}/>`; // hexágono
-    case 4: return `<polygon points="${regularPolygon(50,50,44,5,0)}" ${f}/>`; // pentágono
-    case 5: return `<polygon points="${regularPolygon(50,50,46,3,0)}" ${f}/>`; // triângulo
-    case 6: return `<polygon points="${starPoints(50,50,44,19,5)}" ${f}/>`; // estrela 5 pontas
-    case 7: return `<path d="M50 82 C20 60 12 38 28 26 C40 17 50 28 50 38 C50 28 60 17 72 26 C88 38 80 60 50 82 Z" ${f}/>`; // coração
-    case 8: return `<path d="M50 12 C72 32 78 52 64 68 C56 77 44 77 36 68 C22 52 28 32 50 12 Z" ${f}/>`; // gota
-    case 9: return `<path d="M50 14 C76 22 86 48 70 70 C58 86 38 84 28 68 C14 46 26 20 50 14 Z" ${f}/>`; // folha
-    default: return `<path d="M14 64 A36 36 0 0 1 86 64 Z" ${f}/>`; // arco
-  }
-}
-function lineMarkup(idx,stroke){
-  const s=`stroke="${stroke}" stroke-width="3.4" fill="none" stroke-linecap="round"`;
-  const lines=[];
-  if(idx===1){ for(let i=-2;i<=8;i++){ const o=i*12; lines.push(`<line x1="${o-20}" y1="0" x2="${o+20}" y2="100" ${s}/>`); } }
-  else if(idx===2){ for(let i=-2;i<=8;i++){ const o=i*12; lines.push(`<line x1="${o+20}" y1="0" x2="${o-20}" y2="100" ${s}/>`); } }
-  else if(idx===3){ for(let i=1;i<6;i++){ lines.push(`<line x1="0" y1="${i*16}" x2="100" y2="${i*16}" ${s}/>`); } }
-  else if(idx===4){ for(let i=1;i<6;i++){ lines.push(`<line x1="${i*16}" y1="0" x2="${i*16}" y2="100" ${s}/>`); } }
-  else if(idx===5){ for(let i=1;i<5;i++){ lines.push(`<line x1="0" y1="${i*20}" x2="100" y2="${i*20-30}" ${s}/>`); lines.push(`<line x1="0" y1="${i*20}" x2="100" y2="${i*20+30}" ${s}/>`); } }
-  else if(idx===6){ let d='M0,30'; for(let x=0;x<=100;x+=20) d+=` L${x+10},${x%40===0?10:50}`; lines.push(`<path d="${d}" ${s}/>`); }
-  else if(idx===7){ let d='M0,50'; for(let x=0;x<=100;x+=16) d+=` L${x+8},${(x/16)%2===0?30:70}`; lines.push(`<path d="${d}" ${s}/>`); }
-  else if(idx===8){ for(let a=0;a<8;a++){ const r=(Math.PI*2*a/8); lines.push(`<circle cx="${50+38*Math.cos(r)}" cy="${50+38*Math.sin(r)}" r="3.2" fill="${stroke}"/>`); } }
-  else if(idx===9){ for(let a=0;a<8;a++){ const r=(Math.PI*2*a/8); lines.push(`<line x1="50" y1="50" x2="${50+44*Math.cos(r)}" y2="${50+44*Math.sin(r)}" ${s}/>`); } }
-  else { lines.push(`<circle cx="50" cy="50" r="44" stroke="${stroke}" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="30" stroke="${stroke}" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="16" stroke="${stroke}" stroke-width="3" fill="none"/>`); }
-  return lines.join('');
-}
-function accentMarkup(idx,fill,stroke){
-  const f=`fill="${fill}" stroke="${stroke}" stroke-width="3"`;
-  switch(idx){
-    case 1: return `<circle cx="50" cy="50" r="26" ${f}/>`;
-    case 2: return `<polygon points="${starPoints(50,50,30,12,4)}" ${f}/>`;
-    case 3: return `<path d="M50 10 L50 90 M10 50 L90 50" stroke="${fill}" stroke-width="14" stroke-linecap="round"/>`; // plus
-    case 4: return `<polygon points="${regularPolygon(50,50,30,3,0)}" ${f}/>`;
-    case 5: return `<polygon points="${regularPolygon(50,50,28,4,0)}" ${f}/>`;
-    case 6: return `<circle cx="50" cy="50" r="26" fill="none" stroke="${fill}" stroke-width="9"/>`;
-    case 7: return `<path d="M50 70 C32 56 28 42 38 35 C44 31 50 37 50 42 C50 37 56 31 62 35 C72 42 68 56 50 70 Z" ${f}/>`;
-    case 8: return `<rect x="24" y="24" width="52" height="52" rx="8" ${f}/>`;
-    case 9: return `<path d="M22 50 A28 28 0 0 1 78 50 Z" ${f}/>`;
-    default: return `<polygon points="${starPoints(50,50,30,8,6)}" ${f}/>`;
-  }
+/* ---------- visuais: máscara PNG tingida via CSS mask-image ----------
+   Cada camada (formato/traço/central) usa um PNG-silhueta (10 variantes,
+   cor neutra, fundo transparente) recortado via mask-image e tingido com
+   a cor do tema do dia através de background-color. */
+function maskSpan(categoria,idx,corCss){
+  const arq=`assets/img/mosaico-${categoria}-${String(idx).padStart(2,'0')}.png`;
+  return `<span class="mz-mask" style="-webkit-mask-image:url('${arq}');mask-image:url('${arq}');background-color:${corCss}"></span>`;
 }
 
 /* ---------- estado do jogo ---------- */
@@ -340,9 +279,9 @@ function renderBoard(){
     if(!isBlank(tile)){
       let html='';
       if(tile.active.bg) html+=`<span class="mz-l mz-l-bg" style="background:${rgba(tema.cor,.20)}"></span>`;
-      if(tile.active.line) html+=`<span class="mz-l mz-l-line"><svg viewBox="0 0 100 100">${lineMarkup(tema.variante_traco,rgba(tema.cor,.55))}</svg></span>`;
-      if(tile.active.shape) html+=`<span class="mz-l mz-l-shape"><svg viewBox="0 0 100 100">${shapeMarkup(tema.variante_formato,rgba(tema.cor,.88))}</svg></span>`;
-      if(tile.active.accent) html+=`<span class="mz-l mz-l-accent"><svg viewBox="0 0 100 100">${accentMarkup(tema.variante_central,tema.cor,'#FFF8EC')}</svg></span>`;
+      if(tile.active.line) html+=`<span class="mz-l mz-l-line">${maskSpan('traco',tema.variante_traco,rgba(tema.cor,.55))}</span>`;
+      if(tile.active.shape) html+=`<span class="mz-l mz-l-shape">${maskSpan('formato',tema.variante_formato,rgba(tema.cor,.88))}</span>`;
+      if(tile.active.accent) html+=`<span class="mz-l mz-l-accent">${maskSpan('central',tema.variante_central,tema.cor)}</span>`;
       div.innerHTML=html;
       div.addEventListener('click',()=>onTileTap(i));
     }
@@ -447,30 +386,6 @@ async function loadTop10(){
 }
 
 loadTop10();
-
-/* ---------------------------------------------------------------------------
-   FUTURO: trocar os SVGs placeholder pelos PNGs reais (quando subidos)
-   ---------------------------------------------------------------------------
-   Pra cada categoria (formato/traço/central), os PNGs devem ser silhuetas
-   numa cor neutra (preto ou branco) num fundo transparente. Em vez de
-   <svg>...</svg> dentro de shapeMarkup/lineMarkup/accentMarkup, use uma
-   <img> com mask-image apontando pro arquivo certo, tingida via CSS:
-
-   .mz-mask{
-     -webkit-mask-image: var(--mz-mask-src);
-     -webkit-mask-size: contain;
-     -webkit-mask-repeat: no-repeat;
-     -webkit-mask-position: center;
-     mask-image: var(--mz-mask-src);
-     mask-size: contain;
-     mask-repeat: no-repeat;
-     mask-position: center;
-     background-color: var(--mz-mask-color);
-     width:100%; height:100%; display:block;
-   }
-
-   E no JS: `<span class="mz-mask" style="--mz-mask-src:url('assets/img/mosaico-formato-0${idx}.png');--mz-mask-color:${corCalculada}"></span>`
---------------------------------------------------------------------------- */
 </script>
 
   <script src="assets/js/i18n.js"></script>
