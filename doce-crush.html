@@ -196,10 +196,10 @@ let CELL_W=100/COLS, CELL_H=100/ROWS;
 const TOTAL_TIME=90;
 /* expansão contínua e independente:
    - a cada 7000 pontos libera um doce novo (até esgotar CANDY_NAMES)
-   - a cada 3000 pontos o tabuleiro cresce uma linha — alternando horizontal (linha) e
+   - a cada 4500 pontos o tabuleiro cresce uma linha — alternando horizontal (linha) e
      vertical (coluna), infinitamente, sem limite máximo de tamanho */
 const CANDY_SCORE_INTERVAL=7000;
-const GRID_SCORE_INTERVAL=3000;
+const GRID_SCORE_INTERVAL=4500;
 const CANDY_NAMES=['Eclair','Macaron de Limão','Brigadeiro','Camafeu','Bombom de Pistache','Tortinha de Frutas','Donut Rosa','Doce de Physalis','Brigadeiro Azul','Torta de Limão','Cereja','Pirâmide Roxa'];
 
 const boardEl=document.getElementById('board');
@@ -306,7 +306,7 @@ function updateMultiBadge(){
   if(!active){ el.hidden=true; el.classList.remove('blink'); return; }
   el.hidden=false;
   el.innerHTML=`${iconImg('sparkle')}<span>x${multiplierStack}</span>`;
-  el.classList.toggle('blink', (multiplierUntil-Date.now())<3000);
+  el.classList.toggle('blink', (multiplierUntil-Date.now())<4500);
 }
 function openInventoryFullModal(){
   clearInterval(timer);
