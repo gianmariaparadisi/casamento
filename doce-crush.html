@@ -676,7 +676,18 @@ function resolveSwapOutcome(r1,c1,r2,c2,aOrig,bOrig){
     if(window.confettiBurst) confettiBurst({count:26});
   }
 
-  if(bcTriggered){ showToast('Bem-Casado! +1 power-up de brinde!'); grantPowerup(); if(window.confettiBurst) confettiBurst({count:36,hearts:true}); }
+  if(bcTriggered){
+    score+=5000;
+    const [bcr,bcc]=aIsBC?[r1,c1]:[r2,c2];
+    popScore(bcr,bcc,5000);
+    showToast('Bem-Casado! +5000 pontos e +1 power-up de brinde!');
+    grantPowerup();
+    updateHud();
+    if(window.confettiBurst){
+      confettiBurst({count:90,hearts:true});
+      setTimeout(()=>{ if(window.confettiBurst) confettiBurst({count:60,hearts:true}); },200);
+    }
+  }
   if(direct){ processClear(toClear,specials,[r1,c1,r2,c2]); return; }
 
   const swapCellsArr=[[r1,c1],[r2,c2]];
@@ -750,7 +761,7 @@ function processClear(toClear,specials,anchorCells){
     const [r,c]=key.split(',').map(Number);
     const candy=board[r][c];
     if(candy && !specialPosKeys.has(key)){
-      if(candy.gift==='time') timeBonus+=2;
+      if(candy.gift==='time') timeBonus+=3; /* +50% (era 2s) */
       else if(candy.gift==='powerup') powerupGrants++;
       removeCandyEl(candy); board[r][c]=null; clearedCount++;
     }

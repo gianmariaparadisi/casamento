@@ -143,8 +143,8 @@
     <div class="container" style="padding-bottom:80px">
       <div class="jogos-grid">
 
-        <!-- Em Breve — novo jogo todo início de mês -->
-        <div class="jogo-card reveal jogo-card--soon" style="cursor:default;background:linear-gradient(135deg,rgba(235,245,230,.9),rgba(220,238,215,.7));border-color:rgba(155,195,140,.45);">
+        <!-- Em Breve — novo jogo todo início de mês (oculto até 1º de julho/2026) -->
+        <div class="jogo-card reveal jogo-card--soon" id="card-em-breve" style="display:none;cursor:default;background:linear-gradient(135deg,rgba(235,245,230,.9),rgba(220,238,215,.7));border-color:rgba(155,195,140,.45);">
           <span class="jogo-card__icon">
             <img src="assets/img/icon-sparkle.png" alt="" loading="lazy" style="animation:soon-pulse 2.4s ease-in-out infinite">
           </span>
@@ -153,6 +153,16 @@
           <p class="jogo-card__record" id="soon-countdown" style="background:rgba(180,220,165,.35);color:var(--sage-dark);border:1px solid rgba(140,190,120,.4);font-size:.8rem">Calculando…</p>
           <span class="btn btn--outline btn--sm" style="pointer-events:none;opacity:.6;border-color:var(--sage);color:var(--sage-dark)" data-it="Presto">Em breve</span>
         </div>
+
+        <!-- Doce Crush — lançamento! -->
+        <a href="doce-crush.html" class="jogo-card reveal" style="text-decoration:none;color:inherit;position:relative;background:linear-gradient(135deg,rgba(224,242,210,.95),rgba(196,228,176,.78));border-color:rgba(122,155,110,.55);">
+          <span style="position:absolute;top:-11px;right:50%;transform:translateX(50%);background:var(--sage);color:#fff;font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.32rem .7rem;border-radius:999px;box-shadow:0 3px 8px rgba(82,57,34,.25);white-space:nowrap" data-it="Nuovo gioco!">Jogo novo!</span>
+          <span class="jogo-card__icon"><img src="assets/img/doce-crush-bemcasado.png" alt="" loading="lazy"></span>
+          <h2 class="jogo-card__title" data-it="Dolce Crush">Doce Crush</h2>
+          <p class="jogo-card__desc" data-it="Combina i dolci, crea combo e sblocca il raro Bem-Casado. Il tabellone cresce mentre fai punti!">Combine doces, crie combos e desbloqueie o raro Bem-Casado. O tabuleiro cresce conforme você pontua!</p>
+          <p class="jogo-card__record" id="record-doce-preview" data-it="Caricamento…">Carregando…</p>
+          <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
+        </a>
 
         <!-- Wordle do dia -->
         <a href="wordle.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
@@ -436,6 +446,15 @@
   })();
   </script>
 
+  <script>
+  // Lançamento Doce Crush: card "em breve" some até 1º de julho/2026, depois volta
+  (function(){
+    const card = document.getElementById('card-em-breve');
+    if(!card) return;
+    const cutoff = new Date(2026, 6, 1); // 1º de julho de 2026
+    if(new Date() >= cutoff) card.style.display = '';
+  })();
+  </script>
   <script>
   // Countdown: dias até o 1º dia do próximo mês
   (function(){
