@@ -184,6 +184,16 @@ function unlockScroll(){ document.body.style.overflow=""; document.body.style.to
 
 function loadImg(src){ const i = new Image(); i.loaded=false; i.onload=()=>{i.loaded=true;}; i.src=src; return i; }
 function imgOk(img){ return img && (img.loaded || img.complete) && (img.naturalWidth>0 || img.loaded); }
+/* tenta o PNG definitivo primeiro; se não existir ainda, cai pro SVG provisório
+   automaticamente — assim, quando os PNGs forem subidos com os nomes certos,
+   o jogo passa a usá-los sem precisar tocar no código de novo. */
+function loadImgFallback(pngSrc, fallbackSrc){
+  const i = new Image(); i.loaded=false;
+  i.onload = ()=>{ i.loaded=true; };
+  i.onerror = ()=>{ if (fallbackSrc && i.src.indexOf(fallbackSrc.split("/").pop())===-1){ i.loaded=false; i.src=fallbackSrc; } };
+  i.src = pngSrc;
+  return i;
+}
 
 /* ── Faces (Tiago / Gian) — reaproveita o padrão dos outros jogos ── */
 const RN_GIAN_FACES = [], RN_TIAGO_FACES = [];
@@ -198,18 +208,29 @@ function rnFaces(){ return rnPersonagem === "gian" ? RN_GIAN_FACES : RN_TIAGO_FA
    Cada destino tem: fg (rápido, frente), mid x3 (árvores/casas, meio),
    relief (montanhas/platôs, mais lento), backdrop (cenário profundo, anda
    uma vez por nível e troca quando o destino termina). Nuvens são genéricas. */
-const RUNNER_CLOUDS = [
-  loadImg("assets/img/runner/clouds-1.svg"),
-  loadImg("assets/img/runner/clouds-2.svg"),
-];
+const RIMG = "assets/img/runner/";
+function rImg(name){ return loadImgFallback(`${RIMG}${name}.png`, `${RIMG}${name}.svg`); }
+
+const RUNNER_CLOUDS = [ rImg("clouds-1"), rImg("clouds-2") ];
 const DEST_IDS = ["noronha","tailandia","africa","caribe","maiorca"];
 const RUNNER_LAYERS = {};
+const RUNNER_OBS_IMG = {};
 DEST_IDS.forEach(id=>{
   RUNNER_LAYERS[id] = {
-    mid: [loadImg(`assets/img/runner/${id}-mid-1.svg`), loadImg(`assets/img/runner/${id}-mid-2.svg`), loadImg(`assets/img/runner/${id}-mid-3.svg`)],
-    relief: loadImg(`assets/img/runner/${id}-relief-1.svg`),
-    backdrop: loadImg(`assets/img/runner/${id}-backdrop-1.svg`),
-    fg: [loadImg(`assets/img/runner/${id}-fg-1.svg`), loadImg(`assets/img/runner/${id}-fg-2.svg`)],
+    mid: [rImg(`${id}-mid-1`), rImg(`${id}-mid-2`), rImg(`${id}-mid-3`)],
+    relief: rImg(`${id}-relief-1`),
+    backdrop: rImg(`${id}-backdrop-1`),
+    fg: [rImg(`${id}-fg-1`), rImg(`${id}-fg-2`)],
+  };
+  /* obstáculos e colecionáveis ainda não têm SVG provisório — ficam em emoji
+     até o PNG existir; em quanto não existir, loadImg simplesmente falha e
+     o jogo usa o emoji de DESTS como fallback automático (ver drawObstacle/drawCollectible). */
+  RUNNER_OBS_IMG[id] = {
+    low:    loadImg(`${RIMG}${id}-obs-low-1.png`),
+    tall:   loadImg(`${RIMG}${id}-obs-tall-1.png`),
+    trap:   loadImg(`${RIMG}${id}-obs-trap-1.png`),
+    collect:loadImg(`${RIMG}${id}-collect-1.png`),
+    bonus:  loadImg(`${RIMG}${id}-collect-bonus-1.png`),
   };
 });
 
@@ -527,20 +548,20 @@ function spawnObstacle(){
   const tallChance = Math.min(0.5, 0.20 + lastLap*0.05 + curDestIdx*0.02);
   const r = Math.random();
   if (r < 0.22){
-    obstacles.push({ kind:"trap", x:LW+20, w:d.trap.w, h:d.trap.h, e:d.trap.e, passed:false });
+    obstacles.push({ kind:"trap", x:LW+20, w:d.trap.w, h:d.trap.h, e:d.trap.e, img:RUNNER_OBS_IMG[d.id].trap, passed:false });
   } else if (r < 0.22 + tallChance){
-    obstacles.push({ kind:"tall", x:LW+20, w:d.tall.w, h:d.tall.h, e:d.tall.e, passed:false });
+    obstacles.push({ kind:"tall", x:LW+20, w:d.tall.w, h:d.tall.h, e:d.tall.e, img:RUNNER_OBS_IMG[d.id].tall, passed:false });
   } else {
-    obstacles.push({ kind:"low", x:LW+20, w:d.low.w, h:d.low.h, e:d.low.e, passed:false });
+    obstacles.push({ kind:"low", x:LW+20, w:d.low.w, h:d.low.h, e:d.low.e, img:RUNNER_OBS_IMG[d.id].low, passed:false });
   }
 }
 function spawnCollectible(){
   const d = DESTS[curDestIdx];
   const canBonus = lastLap >= 1; // a partir da 2ª repetição das voltas
   if (canBonus && Math.random() < 0.4){
-    collectibles.push({ x:LW+20, y0:GROUND_Y-118, w:26, e:d.bonus.e, pts:d.bonus.pts, label:d.bonus.label, bob:Math.random()*6.28, taken:false, bonus:true });
+    collectibles.push({ x:LW+20, y0:GROUND_Y-118, w:26, e:d.bonus.e, img:RUNNER_OBS_IMG[d.id].bonus, pts:d.bonus.pts, label:d.bonus.label, bob:Math.random()*6.28, taken:false, bonus:true });
   } else {
-    collectibles.push({ x:LW+20, y0:GROUND_Y-78, w:24, e:d.collect.e, pts:d.collect.pts, label:d.collect.label, bob:Math.random()*6.28, taken:false, bonus:false });
+    collectibles.push({ x:LW+20, y0:GROUND_Y-78, w:24, e:d.collect.e, img:RUNNER_OBS_IMG[d.id].collect, pts:d.collect.pts, label:d.collect.label, bob:Math.random()*6.28, taken:false, bonus:false });
   }
 }
 
@@ -676,9 +697,13 @@ function drawGround(d){
 function drawObstacle(o){
   const y = obstacleY(o);
   ctx.save();
-  ctx.font = `${o.h}px serif`;
-  ctx.textAlign="center"; ctx.textBaseline="bottom";
-  ctx.fillText(o.e, o.x + o.w/2, y + o.h);
+  if (imgOk(o.img)){
+    ctx.drawImage(o.img, o.x, y, o.w, o.h);
+  } else {
+    ctx.font = `${o.h}px serif`;
+    ctx.textAlign="center"; ctx.textBaseline="bottom";
+    ctx.fillText(o.e, o.x + o.w/2, y + o.h);
+  }
   ctx.restore();
 }
 function drawCollectible(c){
@@ -690,9 +715,13 @@ function drawCollectible(c){
     ctx.beginPath(); ctx.arc(c.x+c.w/2, y+c.w/2, c.w*0.85, 0, Math.PI*2); ctx.fill();
     ctx.globalAlpha = 1;
   }
-  ctx.font = `${c.w+6}px serif`;
-  ctx.textAlign="center"; ctx.textBaseline="middle";
-  ctx.fillText(c.e, c.x + c.w/2, y + c.w/2);
+  if (imgOk(c.img)){
+    ctx.drawImage(c.img, c.x, y, c.w, c.w);
+  } else {
+    ctx.font = `${c.w+6}px serif`;
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(c.e, c.x + c.w/2, y + c.w/2);
+  }
   ctx.restore();
 }
 function drawParticle(p){
