@@ -201,6 +201,7 @@
     setTimeout(() => wrap.remove(), 4500);
   }
   window.delightsConfetti = confettiBurst;
+  window.confettiBurst = confettiBurst; // alias: vários jogos (doce-crush, mosaico, wedding-match...) chamam window.confettiBurst
 
   // Pequeno "pop" no ponto clicado (confete/folha/coração)
   function spawnPop(x, y, src, size) {
