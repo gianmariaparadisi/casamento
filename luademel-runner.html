@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Corrida da Lua de Mel — Tiago & Gian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="assets/css/style.css"/>
+  <style>
+    :root{
+      --rn-cream:#FBF7EF; --rn-cream2:#F4F1EB;
+      --rn-sage:#7A9B6E; --rn-sage-dk:#506B45; --rn-sage-lt:#EBF0E6;
+      --rn-terra:#C46D28; --rn-amber:#B87B3E;
+      --rn-navy:#1A1A40; --rn-gold:#C8A050;
+    }
+    body.game-page{min-height:100svh;background:var(--rn-cream2);color:var(--rn-navy);overscroll-behavior:none;}
+    html,body{overscroll-behavior:none;}
+
+    .game-nav{position:sticky;top:0;z-index:30;background:rgba(251,247,239,.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(196,109,40,.18);}
+    .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:13px 0;gap:1rem;}
+    .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.84rem;color:var(--rn-amber);}
+    .game-back{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--rn-sage-dk);text-decoration:underline;text-underline-offset:3px;}
+
+    .game-shell{width:94%;max-width:680px;margin:0 auto;padding:24px 0 80px;}
+    .game-kicker{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--rn-terra);text-align:center;margin-bottom:.4rem;}
+    .game-title{font-family:var(--font-display);font-size:clamp(2rem,8vw,3.4rem);font-weight:300;line-height:.95;text-align:center;margin-bottom:.5rem;}
+    .game-sub{max-width:440px;margin:0 auto 1rem;text-align:center;color:var(--rn-amber);font-size:.86rem;line-height:1.65;}
+
+    .hud{display:flex;gap:.55rem;justify-content:center;flex-wrap:wrap;margin:.5rem auto .9rem;}
+    .hud__pill{background:rgba(255,255,255,.7);border:1px solid rgba(196,109,40,.22);border-radius:999px;padding:.42rem .82rem;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--rn-amber);display:flex;align-items:center;gap:.35rem;}
+    .hud__pill strong{color:var(--rn-navy);font-weight:600;font-size:.82rem;text-transform:none;letter-spacing:0;}
+    .hud__pill .flag{font-size:1rem;}
+
+    /* Char selector */
+    .char-row{display:flex;gap:.6rem;justify-content:center;align-items:center;margin:0 0 .8rem;}
+    .char-row span{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--rn-amber);}
+    .rn-char-btn{display:flex;align-items:center;gap:.36rem;font-size:.84rem;font-weight:600;padding:.4rem .9rem;border-radius:999px;border:2px solid var(--rn-sage-lt);background:#fff;color:var(--rn-sage-dk);cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;}
+    .rn-char-btn img{width:20px;height:20px;border-radius:50%;object-fit:cover;}
+    .rn-char-btn.active{border-color:var(--rn-sage);background:var(--rn-sage);color:#fff;}
+
+    .game-panel{position:relative;border-radius:18px;overflow:hidden;border:2px solid rgba(196,109,40,.22);box-shadow:0 16px 60px rgba(26,26,64,.14);background:#cfe8ee;}
+    canvas{display:block;width:100%;touch-action:none;cursor:pointer;}
+
+    .game-overlay{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,247,239,.93);text-align:center;padding:1.6rem 1.3rem;backdrop-filter:blur(5px);}
+    .game-overlay.show{display:flex;}
+    .ov-emoji{font-size:2.6rem;margin-bottom:.4rem;}
+    .ov-title{font-family:var(--font-display);font-size:1.9rem;font-weight:300;color:var(--rn-navy);margin-bottom:.3rem;}
+    .ov-sub{font-size:.84rem;color:var(--rn-amber);margin-bottom:1rem;line-height:1.6;max-width:360px;}
+    .ov-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem;width:100%;max-width:320px;}
+    .ov-stat{background:var(--rn-sage-lt);border-radius:10px;padding:.5rem .6rem;font-size:.7rem;color:var(--rn-sage-dk);}
+    .ov-stat strong{display:block;font-size:1.05rem;font-weight:600;color:var(--rn-navy);}
+    .ov-btns{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;}
+
+    .game-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:30px;border:1.5px solid rgba(196,109,40,.35);background:var(--rn-cream);color:var(--rn-navy);padding:.68rem 1.25rem;font-size:.72rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;cursor:pointer;transition:all .15s;gap:.4rem;font-family:'Inter',sans-serif;}
+    .game-btn:hover{background:var(--rn-cream2);border-color:var(--rn-terra);}
+    .game-btn--main{background:var(--rn-terra);color:#fff;border-color:transparent;}
+    .game-btn--main:hover{background:var(--rn-amber);}
+
+    .ctrl-row{display:flex;gap:.6rem;justify-content:center;margin-top:.9rem;}
+    .ctrl-btn{flex:1;max-width:220px;height:54px;border-radius:16px;background:#fff;border:1.5px solid rgba(196,109,40,.3);font-size:.78rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--rn-navy);display:flex;align-items:center;justify-content:center;gap:.4rem;-webkit-tap-highlight-color:transparent;cursor:pointer;box-shadow:0 4px 14px rgba(82,57,34,.08);}
+    .ctrl-btn:active{background:var(--rn-sage-lt);border-color:var(--rn-sage);}
+    @media(min-width:720px){ .ctrl-row{display:none;} }
+    .desk-hint{display:none;text-align:center;font-size:.74rem;color:var(--rn-amber);margin-top:.7rem;}
+    @media(min-width:720px){ .desk-hint{display:block;} }
+    .mobile-hint{text-align:center;font-size:.7rem;color:var(--rn-amber);margin-top:.5rem;}
+    @media(min-width:720px){ .mobile-hint{display:none;} }
+
+    .save-box{margin-top:1.1rem;background:var(--rn-cream);border:1px solid rgba(196,109,40,.2);border-radius:14px;padding:.9rem;}
+    .save-box h3{font-family:var(--font-display);font-size:1.15rem;font-weight:400;margin-bottom:.55rem;text-align:center;}
+    .save-row{display:flex;gap:.5rem;}
+    .save-input{flex:1;min-width:0;border:1px solid rgba(196,109,40,.3);border-radius:30px;background:#fff;padding:.6rem .9rem;font:inherit;font-size:.88rem;outline:none;color:var(--rn-navy);}
+    .save-msg{font-size:.72rem;color:var(--rn-sage-dk);margin-top:.4rem;min-height:1em;text-align:center;}
+    .top10{margin-top:1rem;background:rgba(255,255,255,.5);border:1px solid rgba(196,109,40,.18);border-radius:14px;padding:.85rem;}
+    .top10__title{font-family:var(--font-display);font-size:1.15rem;font-weight:400;margin-bottom:.5rem;text-align:center;}
+    .top10__list{list-style:none;margin:0;padding:0;display:grid;gap:.3rem;}
+    .top10__item{display:flex;align-items:center;gap:.6rem;background:#fff;border:1px solid rgba(196,109,40,.15);border-radius:10px;padding:.45rem .65rem;font-size:.82rem;}
+    .top10__item--gold{background:#FFF8E7;border-color:#E8C84A;}
+    .top10__item--silver{background:#F5F5F5;border-color:#C0C0C0;}
+    .top10__item--bronze{background:#FFF2EC;border-color:#CD7F32;}
+    .top10__pos{font-family:var(--font-display);width:1.4rem;text-align:center;color:var(--rn-amber);}
+    .top10__name{flex:1;font-weight:500;}
+    .top10__pts{font-weight:700;color:var(--rn-terra);}
+    .top10__empty,.top10__loading{text-align:center;padding:1rem;font-size:.82rem;color:var(--rn-amber);font-style:italic;}
+
+    @media(max-width:480px){ .save-row{flex-direction:column;} .game-btn{width:100%;} }
+  </style>
+</head>
+<body class="game-page">
+  <nav class="game-nav"><div class="game-nav__inner">
+    <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
+    <div class="game-brand">Tiago & Gian</div>
+  </div></nav>
+
+  <main class="game-shell">
+    <p class="game-kicker" data-it="5 destinazioni, una sola corsa">5 destinos, 1 corrida só</p>
+    <h1 class="game-title"><span data-it="Corsa della">Corrida da</span><br><em><span data-it="Luna di Miele">Lua de Mel</span></em></h1>
+    <p class="game-sub" data-it="Salta e abbassati lungo i luoghi della nostra luna di miele — da Fernando de Noronha a Maiorca, senza fermarti.">Pule e abaixe pelos lugares da nossa lua de mel — de Fernando de Noronha a Maiorca, sem parar.</p>
+
+    <div class="hud">
+      <div class="hud__pill"><span class="flag" id="rn-hud-flag">🇧🇷</span> <strong id="rn-hud-dest">Noronha</strong></div>
+      <div class="hud__pill" data-it="Pontos"><span data-it="Punti">Pontos</span>: <strong id="rn-hud-score">0</strong></div>
+      <div class="hud__pill">🏆 <span data-it="Record">Recorde</span>: <strong id="rn-hud-best">—</strong></div>
+    </div>
+
+    <div class="char-row">
+      <span data-it="Gioca come">Jogar como</span>
+      <button class="rn-char-btn active" id="rn-btn-tiago" onclick="setRunnerPersonagem('tiago')">
+        <img src="assets/img/tiagoface01.png" alt=""> Tiago
+      </button>
+      <button class="rn-char-btn" id="rn-btn-gian" onclick="setRunnerPersonagem('gian')">
+        <img src="assets/img/gianface01.png" alt=""> Gian
+      </button>
+    </div>
+
+    <section class="game-panel">
+      <canvas id="rn-canvas" tabindex="0"></canvas>
+      <div class="game-overlay" id="rn-overlay">
+        <div class="ov-emoji" id="rn-ov-emoji">🧳</div>
+        <p class="ov-title" id="rn-ov-title"><span data-it="Corsa della Luna di Miele">Corrida da Lua de Mel</span></p>
+        <p class="ov-sub" id="rn-ov-sub"><span data-it="Salta gli ostacoli, abbassati sotto quelli che volano e attraversa i 5 paradisi della nostra luna di miele.">Pule os obstáculos, abaixe sob os que voam e atravesse os 5 paraísos da nossa lua de mel.</span></p>
+        <div class="ov-stats" id="rn-ov-stats" style="display:none"></div>
+        <div class="ov-btns" id="rn-ov-btns"></div>
+      </div>
+    </section>
+
+    <div class="ctrl-row">
+      <button class="ctrl-btn" id="rn-btn-jump">⬆️ <span data-it="Salta">Saltar</span></button>
+      <button class="ctrl-btn" id="rn-btn-duck">⬇️ <span data-it="Abbassati">Abaixar</span></button>
+    </div>
+    <p class="desk-hint" data-it="Espaço / ↑ para saltar · ↓ para abaixar · clique para começar">Espaço / ↑ para saltar · ↓ para abaixar · clique para começar</p>
+    <p class="mobile-hint" data-it="Toca per saltare · tieni premuto ⬇️ per abbassarti">Toque para saltar · segure ⬇️ para abaixar</p>
+
+    <div id="rn-postgame" style="display:none">
+      <div class="save-box">
+        <h3>🏆 <span data-it="Salva il tuo record">Salvar seu recorde</span></h3>
+        <div class="save-row">
+          <input type="text" id="rn-nome" class="save-input" placeholder="Seu nome" maxlength="30" autocomplete="name"/>
+          <button class="game-btn game-btn--main" onclick="salvarScoreRunner()" data-it="Salva">Salvar</button>
+        </div>
+        <p class="save-msg" id="rn-save-msg"></p>
+      </div>
+      <section class="top10" id="rn-top10-wrap">
+        <div id="rn-top10"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="assets/js/game-sounds.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/delights.js"></script>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   CORRIDA DA LUA DE MEL — runner estilo "Chrome Dino"
+   5 destinos em sequência (Noronha → Tailândia → África do Sul
+   → Caribe → Maiorca), pular/abaixar, dificuldade crescente,
+   placar Top 10 compartilhado com os outros jogos do site.
+══════════════════════════════════════════════════════════ */
+"use strict";
+
+const RUNNER_GAME_ID = "luademel-runner";
+const RUNNER_API = typeof API_URL !== "undefined"
+  ? API_URL
+  : "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+
+const DPR = Math.min(window.devicePixelRatio || 1, 3);
+
+/* Resolução lógica fixa do jogo — a tela só estica via CSS,
+   então física e colisão se comportam igual em qualquer device. */
+const LW = 640, LH = 260;
+const GROUND_Y = 210;
+
+let _rnScrollY = 0;
+function lockScroll(){ _rnScrollY = window.scrollY; document.body.style.overflow="hidden"; document.body.style.touchAction="none"; }
+function unlockScroll(){ document.body.style.overflow=""; document.body.style.touchAction=""; window.scrollTo(0,_rnScrollY); }
+
+function loadImg(src){ const i = new Image(); i.loaded=false; i.onload=()=>{i.loaded=true;}; i.src=src; return i; }
+function imgOk(img){ return img && img.complete && img.naturalWidth > 0; }
+
+/* ── Faces (Tiago / Gian) — reaproveita o padrão dos outros jogos ── */
+const RN_GIAN_FACES = [], RN_TIAGO_FACES = [];
+for (let i=1;i<=7;i++){
+  RN_GIAN_FACES.push(loadImg(`assets/img/gianface${String(i).padStart(2,"0")}.png`));
+  RN_TIAGO_FACES.push(loadImg(`assets/img/tiagoface${String(i).padStart(2,"0")}.png`));
+}
+let rnPersonagem = "tiago", rnFaceIdx = 0;
+function rnFaces(){ return rnPersonagem === "gian" ? RN_GIAN_FACES : RN_TIAGO_FACES; }
+
+/* ── Cenário especial de Fernando de Noronha (arte já existente) ── */
+const NORONHA_SKY    = loadImg("assets/img/noronha-céu.png");
+const NORONHA_PICO   = loadImg("assets/img/noronha-pico.png");
+const NORONHA_COLINA = loadImg("assets/img/noronha-colina.png");
+const NORONHA_PRAIA  = loadImg("assets/img/noronha-praia.png");
+const NORONHA_ROCHA1 = loadImg("assets/img/noronha-rocha-1.png");
+const NORONHA_ROCHA2 = loadImg("assets/img/noronha-rocha-2.png");
+const NORONHA_FLOR_E = loadImg("assets/img/noronha-flor-esquerda.png");
+const NORONHA_FLOR_D = loadImg("assets/img/noronha-flor-direita.png");
+const NORONHA_BIRD   = loadImg("assets/img/noronha-passaro.png");
+
+/* ══════════════════════════════════════════════════════════
+   DESTINOS — 5 trechos em sequência, depois reinicia o ciclo
+   (igual ao Dino: nunca acaba, só fica mais difícil)
+══════════════════════════════════════════════════════════ */
+const DESTS = [
+  { id:"noronha", flag:"🇧🇷", name:"Fernando de Noronha", tagline:"Praia do Sancho nos espera",
+    len:420, sky:["#8FD3E8","#FDEFC4"], ground:"#E8D2A0", groundLine:"#C9A968", scenery:"noronha",
+    groundObs:[{e:"🦀",w:32,h:24},{e:"🪨",w:28,h:50}], airObs:[{e:"🐦",w:30,h:22}],
+    collect:{e:"🐚",pts:60,label:"Concha"} },
+  { id:"tailandia", flag:"🇹🇭", name:"Tailândia", tagline:"Templos dourados e elefantes",
+    len:500, sky:["#FFD27A","#FF9E5E"], ground:"#C9A227", groundLine:"#8C701A", scenery:"temple",
+    groundObs:[{e:"🐘",w:56,h:46},{e:"🛕",w:36,h:74}], airObs:[{e:"🏮",w:26,h:30}],
+    collect:{e:"🪷",pts:80,label:"Flor de Lótus"} },
+  { id:"africa", flag:"🇿🇦", name:"África do Sul", tagline:"Savana ao pôr do sol",
+    len:540, sky:["#FF7E5F","#FEB47B"], ground:"#7A5230", groundLine:"#523515", scenery:"savanna",
+    groundObs:[{e:"🦓",w:48,h:42},{e:"🌳",w:32,h:66}], airObs:[{e:"🦅",w:32,h:22}],
+    collect:{e:"💎",pts:100,label:"Diamante"} },
+  { id:"caribe", flag:"🏝️", name:"Caribe", tagline:"Águas turquesa e veleiros",
+    len:580, sky:["#4FC1E9","#B6E5D8"], ground:"#E8C99A", groundLine:"#C9A968", scenery:"palm",
+    groundObs:[{e:"🦞",w:34,h:26},{e:"⚓",w:24,h:46}], airObs:[{e:"🦜",w:30,h:24}],
+    collect:{e:"🪙",pts:110,label:"Moeda do Tesouro"} },
+  { id:"maiorca", flag:"🇪🇸", name:"Maiorca", tagline:"Mediterrâneo — o gran finale",
+    len:620, sky:["#3A5BA0","#E8784A"], ground:"#5E7FA3", groundLine:"#33506E", scenery:"windmill",
+    groundObs:[{e:"🐐",w:40,h:36},{e:"⚙️",w:32,h:76}], airObs:[{e:"🕊️",w:28,h:20}],
+    collect:{e:"💍",pts:160,label:"Aliança"} },
+];
+const CYCLE_LEN = DESTS.reduce((s,d)=>s+d.len,0);
+
+function destIndexAt(distance){
+  let d = ((distance % CYCLE_LEN) + CYCLE_LEN) % CYCLE_LEN, acc = 0;
+  for (let i=0;i<DESTS.length;i++){ acc += DESTS[i].len; if (d < acc) return i; }
+  return DESTS.length - 1;
+}
+function lerpColor(a,b,t){
+  const pa=parseInt(a.slice(1),16), pb=parseInt(b.slice(1),16);
+  const ar=(pa>>16)&255, ag=(pa>>8)&255, ab=pa&255;
+  const br=(pb>>16)&255, bg=(pb>>8)&255, bb=pb&255;
+  const r=Math.round(ar+(br-ar)*t), g=Math.round(ag+(bg-ag)*t), bl=Math.round(ab+(bb-ab)*t);
+  return `rgb(${r},${g},${bl})`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ESTADO DO JOGO
+══════════════════════════════════════════════════════════ */
+const canvas = document.getElementById("rn-canvas");
+const ctx = canvas.getContext("2d");
+
+let rnAlive=false, rnStarted=false, rnRaf=null, rnLastTs=0;
+let distance=0, speed=0, score=0, bonus=0, best=0;
+let curDestIdx=0, lastLap=0;
+let groundOffset=0, farOffset=0;
+
+const PLAYER_X = 70;
+const STAND_W=30, STAND_H=44, DUCK_W=44, DUCK_H=24;
+let player = { y: GROUND_Y-STAND_H, vy:0, jumping:false, ducking:false, runT:0 };
+
+const GRAVITY = 1900, JUMP_V = -660, FASTFALL = 2600;
+
+let obstacles = [];   // {kind:'ground'|'air', x, w, h, e, passed}
+let collectibles = []; // {x, y0, w, e, pts, bob, taken}
+let particles = [];   // {x,y,vx,vy,life,total,text,color}
+let nextObsGap = 0, nextCollGap = 0;
+let banner = { text:"", flag:"", timer:0 };
+let shake = 0;
+
+function getSave(){ try{ return JSON.parse(localStorage.getItem("luademelRunnerSave")||"{}"); }catch{ return {}; } }
+function setSave(d){ try{ localStorage.setItem("luademelRunnerSave", JSON.stringify(d)); }catch{} }
+best = getSave().best || 0;
+
+function setupCanvas(){
+  const wrap = canvas.parentElement;
+  const dispW = Math.min(wrap.clientWidth, 680);
+  const dispH = dispW * (LH/LW);
+  canvas.width  = LW * DPR;
+  canvas.height = LH * DPR;
+  canvas.style.width  = dispW + "px";
+  canvas.style.height = dispH + "px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener("resize", ()=>{ setupCanvas(); if(!rnAlive) drawFrame(0); });
+
+/* ══════════════════════════════════════════════════════════
+   CONTROLES
+══════════════════════════════════════════════════════════ */
+function doJump(){
+  if (!rnStarted) { startRunner(); return; }
+  if (!rnAlive) return;
+  if (!player.jumping && !player.ducking){
+    player.jumping = true; player.vy = JUMP_V;
+    if(window.GS){GS.pop();GS.hTap();}
+  }
+}
+function setDuck(on){
+  if (!rnAlive) return;
+  if (on && !player.jumping){ player.ducking = true; }
+  else if (!on){ player.ducking = false; }
+}
+
+document.addEventListener("keydown", e=>{
+  const tag = (e.target && e.target.tagName) || "";
+  if (tag === "INPUT" || tag === "TEXTAREA") return;
+  if ([" ","ArrowUp"].includes(e.key)){ e.preventDefault(); doJump(); }
+  if (e.key === "ArrowDown"){ e.preventDefault(); setDuck(true); }
+});
+document.addEventListener("keyup", e=>{
+  if (e.key === "ArrowDown") setDuck(false);
+});
+
+canvas.addEventListener("mousedown", ()=> doJump());
+canvas.addEventListener("touchstart", e=>{ e.preventDefault(); doJump(); }, {passive:false});
+
+const btnJump = document.getElementById("rn-btn-jump");
+const btnDuck = document.getElementById("rn-btn-duck");
+btnJump.addEventListener("touchstart", e=>{ e.preventDefault(); doJump(); }, {passive:false});
+btnJump.addEventListener("click", ()=> doJump());
+btnDuck.addEventListener("touchstart", e=>{ e.preventDefault(); setDuck(true); }, {passive:false});
+btnDuck.addEventListener("touchend", e=>{ e.preventDefault(); setDuck(false); }, {passive:false});
+btnDuck.addEventListener("mousedown", ()=> setDuck(true));
+btnDuck.addEventListener("mouseup", ()=> setDuck(false));
+btnDuck.addEventListener("mouseleave", ()=> setDuck(false));
+
+/* ══════════════════════════════════════════════════════════
+   OVERLAY
+══════════════════════════════════════════════════════════ */
+function showOverlay(emoji, title, sub, btns, stats){
+  const ov = document.getElementById("rn-overlay");
+  document.getElementById("rn-ov-emoji").textContent = emoji;
+  document.getElementById("rn-ov-title").textContent = title;
+  document.getElementById("rn-ov-sub").innerHTML = sub;
+  const statsEl = document.getElementById("rn-ov-stats");
+  if (stats){ statsEl.style.display="grid"; statsEl.innerHTML = stats; } else { statsEl.style.display="none"; statsEl.innerHTML=""; }
+  document.getElementById("rn-ov-btns").innerHTML = btns.map(b=>`<button class="game-btn game-btn--main" onclick="${b.fn}">${b.label}</button>`).join("");
+  ov.classList.add("show");
+}
+function hideOverlay(){ document.getElementById("rn-overlay").classList.remove("show"); }
+
+/* ══════════════════════════════════════════════════════════
+   CICLO DE VIDA
+══════════════════════════════════════════════════════════ */
+function resetRunner(){
+  setupCanvas();
+  distance=0; speed=260; score=0; bonus=0; curDestIdx=0; lastLap=0;
+  groundOffset=0; farOffset=0;
+  player = { y: GROUND_Y-STAND_H, vy:0, jumping:false, ducking:false, runT:0 };
+  obstacles=[]; collectibles=[]; particles=[];
+  nextObsGap = 260; nextCollGap = 380;
+  banner = {text:"", flag:"", timer:0}; shake=0;
+  rnFaceIdx = Math.floor(Math.random()*rnFaces().length);
+  updateHud();
+  document.getElementById("rn-postgame").style.display="none";
+  drawFrame(0);
+  showOverlay("🧳","Corrida da Lua de Mel",
+    "Pule os obstáculos, abaixe sob os que voam e atravesse os 5 paraísos da nossa lua de mel.",
+    [{label:"Começar", fn:"startRunner()"}]);
+}
+
+function startRunner(){
+  rnStarted = true; rnAlive = true;
+  hideOverlay();
+  lockScroll();
+  rnLastTs = 0;
+  if (rnRaf) cancelAnimationFrame(rnRaf);
+  rnRaf = requestAnimationFrame(loop);
+}
+window.startRunner = startRunner;
+
+function endRunner(){
+  rnAlive = false;
+  if (rnRaf) cancelAnimationFrame(rnRaf);
+  rnRaf = null;
+  unlockScroll();
+  if(window.GS){GS.bad();GS.hBad();}
+  shake = 14;
+
+  score = Math.floor(distance) + bonus;
+  let isBest = false;
+  if (score > best){ best = score; isBest = true; setSave({best}); }
+  updateHud();
+
+  const laps = lastLap;
+  const destsVisited = laps>0 ? 5 : (curDestIdx+1);
+  const msg = score>=2500 ? "Lenda das 5 ilhas! Vocês já são experts em lua de mel." :
+              score>=1200 ? "Ótima corrida! Quase deu a volta completa." :
+              score>=500  ? "Bom progresso — a praia ainda não acabou." :
+                            "Caiu rapidinho! Bora tentar de novo.";
+
+  setTimeout(()=>{
+    showOverlay("💥","Que tombo!",
+      msg + (isBest ? " <strong>Novo recorde!</strong> 🏆" : ""),
+      [{label:"Jogar de novo", fn:"startRunner2()"},{label:"Voltar aos jogos", fn:"location.href='jogos.html'"}],
+      `<div class="ov-stat"><strong>${score}</strong>pontos</div>
+       <div class="ov-stat"><strong>${Math.floor(distance)}m</strong>percorridos</div>
+       <div class="ov-stat"><strong>${destsVisited}/5</strong>destinos</div>
+       <div class="ov-stat"><strong>${laps}</strong>voltas completas</div>`);
+    document.getElementById("rn-postgame").style.display="block";
+    carregarTop10Runner();
+  }, 280);
+}
+function startRunner2(){ resetRunner(); startRunner(); }
+window.startRunner2 = startRunner2;
+
+function updateHud(){
+  const d = DESTS[curDestIdx];
+  document.getElementById("rn-hud-flag").textContent = d.flag;
+  document.getElementById("rn-hud-dest").textContent = d.name;
+  document.getElementById("rn-hud-score").textContent = Math.floor(distance)+bonus;
+  document.getElementById("rn-hud-best").textContent = best || "—";
+}
+
+/* ══════════════════════════════════════════════════════════
+   LOOP PRINCIPAL
+══════════════════════════════════════════════════════════ */
+function loop(ts){
+  if (!rnAlive) return;
+  rnRaf = requestAnimationFrame(loop);
+  if (!rnLastTs) rnLastTs = ts;
+  let dt = (ts - rnLastTs) / 1000;
+  dt = Math.min(dt, 0.05);
+  rnLastTs = ts;
+
+  update(dt);
+  drawFrame(ts);
+}
+
+function update(dt){
+  /* velocidade cresce com a distância, com pequenos saltos a cada destino/volta */
+  speed = Math.min(620, 260 + distance*0.05);
+  const distDelta = (speed*dt)/16;
+  distance += distDelta;
+  groundOffset = (groundOffset + speed*dt) % LW;
+  farOffset = (farOffset + speed*dt*0.35) % LW;
+
+  const newIdx = destIndexAt(distance);
+  if (newIdx !== curDestIdx){
+    curDestIdx = newIdx;
+    const d = DESTS[curDestIdx];
+    banner = { text:`Chegando a ${d.name}`, flag:d.flag, timer:2.2 };
+    if(window.GS){GS.combo(3);GS.hGood();}
+    spawnBurst(LW/2, 60, 14);
+  }
+  const lapNow = Math.floor(distance/CYCLE_LEN);
+  if (lapNow > lastLap){
+    lastLap = lapNow;
+    banner = { text:"Volta completa! Tudo mais rápido agora", flag:"🌍", timer:2.4 };
+    if(window.GS){GS.win();GS.hWin();}
+    spawnBurst(LW/2, 60, 22);
+  }
+  if (banner.timer > 0) banner.timer -= dt;
+
+  /* física do jogador */
+  if (player.jumping){
+    let g = GRAVITY;
+    if (player.ducking) g += FASTFALL; // mantém abaixar para cair mais rápido
+    player.vy += g*dt;
+    player.y += player.vy*dt;
+    const standY = GROUND_Y - STAND_H;
+    if (player.y >= standY){ player.y = standY; player.vy = 0; player.jumping = false; }
+  } else {
+    player.y = GROUND_Y - (player.ducking ? DUCK_H : STAND_H);
+  }
+  player.runT += dt * (player.jumping ? 0 : speed*0.045);
+
+  /* spawn de obstáculos */
+  nextObsGap -= distDelta;
+  if (nextObsGap <= 0){
+    spawnObstacle();
+    const minGap = 70 + speed*0.28;
+    nextObsGap = minGap + Math.random()*minGap*0.9;
+  }
+  nextCollGap -= distDelta;
+  if (nextCollGap <= 0){
+    spawnCollectible();
+    nextCollGap = 140 + Math.random()*160;
+  }
+
+  /* move obstáculos/colecionáveis (em px de tela, escala simples) */
+  const pxSpeed = speed*dt*0.9;
+  obstacles.forEach(o=> o.x -= pxSpeed);
+  obstacles = obstacles.filter(o=> o.x > -80);
+  collectibles.forEach(c=> c.x -= pxSpeed);
+  collectibles = collectibles.filter(c=> !c.taken && c.x > -60);
+
+  checkCollisions();
+
+  particles.forEach(p=>{ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=400*dt; p.life-=dt; });
+  particles = particles.filter(p=>p.life>0);
+  if (shake>0) shake = Math.max(0, shake - dt*40);
+
+  updateHud();
+}
+
+function spawnObstacle(){
+  const d = DESTS[curDestIdx];
+  const isAir = Math.random() < 0.34;
+  if (isAir){
+    const a = d.airObs[Math.floor(Math.random()*d.airObs.length)];
+    obstacles.push({ kind:"air", x:LW+20, w:a.w, h:a.h, e:a.e, passed:false });
+  } else {
+    const g = d.groundObs[Math.floor(Math.random()*d.groundObs.length)];
+    obstacles.push({ kind:"ground", x:LW+20, w:g.w, h:g.h, e:g.e, passed:false });
+  }
+}
+function spawnCollectible(){
+  const d = DESTS[curDestIdx];
+  collectibles.push({ x:LW+20, y0:GROUND_Y-78, w:24, e:d.collect.e, pts:d.collect.pts, label:d.collect.label, bob:Math.random()*6.28, taken:false });
+}
+
+function playerBox(){
+  const w = player.ducking ? DUCK_W : STAND_W;
+  const h = player.ducking ? DUCK_H : STAND_H;
+  const pad = 6; // colisão um pouco generosa pro jogo ser justo
+  return { x: PLAYER_X+pad, y: player.y+pad, w: w-pad*2, h: h-pad*2 };
+}
+function rectsOverlap(a,b){ return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y; }
+
+function checkCollisions(){
+  const pb = playerBox();
+  for (const o of obstacles){
+    let oy;
+    if (o.kind === "ground") oy = GROUND_Y - o.h;
+    else oy = GROUND_Y - STAND_H - 8 - o.h; // banda alta — obriga abaixar
+    const ob = { x:o.x+4, y:oy+4, w:o.w-8, h:o.h-8 };
+    if (!o.passed && rectsOverlap(pb, ob)){ endRunner(); return; }
+    if (!o.passed && o.x + o.w < PLAYER_X) o.passed = true;
+  }
+  for (const c of collectibles){
+    if (c.taken) continue;
+    const cb = { x:c.x, y:c.y0 + Math.sin(c.bob)*6, w:c.w, h:c.w };
+    if (rectsOverlap(pb, cb)){
+      c.taken = true; bonus += c.pts;
+      spawnFloatText(c.x, c.y0, `+${c.pts}`);
+      if(window.GS){GS.eat();GS.hGood();}
+    }
+  }
+}
+
+function spawnBurst(x,y,n){
+  for (let i=0;i<n;i++){
+    const ang = Math.random()*Math.PI*2, spd = 60+Math.random()*120;
+    particles.push({ x, y, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd-60, life:.6+Math.random()*.4, total:1, color:["#C46D28","#7A9B6E","#C8A050","#1A1A40"][i%4] });
+  }
+}
+function spawnFloatText(x,y,text){
+  particles.push({ x, y, vx:0, vy:-40, life:.9, total:.9, text, color:"#506B45" });
+}
+
+/* ══════════════════════════════════════════════════════════
+   DESENHO
+══════════════════════════════════════════════════════════ */
+function drawFrame(){
+  ctx.save();
+  if (shake>0) ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake);
+
+  const idx = curDestIdx, d = DESTS[idx];
+  const next = DESTS[(idx+1)%DESTS.length];
+  drawSky(d);
+  drawScenery(d);
+  drawGround(d);
+
+  obstacles.forEach(drawObstacle);
+  collectibles.forEach(drawCollectible);
+  particles.forEach(drawParticle);
+  drawPlayer();
+
+  if (banner.timer > 0) drawBanner();
+
+  ctx.restore();
+}
+
+function drawSky(d){
+  const g = ctx.createLinearGradient(0,0,0,GROUND_Y);
+  g.addColorStop(0, d.sky[0]); g.addColorStop(1, d.sky[1]);
+  ctx.fillStyle = g; ctx.fillRect(0,0,LW,GROUND_Y);
+}
+
+function drawScenery(d){
+  ctx.save();
+  const offset = farOffset;
+  if (d.scenery === "noronha"){
+    if (imgOk(NORONHA_SKY)) ctx.drawImage(NORONHA_SKY,0,0,LW,GROUND_Y*0.9);
+    [0,1].forEach(i=>{
+      const x = i*LW - (offset%LW);
+      if (imgOk(NORONHA_PICO)) ctx.drawImage(NORONHA_PICO, x+LW*.55, GROUND_Y-130, 110, 120);
+      if (imgOk(NORONHA_COLINA)) ctx.drawImage(NORONHA_COLINA, x, GROUND_Y-70, LW, 80);
+    });
+    if (imgOk(NORONHA_BIRD)) ctx.drawImage(NORONHA_BIRD, 40+Math.sin(farOffset*0.01)*20, 40, 30, 22);
+  } else if (d.scenery === "temple"){
+    drawTiled(offset, 220, (x)=>drawTemple(x));
+  } else if (d.scenery === "savanna"){
+    drawTiled(offset, 180, (x)=>drawAcacia(x));
+    ctx.fillStyle="rgba(255,210,150,.55)"; ctx.beginPath(); ctx.arc(LW*.78,46,22,0,Math.PI*2); ctx.fill();
+  } else if (d.scenery === "palm"){
+    drawTiled(offset, 200, (x)=>drawPalm(x));
+  } else if (d.scenery === "windmill"){
+    drawTiled(offset, 240, (x)=>drawWindmill(x));
+  }
+  ctx.restore();
+}
+function drawTiled(offset, spacing, fn){
+  const start = -((offset*0.6) % spacing) - spacing;
+  for (let x=start; x<LW+spacing; x+=spacing) fn(x);
+}
+function drawTemple(x){
+  ctx.fillStyle="rgba(140,90,20,.32)";
+  ctx.beginPath(); ctx.moveTo(x,GROUND_Y-60); ctx.lineTo(x+30,GROUND_Y-100); ctx.lineTo(x+60,GROUND_Y-60); ctx.closePath(); ctx.fill();
+  ctx.fillRect(x+6,GROUND_Y-60,48,40);
+}
+function drawAcacia(x){
+  ctx.strokeStyle="rgba(70,45,20,.4)"; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.moveTo(x,GROUND_Y-10); ctx.lineTo(x+6,GROUND_Y-60); ctx.stroke();
+  ctx.fillStyle="rgba(70,45,20,.32)";
+  ctx.beginPath(); ctx.ellipse(x+10,GROUND_Y-72,38,14,0,0,Math.PI*2); ctx.fill();
+}
+function drawPalm(x){
+  ctx.strokeStyle="rgba(90,70,30,.4)"; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.moveTo(x,GROUND_Y-8); ctx.quadraticCurveTo(x+10,GROUND_Y-60,x+4,GROUND_Y-90); ctx.stroke();
+  ctx.fillStyle="rgba(60,110,60,.4)";
+  for(let i=0;i<5;i++){ const a=(i/5)*Math.PI*2; ctx.beginPath(); ctx.ellipse(x+4+Math.cos(a)*22, GROUND_Y-90+Math.sin(a)*12, 22,8, a, 0, Math.PI*2); ctx.fill(); }
+}
+function drawWindmill(x){
+  ctx.fillStyle="rgba(255,255,255,.55)"; ctx.fillRect(x+10,GROUND_Y-70,18,70);
+  ctx.strokeStyle="rgba(255,255,255,.7)"; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.moveTo(x+19,GROUND_Y-70); ctx.lineTo(x+19-16,GROUND_Y-92);
+  ctx.moveTo(x+19,GROUND_Y-70); ctx.lineTo(x+19+16,GROUND_Y-92);
+  ctx.moveTo(x+19,GROUND_Y-70); ctx.lineTo(x+19-16,GROUND_Y-50);
+  ctx.moveTo(x+19,GROUND_Y-70); ctx.lineTo(x+19+16,GROUND_Y-50);
+  ctx.stroke();
+}
+
+function drawGround(d){
+  ctx.fillStyle = d.ground; ctx.fillRect(0,GROUND_Y,LW,LH-GROUND_Y);
+  ctx.fillStyle = d.groundLine; ctx.fillRect(0,GROUND_Y,LW,4);
+  ctx.save();
+  ctx.strokeStyle = d.groundLine; ctx.globalAlpha=.4; ctx.lineWidth=2;
+  const off = groundOffset % 36;
+  for (let x=-off; x<LW; x+=36){ ctx.beginPath(); ctx.moveTo(x,GROUND_Y+10); ctx.lineTo(x+16,GROUND_Y+10); ctx.stroke(); }
+  ctx.restore();
+}
+
+function drawObstacle(o){
+  const y = o.kind==="ground" ? GROUND_Y - o.h : GROUND_Y - STAND_H - 8 - o.h;
+  ctx.save();
+  ctx.font = `${o.h}px serif`;
+  ctx.textAlign="center"; ctx.textBaseline="bottom";
+  ctx.fillText(o.e, o.x + o.w/2, y + o.h);
+  ctx.restore();
+}
+function drawCollectible(c){
+  const y = c.y0 + Math.sin(c.bob + distance*0.05)*6;
+  ctx.save();
+  ctx.font = `${c.w+6}px serif`;
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText(c.e, c.x + c.w/2, y + c.w/2);
+  ctx.restore();
+}
+function drawParticle(p){
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, p.life/p.total);
+  if (p.text){
+    ctx.font="bold 13px 'Inter',sans-serif"; ctx.fillStyle=p.color; ctx.textAlign="center";
+    ctx.fillText(p.text, p.x, p.y);
+  } else {
+    ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x,p.y,3.2,0,Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawPlayer(){
+  const ducking = player.ducking && !player.jumping;
+  const w = ducking ? DUCK_W : STAND_W, h = ducking ? DUCK_H : STAND_H;
+  const x = PLAYER_X, y = player.y;
+  const legSwing = player.jumping ? 0 : Math.sin(player.runT*2)*1;
+
+  ctx.save();
+  /* sombra */
+  ctx.fillStyle="rgba(0,0,0,.14)";
+  ctx.beginPath(); ctx.ellipse(x+w/2, GROUND_Y+5, w*.55, 5, 0,0,Math.PI*2); ctx.fill();
+
+  if (ducking){
+    /* abaixado: corpo deitado, rosto na frente */
+    ctx.fillStyle = rnPersonagem==="tiago" ? "#C8A060" : "#90B870";
+    ctx.beginPath(); ctx.roundRect(x, y+6, w, h-6, 8); ctx.fill();
+    drawFaceCircle(x+w-9, y+h*.5, 11);
+  } else {
+    /* pernas */
+    ctx.strokeStyle = "#3D2E1C"; ctx.lineWidth=4; ctx.lineCap="round";
+    ctx.beginPath();
+    ctx.moveTo(x+8, y+h-2); ctx.lineTo(x+8-legSwing*3, y+h+8);
+    ctx.moveTo(x+w-8, y+h-2); ctx.lineTo(x+w-8+legSwing*3, y+h+8);
+    ctx.stroke();
+    /* corpo (camiseta) */
+    ctx.fillStyle = rnPersonagem==="tiago" ? "#C8A060" : "#90B870";
+    ctx.beginPath(); ctx.roundRect(x+2, y+h*.32, w-4, h*.55, 7); ctx.fill();
+    /* maletinha de viagem */
+    ctx.fillStyle="#C46D28";
+    ctx.beginPath(); ctx.roundRect(x-7, y+h*.5, 8, 11, 2); ctx.fill();
+    /* rosto */
+    drawFaceCircle(x+w/2, y+h*.22, 13);
+  }
+  ctx.restore();
+}
+function drawFaceCircle(cx,cy,r){
+  const faces = rnFaces(); const img = faces[rnFaceIdx % faces.length];
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.clip();
+  if (imgOk(img)){ ctx.drawImage(img, cx-r, cy-r, r*2, r*2); }
+  else { ctx.fillStyle = rnPersonagem==="tiago" ? "#B87B3E" : "#7A9B6E"; ctx.fill(); }
+  ctx.restore();
+}
+
+function drawBanner(){
+  const t = banner.timer;
+  const alpha = t > 1.8 ? (2.2-t)/0.4 : t < 0.4 ? t/0.4 : 1;
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+  ctx.fillStyle = "rgba(26,26,64,.78)";
+  ctx.beginPath(); ctx.roundRect(LW/2-150, 16, 300, 40, 20); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.font = "bold 15px 'Inter',sans-serif";
+  ctx.fillText(`${banner.flag}  ${banner.text}`, LW/2, 37);
+  ctx.restore();
+}
+
+/* ══════════════════════════════════════════════════════════
+   PERSONAGEM
+══════════════════════════════════════════════════════════ */
+function setRunnerPersonagem(p){
+  rnPersonagem = p;
+  document.getElementById("rn-btn-tiago").classList.toggle("active", p==="tiago");
+  document.getElementById("rn-btn-gian").classList.toggle("active", p==="gian");
+  rnFaceIdx = Math.floor(Math.random()*rnFaces().length);
+  if (!rnAlive) drawFrame(0);
+}
+window.setRunnerPersonagem = setRunnerPersonagem;
+
+/* ══════════════════════════════════════════════════════════
+   PLACAR (Top 10 compartilhado com a API do site)
+══════════════════════════════════════════════════════════ */
+function escJ(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+window.salvarScoreRunner = async function(){
+  const ni = document.getElementById("rn-nome");
+  const me = document.getElementById("rn-save-msg");
+  const btn = ni.nextElementSibling;
+  const nome = (ni.value||"").trim();
+  if (!nome){ me.style.color="var(--rn-terra)"; me.textContent="Informe seu nome."; ni.focus(); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  try{
+    const r = await fetch(RUNNER_API, { method:"POST", body: JSON.stringify({ action:"score", jogo:RUNNER_GAME_ID, nome, pontos: score }) });
+    const j = await r.json();
+    if (j.sucesso){
+      me.style.color = "var(--rn-sage-dk)"; me.textContent = "Recorde salvo! 🏆";
+      btn.disabled = true; btn.textContent = "Salvo";
+      ni.disabled = true;
+      carregarTop10Runner();
+    } else throw new Error();
+  } catch {
+    btn.disabled = false; btn.textContent = "Salvar";
+    me.style.color = "var(--rn-terra)"; me.textContent = "Não conseguimos salvar. Tente novamente.";
+  }
+};
+
+async function carregarTop10Runner(){
+  const el = document.getElementById("rn-top10"); if (!el) return;
+  el.innerHTML = `<h3 class="top10__title">🏆 Top 10</h3><p class="top10__loading">Carregando…</p>`;
+  try{
+    const r = await fetch(`${RUNNER_API}?action=top10&jogo=${RUNNER_GAME_ID}`);
+    const d = await r.json();
+    if (!d?.lista?.length){ el.innerHTML = `<h3 class="top10__title">🏆 Top 10</h3><p class="top10__empty">Nenhum recorde ainda. Seja o primeiro!</p>`; return; }
+    const medals = ["🥇","🥈","🥉"], classes = ["top10__item--gold","top10__item--silver","top10__item--bronze"];
+    el.innerHTML = `<h3 class="top10__title">🏆 Top 10</h3><ul class="top10__list">${
+      d.lista.map((it,i)=>`<li class="top10__item ${classes[i]||""}"><span class="top10__pos">${medals[i]||(i+1)}</span><span class="top10__name">${escJ(it.nome)}</span><span class="top10__pts">${it.pontos} pts</span></li>`).join("")
+    }</ul>`;
+  } catch {
+    el.innerHTML = `<h3 class="top10__title">🏆 Top 10</h3><p class="top10__empty">Não foi possível carregar.</p>`;
+  }
+}
+
+resetRunner();
+</script>
+  <script src="assets/js/scroll-to-game.js"></script>
+  <script src="assets/js/bg-music.js"></script>
+</body>
+</html>
