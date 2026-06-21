@@ -25,7 +25,7 @@
 
     /* Board */
     .dc-board-wrap{width:min(96%,var(--board-max,560px));margin:.85rem auto 0;aspect-ratio:1;position:relative;background:rgba(255,255,255,.5);border:1px solid rgba(216,205,188,.85);border-radius:18px;box-shadow:0 10px 32px rgba(82,57,34,.10);overflow:hidden;touch-action:none;transition:width .35s ease;}
-    .candy{position:absolute;width:calc(100%/var(--cols,8));height:calc(100%/var(--cols,8));box-sizing:border-box;display:flex;align-items:center;justify-content:center;transition:top .22s cubic-bezier(.4,0,.2,1),left .22s cubic-bezier(.4,0,.2,1),opacity .18s ease;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
+    .candy{position:absolute;width:calc(100%/var(--cols,8));height:calc(100%/var(--rows,8));box-sizing:border-box;display:flex;align-items:center;justify-content:center;transition:top .22s cubic-bezier(.4,0,.2,1),left .22s cubic-bezier(.4,0,.2,1),opacity .18s ease;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
     .candy-img{position:absolute;inset:6%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));transition:transform .15s;pointer-events:none;}
     /* a bomba de cor é mais estreita/alta que os outros doces (proporção bem diferente) — caixa maior
        pra ela não ficar pequena/encolhida no centro da célula, comparada aos vizinhos */
@@ -146,7 +146,7 @@
           <li><span data-it="Dolci com um pequeno selo escondem prêmios — combinali!">Doces com um pequeno selo escondem prêmios — combine-os!</span></li>
           <li><span data-it="Tempo extra, congelar e pontos x2 aplicam-se na hora (o x2 acumula em dobro se vier de novo). Embaralhar e ímã ficam guardados sem limite na reserva.">Tempo extra, congelar e pontos x2 aplicam-se na hora (o x2 acumula em dobro se vier de novo). Embaralhar e ímã ficam guardados sem limite na reserva.</span></li>
           <li><span data-it="Bomba de cor vai para a reserva (até 2). Reserva cheia? Escolha qual usar antes de perder a nova!">Bomba de cor vai para a reserva (até 2). Reserva cheia? Escolha qual usar antes de perder a nova!</span></li>
-          <li><span data-it="Ogni 5 mila punti sblocchi qualcosa di nuovo — dolci extra e, in alcuni traguardi, un tabellone più grande!">A cada 5 mil pontos você desbloqueia algo novo — doces extras e, em alguns marcos, um tabuleiro maior!</span></li>
+          <li><span data-it="Ogni 7 mila punti sblocchi un dolce novo, e ogni 3 mila punti il tabellone cresce — sempre, senza limite!">A cada 7 mil pontos você desbloqueia um doce novo, e a cada 3 mil pontos o tabuleiro cresce — sempre, sem limite!</span></li>
         </ul>
       </div>
       <div class="btn-row"><button class="game-btn game-btn--main" onclick="startGame()" data-it="Inizia">Começar</button></div>
@@ -191,23 +191,15 @@
 const API="https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
 const GAME_KEY="doce-crush";
 const START_ROWS=6, START_COLS=6;
-let ROWS=START_ROWS, COLS=START_COLS; let NTYPES=4; const MAX_NTYPES=12; let CELL=100/COLS;
+let ROWS=START_ROWS, COLS=START_COLS; let NTYPES=4; const MAX_NTYPES=12;
+let CELL_W=100/COLS, CELL_H=100/ROWS;
 const TOTAL_TIME=90;
-/* cada marca de pontuação pode liberar um doce novo e/ou crescer o tabuleiro — ver EXPAND_SPEC.
-   a 6ª marca é de propósito "vazia" (nenhum dos dois), só um respiro no ritmo. */
-const SCORE_MARKS=[5000,10000,15000,20000,25000,30000,35000,40000,45000];
-const EXPAND_SPEC=[
-  {candy:true,  grid:true},  // 1ª: novo doce + tabuleiro maior
-  {candy:true,  grid:false}, // 2ª: só novo doce
-  {candy:true,  grid:true},  // 3ª: novo doce + tabuleiro maior
-  {candy:true,  grid:false}, // 4ª: só novo doce
-  {candy:true,  grid:true},  // 5ª: novo doce + tabuleiro maior
-  {candy:false, grid:false}, // 6ª: nada
-  {candy:true,  grid:false}, // 7ª: só novo doce
-  {candy:true,  grid:true},  // 8ª: novo doce + tabuleiro maior
-  {candy:true,  grid:false}  // 9ª: só novo doce
-];
-const GRID_CAP=START_COLS+EXPAND_SPEC.filter(s=>s.grid).length;
+/* expansão contínua e independente:
+   - a cada 7000 pontos libera um doce novo (até esgotar CANDY_NAMES)
+   - a cada 3000 pontos o tabuleiro cresce uma linha — alternando horizontal (linha) e
+     vertical (coluna), infinitamente, sem limite máximo de tamanho */
+const CANDY_SCORE_INTERVAL=7000;
+const GRID_SCORE_INTERVAL=3000;
 const CANDY_NAMES=['Eclair','Macaron de Limão','Brigadeiro','Camafeu','Bombom de Pistache','Tortinha de Frutas','Donut Rosa','Doce de Physalis','Brigadeiro Azul','Torta de Limão','Cereja','Pirâmide Roxa'];
 
 const boardEl=document.getElementById('board');
@@ -216,7 +208,7 @@ let tapSelected=null, pointerDownCell=null, startX=0, startY=0, moved=false;
 let locked=false, gameActive=false;
 let score=0, timeLeft=TOTAL_TIME, timer=null, maxCombo=0, totalCleared=0, finalScore=0, chainStep=0;
 let triggeredThresholds=new Set();
-let elapsedPlayed=0, expandIndex=0, pendingGridGrowths=0;
+let elapsedPlayed=0, candyMarkIndex=0, gridMarkIndex=0, gridGrowthCount=0, pendingGridGrowths=0;
 let freezeUntil=0, multiplierUntil=0, multiplierStack=1, inventory=[], pendingPowerupOffer=null;
 let stock={shuffle:0, magnet:0};
 
@@ -258,9 +250,14 @@ const POWERUPS={
 // peso relativo de sorteio — shuffle a 10% e magnet a 20% do que era (uniforme) antes
 const POWERUP_WEIGHTS={time:1, freeze:1, multi:1, rainbow:1, shuffle:0.1, magnet:0.2};
 
-function recalcCell(){ CELL=100/COLS; boardEl.style.setProperty('--cols',COLS); }
+function recalcCell(){
+  CELL_W=100/COLS; CELL_H=100/ROWS;
+  boardEl.style.setProperty('--cols',COLS);
+  boardEl.style.setProperty('--rows',ROWS);
+  boardEl.style.aspectRatio=COLS+' / '+ROWS;
+}
 /* frequência de power-ups cai progressivamente com as expansões: 100% no início, 20% na expansão 5 */
-function powerupFreqMult(){ return Math.max(0.2, 1-0.16*expandIndex); }
+function powerupFreqMult(){ return Math.max(0.2, 1-0.16*(candyMarkIndex+gridMarkIndex)); }
 function maybeGift(candy){
   const roll=Math.random();
   const pf=powerupFreqMult();
@@ -439,7 +436,8 @@ function rnd(n){return Math.floor(Math.random()*n);}
 function makeCandy(type,special){return {id:idSeq++,type,special:special||null};}
 function inBounds(r,c){return r>=0&&r<ROWS&&c>=0&&c<COLS;}
 function isAdjacent(r1,c1,r2,c2){return (Math.abs(r1-r2)+Math.abs(c1-c2))===1;}
-function cellPct(i){return (i*CELL)+'%';}
+function cellPctX(c){return (c*CELL_W)+'%';}
+function cellPctY(r){return (r*CELL_H)+'%';}
 
 function createBoard(){
   const b=[];
@@ -536,7 +534,7 @@ function areaEffect(special,r,c){
 }
 
 /* ---------- rendering ---------- */
-function setPos(el,r,c){ el.style.top=cellPct(r); el.style.left=cellPct(c); }
+function setPos(el,r,c){ el.style.top=cellPctY(r); el.style.left=cellPctX(c); }
 
 function createCandyEl(r,c,candy,spawnAbove){
   const el=document.createElement('div');
@@ -546,11 +544,11 @@ function createCandyEl(r,c,candy,spawnAbove){
   el.classList.toggle('is-wildcard',candy.special==='wildcard');
   if(spawnAbove){
     el.style.transition='none';
-    el.style.top=cellPct(r-spawnAbove);
-    el.style.left=cellPct(c);
+    el.style.top=cellPctY(r-spawnAbove);
+    el.style.left=cellPctX(c);
     boardEl.appendChild(el);
     elMap[candy.id]=el;
-    requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ el.style.transition=''; el.style.top=cellPct(r); }); });
+    requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ el.style.transition=''; el.style.top=cellPctY(r); }); });
   } else {
     setPos(el,r,c);
     boardEl.appendChild(el);
@@ -568,8 +566,8 @@ function popScore(r,c,amount){
   const el=document.createElement('div');
   el.className='score-pop';
   el.textContent='+'+amount;
-  el.style.left=((c+0.5)*CELL)+'%';
-  el.style.top=((r+0.5)*CELL)+'%';
+  el.style.left=((c+0.5)*CELL_W)+'%';
+  el.style.top=((r+0.5)*CELL_H)+'%';
   boardEl.appendChild(el);
   setTimeout(()=>{ if(el.parentNode) el.remove(); },720);
 }
@@ -812,7 +810,7 @@ function settleBoard(){
       if(special) specials.push({pos,special,type:cluster.type});
     }
     processClear(toClear,specials,null);
-  } else if(pendingGridGrowths>0 && COLS<GRID_CAP){
+  } else if(pendingGridGrowths>0){
     pendingGridGrowths--;
     growGrid();
   } else if(pendingPowerupOffer){
@@ -841,19 +839,23 @@ function applyGravityAnimated(){
 
 /* ---------- grid expansion ---------- */
 // checa de forma recorrente (loop) pra não perder marcas quando o placar
-// salta de uma vez por duas ou mais (ex.: combo grande cruza 2 SCORE_MARKS junto)
+// salta de uma vez por duas ou mais (ex.: combo grande cruza 2 marcas junto).
+// doces e grid são totalmente independentes: doce novo a cada CANDY_SCORE_INTERVAL,
+// linha/coluna nova a cada GRID_SCORE_INTERVAL — sem limite máximo de tamanho.
 function checkExpansion(){
-  while(expandIndex<EXPAND_SPEC.length && score>=SCORE_MARKS[expandIndex]){
-    const spec=EXPAND_SPEC[expandIndex];
-    expandIndex++;
-    if(spec.candy) unlockNewCandy();
-    if(spec.grid) pendingGridGrowths++;
+  while(score>=(candyMarkIndex+1)*CANDY_SCORE_INTERVAL && NTYPES<MAX_NTYPES){
+    candyMarkIndex++;
+    unlockNewCandy();
+  }
+  while(score>=(gridMarkIndex+1)*GRID_SCORE_INTERVAL){
+    gridMarkIndex++;
+    pendingGridGrowths++;
   }
   tryGrowPendingGrid();
 }
 
 function tryGrowPendingGrid(){
-  if(pendingGridGrowths>0 && !locked && COLS<GRID_CAP){
+  if(pendingGridGrowths>0 && !locked){
     pendingGridGrowths--;
     growGrid();
   }
@@ -868,21 +870,44 @@ function unlockNewCandy(){
   sndNewCandy(); haptic(18);
 }
 
+function boardMaxFor(rows,cols){ return (480+(Math.max(rows,cols)-Math.max(START_ROWS,START_COLS))*16)+'px'; }
+function repositionAllCandies(){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const candy=board[r][c];
+    if(candy){ const el=elMap[candy.id]; if(el) setPos(el,r,c); }
+  }
+}
+// crescimento alternado e infinito: 1ª vez linha (horizontal), 2ª vez coluna (vertical), 3ª linha, etc.
 function growGrid(){
   if(!gameActive) return;
+  gridGrowthCount++;
+  const horizontal=(gridGrowthCount%2===1);
+  if(horizontal) growGridRow(); else growGridCol();
+}
+function growGridRow(){
   locked=true; chainStep=0; triggeredThresholds=new Set();
-  const oldRows=ROWS, oldCols=COLS;
-  ROWS++; COLS++;
+  const oldRows=ROWS;
+  ROWS++;
   recalcCell();
-  boardEl.style.setProperty('--board-max',(480+(COLS-START_COLS)*16)+'px');
-  for(let r=0;r<oldRows;r++){ board[r].push(maybeGift(makeCandy(rnd(NTYPES)))); }
+  boardEl.style.setProperty('--board-max',boardMaxFor(ROWS,COLS));
   board.push([]);
   for(let c=0;c<COLS;c++){ board[oldRows][c]=maybeGift(makeCandy(rnd(NTYPES))); }
-  for(let r=0;r<oldRows;r++)for(let c=0;c<oldCols;c++){
-    const candy=board[r][c]; if(candy){ const el=elMap[candy.id]; if(el) setPos(el,r,c); }
-  }
-  for(let r=0;r<oldRows;r++) createCandyEl(r,oldCols,board[r][oldCols],2);
+  repositionAllCandies();
   for(let c=0;c<COLS;c++) createCandyEl(oldRows,c,board[oldRows][c],2);
+  showToast('Tabuleiro expandiu! '+ROWS+'×'+COLS);
+  if(window.confettiBurst) confettiBurst({count:32,hearts:true});
+  sndSpecial(); haptic(30);
+  setTimeout(settleBoard,420);
+}
+function growGridCol(){
+  locked=true; chainStep=0; triggeredThresholds=new Set();
+  const oldCols=COLS;
+  COLS++;
+  recalcCell();
+  boardEl.style.setProperty('--board-max',boardMaxFor(ROWS,COLS));
+  for(let r=0;r<ROWS;r++){ board[r].push(maybeGift(makeCandy(rnd(NTYPES)))); }
+  repositionAllCandies();
+  for(let r=0;r<ROWS;r++) createCandyEl(r,oldCols,board[r][oldCols],2);
   showToast('Tabuleiro expandiu! '+ROWS+'×'+COLS);
   if(window.confettiBurst) confettiBurst({count:32,hearts:true});
   sndSpecial(); haptic(30);
@@ -898,7 +923,7 @@ function restartGame(){
   document.getElementById('invFullModal').hidden=true;
   score=0; timeLeft=TOTAL_TIME; maxCombo=0; totalCleared=0; chainStep=0;
   tapSelected=null; pointerDownCell=null; locked=false; gameActive=true;
-  triggeredThresholds=new Set(); elapsedPlayed=0; expandIndex=0; pendingGridGrowths=0;
+  triggeredThresholds=new Set(); elapsedPlayed=0; candyMarkIndex=0; gridMarkIndex=0; gridGrowthCount=0; pendingGridGrowths=0;
   freezeUntil=0; multiplierUntil=0; multiplierStack=1; inventory=[]; pendingPowerupOffer=null; renderInventory();
   stock={shuffle:0,magnet:0}; renderStock('shuffle'); renderStock('magnet'); updateMultiBadge();
   ROWS=START_ROWS; COLS=START_COLS; NTYPES=4; recalcCell();
