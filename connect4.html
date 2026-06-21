@@ -598,7 +598,7 @@
 
   window.compartilharConn = function() {
     const d = hoje();
-    const txt = `Conexões do Casamento Tiago & Gian 🌿\n${d} · ${resolvidos.length}/4 grupos\n\n${emojiHistorico.join("\n")}\n\nhttps://gianmariaparadisi.github.io/casamento/connect4.html`;
+    const txt = `Conexões do Casamento Tiago & Gian 🌿\n${d} · ${resolvidos.length}/4 grupos\n\n${emojiHistorico.join("\n")}\n\nhttps://gianmariaparadisi.github.io/casamento/jogos.html`;
     if (navigator.share) {
       navigator.share({ text: txt }).catch(() => {});
     } else {

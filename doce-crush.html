@@ -146,7 +146,7 @@
           <li><span data-it="Dolci com um pequeno selo escondem prêmios — combinali!">Doces com um pequeno selo escondem prêmios — combine-os!</span></li>
           <li><span data-it="Tempo extra, congelar e pontos x2 aplicam-se na hora (o x2 acumula em dobro se vier de novo). Embaralhar e ímã ficam guardados sem limite na reserva.">Tempo extra, congelar e pontos x2 aplicam-se na hora (o x2 acumula em dobro se vier de novo). Embaralhar e ímã ficam guardados sem limite na reserva.</span></li>
           <li><span data-it="Bomba de cor vai para a reserva (até 2). Reserva cheia? Escolha qual usar antes de perder a nova!">Bomba de cor vai para a reserva (até 2). Reserva cheia? Escolha qual usar antes de perder a nova!</span></li>
-          <li><span data-it="Ogni 7 mila punti sblocchi un dolce novo, e ogni 3 mila punti il tabellone cresce — sempre, senza limite!">A cada 7 mil pontos você desbloqueia um doce novo, e a cada 3 mil pontos o tabuleiro cresce — sempre, sem limite!</span></li>
+          <li><span data-it="Ogni 7 mila punti sblocchi un dolce novo, e ogni 4500 punti il tabellone cresce — sempre, senza limite!">A cada 7 mil pontos você desbloqueia um doce novo, e a cada 4500 pontos o tabuleiro cresce — sempre, sem limite!</span></li>
         </ul>
       </div>
       <div class="btn-row"><button class="game-btn game-btn--main" onclick="startGame()" data-it="Inizia">Começar</button></div>
@@ -306,7 +306,7 @@ function updateMultiBadge(){
   if(!active){ el.hidden=true; el.classList.remove('blink'); return; }
   el.hidden=false;
   el.innerHTML=`${iconImg('sparkle')}<span>x${multiplierStack}</span>`;
-  el.classList.toggle('blink', (multiplierUntil-Date.now())<4500);
+  el.classList.toggle('blink', (multiplierUntil-Date.now())<3000);
 }
 function openInventoryFullModal(){
   clearInterval(timer);

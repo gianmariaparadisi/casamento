@@ -532,7 +532,7 @@
 
   window.compartilharWordle = function() {
     var d   = hoje();
-    var txt = "Wordle do Casamento Tiago & Gian 🌿\n" + d + " · " + tentativas.length + "/" + MAX_TENTATIVAS + "\n\n" + emojiGrid.join("\n") + "\n\nhttps://gianmariaparadisi.github.io/casamento/wordle.html";
+    var txt = "Wordle do Casamento Tiago & Gian 🌿\n" + d + " · " + tentativas.length + "/" + MAX_TENTATIVAS + "\n\n" + emojiGrid.join("\n") + "\n\nhttps://gianmariaparadisi.github.io/casamento/jogos.html";
     if (navigator.share) {
       navigator.share({ text: txt }).catch(function(){});
     } else {
