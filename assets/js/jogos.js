@@ -480,6 +480,7 @@ async function carregarPreviewRecorde(){
     {key:"flight-lisboa", el:"record-flight-preview"},
     {key:"doce-crush",   el:"record-doce-preview"},
     {key:"mosaico",      el:"record-mosaico-preview"},
+    {key:"luademel-runner", el:"record-luademel-preview"},
   ];
   for(const j of jogos){
     const el=document.getElementById(j.el); if(!el) continue;
