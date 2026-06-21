@@ -1,0 +1,6 @@
+<svg viewBox="0 0 110 200" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#B98B4A" fill-opacity="0.5">
+    <path d="M30 200 L30 150 Q55 130 80 150 L80 200 Z"/>
+    <path d="M25 152 L55 122 L85 152 Z" fill="#7A5230" fill-opacity="0.55"/>
+  </g>
+</svg>
