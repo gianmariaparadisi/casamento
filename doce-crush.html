@@ -261,8 +261,8 @@ const POWERUPS={
   goldbomb:{icon:'goldbomb',label:'Bomba Dourada',requiresIdle:true, apply:()=>{ grantGoldBomb(); }}
 };
 // peso relativo de sorteio — shuffle a 10% e magnet a 20% do que era (uniforme) antes
-// goldbomb um pouco mais raro que a bomba de cor comum, mas não muito mais
-const POWERUP_WEIGHTS={time:1, freeze:1, multi:1, rainbow:1, goldbomb:0.65, shuffle:0.1, magnet:0.2};
+// goldbomb reduzida pra 1/3 do peso anterior (0.65 → ~0.22), bem mais rara que a bomba de cor
+const POWERUP_WEIGHTS={time:1, freeze:1, multi:1, rainbow:1, goldbomb:0.22, shuffle:0.1, magnet:0.2};
 
 function recalcCell(){
   CELL_W=100/COLS; CELL_H=100/ROWS;
