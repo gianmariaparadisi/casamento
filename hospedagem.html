@@ -77,7 +77,7 @@
 
     .hotel__card { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-green);display:flex;flex-direction:column;transition:box-shadow var(--transition),transform var(--transition); }
     .hotel__card:hover { box-shadow:var(--shadow-lg);transform:translateY(-3px); }
-    .hotel__foto-ph { width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;overflow:hidden; }
+    .hotel__foto-ph { width:100%;height:200px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;overflow:visible; }
     .hotel__foto-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1; }
     .hotel__body { padding:1.75rem;display:flex;flex-direction:column;gap:.45rem;flex:1; }
     .hotel__categoria { font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--sage);font-weight:500; }
@@ -92,30 +92,30 @@
     .hotel__info-row strong { color:var(--text-main); }
     .hotel__actions { display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.25rem; }
 
-    /* ─── ESGOTADO ─── */
-    .hotel__card--soldout { opacity:.72;filter:grayscale(.35); }
-    .hotel__card--soldout:hover { transform:none; }
-    .hotel__soldout-ribbon {
-      position:absolute;top:14px;right:-34px;z-index:2;
-      background:#c0392b;color:#fff;font-size:.72rem;font-weight:700;
-      letter-spacing:.1em;text-transform:uppercase;
-      padding:.35rem 2.5rem;transform:rotate(40deg);
+    /* ─── FAIXA DIAGONAL (corner ribbon, largura fixa pra não cortar texto) ─── */
+    .hotel__ribbon {
+      position:absolute;top:20px;right:-52px;z-index:2;
+      width:190px;text-align:center;
+      color:#fff;font-size:.66rem;font-weight:700;
+      letter-spacing:.05em;text-transform:uppercase;
+      padding:.4rem 0;transform:rotate(40deg);
       box-shadow:0 2px 8px rgba(0,0,0,.25);
+      white-space:nowrap;
     }
+    .hotel__ribbon--soldout { background:#c0392b; }
+    .hotel__ribbon--cupom { background:#3F8C4A; }
+
+    /* ─── ESGOTADO (Carlton) ─── */
+    .hotel__card--soldout { background:#FBEAEA;border-color:#E3B3B3; }
+    .hotel__card--soldout:hover { transform:none; }
     .hotel__badge-soldout {
       display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:700;
       color:#fff;background:#c0392b;padding:.25rem .7rem;border-radius:20px;
       margin-top:.1rem;width:fit-content;text-transform:uppercase;letter-spacing:.04em;
     }
 
-    /* ─── CUPOM DE DESCONTO (faixa na foto) ─── */
-    .hotel__cupom-ribbon {
-      position:absolute;top:14px;right:-34px;z-index:2;
-      background:var(--sage-dark,#5C7A52);color:#fff;font-size:.72rem;font-weight:700;
-      letter-spacing:.08em;text-transform:uppercase;
-      padding:.35rem 2.1rem;transform:rotate(40deg);
-      box-shadow:0 2px 8px rgba(0,0,0,.25);
-    }
+    /* ─── DESTAQUE CUPOM (Zahara) ─── */
+    .hotel__card--cupom { background:#EAF6EC;border-color:#B7DCC0; }
 
     /* ─── CUPOM DE DESCONTO ─── */
     .hotel__cupom {
@@ -229,9 +229,9 @@
       <div class="hoteis__grid">
 
         <!-- 1 - Zahara -->
-        <article class="hotel__card reveal">
+        <article class="hotel__card hotel__card--cupom reveal">
           <div class="hotel__foto-ph" style="background:linear-gradient(135deg,#e4ecf5,#c5d5e8)">
-            <span class="hotel__cupom-ribbon" data-it="Codice sconto">Cupom de desconto</span>
+            <span class="hotel__ribbon hotel__ribbon--cupom" data-it="Codice sconto">Cupom de desconto</span>
             <img class="hotel__foto-img" src="assets/img/hotel-zahara.jpg" alt="" onerror="this.style.display='none'">
             <svg width="56" height="56" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#7A93B8">
               <path d="M8 40c2-3 4-3 6 0s4 3 6 0 4-3 6 0 4 3 6 0 4-3 6 0"/>
@@ -324,7 +324,7 @@
         <!-- 3 - Carlton Suítes (ESGOTADO) -->
         <article class="hotel__card hotel__card--soldout reveal">
           <div class="hotel__foto-ph" style="background:linear-gradient(135deg,#e8f2e4,#c8dcbf)">
-            <span class="hotel__soldout-ribbon" data-it="Esaurito">Esgotado</span>
+            <span class="hotel__ribbon hotel__ribbon--soldout" data-it="Esaurito">Esgotado</span>
             <img class="hotel__foto-img" src="assets/img/hotel-carlton.jpg" alt="" onerror="this.style.display='none'">
             <svg width="56" height="56" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#7A9B6E">
               <rect x="6" y="18" width="36" height="22" rx="1.5"/><path d="M6 18 24 6l18 12"/>
