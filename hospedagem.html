@@ -91,6 +91,35 @@
     .hotel__info-row svg { flex-shrink:0;color:var(--sage);margin-top:1px; }
     .hotel__info-row strong { color:var(--text-main); }
     .hotel__actions { display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.25rem; }
+
+    /* ─── ESGOTADO ─── */
+    .hotel__card--soldout { opacity:.72;filter:grayscale(.35); }
+    .hotel__card--soldout:hover { transform:none; }
+    .hotel__soldout-ribbon {
+      position:absolute;top:14px;right:-34px;z-index:2;
+      background:#c0392b;color:#fff;font-size:.72rem;font-weight:700;
+      letter-spacing:.1em;text-transform:uppercase;
+      padding:.35rem 2.5rem;transform:rotate(40deg);
+      box-shadow:0 2px 8px rgba(0,0,0,.25);
+    }
+    .hotel__badge-soldout {
+      display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:700;
+      color:#fff;background:#c0392b;padding:.25rem .7rem;border-radius:20px;
+      margin-top:.1rem;width:fit-content;text-transform:uppercase;letter-spacing:.04em;
+    }
+
+    /* ─── CUPOM DE DESCONTO ─── */
+    .hotel__cupom {
+      margin-top:.5rem;padding:.65rem .85rem;background:#FFF8E8;
+      border:1.5px dashed #D9A441;border-radius:var(--radius);
+      display:flex;align-items:center;gap:.55rem;font-size:.82rem;color:#7A5C1E;line-height:1.5;
+    }
+    .hotel__cupom svg { flex-shrink:0;color:#D9A441; }
+    .hotel__cupom strong {
+      font-family:monospace;letter-spacing:.04em;background:#fff;
+      padding:.15rem .5rem;border-radius:4px;border:1px solid #D9A441;
+    }
+
     /* Distância até a Fazenda */
     .hotel__distancia { margin-top:1rem;padding-top:1rem;border-top:1px solid var(--line-green); }
     .hotel__distancia-badge { display:flex;align-items:center;gap:.45rem;font-size:.78rem;color:var(--sage-dark);font-weight:600; }
@@ -190,44 +219,51 @@
       <h2 class="hoteis__titulo reveal" data-it="Hotel a Limeira">Hotéis em Limeira</h2>
       <div class="hoteis__grid">
 
-        <!-- 1 - Carlton Suítes -->
+        <!-- 1 - Zahara -->
         <article class="hotel__card reveal">
-          <div class="hotel__foto-ph" style="background:linear-gradient(135deg,#e8f2e4,#c8dcbf)">
-            <img class="hotel__foto-img" src="assets/img/hotel-carlton.jpg" alt="" onerror="this.style.display='none'">
-            <svg width="56" height="56" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#7A9B6E">
-              <rect x="6" y="18" width="36" height="22" rx="1.5"/><path d="M6 18 24 6l18 12"/>
-              <path d="M14 40v-8h8v8M26 40v-8h8v8"/>
-              <path d="M4 44h40"/>
+          <div class="hotel__foto-ph" style="background:linear-gradient(135deg,#e4ecf5,#c5d5e8)">
+            <img class="hotel__foto-img" src="assets/img/hotel-zahara.jpg" alt="" onerror="this.style.display='none'">
+            <svg width="56" height="56" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#7A93B8">
+              <path d="M8 40c2-3 4-3 6 0s4 3 6 0 4-3 6 0 4 3 6 0 4-3 6 0"/>
+              <circle cx="24" cy="14" r="7"/>
+              <path d="M24 21v12"/>
             </svg>
           </div>
           <div class="hotel__body">
-            <p class="hotel__categoria" data-it="Hotel 4 stelle · Resort">Hotel 4 estrelas · Resort</p>
-            <h3 class="hotel__nome">Carlton Suítes Limeira</h3>
+            <p class="hotel__categoria" data-it="Hotel 4 stelle · Gastronomia">Hotel 4 estrelas · Gastronomia</p>
+            <h3 class="hotel__nome">Zahara Hotel</h3>
             <div class="hotel__nota">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              <span data-it="Ottima valutazione · Booking">Excelente avaliação · Booking</span>
+              <span data-it="9.2 · Decolar · molto ben valutato">9.2 · Decolar · muito bem avaliado</span>
             </div>
-            <p class="hotel__preco" data-it-html="A partire da <strong>R$ 175</strong> /notte (doppia)">A partir de <strong>R$ 175</strong> /noite (casal)</p>
-            <p class="hotel__desc" data-it="Il meglio della città: piscine esterne, sauna, campo da tennis, campo da calcio e area relax completa. Buona distanza dal centro, ottimo per relax prima e dopo la festa. Colazione a buffet incluse.">O melhor da cidade: piscinas externas, sauna, quadra de tênis, campo de futebol e área de lazer completa. Boa distância do centro, ótimo para relaxar antes e depois da festa. Café da manhã em buffet incluso.</p>
+            <p class="hotel__preco" data-it-html="A partire da <strong>R$ 280</strong> /notte (doppia)">A partir de <strong>R$ 280</strong> /noite (casal)</p>
+            <div class="hotel__cupom">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5V7a2 2 0 0 1 2-2h2.5"/><path d="M22 9.5V7a2 2 0 0 0-2-2h-2.5"/><path d="M2 14.5V17a2 2 0 0 0 2 2h2.5"/><path d="M22 14.5V17a2 2 0 0 1-2 2h-2.5"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/></svg>
+              <span data-it-html="Usa il codice <strong>TIAGOEGIAN1212</strong> per uno sconto speciale!">Use o cupom <strong>TIAGOEGIAN1212</strong> para um desconto especial!</span>
+            </div>
+            <p class="hotel__desc" data-it="Hotel con struttura completa di alloggio e gastronomia, ristorante premiato, spa, sauna, palestra e parcheggio privato. Una delle opzioni più apprezzate di Limeira.">Hotel com estrutura completa de hospedagem e gastronomia, restaurante premiado, spa, sauna, academia e estacionamento privativo. Uma das opções mais bem avaliadas de Limeira.</p>
             <div class="hotel__info">
               <div class="hotel__info-row">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a7 7 0 0 1 7 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                <span>Rua Boulevard de La Loi, 601, Centreville, Limeira</span>
+                <span>Rua José Jorge Rodrigues, 485, Vila Nova, Limeira</span>
               </div>
               <div class="hotel__info-row">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.34 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.36a16 16 0 0 0 6 6l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                <span><strong>(19) 2113-8989</strong></span>
+                <span><strong>(19) 3440-5445</strong> · <strong>(19) 98423-0193</strong></span>
+              </div>
+              <div class="hotel__info-row">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span>reservas@hotelzahara.com.br</span>
               </div>
             </div>
             <div class="hotel__actions">
-              <a href="https://carltonhoteis.com.br/hotel-carlton-suites-limeira/" target="_blank" rel="noopener" class="btn btn--outline-green btn--sm" data-it="Sito ufficiale">Site oficial</a>
-              <a href="https://www.booking.com/hotel/br/carlton-plaza-limeira.html" target="_blank" rel="noopener" class="btn btn--outline btn--sm">Booking.com</a>
+              <a href="https://zaharahotel.com.br" target="_blank" rel="noopener" class="btn btn--outline-green btn--sm" data-it="Sito ufficiale">Site oficial</a>
+              <a href="https://www.booking.com/hotel/br/zarzuela.html" target="_blank" rel="noopener" class="btn btn--outline btn--sm">Booking.com</a>
             </div>
-            <!-- Distância até a fazenda -->
             <div class="hotel__distancia">
               <div class="hotel__distancia-badge">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                <span data-it="10 km · 16 min in macchina dalla Fazenda Quilombo">10 km · 16 min de carro até a Fazenda</span>
+                <span data-it="15 km · 26 min in macchina dalla Fazenda Quilombo">15 km · 26 min de carro até a Fazenda</span>
               </div>
             </div>
           </div>
@@ -275,47 +311,46 @@
           </div>
         </article>
 
-        <!-- 3 - Zahara -->
-        <article class="hotel__card reveal">
-          <div class="hotel__foto-ph" style="background:linear-gradient(135deg,#e4ecf5,#c5d5e8)">
-            <img class="hotel__foto-img" src="assets/img/hotel-zahara.jpg" alt="" onerror="this.style.display='none'">
-            <svg width="56" height="56" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#7A93B8">
-              <path d="M8 40c2-3 4-3 6 0s4 3 6 0 4-3 6 0 4 3 6 0 4-3 6 0"/>
-              <circle cx="24" cy="14" r="7"/>
-              <path d="M24 21v12"/>
+        <!-- 3 - Carlton Suítes (ESGOTADO) -->
+        <article class="hotel__card hotel__card--soldout reveal">
+          <div class="hotel__foto-ph" style="background:linear-gradient(135deg,#e8f2e4,#c8dcbf)">
+            <span class="hotel__soldout-ribbon" data-it="Esaurito">Esgotado</span>
+            <img class="hotel__foto-img" src="assets/img/hotel-carlton.jpg" alt="" onerror="this.style.display='none'">
+            <svg width="56" height="56" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#7A9B6E">
+              <rect x="6" y="18" width="36" height="22" rx="1.5"/><path d="M6 18 24 6l18 12"/>
+              <path d="M14 40v-8h8v8M26 40v-8h8v8"/>
+              <path d="M4 44h40"/>
             </svg>
           </div>
           <div class="hotel__body">
-            <p class="hotel__categoria" data-it="Hotel 4 stelle · Gastronomia">Hotel 4 estrelas · Gastronomia</p>
-            <h3 class="hotel__nome">Zahara Hotel</h3>
+            <p class="hotel__categoria" data-it="Hotel 4 stelle · Resort">Hotel 4 estrelas · Resort</p>
+            <h3 class="hotel__nome">Carlton Suítes Limeira</h3>
+            <span class="hotel__badge-soldout" data-it="Esaurito per il weekend del matrimonio">Esgotado para o fim de semana do casamento</span>
             <div class="hotel__nota">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              <span data-it="9.2 · Decolar · molto ben valutato">9.2 · Decolar · muito bem avaliado</span>
+              <span data-it="Ottima valutazione · Booking">Excelente avaliação · Booking</span>
             </div>
-            <p class="hotel__preco" data-it-html="A partire da <strong>R$ 280</strong> /notte (doppia)">A partir de <strong>R$ 280</strong> /noite (casal)</p>
-            <p class="hotel__desc" data-it="Hotel con struttura completa di alloggio e gastronomia, ristorante premiato, spa, sauna, palestra e parcheggio privato. Una delle opzioni più apprezzate di Limeira.">Hotel com estrutura completa de hospedagem e gastronomia, restaurante premiado, spa, sauna, academia e estacionamento privativo. Uma das opções mais bem avaliadas de Limeira.</p>
+            <p class="hotel__preco" data-it-html="A partire da <strong>R$ 175</strong> /notte (doppia)">A partir de <strong>R$ 175</strong> /noite (casal)</p>
+            <p class="hotel__desc" data-it="Il meglio della città: piscine esterne, sauna, campo da tennis, campo da calcio e area relax completa. Buona distanza dal centro, ottimo per relax prima e dopo la festa. Colazione a buffet incluse.">O melhor da cidade: piscinas externas, sauna, quadra de tênis, campo de futebol e área de lazer completa. Boa distância do centro, ótimo para relaxar antes e depois da festa. Café da manhã em buffet incluso.</p>
             <div class="hotel__info">
               <div class="hotel__info-row">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a7 7 0 0 1 7 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                <span>Rua José Jorge Rodrigues, 485, Vila Nova, Limeira</span>
+                <span>Rua Boulevard de La Loi, 601, Centreville, Limeira</span>
               </div>
               <div class="hotel__info-row">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.34 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.36a16 16 0 0 0 6 6l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                <span><strong>(19) 3440-5445</strong> · <strong>(19) 98423-0193</strong></span>
-              </div>
-              <div class="hotel__info-row">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                <span>reservas@hotelzahara.com.br</span>
+                <span><strong>(19) 2113-8989</strong></span>
               </div>
             </div>
             <div class="hotel__actions">
-              <a href="https://zaharahotel.com.br" target="_blank" rel="noopener" class="btn btn--outline-green btn--sm" data-it="Sito ufficiale">Site oficial</a>
-              <a href="https://www.booking.com/hotel/br/zarzuela.html" target="_blank" rel="noopener" class="btn btn--outline btn--sm">Booking.com</a>
+              <a href="https://carltonhoteis.com.br/hotel-carlton-suites-limeira/" target="_blank" rel="noopener" class="btn btn--outline-green btn--sm" data-it="Sito ufficiale">Site oficial</a>
+              <a href="https://www.booking.com/hotel/br/carlton-plaza-limeira.html" target="_blank" rel="noopener" class="btn btn--outline btn--sm">Booking.com</a>
             </div>
+            <!-- Distância até a fazenda -->
             <div class="hotel__distancia">
               <div class="hotel__distancia-badge">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                <span data-it="15 km · 26 min in macchina dalla Fazenda Quilombo">15 km · 26 min de carro até a Fazenda</span>
+                <span data-it="10 km · 16 min in macchina dalla Fazenda Quilombo">10 km · 16 min de carro até a Fazenda</span>
               </div>
             </div>
           </div>
