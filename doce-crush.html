@@ -29,7 +29,7 @@
     .candy-img{position:absolute;inset:6%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));transition:transform .15s;pointer-events:none;}
     /* a bomba de cor é mais estreita/alta que os outros doces (proporção bem diferente) — caixa maior
        pra ela não ficar pequena/encolhida no centro da célula, comparada aos vizinhos */
-    .candy-img.is-bomb{inset:1%;}
+    .candy-img.is-bomb,.candy-img.is-goldbomb{inset:1%;}
     /* Overlay padrão (ex.: embrulhado) — ocupa a mesma caixa quadrada do doce */
     .candy-overlay-img{position:absolute;inset:6%;object-fit:contain;pointer-events:none;}
     /* Bastão de combo (listra) NÃO é uma imagem quadrada: a horizontal é larga e baixa,
@@ -146,6 +146,7 @@
           <li><span data-it="Dolci com um pequeno selo escondem prêmios — combinali!">Doces com um pequeno selo escondem prêmios — combine-os!</span></li>
           <li><span data-it="Tempo extra, congelar e pontos x2 aplicam-se na hora (o x2 acumula em dobro se vier de novo). Embaralhar e ímã ficam guardados sem limite na reserva.">Tempo extra, congelar e pontos x2 aplicam-se na hora (o x2 acumula em dobro se vier de novo). Embaralhar e ímã ficam guardados sem limite na reserva.</span></li>
           <li><span data-it="Bomba de cor vai para a reserva (até 2). Reserva cheia? Escolha qual usar antes de perder a nova!">Bomba de cor vai para a reserva (até 2). Reserva cheia? Escolha qual usar antes de perder a nova!</span></li>
+          <li><span data-it="La Bomba Dorata (rara) va anch'essa nella riserva: quando la scambi con un dolce, quel tipo scompare dal tabellone per il resto della partita!">A Bomba Dourada (rara) também vai pra reserva: ao trocar com um doce, aquele tipo desaparece do tabuleiro pelo resto da partida!</span></li>
           <li><span data-it="Ogni 7 mila punti sblocchi un dolce novo, e ogni 4500 punti il tabellone cresce — sempre, senza limite!">A cada 7 mil pontos você desbloqueia um doce novo, e a cada 4500 pontos o tabuleiro cresce — sempre, sem limite!</span></li>
         </ul>
       </div>
@@ -211,6 +212,16 @@ let triggeredThresholds=new Set();
 let elapsedPlayed=0, candyMarkIndex=0, gridMarkIndex=0, gridGrowthCount=0, pendingGridGrowths=0;
 let freezeUntil=0, multiplierUntil=0, multiplierStack=1, inventory=[], pendingPowerupOffer=null;
 let stock={shuffle:0, magnet:0};
+let retiredTypes=new Set(); // tipos de doce eliminados pra sempre pela Bomba Dourada nesta partida
+
+// sorteia um tipo de doce pra spawn, ignorando tipos retirados pela Bomba Dourada
+function pickSpawnType(){
+  if(retiredTypes.size===0) return rnd(NTYPES);
+  const available=[];
+  for(let t=0;t<NTYPES;t++){ if(!retiredTypes.has(t)) available.push(t); }
+  if(!available.length) return rnd(NTYPES); // segurança: se tudo foi retirado, volta ao normal
+  return available[rnd(available.length)];
+}
 
 /* ---------- ícones (PNG, sem fallback) ---------- */
 const IMG_DIR='assets/img/';
@@ -221,6 +232,7 @@ const ICON_IMG_FILES={
   shuffle:'doce-crush-icone-embaralhar.png',
   magnet:'doce-crush-icone-ima.png',
   rainbow:'doce-crush-icone-bombadecor.png',
+  goldbomb:'doce-crush-icone-bombadourada.png',
   gift:'doce-crush-selo-presente.png'
 };
 function iconImg(name){
@@ -245,10 +257,12 @@ const POWERUPS={
   }},
   shuffle: {icon:'shuffle', label:'Embaralhar',  requiresIdle:true,  apply:()=>{ shuffleBoard(); }},
   magnet:  {icon:'magnet',  label:'Ímã',         requiresIdle:true,  apply:()=>{ magnetMatch(); }},
-  rainbow: {icon:'rainbow', label:'Bomba de Cor',requiresIdle:true,  apply:()=>{ grantRandomBomb(); }}
+  rainbow: {icon:'rainbow', label:'Bomba de Cor',requiresIdle:true,  apply:()=>{ grantRandomBomb(); }},
+  goldbomb:{icon:'goldbomb',label:'Bomba Dourada',requiresIdle:true, apply:()=>{ grantGoldBomb(); }}
 };
 // peso relativo de sorteio — shuffle a 10% e magnet a 20% do que era (uniforme) antes
-const POWERUP_WEIGHTS={time:1, freeze:1, multi:1, rainbow:1, shuffle:0.1, magnet:0.2};
+// goldbomb um pouco mais raro que a bomba de cor comum, mas não muito mais
+const POWERUP_WEIGHTS={time:1, freeze:1, multi:1, rainbow:1, goldbomb:0.65, shuffle:0.1, magnet:0.2};
 
 function recalcCell(){
   CELL_W=100/COLS; CELL_H=100/ROWS;
@@ -383,6 +397,16 @@ function grantRandomBomb(){
   showToast('Bomba de cor criada!'); sndSpecial();
   if(window.confettiBurst) confettiBurst({count:20});
 }
+function grantGoldBomb(){
+  const candidates=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c] && !board[r][c].special) candidates.push([r,c]); }
+  if(!candidates.length){ showToast('Sem espaço pra bomba dourada agora.'); return; }
+  const [r,c]=candidates[rnd(candidates.length)];
+  const candy=board[r][c]; candy.special='goldbomb'; updateCandyVisual(candy);
+  const el=elMap[candy.id]; if(el){ el.classList.add('special-pop'); setTimeout(()=>el.classList.remove('special-pop'),260); }
+  showToast('Bomba Dourada criada! Elimina um doce pro resto do jogo.'); sndSpecial();
+  if(window.confettiBurst) confettiBurst({count:20});
+}
 function pickRandomTypeOnBoard(){
   const types=new Set();
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c]) types.add(board[r][c].type); }
@@ -406,7 +430,7 @@ function haptic(ms){try{navigator.vibrate&&navigator.vibrate(ms||15);}catch(e){}
 /* ---------- imagens dos doces (PNG, sem fallback) ---------- */
 // índice = c.type (mesma ordem de CANDY_NAMES)
 const CANDY_IMG_FILES=['doce-crush-eclair.png','doce-crush-macaron.png','doce-crush-brigadeiro.png','doce-crush-camafeu.png','doce-crush-pistache.png','doce-crush-tortinha.png','doce-crush-donut.png','doce-crush-physalis.png','doce-crush-brigadeiro-azul.png','doce-crush-torta-limao.png','doce-crush-cereja.png','doce-crush-piramide-roxa.png'];
-const SPECIAL_IMG_FILES={wildcard:'doce-crush-coringa.png',bemcasado:'doce-crush-bemcasado.png',bomb:'doce-crush-bomba.png'};
+const SPECIAL_IMG_FILES={wildcard:'doce-crush-coringa.png',bemcasado:'doce-crush-bemcasado.png',bomb:'doce-crush-bomba.png',goldbomb:'doce-crush-bomba-dourada.png'};
 // overlays — desenhados por cima do doce base quando ele ganha um special "parcial" (listra/embrulhado)
 const OVERLAY_IMG_FILES={'stripe-h':'doce-crush-listra-h.png','stripe-v':'doce-crush-listra-v.png','wrapped':'doce-crush-embrulho.png'};
 // classe extra pro overlay de listra: a barra h/v não é quadrada, então ganha uma caixa própria (ver CSS .ov-h/.ov-v)
@@ -425,7 +449,7 @@ function candyHTML(c){
   let badge='';
   if(c.gift==='time') badge='<span class="gift-badge">'+iconImg('hourglass')+'</span>';
   else if(c.gift==='powerup') badge='<span class="gift-badge">'+iconImg('gift')+'</span>';
-  const bombClass=c.special==='bomb'?' is-bomb':'';
+  const bombClass=c.special==='bomb'?' is-bomb':(c.special==='goldbomb'?' is-goldbomb':'');
   const img=`<img src="${candyImgSrc(c)}" class="candy-img${bombClass}" alt="" draggable="false" loading="lazy" onerror="this.style.display='none'">`;
   const overlayImg=specialOverlayImg(c);
   return img+overlayImg+badge;
@@ -445,7 +469,7 @@ function createBoard(){
     b.push([]);
     for(let c=0;c<COLS;c++){
       let type;
-      do{ type=rnd(NTYPES); } while(
+      do{ type=pickSpawnType(); } while(
         (c>=2 && b[r][c-1] && b[r][c-1].type===type && b[r][c-2] && b[r][c-2].type===type) ||
         (r>=2 && b[r-1][c] && b[r-1][c].type===type && b[r-2][c] && b[r-2][c].type===type)
       );
@@ -643,20 +667,27 @@ function attemptSwap(r1,c1,r2,c2){
 function resolveSwapOutcome(r1,c1,r2,c2,aOrig,bOrig){
   if(!gameActive) return;
   const aIsBomb=aOrig.special==='bomb', bIsBomb=bOrig.special==='bomb';
+  const aIsGold=aOrig.special==='goldbomb', bIsGold=bOrig.special==='goldbomb';
+  const aIsBombLike=aIsBomb||aIsGold, bIsBombLike=bIsBomb||bIsGold;
   const aIsBC=aOrig.special==='bemcasado', bIsBC=bOrig.special==='bemcasado';
   let toClear=new Set(), specials=[], direct=false, bcTriggered=false;
 
-  if((aIsBomb&&bIsBC)||(aIsBC&&bIsBomb)||(aIsBC&&bIsBC)){
+  if((aIsBombLike&&bIsBC)||(aIsBC&&bIsBombLike)||(aIsBC&&bIsBC)){
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) toClear.add(r+','+c);
     direct=true; bcTriggered=true;
-  } else if(aIsBomb && bIsBomb){
+  } else if(aIsBombLike && bIsBombLike){
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) toClear.add(r+','+c);
     direct=true;
-  } else if(aIsBomb||bIsBomb){
-    const bombAt=aIsBomb?[r2,c2]:[r1,c1];
-    const otherType=aIsBomb?bOrig.type:aOrig.type;
+  } else if(aIsBombLike||bIsBombLike){
+    const bombAt=aIsBombLike?[r2,c2]:[r1,c1];
+    const otherType=aIsBombLike?bOrig.type:aOrig.type;
+    const isGoldTrigger=aIsGold||bIsGold;
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(board[r][c]&&board[r][c].type===otherType) toClear.add(r+','+c); }
     toClear.add(bombAt[0]+','+bombAt[1]);
+    if(isGoldTrigger && !retiredTypes.has(otherType)){
+      retiredTypes.add(otherType);
+      showToast((CANDY_NAMES[otherType]||'Doce')+' eliminado pro resto do jogo!', IMG_DIR+(CANDY_IMG_FILES[otherType]||''));
+    }
     direct=true; sndSpecial();
     if(window.confettiBurst) confettiBurst({count:22});
   } else if(aIsBC||bIsBC){
@@ -828,7 +859,7 @@ function applyGravityAnimated(){
     for(const candy of survivors){ board[r][c]=candy; moveCandyEl(candy,r,c); r--; }
     let spawnCount=0;
     while(r>=0){
-      const candy=maybeGift(makeCandy(rnd(NTYPES)));
+      const candy=maybeGift(makeCandy(pickSpawnType()));
       board[r][c]=candy;
       spawnCount++;
       createCandyEl(r,c,candy,spawnCount);
@@ -891,7 +922,7 @@ function growGridRow(){
   recalcCell();
   boardEl.style.setProperty('--board-max',boardMaxFor(ROWS,COLS));
   board.push([]);
-  for(let c=0;c<COLS;c++){ board[oldRows][c]=maybeGift(makeCandy(rnd(NTYPES))); }
+  for(let c=0;c<COLS;c++){ board[oldRows][c]=maybeGift(makeCandy(pickSpawnType())); }
   repositionAllCandies();
   for(let c=0;c<COLS;c++) createCandyEl(oldRows,c,board[oldRows][c],2);
   showToast('Tabuleiro expandiu! '+ROWS+'×'+COLS);
@@ -905,7 +936,7 @@ function growGridCol(){
   COLS++;
   recalcCell();
   boardEl.style.setProperty('--board-max',boardMaxFor(ROWS,COLS));
-  for(let r=0;r<ROWS;r++){ board[r].push(maybeGift(makeCandy(rnd(NTYPES)))); }
+  for(let r=0;r<ROWS;r++){ board[r].push(maybeGift(makeCandy(pickSpawnType()))); }
   repositionAllCandies();
   for(let r=0;r<ROWS;r++) createCandyEl(r,oldCols,board[r][oldCols],2);
   showToast('Tabuleiro expandiu! '+ROWS+'×'+COLS);
@@ -926,7 +957,7 @@ function restartGame(){
   triggeredThresholds=new Set(); elapsedPlayed=0; candyMarkIndex=0; gridMarkIndex=0; gridGrowthCount=0; pendingGridGrowths=0;
   freezeUntil=0; multiplierUntil=0; multiplierStack=1; inventory=[]; pendingPowerupOffer=null; renderInventory();
   stock={shuffle:0,magnet:0}; renderStock('shuffle'); renderStock('magnet'); updateMultiBadge();
-  ROWS=START_ROWS; COLS=START_COLS; NTYPES=4; recalcCell();
+  ROWS=START_ROWS; COLS=START_COLS; NTYPES=4; retiredTypes=new Set(); recalcCell();
   boardEl.style.setProperty('--board-max','480px');
   board=createBoard();
   renderFull();
