@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="description" content="Cabelo e maquiagem para madrinhas e família, Tiago e Gian" />
+  <title>Cabelo & Maquiagem · Tiago e Gian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .arr-hero {
+      padding: 132px 5% 70px;
+      background: var(--bg-green);
+      text-align: center;
+      border-bottom: 1px solid var(--line-green);
+    }
+    .arr-hero__eyebrow {
+      font-size: .75rem; letter-spacing: .25em; text-transform: uppercase;
+      color: var(--sage); margin-bottom: .75rem;
+    }
+    .arr-hero__title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 300; color: var(--text-main); line-height: 1.05;
+      margin-bottom: 1.25rem;
+    }
+    .arr-hero__title em { font-style: italic; color: var(--sage-dark); }
+    .arr-hero__sub {
+      font-size: 1rem; color: var(--text-muted);
+      max-width: 540px; margin-inline: auto; line-height: 1.85;
+    }
+
+    .arr-section { padding: 4rem 5%; }
+    .arr-section--alt { background: var(--white); border-top: 1px solid var(--line-green); border-bottom: 1px solid var(--line-green); }
+    .arr-section__header { text-align: center; max-width: 640px; margin: 0 auto 2.5rem; }
+    .arr-section__eyebrow { font-size: .7rem; letter-spacing: .22em; text-transform: uppercase; color: var(--sage); margin-bottom: .6rem; }
+    .arr-section__title { font-family: var(--font-display); font-size: clamp(1.8rem,4vw,2.6rem); font-weight: 300; color: var(--text-main); margin-bottom: .85rem; }
+    .arr-section__sub { font-size: .92rem; color: var(--text-muted); line-height: 1.8; }
+
+    /* Cards de contexto (espaço da noiva) */
+    .arr-info-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 1.25rem; max-width: 920px; margin: 0 auto; }
+    .arr-info-card { background: var(--white); border: 1px solid var(--line-green); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-green); text-align: center; }
+    .arr-info-card__icon { width: 3.4rem; height: 3.4rem; margin: 0 auto .75rem; object-fit: contain; opacity: .85; }
+    .arr-info-card__title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 400; margin-bottom: .5rem; color: var(--text-main); }
+    .arr-info-card__text { font-size: .85rem; color: var(--text-muted); line-height: 1.7; }
+
+    /* Cards de estúdio */
+    .estudio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 1.5rem; max-width: 980px; margin: 0 auto; }
+    .estudio-card {
+      background: var(--white); border: 1px solid var(--line-green); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-green); padding: 1.75rem; display: flex; flex-direction: column; gap: .9rem;
+      transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+    }
+    .estudio-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+    .estudio-card.is-selected { border-color: var(--sage); background: rgba(122,155,110,.05); }
+    .estudio-card__header { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+    .estudio-card__nome { font-family: var(--font-display); font-size: 1.35rem; font-weight: 500; color: var(--text-main); }
+    .estudio-card__votos { font-size: .72rem; color: var(--sage-dark); letter-spacing: .03em; white-space: nowrap; }
+    .estudio-card__valor { font-size: 1.05rem; font-weight: 600; color: var(--terracotta); }
+    .estudio-card__lista { list-style: none; display: flex; flex-direction: column; gap: .55rem; font-size: .82rem; color: var(--text-muted); line-height: 1.55; }
+    .estudio-card__lista li { padding-left: 1.1rem; position: relative; }
+    .estudio-card__lista li::before { content: "·"; position: absolute; left: 0; color: var(--sage); font-weight: 700; }
+    .estudio-card__lista strong { color: var(--text-main); }
+    .estudio-card__lista a { color: var(--sage-dark); text-decoration: underline; text-underline-offset: 2px; }
+    .estudio-card__btn { margin-top: auto; align-self: stretch; }
+    .estudio-card--outros { border-style: dashed; background: var(--bg-green); justify-content: center; text-align: center; }
+    .estudio-card--outros .estudio-card__nome { width: 100%; text-align: center; }
+    .estudio-card--outros .estudio-card__text { font-size: .85rem; color: var(--text-muted); line-height: 1.75; }
+
+    /* Form de interesse */
+    .arr-form-wrap { max-width: 560px; margin: 0 auto; }
+    .arr-form-box { background: var(--white); border: 1px solid var(--line-green); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-green); }
+    .arr-form-group { margin-bottom: 1.4rem; }
+    .arr-form-group:last-of-type { margin-bottom: 0; }
+    .arr-form-group__label { font-size: .85rem; font-weight: 500; color: var(--text-main); margin-bottom: .65rem; display: block; }
+    .arr-form-group__hint { font-size: .72rem; color: var(--text-muted); font-style: italic; margin-top: .35rem; }
+    .rsvp__status--col { flex-direction: column; }
+    .rsvp__status-option--block { width: 100%; }
+
+    @media (max-width: 600px) {
+      .arr-hero { padding: 100px 5% 48px; }
+      .estudio-grid { grid-template-columns: 1fr; }
+      .arr-form-box { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── NAV (sem link próprio — página não listada) ─────── -->
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo-wrap">
+        <img src="assets/img/monograma_light.png" alt="" class="site-logo site-logo--mono" aria-hidden="true">
+        <span>Tiago e Gian</span>
+      </a>
+      <nav class="nav__links" id="navLinks" aria-label="Menu principal">
+        <a href="index.html#evento">O Dia</a>
+        <a href="index.html#cerimonia">Local & Orientações</a>
+        <a href="presentes.html">Presentes</a>
+        <div class="nav__dropdown">
+          <button class="nav__dropdown-toggle" aria-haspopup="true">
+            <span>Informações</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav__dropdown-menu">
+            <a href="padrinhos.html">Para os Padrinhos</a>
+            <a href="transfer.html">Transfer</a>
+            <a href="hospedagem.html">Hospedagem</a>
+          </div>
+        </div>
+        <a href="jogos.html" class="nav__key" aria-label="Segredo">
+          <img src="assets/img/icon-key.png" alt="" style="width:20px;height:20px;object-fit:contain;vertical-align:middle">
+        </a>
+        <a href="index.html#rsvp" class="nav__cta">Confirmar presença</a>
+      </nav>
+      <button class="nav__hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ─── HERO ──────────────────────────────────────────── -->
+  <div class="arr-hero">
+    <p class="arr-hero__eyebrow reveal">Só para madrinhas & família</p>
+    <h1 class="arr-hero__title reveal">Cabelo & <em>maquiagem</em></h1>
+    <p class="arr-hero__sub reveal">
+      Pensando em facilitar a vida de vocês, que estarão vindo de outra cidade, separamos algumas informações
+      sobre arrumação para o nosso grande dia. Dá uma olhada com calma aqui embaixo!
+    </p>
+  </div>
+
+  <!-- ─── O ESPAÇO DA NOIVA ────────────────────────────────── -->
+  <section class="arr-section">
+    <div class="arr-section__header">
+      <p class="arr-section__eyebrow reveal">O espaço</p>
+      <h2 class="arr-section__title reveal">O espaço da noiva vai estar disponível</h2>
+      <p class="arr-section__sub reveal">
+        A fazenda tem um espaço pensado pra arrumação, com até <strong>6 lugares</strong> para maquiagem e cabelo
+        ao mesmo tempo. Como não teremos produção de noiva, vamos liberar esse espaço para madrinhas, mães,
+        tias e demais convidadas se arrumarem juntas antes da cerimônia — achamos que pode ser um momento
+        bem gostoso para todo mundo!
+      </p>
+    </div>
+    <div class="arr-info-cards">
+      <div class="arr-info-card reveal">
+        <img class="arr-info-card__icon" src="assets/img/icon-flower-crown.png" alt="">
+        <h3 class="arr-info-card__title">Até 6 lugares</h3>
+        <p class="arr-info-card__text">Maquiagem e cabelo simultâneos, no espaço da noiva, dentro da fazenda.</p>
+      </div>
+      <div class="arr-info-card reveal">
+        <img class="arr-info-card__icon" src="assets/img/icon-sparkle.png" alt="">
+        <h3 class="arr-info-card__title">Um momento a mais</h3>
+        <p class="arr-info-card__text">Além de praticidade, pode ser uma manhã divertida com todo mundo se arrumando junto.</p>
+      </div>
+      <div class="arr-info-card reveal">
+        <img class="arr-info-card__icon" src="assets/img/icon-bell.png" alt="">
+        <h3 class="arr-info-card__title">A gente intermedia</h3>
+        <p class="arr-info-card__text">Se houver interesse em volume, nós organizamos com o estúdio escolhido para facilitar pra todas.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ESTÚDIOS / VOTAÇÃO ──────────────────────────────── -->
+  <section class="arr-section arr-section--alt" id="estudios">
+    <div class="arr-section__header">
+      <p class="arr-section__eyebrow reveal">Ajudem a escolher</p>
+      <h2 class="arr-section__title reveal">Qual equipe seria mais interessante?</h2>
+      <p class="arr-section__sub reveal">
+        Cotamos com dois estúdios que já atenderam casamentos na fazenda. Dá uma olhada nas opções e
+        conta pra gente no formulário abaixo qual você preferiria — ou se tanto faz!
+      </p>
+    </div>
+
+    <div class="estudio-grid">
+
+      <!-- CHARMANT -->
+      <div class="estudio-card reveal" data-estudio="Charmant">
+        <div class="estudio-card__header">
+          <span class="estudio-card__nome">Charmant</span>
+          <span class="estudio-card__votos" data-votos="Charmant">—</span>
+        </div>
+        <span class="estudio-card__valor">R$ 750 / pessoa</span>
+        <ul class="estudio-card__lista">
+          <li><strong>Serviço:</strong> maquiagem + penteado completos</li>
+          <li><strong>Profissionais:</strong> equipe ajustada ao número de convidadas</li>
+          <li><strong>Pagamento e sinal:</strong> a confirmar diretamente com o estúdio</li>
+          <li><strong>Portfólio:</strong> <a href="https://instagram.com/gisele_garcia_charmant" target="_blank" rel="noopener">@gisele_garcia_charmant</a>, <a href="https://instagram.com/josi.hair.makeup" target="_blank" rel="noopener">@josi.hair.makeup</a>, <a href="https://instagram.com/lisamelocharmant" target="_blank" rel="noopener">@lisamelocharmant</a>, <a href="https://instagram.com/marcia.charmant" target="_blank" rel="noopener">@marcia.charmant</a>, <a href="https://instagram.com/fabianavillasboashair" target="_blank" rel="noopener">@fabianavillasboashair</a>, <a href="https://instagram.com/tathytranca" target="_blank" rel="noopener">@tathytranca</a>, <a href="https://instagram.com/ritchieliamais" target="_blank" rel="noopener">@ritchieliamais</a>, <a href="https://instagram.com/crissinicomakeup" target="_blank" rel="noopener">@crissinicomakeup</a>, <a href="https://instagram.com/thalita.charmant" target="_blank" rel="noopener">@thalita.charmant</a></li>
+        </ul>
+        <button class="btn btn--outline-green btn--sm estudio-card__btn" type="button" onclick="escolherEstudio('Charmant', this)">Prefiro essa equipe</button>
+      </div>
+
+      <!-- LEFRAN -->
+      <div class="estudio-card reveal" data-estudio="Lefran">
+        <div class="estudio-card__header">
+          <span class="estudio-card__nome">Lefran</span>
+          <span class="estudio-card__votos" data-votos="Lefran">—</span>
+        </div>
+        <span class="estudio-card__valor">R$ 700 / pessoa</span>
+        <ul class="estudio-card__lista">
+          <li><strong>Serviço:</strong> maquiagem + penteado, atendimento externo a partir de 3 pessoas</li>
+          <li><strong>Profissionais:</strong> equipe ajustada ao número de convidadas</li>
+          <li><strong>Pagamento e sinal:</strong> sinal de R$ 50/pessoa para reservar (Pix, cartão ou dinheiro). Sinal não é reembolsável em caso de cancelamento</li>
+          <li><strong>Portfólio:</strong> <a href="https://www.instagram.com/reel/DYxpuQsBeHh/?igsh=cnppdWRtbzVlcTA0" target="_blank" rel="noopener">Ver vídeo no Instagram →</a></li>
+        </ul>
+        <button class="btn btn--outline-green btn--sm estudio-card__btn" type="button" onclick="escolherEstudio('Lefran', this)">Prefiro essa equipe</button>
+      </div>
+
+      <!-- OUTROS -->
+      <div class="estudio-card estudio-card--outros reveal">
+        <span class="estudio-card__nome">Outros</span>
+        <p class="estudio-card__text">
+          Conhece ou já trabalhou com algum outro profissional ou estúdio que gostaria de incluir nessa lista?
+          Manda uma mensagem pra <strong>Tiago</strong> ou <strong>Gian</strong> contando qual é — a gente entra
+          em contato com eles e adiciona aqui pra todas votarem também!
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── FORMULÁRIO DE INTERESSE ──────────────────────────── -->
+  <section class="arr-section" id="interesse">
+    <div class="arr-section__header">
+      <p class="arr-section__eyebrow reveal">Conta pra gente</p>
+      <h2 class="arr-section__title reveal">Tem interesse em se arrumar lá?</h2>
+      <p class="arr-section__sub reveal">
+        Isso nos ajuda a organizar tudo com antecedência e com mais conforto pra todas. Pode responder mesmo
+        que ainda não tenha certeza!
+      </p>
+    </div>
+
+    <div class="arr-form-wrap">
+      <div class="arr-form-box reveal" id="interesseBox">
+        <form id="interesseForm" class="rsvp__form" onsubmit="return enviarInteresse(event)">
+
+          <div class="arr-form-group">
+            <label class="arr-form-group__label" for="interesseNome">Seu nome</label>
+            <input type="text" id="interesseNome" class="rsvp__input" placeholder="Ex: Maria" autocomplete="name" required />
+          </div>
+
+          <div class="arr-form-group">
+            <span class="arr-form-group__label">Qual equipe você prefere?</span>
+            <div class="rsvp__status rsvp__status--col" id="grupoEstudio">
+              <label class="rsvp__status-option rsvp__status-option--block">
+                <input type="radio" name="estudio" value="Charmant"> Charmant
+              </label>
+              <label class="rsvp__status-option rsvp__status-option--block">
+                <input type="radio" name="estudio" value="Lefran"> Lefran
+              </label>
+              <label class="rsvp__status-option rsvp__status-option--block">
+                <input type="radio" name="estudio" value="Tanto faz" checked> Tanto faz
+              </label>
+            </div>
+          </div>
+
+          <div class="arr-form-group">
+            <span class="arr-form-group__label">Qual o seu nível de interesse?</span>
+            <div class="rsvp__status rsvp__status--col">
+              <label class="rsvp__status-option rsvp__status-option--block">
+                <input type="radio" name="interesse" value="Gostaria" required> Gostaria
+              </label>
+              <label class="rsvp__status-option rsvp__status-option--block">
+                <input type="radio" name="interesse" value="Gostaria, porém nenhum dos estúdios me agradou"> Gostaria, porém nenhum dos estúdios me agradou
+              </label>
+              <label class="rsvp__status-option rsvp__status-option--block">
+                <input type="radio" name="interesse" value="Gostaria caso a maioria das madrinhas queira também"> Gostaria caso a maioria das madrinhas queira também
+              </label>
+              <label class="rsvp__status-option rsvp__status-option--block">
+                <input type="radio" name="interesse" value="Não tenho interesse"> Não tenho interesse
+              </label>
+            </div>
+          </div>
+
+          <div id="interesseErro"></div>
+          <button class="btn btn--primary" type="submit" id="btnInteresse" style="width:100%">Enviar resposta</button>
+          <p class="arr-form-group__hint" id="interesseContador" style="text-align:center;margin-top:1rem"></p>
+        </form>
+
+        <div class="rsvp__sucesso" id="interesseSucesso" hidden>
+          <div class="rsvp__sucesso-icon"><img src="assets/img/icon-heart-full.png" alt=""></div>
+          <h3>Obrigado!</h3>
+          <p style="font-size:.9rem;color:var(--text-muted)">Recebemos sua resposta. Em breve falamos com mais detalhes por aqui ou diretamente com vocês.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── RODAPÉ ─────────────────────────────────────────── -->
+  <div class="flourish-wrap" style="padding:1.5rem 0 0"><img src="assets/img/footer-flourish.png" alt="" style="max-width:440px;width:85%;display:inline-block"></div>
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__names" aria-label="Tiago e Gian">
+      <img src="assets/img/logohorizontal_light.png" alt="Tiago e Gian" class="site-logo site-logo--footer">
+    </p>
+      <p class="footer__date">12 · 12 · 2026</p>
+      <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
+      <div class="footer__links">
+        <a href="index.html">Início</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/delights.js"></script>
+  <script>
+    /* ─── VOTAÇÃO / INTERESSE — CABELO & MAQUIAGEM ─── */
+    (function () {
+      const cards = Array.from(document.querySelectorAll(".estudio-card[data-estudio]"));
+
+      function aplicarContagens(data) {
+        if (!data) return;
+        const votosEl = (nome) => document.querySelector(`.estudio-card__votos[data-votos="${nome}"]`);
+
+        const charmantEl = votosEl("Charmant");
+        const lefranEl = votosEl("Lefran");
+        if (charmantEl) charmantEl.textContent = formatarVotos(data.charmant);
+        if (lefranEl) lefranEl.textContent = formatarVotos(data.lefran);
+
+        const contador = document.getElementById("interesseContador");
+        if (contador && typeof data.interessadas === "number") {
+          contador.textContent = data.interessadas > 0
+            ? `${data.interessadas} ${data.interessadas === 1 ? "madrinha já demonstrou" : "madrinhas já demonstraram"} interesse`
+            : "";
+        }
+      }
+
+      function formatarVotos(n) {
+        if (typeof n !== "number") return "—";
+        return n === 1 ? "1 voto" : `${n} votos`;
+      }
+
+      async function carregarContagens() {
+        try {
+          const r = await fetch(`${API_URL}?action=arrumacao`);
+          const data = await r.json();
+          aplicarContagens(data);
+        } catch (err) {
+          console.warn("Não foi possível carregar as contagens de arrumação", err);
+        }
+      }
+
+      window.escolherEstudio = function (nome, btn) {
+        cards.forEach(c => c.classList.toggle("is-selected", c.dataset.estudio === nome));
+        const radio = document.querySelector(`#grupoEstudio input[value="${nome}"]`);
+        if (radio) radio.checked = true;
+        document.getElementById("interesse")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.getElementById("interesseNome")?.focus({ preventScroll: true });
+      };
+
+      window.enviarInteresse = async function (ev) {
+        ev.preventDefault();
+        const erroDiv = document.getElementById("interesseErro");
+        erroDiv.innerHTML = "";
+
+        const nome = document.getElementById("interesseNome").value.trim();
+        const estudio = document.querySelector('#grupoEstudio input[name="estudio"]:checked')?.value || "";
+        const interesse = document.querySelector('input[name="interesse"]:checked')?.value || "";
+
+        if (!nome) {
+          erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Por favor, digite seu nome.</p>`;
+          return false;
+        }
+        if (!interesse) {
+          erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Selecione seu nível de interesse.</p>`;
+          return false;
+        }
+
+        const btn = document.getElementById("btnInteresse");
+        btn.disabled = true;
+        btn.textContent = "Enviando…";
+
+        try {
+          const r = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "arrumacaoInteresse", nome, estudio, interesse })
+          });
+          const data = await r.json();
+          aplicarContagens(data);
+
+          document.getElementById("interesseForm").hidden = true;
+          document.getElementById("interesseSucesso").hidden = false;
+        } catch (err) {
+          console.warn("Não foi possível enviar a resposta", err);
+          erroDiv.innerHTML = `<p class="rsvp__msg rsvp__msg--erro">Não conseguimos enviar agora. Tenta de novo em alguns instantes.</p>`;
+          btn.disabled = false;
+          btn.textContent = "Enviar resposta";
+        }
+        return false;
+      };
+
+      carregarContagens();
+    })();
+  </script>
+
+</body>
+</html>
