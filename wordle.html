@@ -51,7 +51,7 @@
     .word-loading { text-align:center;padding:3rem 0;color:var(--text-muted);font-size:.9rem; }
 
     /* GRID */
-    .wordle-grid { display:flex;flex-direction:column;gap:6px;align-items:center;margin-bottom:1.5rem; }
+    .wordle-grid { display:flex;flex-direction:column;gap:6px;align-items:center;margin-bottom:1.5rem;touch-action:manipulation; }
     .wordle-row { display:flex;gap:6px; }
     .wordle-row.shake { animation: word-shake .4s ease; }
     @keyframes word-shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
@@ -107,7 +107,7 @@
     .wordle-msg--ok   { color:var(--sage-dark); }
 
     /* TECLADO */
-    .wordle-kb { display:flex;flex-direction:column;gap:6px;align-items:center; }
+    .wordle-kb { display:flex;flex-direction:column;gap:6px;align-items:center;touch-action:manipulation; }
     .kb-row { display:flex;gap:5px;justify-content:center; }
     .kb-key {
       min-width: 30px; height: 46px; padding: 0 8px;
