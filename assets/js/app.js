@@ -271,7 +271,7 @@ window.buscar = async function() {
     const dados = await resp.json();
 
     btnBuscar.disabled = false;
-    btnBuscar.textContent = "Buscar";
+    btnBuscar.textContent = window.I18N.t("Buscar", "Cerca");
 
     if (!dados || (Array.isArray(dados) && dados.length === 0)) {
       resultado.classList.remove("oculto");
@@ -312,7 +312,7 @@ window.buscar = async function() {
   } catch (err) {
     console.error(err);
     btnBuscar.disabled = false;
-    btnBuscar.textContent = "Buscar";
+    btnBuscar.textContent = window.I18N.t("Buscar", "Cerca");
     resultado.classList.remove("oculto");
     resultado.innerHTML = `
       <p class="rsvp__msg rsvp__msg--erro">

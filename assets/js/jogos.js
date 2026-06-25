@@ -476,11 +476,10 @@ async function carregarPreviewRecorde(){
     {key:"moum-macaron",el:"record-moum-preview"},
     {key:"find-tiago-gian",el:"record-find-preview"},
     {key:"seat-puzzle",el:"record-seat-preview"},
-    {key:"vespa",      el:"record-vespa-preview"},
-    {key:"flight-lisboa", el:"record-flight-preview"},
     {key:"doce-crush",   el:"record-doce-preview"},
     {key:"mosaico",      el:"record-mosaico-preview"},
-    {key:"luademel-runner", el:"record-luademel-preview"},
+    {key:"luademel-lisboa", el:"record-honeymoonflight-preview"},
+    {key:"honeymoon-packing", el:"record-honeymoonpacking-preview"},
   ];
   for(const j of jogos){
     const el=document.getElementById(j.el); if(!el) continue;
