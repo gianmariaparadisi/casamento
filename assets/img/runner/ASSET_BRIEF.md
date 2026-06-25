@@ -1,8 +1,30 @@
 # Briefing de assets — Corrida da Lua de Mel
 
-Hoje o jogo usa **SVGs provisórios** que já estão no código (em `assets/img/runner/`). Quando você gerar os PNGs definitivos, suba-os **dentro dessa mesma pasta** (`assets/img/runner/`, não direto em `assets/img/`), usando exatamente os nomes abaixo — e me avise para eu trocar a extensão `.svg` por `.png` no código (é uma troca rápida, uma linha por imagem).
+Hoje o jogo usa **SVGs provisórios** que já estão no código (em `assets/img/runner/`) pra `backdrop`, `relief`, `clouds` e os obstáculos/colecionáveis. O `ground-1` é novo e não tem placeholder em SVG — até você subir o PNG, o jogo mostra uma cor lisa de chão no lugar. Quando você gerar os PNGs definitivos, suba-os **dentro dessa mesma pasta** (`assets/img/runner/`, não direto em `assets/img/`), usando exatamente os nomes abaixo — o jogo já está configurado pra carregar o PNG automaticamente assim que ele aparecer com o nome certo, sem precisar de nenhuma troca no código.
 
-**Estilo geral para todos os prompts:** ilustração vetorial plana ("flat design"), tipo papercut/colagem de camadas, sem texturas finas nem gradientes complexos (a imagem aparece pequena na tela, detalhe fino se perde). Silhuetas limpas e reconhecíveis. Fundo **transparente** (PNG-24 com alpha) em todas as imagens, exceto onde indicado o contrário. Paleta de cor de cada destino está nos hex abaixo — use como referência, não precisa ser exato.
+## Estilo (cole isso junto com a descrição de cada imagem)
+
+Use como referência visual o estilo dos pôsteres de viagem retrô texturizados (savana com zebra/girafa, vila litorânea, vila mediterrânea, céu com nuvens, templo tailandês).
+
+**Cole este bloco (em inglês) em todo prompt, antes da descrição do conteúdo:**
+
+> Retro travel-poster illustration, textured flat-color style with fine paper-grain / halftone noise overlay across the whole image, like an old screen-printed poster. Bold, warm, saturated palette — burnt orange, mustard yellow, ochre, deep teal, olive green, terracotta, plum. A large solid-color sun or moon disc glowing softly in the sky. Depth created through color temperature, not outlines: distant elements in cooler, muted purplish-blue or teal tones; closer elements in warmer, more saturated tones with sharper edges. No black outlines — shapes are defined purely by flat color blocks meeting directly. Simplified, slightly geometric shapes for architecture (flat walls, simple domes/roofs, small square windows) and confidently simplified animals/plants (broad leaf shapes, simplified stripe/spot patterns). Single warm, low directional light. Slightly muted vintage color grading. No glossy/3D rendering, no photorealism.
+
+Para as imagens que são **cenário completo** (backdrop, relief e chão): componha como nas referências — vista ampla, sol/lua grande no céu (no backdrop/relief), camadas de profundidade (montanhas/colinas atrás, mais claras e frias; elementos na frente, mais escuros e saturados).
+
+Para as imagens que são **objeto isolado** (obstáculos, colecionáveis): mesma paleta/textura/regra de "sem contorno preto", mas só o objeto sozinho, recortado, **fundo transparente**, sem vinheta nem cenário em volta.
+
+Paleta de cor de cada destino está nos hex abaixo — use como referência, não precisa ser exato.
+
+## Transparência — o que pintar e o que deixar transparente, por camada
+
+Isso vale igual pros 5 destinos (as excepções de água estão marcadas 💧 nas tabelas abaixo):
+
+- **`backdrop-1`** (a mais ao fundo): **não pinte céu** — deixe a área de céu transparente, o gradiente de céu do jogo já aparece por trás. Pinte só o horizonte: silhueta de montanha/penhasco/skyline distante, sol/lua, 1 ou 2 detalhes (pássaro, névoa). Se o destino tiver mar (💧 Noronha, Caribe, Maiorca), pinte uma faixa de água logo abaixo do horizonte, ocupando a parte de baixo da imagem — essa faixa de água fica **opaca**, é a única parte "cheia" perto da borda inferior. Se não tiver mar (Tailândia, África), a parte de baixo também fica transparente.
+- **`relief-1`** (penhasco/relevo, mais perto que o backdrop): mesma lógica — topo transparente (sem céu), só a silhueta do relevo pintada, mais próxima/saturada que no backdrop. Nos destinos com mar (💧), a faixa de água ocupa mais espaço aqui (já estamos mais perto da costa) e fica opaca até a borda inferior da imagem. **Não precisa encaixar sem emenda** — o jogo já disfarça a costura espelhando o desenho a cada outro "tile" (ver seção do chão abaixo pra entender a técnica).
+- **`ground-1`** (chão, a camada mais próxima, embaixo dos pés do personagem): **100% opaca, sem transparência** — é uma textura de chão vista de cima/levemente inclinada, preenchendo o quadro todo de ponta a ponta (sem céu, sem água, sem objetos soltos em cima). Pense numa textura contínua de terreno, tipo papel de parede. Assim como o `relief-1`, **não precisa encaixar sem emenda visível** nas bordas — o jogo mesmo disfarça repetindo a textura alternando normal/espelhada lado a lado, então pequenas diferenças nas bordas não vão se notar.
+- **`obs-low/tall/trap`** e **`collect/collect-bonus`**: só o objeto sozinho, fundo 100% transparente, sem chão nem cenário ao redor.
+- **`clouds`**: só as nuvens, fundo 100% transparente.
 
 Cada item tem: nome do arquivo, descrição do conteúdo, proporção e tamanho sugerido para gerar.
 
@@ -18,17 +40,15 @@ Cada item tem: nome do arquivo, descrição do conteúdo, proporção e tamanho 
 ---
 
 ## 🇧🇷 Fernando de Noronha
-Paleta: céu azul claro `#8FD3E8` → creme `#FDEFC4`; areia `#E8D2A0`.
+Paleta: céu azul `#8FD3E8` → creme `#FDEFC4`; baía turquesa/teal escuro; penhasco verde-escuro sobre rocha marrom; areia `#E8D2A0`.
+
+**Referência específica de Noronha (a foto do morro com o pássaro preto):** picos rochosos altos cobertos de vegetação verde-escura caindo direto numa baía turquesa, ilhotas de pedra menores na água, faixa de areia clara na enseada, folhagem tropical larga emoldurando os cantos inferiores, e uma ave-de-rabo-forcado preta com mancha vermelha no peito voando. Use essa composição como base pro `backdrop-1` e pro `relief-1`.
 
 | Arquivo | Conteúdo | Proporção | Tamanho sugerido |
 |---|---|---|---|
-| `noronha-backdrop-1.png` | Camada mais profunda — silhuetas distantes de morros/ilhotas (tipo Morro Dois Irmãos), bem clarinhas/translúcidas, sol suave, 1–2 passarinhos ao longe. Precisa ter variação ao longo de toda a largura (a imagem desliza uma vez do início ao fim do trecho). | ~5.1:1 (bem larga e baixa) | 2000×400px |
-| `noronha-relief-1.png` | Relevo/penhascos verdes médios, mais perto que o backdrop. **Precisa encaixar lado a lado sem emenda visível** (a borda esquerda deve continuar a direita). | ~3.2:1 | 1920×600px |
-| `noronha-mid-1.png` | Formação rochosa/arco de pedra na praia, vertical, pequena. | ~0.6:1 (mais alta que larga) | 360×600px |
-| `noronha-mid-2.png` | Coqueiro(s) agrupado(s), vertical. | ~0.6:1 | 360×600px |
-| `noronha-mid-3.png` | Moita/flor tropical, vertical, mais baixa. | ~0.6:1 | 360×600px |
-| `noronha-fg-1.png` | Tufos de grama de praia / vegetação rasteira, em primeiro plano (passa rápido, na frente de tudo). | ~1.7:1 | 480×280px |
-| `noronha-fg-2.png` | Pedaço de madeira de deriva ("driftwood") ou pedrinhas na areia, primeiro plano. | ~1.7:1 | 480×280px |
+| `noronha-backdrop-1.png` 💧 | Céu transparente (sem pintar). Só o horizonte: picos rochosos altos cobertos de mata, ilhotas de pedra. Da linha do horizonte pra baixo, pinte uma faixa **opaca** de água turquesa (a baía), ocupando a parte inferior da imagem. Bem clarinho/com névoa. Precisa ter variação ao longo de toda a largura (a imagem desliza uma vez do início ao fim do trecho). | ~5.1:1 (bem larga e baixa) | 2000×400px |
+| `noronha-relief-1.png` 💧 | Topo transparente. Os mesmos penhascos, mais perto e saturados que o backdrop. Faixa de água turquesa opaca ocupando boa parte da metade inferior (mais perto da costa que no backdrop). Não precisa encaixar sem emenda — o jogo disfarça a repetição espelhando. | ~3.2:1 | 1920×600px |
+| `noronha-ground-1.png` | Textura de areia clara de praia, vista de cima, com grão fino e algumas marcas suaves (pegadas leves, ondulações de vento), 100% opaca preenchendo o quadro todo. Sem água, sem pedras grandes, sem objetos soltos. | ~12.8:1 (bem larga e baixa) | 1280×100px |
 
 ---
 
@@ -37,13 +57,9 @@ Paleta: céu dourado `#FFD27A` → laranja `#FF9E5E`; terra `#C9A227`.
 
 | Arquivo | Conteúdo | Proporção | Tamanho sugerido |
 |---|---|---|---|
-| `tailandia-backdrop-1.png` | Silhueta distante de colinas com selva e o topo de um templo dourado aparecendo, névoa quente ao fundo, sol baixo. | ~5.1:1 | 2000×400px |
-| `tailandia-relief-1.png` | Colinas de selva em camadas, tom mais médio. Tiling sem emenda (esquerda = direita). | ~3.2:1 | 1920×600px |
-| `tailandia-mid-1.png` | Telhado/torre de templo dourado, pequeno, vertical. | ~0.6:1 | 360×600px |
-| `tailandia-mid-2.png` | Bananeira ou palmeira fina, vertical. | ~0.6:1 | 360×600px |
-| `tailandia-mid-3.png` | Poste com lanternas penduradas, vertical. | ~0.6:1 | 360×600px |
-| `tailandia-fg-1.png` | Talos de bambu ou grama alta, primeiro plano. | ~1.7:1 | 480×280px |
-| `tailandia-fg-2.png` | Folhas de bananeira caídas / vegetação rasteira, primeiro plano. | ~1.7:1 | 480×280px |
+| `tailandia-backdrop-1.png` | Céu transparente. Só o horizonte: colinas com selva e o topo de um templo dourado aparecendo, sol baixo. Sem água — parte de baixo da imagem também fica transparente. | ~5.1:1 | 2000×400px |
+| `tailandia-relief-1.png` | Topo transparente. Colinas de selva em camadas, tom mais médio, sem água. Não precisa encaixar sem emenda — o jogo disfarça a repetição espelhando. | ~3.2:1 | 1920×600px |
+| `tailandia-ground-1.png` | Textura de terra batida dourada/ocre, tipo caminho de templo, vista de cima, com pequenas pedrinhas ou folhas secas espalhadas, 100% opaca preenchendo o quadro todo. | ~12.8:1 | 1280×100px |
 
 ---
 
@@ -52,13 +68,9 @@ Paleta: céu laranja `#FF7E5F` → pêssego `#FEB47B`; terra `#7A5230`.
 
 | Arquivo | Conteúdo | Proporção | Tamanho sugerido |
 |---|---|---|---|
-| `africa-backdrop-1.png` | Horizonte de savana ao pôr do sol, sol grande e baixo, silhueta distante de uma montanha/kopje, alguma ave voando. | ~5.1:1 | 2000×400px |
-| `africa-relief-1.png` | Colinas onduladas de savana com acácias espalhadas, tom médio. Tiling sem emenda. | ~3.2:1 | 1920×600px |
-| `africa-mid-1.png` | Acácia (árvore "guarda-chuva" africana), vertical. | ~0.6:1 | 360×600px |
-| `africa-mid-2.png` | Baobá, vertical, tronco mais grosso. | ~0.6:1 | 360×600px |
-| `africa-mid-3.png` | Cupinzeiro ou formação rochosa pequena, vertical. | ~0.6:1 | 360×600px |
-| `africa-fg-1.png` | Touceiras de capim alto de savana, primeiro plano. | ~1.7:1 | 480×280px |
-| `africa-fg-2.png` | Arbusto baixo/espinheiro, primeiro plano. | ~1.7:1 | 480×280px |
+| `africa-backdrop-1.png` | Céu transparente. Só o horizonte: silhueta distante de montanha/kopje, alguma ave voando, sol grande e baixo. Sem água — parte de baixo transparente. | ~5.1:1 | 2000×400px |
+| `africa-relief-1.png` | Topo transparente. Colinas onduladas de savana com acácias espalhadas, tom médio, sem água. Não precisa encaixar sem emenda — o jogo disfarça a repetição espelhando. | ~3.2:1 | 1920×600px |
+| `africa-ground-1.png` | Textura de terra rachada de savana, marrom-avermelhada, vista de cima, com rachaduras finas e algumas pedrinhas, 100% opaca preenchendo o quadro todo. | ~12.8:1 | 1280×100px |
 
 ---
 
@@ -67,13 +79,9 @@ Paleta: céu turquesa `#4FC1E9` → verde-água `#B6E5D8`; areia `#E8C99A`.
 
 | Arquivo | Conteúdo | Proporção | Tamanho sugerido |
 |---|---|---|---|
-| `caribe-backdrop-1.png` | Cadeia de ilhotas distantes no horizonte, água turquesa clara, névoa pastel suave. | ~5.1:1 | 2000×400px |
-| `caribe-relief-1.png` | Pontas de baía/penínsulas com vegetação, tom médio. Tiling sem emenda. | ~3.2:1 | 1920×600px |
-| `caribe-mid-1.png` | Coqueiro inclinado, vertical. | ~0.6:1 | 360×600px |
-| `caribe-mid-2.png` | Cabana de praia / guarda-sol tiki, vertical. | ~0.6:1 | 360×600px |
-| `caribe-mid-3.png` | Formação de coral/leque-do-mar, vertical, mais baixa. | ~0.6:1 | 360×600px |
-| `caribe-fg-1.png` | Grama de praia / vegetação rasteira, primeiro plano. | ~1.7:1 | 480×280px |
-| `caribe-fg-2.png` | Folhas de palmeira caídas na areia, primeiro plano. | ~1.7:1 | 480×280px |
+| `caribe-backdrop-1.png` 💧 | Céu transparente. Horizonte com cadeia de ilhotas distantes. Da linha do horizonte pra baixo, faixa **opaca** de água turquesa clara ocupando a parte inferior, névoa pastel suave. | ~5.1:1 | 2000×400px |
+| `caribe-relief-1.png` 💧 | Topo transparente. Pontas de baía/penínsulas com vegetação, tom médio. Faixa de água turquesa opaca ocupando boa parte da metade inferior. Não precisa encaixar sem emenda — o jogo disfarça a repetição espelhando. | ~3.2:1 | 1920×600px |
+| `caribe-ground-1.png` | Textura de areia clara/quente, vista de cima, com pequenos fragmentos de concha e coral espalhados, 100% opaca preenchendo o quadro todo. | ~12.8:1 | 1280×100px |
 
 ---
 
@@ -82,31 +90,26 @@ Paleta: céu azul `#3A5BA0` → laranja de fim de tarde `#E8784A`; pedra `#5E7FA
 
 | Arquivo | Conteúdo | Proporção | Tamanho sugerido |
 |---|---|---|---|
-| `maiorca-backdrop-1.png` | Litoral de penhascos mediterrâneos ao longe, sol baixo no horizonte (fim de tarde), tom azul-âmbar. | ~5.1:1 | 2000×400px |
-| `maiorca-relief-1.png` | Colinas em terraços com penhascos de pedra, tom médio. Tiling sem emenda. | ~3.2:1 | 1920×600px |
-| `maiorca-mid-1.png` | Cipreste fino, vertical. | ~0.6:1 | 360×600px |
-| `maiorca-mid-2.png` | Moinho de vento branco pequeno, vertical. | ~0.6:1 | 360×600px |
-| `maiorca-mid-3.png` | Muro de pedra em terraço com videira, vertical, mais baixa. | ~0.6:1 | 360×600px |
-| `maiorca-fg-1.png` | Arbustos de lavanda, primeiro plano. | ~1.7:1 | 480×280px |
-| `maiorca-fg-2.png` | Trecho de muro de pedra baixo, primeiro plano. | ~1.7:1 | 480×280px |
+| `maiorca-backdrop-1.png` 💧 | Céu transparente. Horizonte de penhascos mediterrâneos ao longe, sol baixo (fim de tarde). Da linha do horizonte pra baixo, uma faixa **opaca**, mais fina que em Noronha/Caribe, de mar Mediterrâneo (o trecho aqui é caminho de penhasco, não praia — então a água aparece só lá no fundo, não domina a imagem). | ~5.1:1 | 2000×400px |
+| `maiorca-relief-1.png` 💧 | Topo transparente. Colinas em terraços com penhascos de pedra, tom médio. Pode mostrar uma lasca de mar entre os penhascos, mas a maior parte da imagem é pedra/terraço, não água. Não precisa encaixar sem emenda — o jogo disfarça a repetição espelhando. | ~3.2:1 | 1920×600px |
+| `maiorca-ground-1.png` | Textura de pedra/calçada cinza-azulada em terraço, com linhas de argamassa entre as placas, vista de cima, 100% opaca preenchendo o quadro todo. | ~12.8:1 | 1280×100px |
 
 ---
 
 ## Resumo rápido
-- **Total: 37 imagens** (2 nuvens + 5 destinos × 7 camadas).
+- **Total: 17 imagens** (2 nuvens + 5 destinos × 3 camadas: backdrop, relief, ground).
 - Pastas: tudo dentro de `assets/img/runner/`.
-- Todas com fundo transparente, exceto onde não fizer sentido (nenhuma aqui precisa de fundo sólido).
-- `relief-1` de cada destino precisa **tile-ar sem emenda** na horizontal (lado esquerdo encaixa com o direito) — é a única camada com essa exigência, porque ela se repete lado a lado continuamente.
-- `mid-*` e `fg-*` não precisam tile-ar (eles aparecem espaçados, não colados um no outro).
-- `backdrop-1` não precisa tile-ar (ela deslinza uma única vez do início ao fim de cada trecho/destino), mas precisa ter variação de conteúdo ao longo de toda a largura.
+- `backdrop-1` e `relief-1` ficam com céu/topo transparente (regras na seção "Transparência" acima); `ground-1` é 100% opaco.
+- `relief-1` e `ground-1` de cada destino se repetem lado a lado continuamente, mas **não precisam encaixar sem emenda** — o jogo mesmo disfarça a costura alternando uma cópia normal e uma espelhada a cada tile.
+- `backdrop-1` não repete (ela deslinza uma única vez do início ao fim de cada trecho/destino), mas precisa ter variação de conteúdo ao longo de toda a largura.
 
-Quando subir os PNGs com esses nomes nessa pasta, me avise que eu troco as referências no código de `.svg` para `.png`.
+Quando subir os PNGs com esses nomes nessa pasta, o jogo troca pra eles automaticamente — não precisa de nada no código.
 
 ---
 
 ## Obstáculos e colecionáveis — assets SEPARADOS (não são decoração)
 
-Confirmando: `mid-*` e `fg-*` acima são só estética de fundo, sem colisão. Os obstáculos e colecionáveis são outra categoria de asset, totalmente separada — hoje eles ainda nem têm imagem própria, são desenhados como emoji direto no canvas (placeholder). Esses sim precisam de arquivo próprio.
+Os obstáculos e colecionáveis são uma categoria de asset totalmente separada das camadas de cenário acima, sem relação com elas — hoje eles ainda nem têm imagem própria, são desenhados como emoji direto no canvas (placeholder). Esses sim precisam de arquivo próprio.
 
 Estilo aqui é diferente do fundo: mais **sólido, contrastado e legível em décimos de segundo** (o jogador precisa reconhecer e decidir pular ou não quase instantaneamente) — pode ser mais "cartoon"/saturado que as camadas de paisagem. Arte deve preencher o quadro **de ponta a ponta, sem margem transparente sobrando**, porque a imagem é esticada exatamente no tamanho da caixa de colisão.
 
@@ -121,7 +124,7 @@ Cada destino tem 5 tipos:
 |---|---|---|---|
 | `noronha-obs-low-1.png` | Caranguejo, visto de lado/3-4, estilo flat. | 1:1 | 240×240 |
 | `noronha-obs-tall-1.png` | Formação rochosa/pedra alta da praia. | ~1:3.7 (bem fina e alta) | 220×800 |
-| `noronha-obs-trap-1.png` | Pássaro voando baixo. | ~1.25:1 | 240×190 |
+| `noronha-obs-trap-1.png` | Ave-de-rabo-forcado preta com mancha vermelha no peito, voando baixo (igual à da referência). | ~1.25:1 | 240×190 |
 | `noronha-collect-1.png` | Concha do mar. | 1:1 | 200×200 |
 | `noronha-collect-bonus-1.png` | Coco. | 1:1 | 220×220 |
 | `tailandia-obs-low-1.png` | Coco caído / fruta pequena no chão. | ~0.93:1 | 230×250 |
@@ -145,4 +148,4 @@ Cada destino tem 5 tipos:
 | `maiorca-collect-1.png` | Aliança de casamento. | 1:1 | 200×200 |
 | `maiorca-collect-bonus-1.png` | Cacho de uvas. | 1:1 | 220×220 |
 
-Total dessa categoria: **25 imagens** (5 tipos × 5 destinos). Somado às 37 de paisagem, dá **62 imagens** no total. Quando essas chegarem, eu troco o código pra desenhar a imagem em vez do emoji (é onde estão `drawObstacle()` e `drawCollectible()`).
+Total dessa categoria: **25 imagens** (5 tipos × 5 destinos). Somado às 17 de paisagem, dá **42 imagens** no total. Quando essas chegarem, eu troco o código pra desenhar a imagem em vez do emoji (é onde estão `drawObstacle()` e `drawCollectible()`).
