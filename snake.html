@@ -162,6 +162,15 @@
 
   const DPR = Math.min(window.devicePixelRatio || 1, 3);
 
+  /* Estado global do jogo (precisa existir antes de qualquer função usá-lo,
+     já que o script roda em "use strict"). */
+  let snCtx = null, snCell = 20, SN_COLS = 16, SN_ROWS = 16;
+  let snAlive = false, snRaf = null;
+  let snScore = 0, snSpeed = 145, snLast = 0;
+  let snDir = {x:1,y:0}, snNext = {x:1,y:0};
+  let snBody = [], snVisual = [], snFood = {x:0,y:0};
+  let snBest = parseInt(localStorage.getItem("snakeBest")||"0",10) || 0;
+
   function setupCanvas(id, w, h) {
     const c = document.getElementById(id);
     if (!c) return null;
@@ -235,6 +244,39 @@
     if (ov) ov.style.display = "none";
   }
 
+
+  function resetSnake() {
+    const panel = document.querySelector(".game-panel");
+    const w = (panel && panel.clientWidth) || 360;
+    SN_COLS = 16;
+    snCell = Math.max(12, Math.floor(w / SN_COLS));
+    SN_ROWS = SN_COLS;
+    snCtx = setupCanvas("snake-canvas", SN_COLS * snCell, SN_ROWS * snCell);
+
+    snAlive = false;
+    if (snRaf) { cancelAnimationFrame(snRaf); snRaf = null; }
+    snScore = 0; snSpeed = 145; snLast = 0;
+    snDir = {x:1,y:0}; snNext = {x:1,y:0};
+    snBody = [{x:5,y:5},{x:4,y:5},{x:3,y:5}];
+    snVisual = snBody.map(s => ({x:s.x, y:s.y}));
+    snFood = snNewFood();
+    snFaceIdx = Math.floor(Math.random() * snFaces().length);
+
+    document.getElementById("snake-score").textContent = "0";
+    document.getElementById("snake-best").textContent = snBest || "—";
+    document.getElementById("snake-postgame").style.display = "none";
+
+    snDrawStatic();
+    showOverlay(
+      "<img src='assets/img/icon-snake-mascot.png' alt='Snake'>",
+      (window.I18N && window.I18N.lang==='it') ? "Snake di Tiago" : "Snake do Tiago",
+      (window.I18N && window.I18N.lang==='it')
+        ? "Guida Tiago tra gli hamburger.\nPiù mangia, più veloce diventa."
+        : "Guie o Tiago pelos hambúrgueres.\nQuanto mais ele come, mais rápido fica.",
+      [{label:(window.I18N && window.I18N.lang==='it') ? "Gioca" : "Jogar", fn:"startSnake()"}]
+    );
+  }
+  window.resetSnake = resetSnake;
 
   function startSnake() {
     if(window.GS){GS.pop();GS.hTap();}
