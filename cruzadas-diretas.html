@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cruzadinha — Tiago e Gian</title>
+
+  <!-- Open Graph / WhatsApp / iMessage preview -->
+  <meta property="og:type"         content="website" />
+  <meta property="og:title"        content="Cruzadinha — Tiago e Gian" />
+  <meta property="og:description"  content="Uma cruzada direta nova a cada semana." />
+  <meta property="og:url"          content="https://gianmariaparadisi.github.io/casamento/cruzadas-diretas.html" />
+  <meta property="og:site_name"    content="Tiago e Gian · 12.12.2026" />
+  <meta name="twitter:card"        content="summary" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { background: var(--bg-main); }
+
+    .cd-page { max-width: 760px; margin-inline: auto; padding: 100px 16px 80px; }
+
+    .cd-header { text-align:center;margin-bottom:1.5rem; }
+    .cd-header__eyebrow { font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--sage);margin-bottom:.4rem; }
+    .cd-header__title { font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--text-main);margin-bottom:.25rem; }
+    .cd-header__sub { font-size:.82rem;color:var(--text-muted);line-height:1.6; }
+    .cd-header__meta { display:flex;justify-content:center;gap:.6rem;align-items:center;margin-top:.6rem;flex-wrap:wrap; }
+    .cd-badge { font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--sage-dark);background:var(--bg-green);padding:.25rem .65rem;border-radius:20px;border:1px solid var(--line-green); }
+    .cd-badge--demo { color:var(--terracotta);background:#FBF0E2;border-color:#E9CFA0; }
+    .cd-timer { font-size:.78rem;color:var(--text-muted);font-weight:500;font-variant-numeric:tabular-nums; }
+
+    .cd-loading { text-align:center;padding:3rem 0;color:var(--text-muted);font-size:.9rem; }
+
+    /* ─── GRADE ──────────────────────────────────────── */
+    .cd-board-wrap { display:flex;flex-direction:column;align-items:center;gap:1.2rem; }
+    .cd-grid {
+      display:grid;
+      gap:3px;
+      margin-inline:auto;
+      touch-action: manipulation;
+      --cd-cell: 40px;
+      max-width: 100%;
+    }
+    .cd-cell {
+      position:relative;
+      width: var(--cd-cell); height: var(--cd-cell);
+      border-radius: 4px;
+      background: rgba(255,255,255,.9);
+      border: 1px solid rgba(216,205,188,.7);
+      box-shadow: 0 1px 5px rgba(82,57,34,.06);
+      overflow:hidden;
+    }
+    .cd-cell.block { background: rgba(90,64,32,.88); border-color: rgba(90,64,32,.88); box-shadow:none; }
+
+    .cd-cell input {
+      width:100%; height:100%; border:none; background:transparent;
+      text-align:center; text-transform:uppercase;
+      font-family: var(--font-display); font-weight:700; font-size:calc(var(--cd-cell) * 0.46);
+      color:#5A4020; border-radius:4px; padding:0;
+      caret-color: var(--sage-dark);
+    }
+    .cd-cell input:focus { outline:none; }
+    .cd-cell.active-word input { background: rgba(122,155,110,.14); }
+    .cd-cell.active-cell input { background: rgba(122,155,110,.32); }
+    .cd-cell.correct input { background: var(--sage-dark); color:#fff; }
+    .cd-cell.correct { border-color: var(--sage-dark); }
+    .cd-cell.wrong input { background: rgba(184,123,62,.18); color: var(--terracotta-hover); }
+    .cd-cell.wrong { border-color: var(--terracotta); animation: cd-shake .3s ease; }
+    @keyframes cd-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)} }
+
+    .cd-cell.clue { background: rgba(224,242,210,.65); border-color: rgba(122,155,110,.45); display:flex; flex-direction:column; cursor:default; }
+    .cd-clue-half { flex:1; display:flex; align-items:center; gap:2px; padding:1px 2px; font-size:6.4px; line-height:1.04; color:#3F5C36; cursor:pointer; overflow:hidden; }
+    .cd-clue-half:hover, .cd-clue-half.active-clue { background: rgba(122,155,110,.32); }
+    .cd-clue-half + .cd-clue-half { border-top:1px solid rgba(122,155,110,.35); }
+    .cd-clue-half__arrow { flex:0 0 auto; font-size:7px; font-weight:700; color:var(--sage-dark); }
+    .cd-clue-half__txt { flex:1; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+    .cd-actions { display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap; }
+    .cd-reveal-link { display:block;text-align:center;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:none;margin-top:.25rem; }
+    .cd-reveal-link:hover { color:var(--terracotta); }
+
+    .cd-msg { text-align:center;font-size:.87rem;min-height:1.4em;color:var(--text-muted); }
+    .cd-msg--erro { color:var(--terracotta); }
+    .cd-msg--ok   { color:var(--sage-dark); }
+
+    /* ─── RESULTADO ──────────────────────────────────── */
+    .cd-result { background:var(--white);border:1px solid var(--line-green);border-radius:var(--radius-lg);padding:1.75rem;text-align:center;box-shadow:var(--shadow-green);margin-top:1rem; }
+    .cd-result__icon img { width:5.5rem;height:5.5rem;object-fit:contain;display:block;margin:0 auto; }
+    .cd-result__title { font-family:var(--font-display);font-size:1.6rem;font-weight:300;margin:.5rem 0 .25rem; }
+    .cd-result__sub { font-size:.84rem;color:var(--text-muted);margin-bottom:1rem; }
+    .cd-result__share { margin-top:.5rem; }
+
+    .cd-save-box{margin-top:1rem;background:rgba(255,255,255,.6);border:1px solid rgba(216,205,188,.8);border-radius:12px;padding:.7rem;text-align:left;}
+    .cd-save-box__row{display:flex;gap:.32rem;}
+    .cd-save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.9);border-radius:999px;background:#fff;padding:.52rem .75rem;font:inherit;font-size:.84rem;outline:none;}
+    .cd-save-msg{font-size:.76rem;color:var(--text-muted);margin-top:.4rem;text-align:center;min-height:1.2em;}
+    @media(max-width:480px){.cd-save-box__row{flex-direction:column}}
+
+    .cd-top10{margin-top:.85rem;background:rgba(255,255,255,.44);border:1px solid rgba(216,205,188,.75);border-radius:12px;padding:.7rem;}
+    .cd-top10 h3{font-family:var(--font-display);font-size:1rem;font-weight:400;margin-bottom:.32rem;text-align:center;}
+    .cd-top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.2rem;}
+    .cd-top10 li{display:flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.6);border-radius:9px;padding:.3rem .46rem;font-size:.76rem;}
+    .cd-top10 .pos{font-family:var(--font-display);font-size:.86rem;width:1.1rem;text-align:center;color:#A47845;}
+    .cd-top10 .name{flex:1;font-weight:500;} .cd-top10 .pts{font-weight:700;color:#7B4B22;}
+
+    .confetti-rain{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
+    .confetti-rain__piece{position:absolute;top:-10%;width:28px;height:28px;object-fit:contain;animation:confettiFall linear forwards;}
+    @keyframes confettiFall{
+      0%{transform:translateY(0) rotate(0deg);opacity:1;}
+      100%{transform:translateY(110vh) rotate(360deg);opacity:.85;}
+    }
+
+    html, body { overscroll-behavior: none; }
+  </style>
+</head>
+<body>
+
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo-wrap">
+        <img src="assets/img/monograma_light.png" alt="" class="site-logo site-logo--mono" aria-hidden="true">
+        <span>Tiago e Gian</span>
+      </a>
+      <nav class="nav__links" id="navLinks">
+        <a href="index.html#evento">O Dia</a>
+        <a href="index.html#cerimonia">Local & Orientações</a>
+        <a href="presentes.html">Presentes</a>
+        <div class="nav__dropdown">
+          <button class="nav__dropdown-toggle" aria-haspopup="true">
+            Informações
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav__dropdown-menu">
+            <a href="padrinhos.html">Para os Padrinhos</a>
+            <a href="transfer.html">Transfer</a>
+            <a href="hospedagem.html">Hospedagem</a>
+          </div>
+        </div>
+        <a href="jogos.html" class="nav__key" aria-label="Segredo">
+          <img src="assets/img/icon-key.png" alt="" style="width:20px;height:20px;object-fit:contain;vertical-align:middle">
+        </a>
+        <a href="index.html#rsvp" class="nav__cta">Confirmar presença</a>
+      </nav>
+      <button class="nav__hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="cd-page">
+    <div class="cd-header">
+      <p class="cd-header__eyebrow" data-it="Cruciverba diretto della settimana">Cruzada direta da semana</p>
+      <h1 class="cd-header__title" data-it="Cruzadinha">Cruzadinha</h1>
+      <p class="cd-header__sub" data-it="Una griglia nuova ogni settimana. La dica está dentro da própria célula: clicca e digita.">Uma grade nova a cada semana. A dica fica dentro da própria célula: clique e digite.</p>
+      <div class="cd-header__meta">
+        <span class="cd-badge" id="cdDateBadge"></span>
+        <span class="cd-timer" id="cdTimer">00:00</span>
+      </div>
+    </div>
+
+    <div id="cdLoading" class="cd-loading">
+      <span class="spinner"></span> <span data-it="Caricamento del cruciverba della settimana…">Carregando a cruzadinha da semana…</span>
+    </div>
+
+    <div id="cdGame" style="display:none">
+      <div class="cd-board-wrap">
+        <div class="cd-grid" id="cdGrid"></div>
+        <p class="cd-msg" id="cdMsg"></p>
+        <div class="cd-actions">
+          <button class="btn btn--primary btn--sm" id="cdBtnVerificar" data-it="Verifica">Verificar</button>
+          <button class="btn btn--outline btn--sm" id="cdBtnLimpar" data-it="Pulisci">Limpar</button>
+        </div>
+        <button class="cd-reveal-link" id="cdBtnRevelar" data-it="Rivela soluzione">Revelar solução</button>
+      </div>
+    </div>
+
+    <div id="cdResult" style="display:none">
+      <div class="cd-result">
+        <div class="cd-result__icon"><img src="assets/img/icon-confetti-burst.png" alt=""></div>
+        <h2 class="cd-result__title">Resolvido!</h2>
+        <p class="cd-result__sub" id="cdResultSub"></p>
+        <div class="cd-result__share">
+          <button class="btn btn--outline-green btn--sm" id="cdBtnCompartilhar" data-it="Condividi risultato">Compartilhar resultado</button>
+        </div>
+        <div class="cd-save-box">
+          <div class="cd-save-box__row">
+            <input class="cd-save-input" id="cdName" placeholder="Seu nome" maxlength="22" data-it-placeholder="Il tuo nome" />
+            <button class="btn btn--primary btn--sm" id="cdBtnSalvar" data-it="Salva">Salvar</button>
+          </div>
+          <p class="cd-save-msg" id="cdSaveMsg"></p>
+        </div>
+      </div>
+      <div class="cd-top10">
+        <h3 data-it="Classifica">Placar</h3>
+        <ol id="cdTopList"></ol>
+      </div>
+      <div style="text-align:center;margin-top:1rem">
+        <a href="jogos.html" class="btn btn--outline btn--sm" data-it="← Torna ai giochi">← Voltar aos jogos</a>
+      </div>
+    </div>
+
+    <div id="cdErro" style="display:none">
+      <p style="text-align:center;color:var(--text-muted);font-size:.9rem;padding:2rem 0">
+        <span data-it="Non abbiamo trovato un cruciverba per questa settimana.">Não encontramos uma cruzadinha para esta semana.</span><br><span data-it="Torna presto!">Volte em breve!</span> <img src="assets/img/icon-sparkle.png" alt="" style="width:1.6em;height:1.6em;object-fit:contain;vertical-align:-.28em">
+      </p>
+      <div style="text-align:center">
+        <a href="jogos.html" class="btn btn--outline btn--sm" data-it="← Torna ai giochi">← Voltar aos jogos</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="flourish-wrap" style="padding:1.5rem 0 0"><img src="assets/img/footer-flourish.png" alt="" style="max-width:440px;width:85%;display:inline-block"></div>
+  <div class="divider-wrap" style="padding:.5rem 0"><img src="assets/img/divider-terracota.png" alt="" style="max-width:200px;width:50%;display:inline-block;opacity:.45"></div>
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__names" aria-label="Tiago e Gian">
+      <img src="assets/img/logohorizontal_light.png" alt="Tiago e Gian" class="site-logo site-logo--footer">
+    </p>
+      <p class="footer__date">12 · 12 · 2026</p>
+      <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
+    </div>
+  </footer>
+
+  <script src="assets/js/game-sounds.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/delights.js"></script>
+  <script>
+  /* ══════════════════════════════════════════════════════════
+     CRUZADINHA "DIRETA", Tiago e Gian
+     Espera da API (action=cruzadasdiretas): puzzle 14x9 cujas dicas
+     ficam embutidas na própria célula da grade (sem lista de dicas
+     separada). Formato da célula:
+       null                                      -> bloco (sem uso)
+       "A"                                       -> célula de letra (a letra é a solução)
+       {clues:[{dir:"r"|"d", texto:"..."}]}      -> célula de dica (1 ou 2 dicas)
+     "dir":"r" = resposta começa na célula à direita e segue para a direita.
+     "dir":"d" = resposta começa na célula abaixo e segue para baixo.
+     Se a API não responder (ou não houver puzzle para a semana atual),
+     usa um puzzle de demonstração embutido — assim este arquivo já
+     funciona sozinho, sem depender da planilha.
+  ══════════════════════════════════════════════════════════ */
+
+  const GAME_KEY = "cruzadas-diretas";
+
+  function t_(pt, it) { return (window.I18N && window.I18N.lang === "it") ? it : pt; }
+
+  // ── Puzzle de demonstração (14 colunas x 9 linhas) ──────────
+  function demoGrid_() {
+    const ROWS = 9, COLS = 14;
+    const g = Array.from({length: ROWS}, () => Array(COLS).fill(null));
+    g[1][1]  = { clues: [
+      { dir: "r", texto: "Cerimônia em que duas pessoas se tornam uma só" },
+      { dir: "d", texto: "O que move os noivos até o altar" }
+    ]};
+    "CASAMENTO".split("").forEach((ch, i) => { g[1][2+i] = ch; });
+    "AMOR".split("").forEach((ch, i) => { g[2+i][1] = ch; });
+
+    g[2][3] = { clues: [ { dir: "d", texto: "Flor clássica do buquê da noiva" } ] };
+    "ROSA".split("").forEach((ch, i) => { g[3+i][3] = ch; });
+
+    g[2][8] = { clues: [ { dir: "d", texto: "Doce típico de festa de casamento brasileira" } ] };
+    "BOLO".split("").forEach((ch, i) => { g[3+i][8] = ch; });
+
+    g[7][9] = { clues: [ { dir: "r", texto: "Peça de joia trocada na cerimônia" } ] };
+    "ANEL".split("").forEach((ch, i) => { g[7][10+i] = ch; });
+
+    return g;
+  }
+  const DEMO_PUZZLE = { tema: "Demonstração", rows: 9, cols: 14, grid: demoGrid_() };
+
+  let PUZZLE = null;
+  let usandoDemo = false;
+  let ROWS = 9, COLS = 14;
+  let grid = [];                // grid[r][c] = célula bruta (null | letra | {clues})
+  let cellEls = [];              // cellEls[r][c] -> elemento .cd-cell
+  let inputEls = [];             // inputEls[r][c] -> <input> (apenas células de letra)
+  let entries = [];              // [{dir, row, col, cells:[[r,c],...]}] (row/col = posição da célula de DICA)
+  let entryAt = {};              // "r,c" -> { r: entry|null, d: entry|null } (apenas células de letra)
+  let curDir = "r";
+  let curEntry = null;
+  let jogoFinalizado = false;
+  let cronometro = null, segundos = 0, cronometroIniciado = false;
+  let tentativasVerificar = 0;
+
+  function hoje() {
+    var d = new Date();
+    return String(d.getDate()).padStart(2,'0') + "/" + String(d.getMonth()+1).padStart(2,'0') + "/" + d.getFullYear();
+  }
+
+  function carregarPuzzle() {
+    var cbName = "cb_cd_" + Date.now();
+    var url = API_URL + "?action=cruzadasdiretas&data=" + encodeURIComponent(hoje()) + "&callback=" + cbName;
+
+    var timer = setTimeout(function() {
+      delete window[cbName];
+      usarDemo();
+    }, 6000);
+
+    window[cbName] = function(json) {
+      clearTimeout(timer);
+      delete window[cbName];
+      var s = document.getElementById("_cdscript");
+      if (s) s.remove();
+      if (json && json.puzzle && Array.isArray(json.puzzle.grid)) {
+        iniciarPuzzle(json.puzzle, false);
+      } else {
+        usarDemo();
+      }
+    };
+
+    var script = document.createElement("script");
+    script.id  = "_cdscript";
+    script.src = url;
+    script.onerror = function() {
+      clearTimeout(timer);
+      delete window[cbName];
+      usarDemo();
+    };
+    document.head.appendChild(script);
+  }
+
+  function usarDemo() {
+    iniciarPuzzle(DEMO_PUZZLE, true);
+  }
+
+  function iniciarPuzzle(puzzle, demo) {
+    PUZZLE = puzzle;
+    usandoDemo = demo;
+    document.getElementById("cdLoading").style.display = "none";
+    document.getElementById("cdGame").style.display     = "block";
+    document.getElementById("cdDateBadge").textContent = demo
+      ? (window.I18N ? window.I18N.t("Modo de teste — puzzle de exemplo","Modalità test — puzzle di esempio") : "Modo de teste — puzzle de exemplo")
+      : (puzzle.tema || new Date().toLocaleDateString((window.I18N && window.I18N.lang === "it") ? "it-IT" : "pt-BR", { day:"numeric", month:"long" }));
+    if (demo) document.getElementById("cdDateBadge").classList.add("cd-badge--demo");
+
+    montarEstado(puzzle);
+    construirGrid();
+    focarPrimeiraCelula();
+  }
+
+  function isLetterCell_(r,c){
+    return r>=0 && r<ROWS && c>=0 && c<COLS && typeof grid[r][c] === "string";
+  }
+  function isClueCell_(r,c){
+    return r>=0 && r<ROWS && c>=0 && c<COLS && grid[r][c] && typeof grid[r][c] === "object";
+  }
+
+  /* Varre a grade a partir das células de dica e monta as "entries"
+     (sequências de células de letra que formam uma resposta). */
+  function montarEstado(puzzle) {
+    ROWS = Math.max(1, parseInt(puzzle.rows,10) || 9);
+    COLS = Math.max(1, parseInt(puzzle.cols,10) || 14);
+    grid = puzzle.grid || [];
+    // normaliza letras para maiúsculas
+    for (var r=0;r<ROWS;r++){
+      for (var c=0;c<COLS;c++){
+        if (typeof grid[r] !== "undefined" && typeof grid[r][c] === "string") {
+          grid[r][c] = grid[r][c].toUpperCase();
+        }
+      }
+    }
+
+    entries = [];
+    entryAt = {};
+
+    for (var r=0;r<ROWS;r++){
+      for (var c=0;c<COLS;c++){
+        if (!isClueCell_(r,c)) continue;
+        var clues = grid[r][c].clues || [];
+        clues.forEach(function(cl){
+          var cells = [];
+          if (cl.dir === "r") {
+            var cc = c+1;
+            while (isLetterCell_(r,cc)) { cells.push([r,cc]); cc++; }
+          } else if (cl.dir === "d") {
+            var rr = r+1;
+            while (isLetterCell_(rr,c)) { cells.push([rr,c]); rr++; }
+          }
+          if (!cells.length) return;
+          var entry = { dir: cl.dir, row: r, col: c, texto: cl.texto, cells: cells };
+          entries.push(entry);
+          cells.forEach(function(rc){
+            var key = rc[0]+","+rc[1];
+            if (!entryAt[key]) entryAt[key] = { r:null, d:null };
+            entryAt[key][cl.dir] = entry;
+          });
+        });
+      }
+    }
+  }
+
+  function ajustarTamanhoCelula() {
+    var grid_ = document.getElementById("cdGrid");
+    if (!grid_) return;
+    var gap = 3;
+    var maxWidth = Math.min(window.innerWidth - 32, 720);
+    var size = Math.floor((maxWidth - gap * (COLS - 1)) / COLS);
+    size = Math.max(22, Math.min(46, size));
+    grid_.style.setProperty("--cd-cell", size + "px");
+  }
+
+  function construirGrid() {
+    var gridEl = document.getElementById("cdGrid");
+    gridEl.innerHTML = "";
+    ajustarTamanhoCelula();
+    gridEl.style.gridTemplateColumns = "repeat(" + COLS + ", auto)";
+    cellEls = Array.from({length:ROWS}, function(){ return Array(COLS).fill(null); });
+    inputEls = Array.from({length:ROWS}, function(){ return Array(COLS).fill(null); });
+
+    for (var r=0;r<ROWS;r++){
+      for (var c=0;c<COLS;c++){
+        var cell = document.createElement("div");
+        cell.className = "cd-cell";
+
+        if (isClueCell_(r,c)) {
+          cell.classList.add("clue");
+          var clues = grid[r][c].clues || [];
+          clues.forEach(function(cl){
+            var half = document.createElement("div");
+            half.className = "cd-clue-half";
+            half.dataset.dir = cl.dir;
+            half.dataset.row = r;
+            half.dataset.col = c;
+            half.title = cl.texto;
+            var arrow = document.createElement("span");
+            arrow.className = "cd-clue-half__arrow";
+            arrow.textContent = cl.dir === "r" ? "→" : "↓";
+            var txt = document.createElement("span");
+            txt.className = "cd-clue-half__txt";
+            txt.textContent = cl.texto;
+            half.appendChild(arrow);
+            half.appendChild(txt);
+            half.addEventListener("click", onClueClick);
+            cell.appendChild(half);
+          });
+          gridEl.appendChild(cell);
+          cellEls[r][c] = cell;
+          continue;
+        }
+
+        if (!isLetterCell_(r,c)) {
+          cell.classList.add("block");
+          gridEl.appendChild(cell);
+          continue;
+        }
+
+        var input = document.createElement("input");
+        input.maxLength = 1;
+        input.autocomplete = "off";
+        input.autocapitalize = "characters";
+        input.inputMode = "text";
+        input.dataset.r = r;
+        input.dataset.c = c;
+        input.addEventListener("focus", onCellFocus);
+        input.addEventListener("click", onCellClick);
+        input.addEventListener("keydown", onCellKeydown);
+        input.addEventListener("input", onCellInput);
+        cell.appendChild(input);
+        gridEl.appendChild(cell);
+        cellEls[r][c] = cell;
+        inputEls[r][c] = input;
+      }
+    }
+  }
+
+  function entriesAt(r,c,dir){
+    var e = entryAt[r+","+c];
+    return e ? e[dir] : null;
+  }
+
+  function clearHighlight(){
+    for (var r=0;r<ROWS;r++) for (var c=0;c<COLS;c++){
+      if (cellEls[r][c]) cellEls[r][c].classList.remove("active-word","active-cell");
+    }
+    document.querySelectorAll(".cd-clue-half.active-clue").forEach(function(el){ el.classList.remove("active-clue"); });
+  }
+
+  function highlight(r,c,dir){
+    clearHighlight();
+    var entry = entriesAt(r,c,dir);
+    if (!entry) { dir = dir === "r" ? "d" : "r"; entry = entriesAt(r,c,dir); }
+    if (!entry) return;
+    curDir = dir; curEntry = entry;
+    entry.cells.forEach(function(rc){
+      var el = cellEls[rc[0]][rc[1]];
+      if (el) el.classList.add("active-word");
+    });
+    if (cellEls[r][c]) cellEls[r][c].classList.add("active-cell");
+    var half = document.querySelector('.cd-clue-half[data-dir="'+entry.dir+'"][data-row="'+entry.row+'"][data-col="'+entry.col+'"]');
+    if (half) half.classList.add("active-clue");
+  }
+
+  function onClueClick(e){
+    var half = e.currentTarget;
+    var r = +half.dataset.row, c = +half.dataset.col, dir = half.dataset.dir;
+    var ent = entries.find(function(en){ return en.row===r && en.col===c && en.dir===dir; });
+    if (!ent || !ent.cells.length) return;
+    var first = ent.cells[0];
+    curDir = dir;
+    highlight(first[0], first[1], dir);
+    var input = inputEls[first[0]][first[1]];
+    if (input && !input.disabled) input.focus();
+  }
+
+  function onCellFocus(e){
+    var r = +e.target.dataset.r, c = +e.target.dataset.c;
+    highlight(r,c,curDir);
+  }
+
+  function onCellClick(e){
+    var r = +e.target.dataset.r, c = +e.target.dataset.c;
+    if (curEntry && curEntry === entriesAt(r,c,curDir)) {
+      var outroDir = curDir === "r" ? "d" : "r";
+      if (entriesAt(r,c,outroDir)) { highlight(r,c,outroDir); return; }
+    }
+    highlight(r,c,curDir);
+  }
+
+  function moveTo(r,c){
+    if (!isLetterCell_(r,c)) return false;
+    var input = inputEls[r][c];
+    if (!input || input.disabled) return false;
+    input.focus();
+    return true;
+  }
+
+  function passo(r,c,dir){ return dir==="r" ? [r,c+1] : [r+1,c]; }
+  function passoTras(r,c,dir){ return dir==="r" ? [r,c-1] : [r-1,c]; }
+
+  function proximaLivre(r,c,dir){
+    var pos = [r,c];
+    while (true){
+      pos = passo(pos[0],pos[1],dir);
+      if (!isLetterCell_(pos[0],pos[1])) return null;
+      if (!inputEls[pos[0]][pos[1]].value) return pos;
+    }
+  }
+
+  function anteriorEditavel(r,c,dir){
+    var pos = [r,c];
+    while (true){
+      pos = passoTras(pos[0],pos[1],dir);
+      if (!isLetterCell_(pos[0],pos[1])) return null;
+      if (!inputEls[pos[0]][pos[1]].disabled) return pos;
+    }
+  }
+
+  function isGridFull(){
+    for (var r=0;r<ROWS;r++){
+      for (var c=0;c<COLS;c++){
+        if (!isLetterCell_(r,c)) continue;
+        if (!inputEls[r][c].value) return false;
+      }
+    }
+    return true;
+  }
+
+  function onCellKeydown(e){
+    var r = +e.target.dataset.r, c = +e.target.dataset.c;
+    if (e.key === "ArrowRight") { e.preventDefault(); curDir="r"; if(!moveTo(r,c+1)) highlight(r,c,"r"); else highlight(r,c+1,"r"); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); curDir="r"; if(moveTo(r,c-1)) highlight(r,c-1,"r"); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); curDir="d"; if(moveTo(r+1,c)) highlight(r+1,c,"d"); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); curDir="d"; if(moveTo(r-1,c)) highlight(r-1,c,"d"); }
+    else if (e.key === "Backspace") {
+      if (!e.target.value) {
+        e.preventDefault();
+        var prev = anteriorEditavel(r,c,curDir);
+        if (prev && moveTo(prev[0],prev[1])) {
+          inputEls[prev[0]][prev[1]].value = "";
+          cellEls[prev[0]][prev[1]].classList.remove("wrong");
+          highlight(prev[0],prev[1],curDir);
+        }
+      }
+    }
+  }
+
+  function onCellInput(e){
+    var r = +e.target.dataset.r, c = +e.target.dataset.c;
+    var v = e.target.value.toUpperCase().replace(/[^A-ZÀ-Ú]/g,"");
+    e.target.value = v;
+    if (e.target.classList.contains("wrong")) { e.target.parentElement.classList.remove("wrong"); }
+    if (!v) return;
+    iniciarCronometro();
+    if (window.GS) GS.pop();
+    var alvo = proximaLivre(r,c,curDir) || passo(r,c,curDir);
+    if (moveTo(alvo[0], alvo[1])) highlight(alvo[0], alvo[1], curDir);
+    if (isGridFull()) verificar(true);
+  }
+
+  function focarPrimeiraCelula(){
+    for (var r=0;r<ROWS;r++) for (var c=0;c<COLS;c++){
+      if (isLetterCell_(r,c)) { highlight(r,c,"r"); return; }
+    }
+  }
+
+  function iniciarCronometro(){
+    if (cronometroIniciado) return;
+    cronometroIniciado = true;
+    cronometro = setInterval(function(){
+      segundos++;
+      var m = String(Math.floor(segundos/60)).padStart(2,"0");
+      var s = String(segundos%60).padStart(2,"0");
+      document.getElementById("cdTimer").textContent = m + ":" + s;
+    }, 1000);
+  }
+  function pararCronometro(){ if (cronometro) clearInterval(cronometro); }
+
+  function setMsg(txt, tipo){
+    var el = document.getElementById("cdMsg");
+    el.textContent = txt;
+    el.className = "cd-msg" + (tipo ? " cd-msg--"+tipo : "");
+  }
+
+  function verificar(auto){
+    if (jogoFinalizado) return;
+    tentativasVerificar++;
+    var totalAbertas = 0, totalCorretas = 0, algumaPreenchida = false;
+
+    for (var r=0;r<ROWS;r++){
+      for (var c=0;c<COLS;c++){
+        if (!isLetterCell_(r,c)) continue;
+        totalAbertas++;
+        var input = inputEls[r][c];
+        var cell  = cellEls[r][c];
+        var val = input.value.trim();
+        if (!val) continue;
+        algumaPreenchida = true;
+        if (val === grid[r][c]) {
+          totalCorretas++;
+          cell.classList.add("correct");
+          cell.classList.remove("wrong");
+          input.disabled = true;
+        } else {
+          cell.classList.add("wrong");
+          cell.classList.remove("correct");
+        }
+      }
+    }
+
+    if (!algumaPreenchida) {
+      if (!auto) setMsg(t_("Preencha pelo menos uma palavra antes de verificar.","Completa almeno una parola prima di verificare."), "erro");
+      return;
+    }
+
+    if (totalCorretas === totalAbertas) {
+      finalizar(true);
+    } else {
+      setMsg(auto ? t_("Quase lá... mas ainda não acertou tudo.","Quasi fatto... ma non hai ancora indovinato tutto.") : t_("Algumas letras ainda não estão certas. Continue tentando!","Alcune lettere non sono ancora corrette. Continua a provare!"), "erro");
+      if (window.GS) { GS.bad(); GS.hBad(); }
+    }
+  }
+
+  function limpar(){
+    if (jogoFinalizado) return;
+    for (var r=0;r<ROWS;r++){
+      for (var c=0;c<COLS;c++){
+        if (!isLetterCell_(r,c)) continue;
+        inputEls[r][c].value = "";
+        inputEls[r][c].disabled = false;
+        cellEls[r][c].classList.remove("correct","wrong");
+      }
+    }
+    setMsg("");
+    focarPrimeiraCelula();
+  }
+
+  function revelar(){
+    if (jogoFinalizado) { return; }
+    for (var r=0;r<ROWS;r++){
+      for (var c=0;c<COLS;c++){
+        if (!isLetterCell_(r,c)) continue;
+        inputEls[r][c].value = grid[r][c];
+        inputEls[r][c].disabled = true;
+        cellEls[r][c].classList.add("correct");
+        cellEls[r][c].classList.remove("wrong");
+      }
+    }
+    finalizar(false);
+  }
+
+  function finalizar(venceu){
+    jogoFinalizado = true;
+    pararCronometro();
+    if (window.GS) { venceu ? GS.win() : GS.good(); if (venceu && GS.hWin) GS.hWin(); }
+    document.getElementById("cdGame").style.display   = "none";
+    document.getElementById("cdResult").style.display = "block";
+    document.querySelector(".cd-result__title").textContent = venceu ? t_("Resolvido!","Risolto!") : t_("Aqui está a solução","Ecco la soluzione");
+    var m = String(Math.floor(segundos/60)).padStart(2,"0");
+    var s = String(segundos%60).padStart(2,"0");
+    document.getElementById("cdResultSub").textContent = venceu
+      ? t_("Você completou em " + m + ":" + s + ".","Hai completato in " + m + ":" + s + ".")
+      : t_("Até a próxima!","A presto!");
+    if (venceu) confettiRain();
+    carregarTop10();
+  }
+
+  function confettiRain(){
+    const wrap = document.createElement("div");
+    wrap.className = "confetti-rain";
+    const n = 24;
+    for(let i=0;i<n;i++){
+      const img = document.createElement("img");
+      const piece = String((i % 12) + 1).padStart(2,"0");
+      img.src = `assets/img/confetti-piece-${piece}.png`;
+      img.className = "confetti-rain__piece";
+      img.alt = "";
+      const left = Math.random()*100;
+      const duration = 2.6 + Math.random()*1.8;
+      const delay = Math.random()*0.6;
+      const size = 18 + Math.random()*18;
+      img.style.left = left + "vw";
+      img.style.width = size + "px";
+      img.style.height = size + "px";
+      img.style.animationDuration = duration + "s";
+      img.style.animationDelay = delay + "s";
+      wrap.appendChild(img);
+    }
+    document.body.appendChild(wrap);
+    setTimeout(() => wrap.remove(), 5000);
+  }
+
+  function escHtml_(s){ return String(s||"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+  async function carregarTop10(){
+    var list = document.getElementById("cdTopList");
+    if (!list) return;
+    list.innerHTML = '<li><span class="name">' + t_("Carregando...","Caricamento...") + '</span></li>';
+    try {
+      var r = await fetch(API_URL + "?action=top10&jogo=" + GAME_KEY);
+      var d = await r.json();
+      var arr = d.lista || [];
+      if (!arr.length) { list.innerHTML = '<li><span class="name">' + t_("Seja o primeiro!","Sii il primo!") + '</span></li>'; return; }
+      list.innerHTML = arr.map(function(it,i){
+        return '<li><span class="pos">'+(i+1)+'</span><span class="name">'+escHtml_(it.nome)+'</span><span class="pts">'+it.pontos+' pts</span></li>';
+      }).join("");
+    } catch(e) {
+      list.innerHTML = '<li><span class="name">' + t_("Placar indisponível.","Classifica non disponibile.") + '</span></li>';
+    }
+  }
+
+  async function salvarPontuacao(){
+    var nome = (document.getElementById("cdName").value || "").trim().slice(0,22);
+    var msg  = document.getElementById("cdSaveMsg");
+    if (!nome) { msg.textContent = t_("Coloque seu nome!","Inserisci il tuo nome!"); return; }
+    msg.textContent = t_("Salvando...","Salvataggio...");
+    var pontos = Math.max(0, 1000 - segundos);
+    try {
+      await fetch(API_URL, { method:"POST", body: JSON.stringify({ action:"score", jogo:GAME_KEY, nome:nome, pontos:pontos }) });
+      msg.textContent = t_("Salvo!","Salvato!");
+      carregarTop10();
+    } catch(e) {
+      msg.textContent = t_("Erro ao salvar.","Errore.");
+    }
+  }
+
+  document.getElementById("cdBtnVerificar").addEventListener("click", function(){ verificar(false); });
+  document.getElementById("cdBtnLimpar").addEventListener("click", limpar);
+  document.getElementById("cdBtnRevelar").addEventListener("click", revelar);
+  document.getElementById("cdBtnSalvar").addEventListener("click", salvarPontuacao);
+  document.getElementById("cdBtnCompartilhar").addEventListener("click", function(){
+    var m = String(Math.floor(segundos/60)).padStart(2,"0");
+    var s = String(segundos%60).padStart(2,"0");
+    var txt = t_(
+      "Resolvi a Cruzadinha do casamento de Tiago & Gian em " + m + ":" + s + "! 🌿\n\nhttps://gianmariaparadisi.github.io/casamento/cruzadas-diretas.html",
+      "Ho risolto il Cruciverba del matrimonio di Tiago & Gian in " + m + ":" + s + "! 🌿\n\nhttps://gianmariaparadisi.github.io/casamento/cruzadas-diretas.html"
+    );
+    if (navigator.share) {
+      navigator.share({ text: txt }).catch(function(){});
+    } else {
+      navigator.clipboard.writeText(txt).then(function(){
+        var btn = document.getElementById("cdBtnCompartilhar");
+        var orig = btn.textContent;
+        btn.textContent = t_("Copiado!","Copiato!");
+        setTimeout(function(){ btn.textContent = orig; }, 2000);
+      });
+    }
+  });
+
+  window.addEventListener("resize", function(){
+    if (PUZZLE) ajustarTamanhoCelula();
+  });
+
+  carregarPuzzle();
+  </script>
+  <script src="assets/js/bg-music.js"></script>
+</body>
+</html>

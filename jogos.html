@@ -169,9 +169,19 @@
           <span class="btn btn--outline btn--sm" style="pointer-events:none;opacity:.6;border-color:var(--sage);color:var(--sage-dark)" data-it="Presto">Em breve</span>
         </div>
 
-        <!-- Doce Crush — lançamento! -->
-        <a href="doce-crush.html" class="jogo-card reveal" style="text-decoration:none;color:inherit;position:relative;background:linear-gradient(135deg,rgba(224,242,210,.95),rgba(196,228,176,.78));border-color:rgba(122,155,110,.55);">
+        <!-- Cruzadinha semanal — destaque a partir de 10/07/2026 (ocupa o lugar do Doce Crush) -->
+        <a href="cruzadas-diretas.html" id="card-cruzadinha-featured" class="jogo-card reveal" style="display:none;text-decoration:none;color:inherit;position:relative;background:linear-gradient(135deg,rgba(224,242,210,.95),rgba(196,228,176,.78));border-color:rgba(122,155,110,.55);">
           <span style="position:absolute;top:-11px;right:50%;transform:translateX(50%);background:var(--sage);color:#fff;font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.32rem .7rem;border-radius:999px;box-shadow:0 3px 8px rgba(82,57,34,.25);white-space:nowrap" data-it="Nuovo gioco!">Jogo novo!</span>
+          <span class="jogo-card__icon"><img src="assets/img/icon-wordle-grid.png" alt="" loading="lazy"></span>
+          <h2 class="jogo-card__title" data-it="Cruciverba Diretto">Cruzadinha</h2>
+          <p class="jogo-card__desc" data-it="Una griglia 14x9 nuova ogni settimana, nel formato &quot;cruzada direta&quot;: la dica está dentro da própria célula.">Uma grade 14x9 nova a cada semana, no formato "cruzada direta": a dica fica dentro da própria célula.</p>
+          <p class="jogo-card__record" id="record-cruzadinha-preview" data-it="Caricamento…">Carregando…</p>
+          <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
+        </a>
+
+        <!-- Doce Crush — destaque até 30/06/2026; depois vira card normal e migra para antes do Snake -->
+        <a href="doce-crush.html" id="card-doce-crush" class="jogo-card reveal" style="text-decoration:none;color:inherit;position:relative;background:linear-gradient(135deg,rgba(224,242,210,.95),rgba(196,228,176,.78));border-color:rgba(122,155,110,.55);">
+          <span id="doce-badge" style="position:absolute;top:-11px;right:50%;transform:translateX(50%);background:var(--sage);color:#fff;font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.32rem .7rem;border-radius:999px;box-shadow:0 3px 8px rgba(82,57,34,.25);white-space:nowrap" data-it="Nuovo gioco!">Jogo novo!</span>
           <span class="jogo-card__icon"><img src="assets/img/doce-crush-bemcasado.png" alt="" loading="lazy"></span>
           <h2 class="jogo-card__title" data-it="Dolce Crush">Doce Crush</h2>
           <p class="jogo-card__desc" data-it="Combina i dolci, crea combo e sblocca il raro Bem-Casado. Il tabellone cresce mentre fai punti!">Combine doces, crie combos e desbloqueie o raro Bem-Casado. O tabuleiro cresce conforme você pontua!</p>
@@ -465,21 +475,46 @@
   </script>
 
   <script>
-  // Lançamento Doce Crush: card "em breve" some até 1º de julho/2026, depois volta
+  // Calendário da vitrine de jogos:
+  //  · até 30/06/2026 — Doce Crush é o destaque "Jogo novo!" (estado atual)
+  //  · 01/07 a 09/07/2026 — Doce Crush vira card normal (migra para antes do Snake);
+  //    o destaque mostra o card "em breve"
+  //  · a partir de 10/07/2026 — a Cruzadinha (cruzadas diretas semanal) assume o destaque
   (function(){
-    const card = document.getElementById('card-em-breve');
-    if(!card) return;
-    const cutoff = new Date(2026, 6, 1); // 1º de julho de 2026
-    if(new Date() >= cutoff) card.style.display = '';
+    const cutoffDoceNormal   = new Date(2026, 6, 1);  // 1º de julho de 2026
+    const cutoffCruzadinha   = new Date(2026, 6, 10); // 10 de julho de 2026
+    const now = new Date();
+
+    const emBreve     = document.getElementById('card-em-breve');
+    const doce        = document.getElementById('card-doce-crush');
+    const doceBadge   = document.getElementById('doce-badge');
+    const cruzadinha  = document.getElementById('card-cruzadinha-featured');
+    const snakeCard   = document.querySelector('a[href="snake.html"]');
+
+    if (now >= cutoffDoceNormal) {
+      // Doce Crush deixa de ser destaque: remove o selo e o fundo especial
+      if (doceBadge) doceBadge.remove();
+      if (doce) { doce.style.background = ''; doce.style.borderColor = ''; }
+      // Migra o card para imediatamente antes do Snake
+      if (doce && snakeCard && snakeCard.parentNode) {
+        snakeCard.parentNode.insertBefore(doce, snakeCard);
+      }
+      if (emBreve) emBreve.style.display = '';
+    }
+
+    if (now >= cutoffCruzadinha) {
+      if (emBreve) emBreve.style.display = 'none';
+      if (cruzadinha) cruzadinha.style.display = '';
+    }
   })();
   </script>
   <script>
-  // Countdown: dias até o 1º dia do próximo mês
+  // Countdown do card "em breve": dias até a Cruzadinha entrar (10/07/2026)
   (function(){
     const el = document.getElementById('soon-countdown');
     if(!el) return;
     const now  = new Date();
-    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const next = new Date(2026, 6, 10); // 10 de julho de 2026
     const diff = Math.ceil((next - now) / (1000 * 60 * 60 * 24));
     const it   = window.I18N && window.I18N.lang === 'it';
     if(diff <= 0){
