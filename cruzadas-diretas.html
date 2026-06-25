@@ -36,6 +36,7 @@
 
     /* ─── GRADE ──────────────────────────────────────── */
     .cd-board-wrap { display:flex;flex-direction:column;align-items:center;gap:1.2rem; }
+    .cd-grid-scroll { width:100%; overflow-x:auto; padding:2px; }
     .cd-grid {
       display:grid;
       gap:3px;
@@ -43,6 +44,7 @@
       touch-action: manipulation;
       --cd-cell: 40px;
       max-width: 100%;
+      width: max-content;
     }
     .cd-cell {
       position:relative;
@@ -72,11 +74,26 @@
     @keyframes cd-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)} }
 
     .cd-cell.clue { background: rgba(224,242,210,.65); border-color: rgba(122,155,110,.45); display:flex; flex-direction:column; cursor:default; }
-    .cd-clue-half { flex:1; display:flex; align-items:center; gap:2px; padding:1px 2px; font-size:6.4px; line-height:1.04; color:#3F5C36; cursor:pointer; overflow:hidden; }
-    .cd-clue-half:hover, .cd-clue-half.active-clue { background: rgba(122,155,110,.32); }
+    .cd-clue-half { flex:1; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .cd-clue-half:hover, .cd-clue-half.active-clue { background: rgba(122,155,110,.38); }
     .cd-clue-half + .cd-clue-half { border-top:1px solid rgba(122,155,110,.35); }
-    .cd-clue-half__arrow { flex:0 0 auto; font-size:7px; font-weight:700; color:var(--sage-dark); }
-    .cd-clue-half__txt { flex:1; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .cd-clue-half__arrow { font-weight:700; color:var(--sage-dark); font-size:calc(var(--cd-cell) * 0.34); line-height:1; }
+
+    /* Barra de dica: a dica completa NUNCA fica truncada dentro da célula
+       (que é pequena demais, principalmente no celular) — ela aparece
+       inteira aqui, em fonte legível, e atualiza ao tocar numa célula. */
+    .cd-clue-bar {
+      position: sticky; top: 64px; z-index: 6;
+      display:flex; align-items:flex-start; gap:.55rem;
+      width:100%; max-width:720px; margin-inline:auto;
+      background: var(--white); border:1px solid var(--line-green); border-radius:14px;
+      padding:.65rem .9rem; box-shadow: var(--shadow-green);
+      font-size:.92rem; line-height:1.42; color:var(--text-main);
+    }
+    .cd-clue-bar__arrow { flex:0 0 auto; font-weight:700; color:var(--sage-dark); font-size:1.1rem; }
+    .cd-clue-bar__txt { flex:1; }
+    .cd-clue-bar__dir { display:block; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--sage); margin-bottom:.1rem; }
+    @media (max-width:520px){ .cd-clue-bar { top:58px; font-size:.88rem; } }
 
     .cd-actions { display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap; }
     .cd-reveal-link { display:block;text-align:center;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:none;margin-top:.25rem; }
@@ -167,7 +184,14 @@
 
     <div id="cdGame" style="display:none">
       <div class="cd-board-wrap">
-        <div class="cd-grid" id="cdGrid"></div>
+        <div class="cd-clue-bar" id="cdClueBar">
+          <span class="cd-clue-bar__arrow" id="cdClueBarArrow">→</span>
+          <span class="cd-clue-bar__txt">
+            <span class="cd-clue-bar__dir" id="cdClueBarDir" data-it="Indizio">Dica</span>
+            <span id="cdClueBarTxt" data-it="Tocca una cella per vedere l'indizio.">Toque numa célula para ver a dica.</span>
+          </span>
+        </div>
+        <div class="cd-grid-scroll"><div class="cd-grid" id="cdGrid"></div></div>
         <p class="cd-msg" id="cdMsg"></p>
         <div class="cd-actions">
           <button class="btn btn--primary btn--sm" id="cdBtnVerificar" data-it="Verifica">Verificar</button>
@@ -239,6 +263,11 @@
        {clues:[{dir:"r"|"d", texto:"..."}]}      -> célula de dica (1 ou 2 dicas)
      "dir":"r" = resposta começa na célula à direita e segue para a direita.
      "dir":"d" = resposta começa na célula abaixo e segue para baixo.
+     Cada dica pode opcionalmente incluir "start":[row,col] — usado quando,
+     por causa do layout (borda da grade ou colisão com outra dica), a
+     resposta não começa na célula imediatamente ao lado/abaixo da própria
+     dica. Se "start" não for informado, usa o comportamento padrão (célula
+     adjacente, à direita para "r" ou abaixo para "d").
      Se a API não responder (ou não houver puzzle para a semana atual),
      usa um puzzle de demonstração embutido — assim este arquivo já
      funciona sozinho, sem depender da planilha.
@@ -373,12 +402,16 @@
         var clues = grid[r][c].clues || [];
         clues.forEach(function(cl){
           var cells = [];
+          var startR = r, startC = c;
+          if (cl.start && cl.start.length === 2) { startR = cl.start[0]; startC = cl.start[1]; }
+          else if (cl.dir === "r") { startC = c+1; }
+          else if (cl.dir === "d") { startR = r+1; }
           if (cl.dir === "r") {
-            var cc = c+1;
-            while (isLetterCell_(r,cc)) { cells.push([r,cc]); cc++; }
+            var cc = startC;
+            while (isLetterCell_(startR,cc)) { cells.push([startR,cc]); cc++; }
           } else if (cl.dir === "d") {
-            var rr = r+1;
-            while (isLetterCell_(rr,c)) { cells.push([rr,c]); rr++; }
+            var rr = startR;
+            while (isLetterCell_(rr,startC)) { cells.push([rr,startC]); rr++; }
           }
           if (!cells.length) return;
           var entry = { dir: cl.dir, row: r, col: c, texto: cl.texto, cells: cells };
@@ -426,14 +459,11 @@
             half.dataset.row = r;
             half.dataset.col = c;
             half.title = cl.texto;
+            half.setAttribute("aria-label", cl.texto);
             var arrow = document.createElement("span");
             arrow.className = "cd-clue-half__arrow";
             arrow.textContent = cl.dir === "r" ? "→" : "↓";
-            var txt = document.createElement("span");
-            txt.className = "cd-clue-half__txt";
-            txt.textContent = cl.texto;
             half.appendChild(arrow);
-            half.appendChild(txt);
             half.addEventListener("click", onClueClick);
             cell.appendChild(half);
           });
@@ -492,6 +522,21 @@
     if (cellEls[r][c]) cellEls[r][c].classList.add("active-cell");
     var half = document.querySelector('.cd-clue-half[data-dir="'+entry.dir+'"][data-row="'+entry.row+'"][data-col="'+entry.col+'"]');
     if (half) half.classList.add("active-clue");
+    atualizarBarraDeDica(entry);
+  }
+
+  /* A dica completa aparece sempre aqui, nunca cortada com "..." dentro
+     da célula (que é pequena demais para texto, principalmente no celular). */
+  function atualizarBarraDeDica(entry){
+    var arrowEl = document.getElementById("cdClueBarArrow");
+    var dirEl   = document.getElementById("cdClueBarDir");
+    var txtEl   = document.getElementById("cdClueBarTxt");
+    if (!arrowEl || !txtEl) return;
+    arrowEl.textContent = entry.dir === "r" ? "→" : "↓";
+    if (dirEl) dirEl.textContent = entry.dir === "r"
+      ? t_("Da esquerda para a direita","Da sinistra a destra")
+      : t_("De cima para baixo","Dall'alto in basso");
+    txtEl.textContent = entry.texto || "";
   }
 
   function onClueClick(e){
