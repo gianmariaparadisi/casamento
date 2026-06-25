@@ -143,9 +143,9 @@
 
   <div class="cw-page">
     <div class="cw-header">
-      <p class="cw-header__eyebrow">Mini Cruzadinha do dia</p>
-      <h1 class="cw-header__title">Mini Cruzadinha</h1>
-      <p class="cw-header__sub">Uma grade nova a cada dia. Preencha tudo e clique em Verificar.</p>
+      <p class="cw-header__eyebrow" data-it="Mini Cruciverba del giorno">Mini Cruzadinha do dia</p>
+      <h1 class="cw-header__title" data-it="Mini Cruciverba">Mini Cruzadinha</h1>
+      <p class="cw-header__sub" data-it="Una griglia nuova ogni giorno. Completa tutto e clicca su Verifica.">Uma grade nova a cada dia. Preencha tudo e clique em Verificar.</p>
       <div class="cw-header__meta">
         <span class="cw-badge" id="cwDateBadge"></span>
         <span class="cw-timer" id="cwTimer">00:00</span>
@@ -153,7 +153,7 @@
     </div>
 
     <div id="cwLoading" class="cw-loading">
-      <span class="spinner"></span> Carregando a cruzadinha de hoje…
+      <span class="spinner"></span> <span data-it="Caricamento del cruciverba di oggi…">Carregando a cruzadinha de hoje…</span>
     </div>
 
     <div id="cwGame" style="display:none">
@@ -161,18 +161,18 @@
         <div class="cw-grid" id="cwGrid"></div>
         <p class="cw-msg" id="cwMsg"></p>
         <div class="cw-actions">
-          <button class="btn btn--primary btn--sm" id="cwBtnVerificar">Verificar</button>
-          <button class="btn btn--outline btn--sm" id="cwBtnLimpar">Limpar</button>
+          <button class="btn btn--primary btn--sm" id="cwBtnVerificar" data-it="Verifica">Verificar</button>
+          <button class="btn btn--outline btn--sm" id="cwBtnLimpar" data-it="Pulisci">Limpar</button>
         </div>
-        <button class="cw-reveal-link" id="cwBtnRevelar">Revelar solução</button>
+        <button class="cw-reveal-link" id="cwBtnRevelar" data-it="Rivela soluzione">Revelar solução</button>
 
         <div class="cw-clues">
           <div class="cw-clues__col">
-            <h3>Horizontais</h3>
+            <h3 data-it="Orizzontali">Horizontais</h3>
             <ul class="cw-clues__list" id="cwAcrossList"></ul>
           </div>
           <div class="cw-clues__col">
-            <h3>Verticais</h3>
+            <h3 data-it="Verticali">Verticais</h3>
             <ul class="cw-clues__list" id="cwDownList"></ul>
           </div>
         </div>
@@ -185,20 +185,20 @@
         <h2 class="cw-result__title">Resolvido!</h2>
         <p class="cw-result__sub" id="cwResultSub"></p>
         <div class="cw-result__share">
-          <button class="btn btn--outline-green btn--sm" id="cwBtnCompartilhar">Compartilhar resultado</button>
+          <button class="btn btn--outline-green btn--sm" id="cwBtnCompartilhar" data-it="Condividi risultato">Compartilhar resultado</button>
         </div>
       </div>
       <div style="text-align:center;margin-top:1rem">
-        <a href="jogos.html" class="btn btn--outline btn--sm">← Voltar aos jogos</a>
+        <a href="jogos.html" class="btn btn--outline btn--sm" data-it="← Torna ai giochi">← Voltar aos jogos</a>
       </div>
     </div>
 
     <div id="cwErro" style="display:none">
       <p style="text-align:center;color:var(--text-muted);font-size:.9rem;padding:2rem 0">
-        Não encontramos uma cruzadinha para hoje.<br>Volte em breve! <img src="assets/img/icon-sparkle.png" alt="" style="width:1.6em;height:1.6em;object-fit:contain;vertical-align:-.28em">
+        <span data-it="Non abbiamo trovato un cruciverba per oggi.">Não encontramos uma cruzadinha para hoje.</span><br><span data-it="Torna presto!">Volte em breve!</span> <img src="assets/img/icon-sparkle.png" alt="" style="width:1.6em;height:1.6em;object-fit:contain;vertical-align:-.28em">
       </p>
       <div style="text-align:center">
-        <a href="jogos.html" class="btn btn--outline btn--sm">← Voltar aos jogos</a>
+        <a href="jogos.html" class="btn btn--outline btn--sm" data-it="← Torna ai giochi">← Voltar aos jogos</a>
       </div>
     </div>
   </div>
@@ -231,6 +231,8 @@
 
   const SIZE_MIN = 5, SIZE_MAX = 10;
   let ROWS = 5, COLS = 5;
+
+  function t_(pt, it) { return (window.I18N && window.I18N.lang === "it") ? it : pt; }
 
   // ── Puzzle de demonstração ──────────────────────────────────
   // Grade (●=bloco):
@@ -317,8 +319,8 @@
     document.getElementById("cwLoading").style.display = "none";
     document.getElementById("cwGame").style.display     = "block";
     document.getElementById("cwDateBadge").textContent = demo
-      ? "Modo de teste — puzzle de exemplo"
-      : new Date().toLocaleDateString("pt-BR", { day:"numeric", month:"long" });
+      ? (window.I18N ? window.I18N.t("Modo de teste — puzzle de exemplo","Modalità test — puzzle di esempio") : "Modo de teste — puzzle de exemplo")
+      : new Date().toLocaleDateString((window.I18N && window.I18N.lang === "it") ? "it-IT" : "pt-BR", { day:"numeric", month:"long" });
     if (demo) document.getElementById("cwDateBadge").classList.add("cw-badge--demo");
 
     montarEstado(puzzle);
@@ -635,14 +637,14 @@
     }
 
     if (!algumaPreenchida) {
-      if (!auto) setMsg("Preencha pelo menos uma palavra antes de verificar.", "erro");
+      if (!auto) setMsg(t_("Preencha pelo menos uma palavra antes de verificar.","Completa almeno una parola prima di verificare."), "erro");
       return;
     }
 
     if (totalCorretas === totalAbertas) {
       finalizar(true);
     } else {
-      setMsg(auto ? "Quase lá... mas ainda não acertou tudo." : "Algumas letras ainda não estão certas. Continue tentando!", "erro");
+      setMsg(auto ? t_("Quase lá... mas ainda não acertou tudo.","Quasi fatto... ma non hai ancora indovinato tutto.") : t_("Algumas letras ainda não estão certas. Continue tentando!","Alcune lettere non sono ancora corrette. Continua a provare!"), "erro");
       if (window.GS) { GS.bad(); GS.hBad(); }
     }
   }
@@ -681,12 +683,12 @@
     if (window.GS) { venceu ? GS.win() : GS.good(); if (venceu && GS.hWin) GS.hWin(); }
     document.getElementById("cwGame").style.display   = "none";
     document.getElementById("cwResult").style.display = "block";
-    document.querySelector(".cw-result__title").textContent = venceu ? "Resolvido!" : "Aqui está a solução";
+    document.querySelector(".cw-result__title").textContent = venceu ? t_("Resolvido!","Risolto!") : t_("Aqui está a solução","Ecco la soluzione");
     var m = String(Math.floor(segundos/60)).padStart(2,"0");
     var s = String(segundos%60).padStart(2,"0");
     document.getElementById("cwResultSub").textContent = venceu
-      ? "Você completou em " + m + ":" + s + "."
-      : "Até a próxima!";
+      ? t_("Você completou em " + m + ":" + s + ".","Hai completato in " + m + ":" + s + ".")
+      : t_("Até a próxima!","A presto!");
     if (venceu) confettiRain();
   }
 
@@ -721,14 +723,17 @@
   document.getElementById("cwBtnCompartilhar").addEventListener("click", function(){
     var m = String(Math.floor(segundos/60)).padStart(2,"0");
     var s = String(segundos%60).padStart(2,"0");
-    var txt = "Resolvi a Mini Cruzadinha do casamento de Tiago & Gian em " + m + ":" + s + "! 🌿\n\nhttps://gianmariaparadisi.github.io/casamento/mini-crossword.html";
+    var txt = t_(
+      "Resolvi a Mini Cruzadinha do casamento de Tiago & Gian em " + m + ":" + s + "! 🌿\n\nhttps://gianmariaparadisi.github.io/casamento/mini-crossword.html",
+      "Ho risolto il Mini Cruciverba del matrimonio di Tiago & Gian in " + m + ":" + s + "! 🌿\n\nhttps://gianmariaparadisi.github.io/casamento/mini-crossword.html"
+    );
     if (navigator.share) {
       navigator.share({ text: txt }).catch(function(){});
     } else {
       navigator.clipboard.writeText(txt).then(function(){
         var btn = document.getElementById("cwBtnCompartilhar");
         var orig = btn.textContent;
-        btn.textContent = "Copiado!";
+        btn.textContent = t_("Copiado!","Copiato!");
         setTimeout(function(){ btn.textContent = orig; }, 2000);
       });
     }

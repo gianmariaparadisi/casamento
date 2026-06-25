@@ -8,16 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="assets/css/style.css"/>
-  <style>a<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lua de Mel de Papel — Tiago & Gian</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="assets/css/style.css"/>
   <style>
     :root {
       --fl-cream:   #FBF7EF; --fl-cream2: #F4F1EB;
@@ -126,7 +116,7 @@
 <body class="game-page">
   <nav class="game-nav">
     <div class="game-nav__inner">
-      <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
+      <a class="game-back" href="jogos.html" data-it="← Torna ai giochi">← Voltar aos jogos</a>
       <div class="game-brand">Tiago &amp; Gian</div>
     </div>
   </nav>
@@ -138,9 +128,9 @@
       <div style="text-align:center;margin-bottom:.5rem">
         <img src="assets/img/packing-airplane-takeoff.png" alt="" style="width:4rem;height:4rem;object-fit:contain;display:inline-block;filter:drop-shadow(0 4px 8px rgba(196,109,40,.22))" onerror="this.style.fontSize='3rem';this.outerHTML='<span style=\'display:block;text-align:center;font-size:3rem\'>✈️</span>'">
       </div>
-      <p class="game-kicker">✈️ 5 Destinos · Física Real</p>
-      <h1 class="game-title">Lua de Mel<br><em>de Papel</em></h1>
-      <p class="game-sub">Arraste e solte para lançar o avião. Segure para dar gás. Colete lembranças europeias!</p>
+      <p class="game-kicker" data-it="✈️ 5 Destinazioni · Fisica Reale">✈️ 5 Destinos · Física Real</p>
+      <h1 class="game-title" data-it-html="Luna di Miele<br><em>di Carta</em>">Lua de Mel<br><em>de Papel</em></h1>
+      <p class="game-sub" data-it="Trascina e rilascia per lanciare l'aereo. Tieni premuto per dare gas. Raccogli ricordi europei!">Arraste e solte para lançar o avião. Segure para dar gás. Colete lembranças europeias!</p>
       <div class="dest-grid" id="dest-grid"></div>
     </div>
 
@@ -151,7 +141,7 @@
         <div class="briefing__dest"    id="br-dest"></div>
         <div class="briefing__tagline" id="br-tagline"></div>
         <div class="briefing__tip"     id="br-tip"></div>
-        <button class="game-btn game-btn--main" onclick="startFlight()">✈️ Decolar!</button>
+        <button class="game-btn game-btn--main" onclick="startFlight()" data-it="✈️ Decolla!">✈️ Decolar!</button>
       </div>
     </div>
 
@@ -162,17 +152,17 @@
         <!-- Overlay start/end inside canvas -->
         <div class="game-overlay show" id="game-overlay">
           <div class="ov-emoji" id="ov-emoji">✈️</div>
-          <div class="ov-title" id="ov-title">Pronto para decolar?</div>
-          <div class="ov-sub"   id="ov-sub">Arraste o avião para mirar e solte para lançar.<br>Segure a tela durante o voo para dar gás!</div>
+          <div class="ov-title" id="ov-title" data-it="Pronto per decollare?">Pronto para decolar?</div>
+          <div class="ov-sub"   id="ov-sub" data-it-html="Trascina l'aereo per puntare e rilascia per lanciare.<br>Tieni premuto durante il volo per dare gas!">Arraste o avião para mirar e solte para lançar.<br>Segure a tela durante o voo para dar gás!</div>
           <div class="ov-stats" id="ov-stats" style="display:none"></div>
           <div class="ov-stars" id="ov-stars"></div>
           <div class="ov-btns"  id="ov-btns">
-            <button class="game-btn game-btn--main" id="ov-main-btn" onclick="beginAiming()">✈️ Lançar!</button>
-            <button class="game-btn" onclick="goToSelect()">← Destinos</button>
+            <button class="game-btn game-btn--main" id="ov-main-btn" onclick="beginAiming()" data-it="✈️ Lancia!">✈️ Lançar!</button>
+            <button class="game-btn" onclick="goToSelect()" data-it="← Destinazioni">← Destinos</button>
           </div>
         </div>
       </div>
-      <p class="mobile-hint" id="mobile-hint">Arraste o avião ✈️ para mirar · Segure para gás 🔥</p>
+      <p class="mobile-hint" id="mobile-hint" data-it="Trascina l'aereo ✈️ per puntare · Tieni premuto per gas 🔥">Arraste o avião ✈️ para mirar · Segure para gás 🔥</p>
     </div>
 
     <!-- RESULT -->
@@ -185,17 +175,17 @@
       </div>
       <div class="result-stats" id="result-stats"></div>
       <div class="save-box">
-        <h3>Salvar seu recorde</h3>
+        <h3 data-it="Salva il tuo record">Salvar seu recorde</h3>
         <div class="save-row">
-          <input type="text" id="flight-nome" class="save-input" placeholder="Seu nome" maxlength="30" autocomplete="name"/>
-          <button class="game-btn game-btn--main" onclick="flightSaveScore()">Salvar</button>
+          <input type="text" id="flight-nome" class="save-input" placeholder="Seu nome" data-it-placeholder="Il tuo nome" maxlength="30" autocomplete="name"/>
+          <button class="game-btn game-btn--main" onclick="flightSaveScore()" data-it="Salva">Salvar</button>
         </div>
         <p class="save-msg" id="flight-save-msg"></p>
       </div>
       <div class="top10-box" id="flight-top10"></div>
       <div style="display:flex;gap:.65rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem">
-        <button class="game-btn game-btn--main" id="res-replay-btn" onclick="replayFlight()">↩ Voar de novo</button>
-        <button class="game-btn" onclick="goToSelect()">← Todos os destinos</button>
+        <button class="game-btn game-btn--main" id="res-replay-btn" onclick="replayFlight()" data-it="↩ Vola di nuovo">↩ Voar de novo</button>
+        <button class="game-btn" onclick="goToSelect()" data-it="← Tutte le destinazioni">← Todos os destinos</button>
       </div>
     </div>
 
@@ -203,11 +193,11 @@
     <div class="screen" id="screen-win">
       <div style="text-align:center;padding:2rem 0 1rem">
         <div style="font-size:3.5rem;margin-bottom:.5rem">💍</div>
-        <div style="font-family:var(--font-display);font-size:2.6rem;font-weight:300;color:var(--fl-navy);margin-bottom:.3rem">Lua de mel completa!</div>
-        <div style="font-size:.9rem;color:var(--fl-amber);margin-bottom:1.2rem;line-height:1.6">Vocês voaram por toda a Europa juntos ❤️</div>
+        <div style="font-family:var(--font-display);font-size:2.6rem;font-weight:300;color:var(--fl-navy);margin-bottom:.3rem" data-it="Luna di miele completa!">Lua de mel completa!</div>
+        <div style="font-size:.9rem;color:var(--fl-amber);margin-bottom:1.2rem;line-height:1.6" data-it="Avete volato insieme per tutta l'Europa ❤️">Vocês voaram por toda a Europa juntos ❤️</div>
         <div class="album-grid" id="album-grid"></div>
-        <div style="font-size:.8rem;color:var(--fl-sage-dk);margin:1rem 0 1.5rem;font-style:italic">5 destinos · 5 memórias · Uma vida inteira pela frente</div>
-        <button class="game-btn game-btn--main" onclick="goToSelect()">✈️ Voar de novo</button>
+        <div style="font-size:.8rem;color:var(--fl-sage-dk);margin:1rem 0 1.5rem;font-style:italic" data-it="5 destinazioni · 5 ricordi · Una vita intera davanti">5 destinos · 5 memórias · Uma vida inteira pela frente</div>
+        <button class="game-btn game-btn--main" onclick="goToSelect()" data-it="✈️ Vola di nuovo">✈️ Voar de novo</button>
       </div>
       <div class="top10-box" id="win-top10"></div>
     </div>
@@ -243,6 +233,8 @@ const GAME_W = 520;
 const GAME_H = 340;
 const GROUND_Y = GAME_H - 38;   // world ground (in screen when camera.y=0)
 
+function t_(pt, it) { return (window.I18N && window.I18N.lang === "it") ? it : pt; }
+
 /* ═══════════════════════════════════════════════════════════
    DESTINATION DATA
 ═══════════════════════════════════════════════════════════ */
@@ -250,91 +242,103 @@ const DESTINATIONS = [
   {
     id:"lisboa", name:"Lisboa", flag:"🇵🇹",
     tagline:"A cidade das sete colinas e do fado",
+    taglineIt:"La città delle sette colline e del fado",
     tip:"Arraste para mirar e solte para lançar! Segure durante o voo para dar gás. Colete pastéis de nata!",
+    tipIt:"Trascina per puntare e rilascia per lanciare! Tieni premuto durante il volo per dare gas. Raccogli i pastéis de nata!",
     targetDist:1800, starThresholds:[800,1400,1800],
     sky:"#8AABCC", horizon:"#D4B890", ground:"#506B45", groundLine:"#3D5230",
     collectibles:[
-      {id:"nata",     emoji:"🥐", pts:50,  label:"Pastel de Nata"},
-      {id:"sardinha", emoji:"🐟", pts:35,  label:"Sardinha"},
-      {id:"azulejo",  emoji:"🟦", pts:60,  label:"Azulejo"},
-      {id:"fado",     emoji:"🎵", pts:45,  label:"Fado Record"},
+      {id:"nata",     emoji:"🥐", pts:50,  label:"Pastel de Nata", img:"collect-lisboa-nata.png"},
+      {id:"sardinha", emoji:"🐟", pts:35,  label:"Sardinha", img:"collect-lisboa-sardinha.png"},
+      {id:"azulejo",  emoji:"🟦", pts:60,  label:"Azulejo", img:"collect-lisboa-azulejo.png"},
+      {id:"fado",     emoji:"🎵", pts:45,  label:"Fado Record", img:"collect-lisboa-fado.png"},
     ],
     obstacles:[
-      {emoji:"🚋", w:88, h:52, label:"Eléctrico"},
-      {emoji:"🐦", w:52, h:36, label:"Gaivota", wave:true},
-      {emoji:"🚩", w:20, h:80, label:"Varal", tall:true},
+      {emoji:"🚋", w:88, h:52, label:"Eléctrico", img:"obstacle-lisboa-eletrico.png"},
+      {emoji:"🐦", w:52, h:36, label:"Gaivota", wave:true, img:"obstacle-lisboa-gaivota.png"},
+      {emoji:"🚩", w:20, h:80, label:"Varal", tall:true, img:"obstacle-lisboa-varal.png"},
     ],
   },
   {
     id:"paris", name:"Paris", flag:"🇫🇷",
     tagline:"Cidade Luz — romance a cada esquina",
+    taglineIt:"Città della Luce — romanticismo a ogni angolo",
     tip:"Desvie dos pombos parisienses e baguetes voadoras. Os macarons valem muito!",
+    tipIt:"Evita i piccioni parigini e le baguette volanti. I macaron valgono molto!",
     targetDist:2200, starThresholds:[1000,1700,2200],
     sky:"#8A9BB0", horizon:"#E8C878", ground:"#506B45", groundLine:"#3D5230",
     collectibles:[
-      {id:"macaron",   emoji:"🍬", pts:80,  label:"Macaron"},
-      {id:"baguete",   emoji:"🥖", pts:40,  label:"Baguete"},
-      {id:"papoula",   emoji:"🌸", pts:55,  label:"Papoula"},
-      {id:"champagne", emoji:"🥂", pts:100, label:"Champagne"},
+      {id:"macaron",   emoji:"🍬", pts:80,  label:"Macaron", img:"collect-paris-macaron.png"},
+      {id:"baguete",   emoji:"🥖", pts:40,  label:"Baguete", img:"collect-paris-baguette.png"},
+      {id:"papoula",   emoji:"🌸", pts:55,  label:"Papoula", img:"collect-paris-coquelicot.png"},
+      {id:"champagne", emoji:"🥂", pts:100, label:"Champagne", img:"collect-paris-champagne.png"},
     ],
     obstacles:[
-      {emoji:"🐦", w:48, h:38, label:"Pombo", wave:true},
-      {emoji:"☂️",  w:55, h:68, label:"Guarda-chuva"},
-      {emoji:"🥖", w:90, h:28, label:"Baguete Voadora"},
+      {emoji:"🐦", w:48, h:38, label:"Pombo", wave:true, img:"obstacle-paris-pombo.png"},
+      {emoji:"☂️",  w:55, h:68, label:"Guarda-chuva", img:"obstacle-paris-guarda-chuva.png"},
+      {emoji:"🥖", w:90, h:28, label:"Baguete Voadora", img:"obstacle-paris-baguete-voando.png"},
+      {emoji:"🎈", w:50, h:90, label:"Balão", wave:true, img:"obstacle-paris-balao.png"},
     ],
   },
   {
     id:"roma", name:"Roma", flag:"🇮🇹",
     tagline:"A Cidade Eterna — dolce vita",
+    taglineIt:"La Città Eterna — dolce vita",
     tip:"Fique longe das colunas romanas! Colete gelato e moedas da Fontana di Trevi.",
+    tipIt:"Stai lontano dalle colonne romane! Raccogli gelato e monete della Fontana di Trevi.",
     targetDist:2600, starThresholds:[1200,2000,2600],
     sky:"#D4A878", horizon:"#F4E0B8", ground:"#6B5840", groundLine:"#4A3A25",
     collectibles:[
-      {id:"gelato",    emoji:"🍦", pts:75,  label:"Gelato"},
-      {id:"limone",    emoji:"🍋", pts:50,  label:"Limone"},
-      {id:"moeda",     emoji:"🪙", pts:90,  label:"Moeda da Fontana"},
-      {id:"espaguete", emoji:"🍝", pts:60,  label:"Espaguete"},
+      {id:"gelato",    emoji:"🍦", pts:75,  label:"Gelato", img:"collect-roma-gelato.png"},
+      {id:"limone",    emoji:"🍋", pts:50,  label:"Limone", img:"collect-roma-limone.png"},
+      {id:"moeda",     emoji:"🪙", pts:90,  label:"Moeda da Fontana", img:"collect-roma-moeda.png"},
+      {id:"espaguete", emoji:"🍝", pts:60,  label:"Espaguete", img:"collect-roma-espaguete.png"},
     ],
     obstacles:[
-      {emoji:"🛵", w:78, h:52, label:"Scooter"},
-      {emoji:"🐈", w:55, h:42, label:"Gato Romano"},
-      {emoji:"🏛️", w:38, h:98, label:"Coluna", tall:true},
+      {emoji:"🛵", w:78, h:52, label:"Scooter", img:"obstacle-roma-scooter.png"},
+      {emoji:"🐈", w:55, h:42, label:"Gato Romano", img:"obstacle-roma-gato.png"},
+      {emoji:"🏛️", w:38, h:98, label:"Coluna", tall:true, img:"obstacle-roma-coluna.png"},
     ],
   },
   {
     id:"santorini", name:"Santorini", flag:"🇬🇷",
     tagline:"Vento do Egeu — pôr do sol eterno",
+    taglineIt:"Vento dell'Egeo — tramonto eterno",
     tip:"Ventos erráticos! O moinho gira. Colete alianças — valem muito.",
+    tipIt:"Venti erratici! Il mulino gira. Raccogli le fedi — valgono molto.",
     targetDist:3000, starThresholds:[1400,2300,3000],
     sky:"#3A6BA0", horizon:"#E8784A", ground:"#1A5A80", groundLine:"#0D3F5C",
     collectibles:[
-      {id:"ouzo",       emoji:"🥃", pts:65,  label:"Ouzo"},
-      {id:"polvo",      emoji:"🐙", pts:80,  label:"Polvo"},
-      {id:"buganvilha", emoji:"🌸", pts:55,  label:"Buganvília"},
-      {id:"anel",       emoji:"💍", pts:150, label:"Aliança"},
+      {id:"ouzo",       emoji:"🥃", pts:65,  label:"Ouzo", img:"collect-santorini-ouzo.png"},
+      {id:"polvo",      emoji:"🐙", pts:80,  label:"Polvo", img:"collect-santorini-polvo.png"},
+      {id:"buganvilha", emoji:"🌸", pts:55,  label:"Buganvília", img:"collect-santorini-buganvilha.png"},
+      {id:"anel",       emoji:"💍", pts:150, label:"Aliança", img:"collect-santorini-anel.png"},
     ],
     obstacles:[
-      {emoji:"⚙️", w:78, h:108, label:"Moinho", spin:true},
-      {emoji:"🫏", w:70, h:55,  label:"Burro"},
-      {emoji:"🏺", w:46, h:60,  label:"Vaso", fall:true},
+      {emoji:"⚙️", w:78, h:108, label:"Moinho", spin:true, img:"obstacle-santorini-moinho.png"},
+      {emoji:"🫏", w:70, h:55,  label:"Burro", img:"obstacle-santorini-burro.png"},
+      {emoji:"🏺", w:46, h:60,  label:"Vaso", fall:true, img:"obstacle-santorini-vaso.png"},
     ],
   },
   {
     id:"positano", name:"Positano", flag:"🇮🇹",
     tagline:"Costa Amalfitana — o gran finale!",
+    taglineIt:"Costiera Amalfitana — il gran finale!",
     tip:"Limões caindo das árvores e o ônibus da costa! Colete corações — o item mais raro.",
+    tipIt:"Limoni che cadono dagli alberi e il bus della costiera! Raccogli i cuori — l'oggetto più raro.",
     targetDist:3500, starThresholds:[1600,2700,3500],
     sky:"#1A1A40", horizon:"#E8784A", ground:"#0A6060", groundLine:"#064040",
     collectibles:[
-      {id:"limoncello", emoji:"🍋", pts:80,  label:"Limoncello"},
-      {id:"postal",     emoji:"📮", pts:70,  label:"Postal"},
-      {id:"flores",     emoji:"💐", pts:60,  label:"Flores"},
-      {id:"coracao",    emoji:"❤️",  pts:200, label:"Coração"},
+      {id:"limoncello", emoji:"🍋", pts:80,  label:"Limoncello", img:"collect-positano-limoncello.png"},
+      {id:"postal",     emoji:"📮", pts:70,  label:"Postal", img:"collect-positano-postal.png"},
+      {id:"flores",     emoji:"💐", pts:60,  label:"Flores", img:"collect-positano-flores.png"},
+      {id:"coracao",    emoji:"❤️",  pts:200, label:"Coração", img:"collect-positano-coracao.png"},
     ],
     obstacles:[
-      {emoji:"🍋", w:52, h:65, label:"Limão Caindo", fall:true},
-      {emoji:"🚌", w:100,h:62, label:"Ônibus da Costa"},
-      {emoji:"🐐", w:62, h:50, label:"Cabra"},
+      {emoji:"🍋", w:52, h:65, label:"Limão Caindo", fall:true, img:"obstacle-positano-limao-caindo.png"},
+      {emoji:"🚌", w:100,h:62, label:"Ônibus da Costa", img:"obstacle-positano-onibus.png"},
+      {emoji:"🐐", w:62, h:50, label:"Cabra", img:"obstacle-positano-cabra.png"},
+      {emoji:"🧳", w:48, h:70, label:"Turista", img:"obstacle-positano-turista.png"},
     ],
   },
 ];
@@ -371,6 +375,10 @@ function loadImg(src) {
  "bg-santorini-sky","bg-santorini-mid","bg-santorini-front",
  "bg-positano-sky","bg-positano-mid","bg-positano-front",
 ].forEach(n => loadImg("assets/img/" + n + ".png"));
+// Ilustrações de colecionáveis/obstáculos de cada destino
+DESTINATIONS.forEach(d => {
+  [...d.collectibles, ...d.obstacles].forEach(it => { if (it.img) loadImg("assets/img/" + it.img); });
+});
 
 /* ═══════════════════════════════════════════════════════════
    PHYSICS CONSTANTS
@@ -468,10 +476,10 @@ function renderDestGrid() {
     return `<div class="dest-card${locked?" locked":""}" ${locked?"":`onclick="selectDest(${i})"`}>
       <span class="dest-card__flag">${d.flag}</span>
       <div class="dest-card__name">${d.name}</div>
-      <div class="dest-card__sub">${i+1}º Destino</div>
+      <div class="dest-card__sub">${i+1}${t_("º Destino","ª Destinazione")}</div>
       <span class="dest-card__stars">${starsStr(i)}</span>
-      <div class="dest-card__rec">${b>0?"Melhor: "+b+" m":"Sem recorde"}</div>
-      ${locked?`<div class="dest-card__lock">🔒</div>`:`<button class="btn-play">Voar →</button>`}
+      <div class="dest-card__rec">${b>0?t_("Melhor: ","Record: ")+b+t_(" m"," m"):t_("Sem recorde","Nessun record")}</div>
+      ${locked?`<div class="dest-card__lock">🔒</div>`:`<button class="btn-play">${t_("Voar →","Vola →")}</button>`}
     </div>`;
   }).join("");
 }
@@ -481,8 +489,8 @@ window.selectDest = function(i) {
   const d = DESTINATIONS[i];
   document.getElementById("br-flag").textContent    = d.flag;
   document.getElementById("br-dest").textContent    = d.name;
-  document.getElementById("br-tagline").textContent = d.tagline;
-  document.getElementById("br-tip").textContent     = "💡 " + d.tip;
+  document.getElementById("br-tagline").textContent = t_(d.tagline, d.taglineIt);
+  document.getElementById("br-tip").textContent     = "💡 " + t_(d.tip, d.tipIt);
   showScreen("screen-briefing");
 };
 
@@ -523,16 +531,16 @@ function initRun() {
 
   // Show "aiming" overlay
   document.getElementById("ov-emoji").textContent = DESTINATIONS[currentDest].flag + " " + DESTINATIONS[currentDest].name;
-  document.getElementById("ov-title").textContent = "Pronto para decolar?";
-  document.getElementById("ov-sub").textContent   = "Arraste o avião ✈️ para mirar · Solte para lançar · Segure para gás!";
+  document.getElementById("ov-title").textContent = t_("Pronto para decolar?","Pronto per decollare?");
+  document.getElementById("ov-sub").textContent   = t_("Arraste o avião ✈️ para mirar · Solte para lançar · Segure para gás!","Trascina l'aereo ✈️ per puntare · Rilascia per lanciare · Tieni premuto per gas!");
   document.getElementById("ov-stats").style.display = "none";
   document.getElementById("ov-stars").textContent = "";
   document.getElementById("ov-btns").innerHTML =
-    `<button class="game-btn game-btn--main" onclick="beginAiming()">✈️ Preparar lançamento</button>
-     <button class="game-btn" onclick="goToSelect()">← Destinos</button>`;
+    `<button class="game-btn game-btn--main" onclick="beginAiming()">${t_("✈️ Preparar lançamento","✈️ Prepara il lancio")}</button>
+     <button class="game-btn" onclick="goToSelect()">${t_("← Destinos","← Destinazioni")}</button>`;
   showOverlay(true);
 
-  document.getElementById("mobile-hint").textContent = "Arraste o ✈️ para mirar · Segure para gás 🔥";
+  document.getElementById("mobile-hint").textContent = t_("Arraste o ✈️ para mirar · Segure para gás 🔥","Trascina il ✈️ per puntare · Tieni premuto per gas 🔥");
 
   // Draw static first frame
   drawFrame();
@@ -680,7 +688,7 @@ function launchPlane(start, end) {
   plane.energy = plane.maxEnergy;
 
   gameState = "flight";
-  document.getElementById("mobile-hint").textContent = "Segure a tela para dar gás 🔥";
+  document.getElementById("mobile-hint").textContent = t_("Segure a tela para dar gás 🔥","Tieni premuto sullo schermo per dare gas 🔥");
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -835,22 +843,22 @@ function endRun(goalReached) {
   // Show result overlay in canvas
   document.getElementById("ov-emoji").textContent = goalReached ? "🎉" : "✈️";
   document.getElementById("ov-title").textContent = goalReached
-    ? "Chegou a " + d.name + "!" : "Voo encerrado!";
+    ? t_("Chegou a "+d.name+"!","Arrivato a "+d.name+"!") : t_("Voo encerrado!","Volo terminato!");
   document.getElementById("ov-sub").textContent = goalReached
-    ? d.tagline : "O avião aterrissou. " + dist + " m voados!";
+    ? t_(d.tagline, d.taglineIt) : t_("O avião aterrissou. "+dist+" m voados!","L'aereo è atterrato. "+dist+" m volati!");
   document.getElementById("ov-stars").textContent = "⭐".repeat(stars)+"☆".repeat(3-stars);
 
   const statsEl = document.getElementById("ov-stats");
   statsEl.style.display = "grid";
   statsEl.innerHTML = `
-    <div class="ov-stat"><strong>${dist} m</strong>Distância</div>
-    <div class="ov-stat"><strong>${itemsCollected}</strong>Itens</div>
-    <div class="ov-stat"><strong>${score}</strong>Pontos</div>
-    <div class="ov-stat"><strong>${coins}</strong>Moedas</div>`;
+    <div class="ov-stat"><strong>${dist} m</strong>${t_("Distância","Distanza")}</div>
+    <div class="ov-stat"><strong>${itemsCollected}</strong>${t_("Itens","Oggetti")}</div>
+    <div class="ov-stat"><strong>${score}</strong>${t_("Pontos","Punti")}</div>
+    <div class="ov-stat"><strong>${coins}</strong>${t_("Moedas","Monete")}</div>`;
 
   document.getElementById("ov-btns").innerHTML = `
-    <button class="game-btn game-btn--main" onclick="goToResult()">📊 Ver resultado</button>
-    <button class="game-btn" onclick="replayFlight()">↩ Tentar de novo</button>`;
+    <button class="game-btn game-btn--main" onclick="goToResult()">${t_("📊 Ver resultado","📊 Vedi risultato")}</button>
+    <button class="game-btn" onclick="replayFlight()">${t_("↩ Tentar de novo","↩ Riprova")}</button>`;
 
   showOverlay(true);
   unlockScroll();
@@ -863,15 +871,15 @@ window.goToResult = function() {
   const stars= dist>=d.starThresholds[2]?3: dist>=d.starThresholds[1]?2: dist>=d.starThresholds[0]?1:0;
 
   document.getElementById("res-emoji").textContent   = "✈️";
-  document.getElementById("res-title").textContent   = dist >= d.targetDist ? "Chegou a "+d.name+"!" : "Voo encerrado";
-  document.getElementById("res-tagline").textContent = d.tagline;
+  document.getElementById("res-title").textContent   = dist >= d.targetDist ? t_("Chegou a "+d.name+"!","Arrivato a "+d.name+"!") : t_("Voo encerrado","Volo terminato");
+  document.getElementById("res-tagline").textContent = t_(d.tagline, d.taglineIt);
   document.getElementById("res-stars").textContent   = "⭐".repeat(stars)+"☆".repeat(3-stars);
   document.getElementById("result-stats").innerHTML  = `
-    <div class="result-stat"><div class="result-stat__val">${dist} m</div><div class="result-stat__lbl">Distância</div></div>
-    <div class="result-stat"><div class="result-stat__val">${score}</div><div class="result-stat__lbl">Pontos</div></div>
-    <div class="result-stat"><div class="result-stat__val">${itemsCollected}</div><div class="result-stat__lbl">Itens</div></div>
-    <div class="result-stat"><div class="result-stat__val">${coins}</div><div class="result-stat__lbl">Moedas</div></div>`;
-  document.getElementById("res-replay-btn").textContent = "↩ Voar em " + d.name;
+    <div class="result-stat"><div class="result-stat__val">${dist} m</div><div class="result-stat__lbl">${t_("Distância","Distanza")}</div></div>
+    <div class="result-stat"><div class="result-stat__val">${score}</div><div class="result-stat__lbl">${t_("Pontos","Punti")}</div></div>
+    <div class="result-stat"><div class="result-stat__val">${itemsCollected}</div><div class="result-stat__lbl">${t_("Itens","Oggetti")}</div></div>
+    <div class="result-stat"><div class="result-stat__val">${coins}</div><div class="result-stat__lbl">${t_("Moedas","Monete")}</div></div>`;
+  document.getElementById("res-replay-btn").textContent = t_("↩ Voar em "+d.name,"↩ Vola a "+d.name);
   showScreen("screen-result");
   loadTop10("flight-top10");
 
@@ -1071,11 +1079,21 @@ function drawWorldItems(ts) {
       continue;
     }
 
-    const sz = Math.max(it.w||40, it.h||40) * 0.85;
-    ctx.font = `${sz}px serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(it.emoji, 0, 0);
+    const img = it.img ? loadImg("assets/img/" + it.img) : null;
+    if (img && img.ok) {
+      // Ilustração temática, mantendo a proporção dentro da caixa w×h
+      const bw = it.w || 40, bh = it.h || 40;
+      const ratio = img.naturalWidth / img.naturalHeight;
+      let dw = bw, dh = bw / ratio;
+      if (dh > bh) { dh = bh; dw = bh * ratio; }
+      ctx.drawImage(img, -dw/2, -dh/2, dw, dh);
+    } else {
+      const sz = Math.max(it.w||40, it.h||40) * 0.85;
+      ctx.font = `${sz}px serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(it.emoji, 0, 0);
+    }
 
     ctx.restore();
   }
@@ -1396,36 +1414,36 @@ window.flightSaveScore = async function() {
   const me  = document.getElementById("flight-save-msg");
   const btn = ni?.nextElementSibling;
   const nome = (ni?.value||"").trim();
-  if (!nome) { me.style.color="var(--fl-terra)"; me.textContent="Informe seu nome."; ni?.focus(); return; }
+  if (!nome) { me.style.color="var(--fl-terra)"; me.textContent=t_("Informe seu nome.","Inserisci il tuo nome."); ni?.focus(); return; }
   if (btn) { btn.disabled=true; btn.innerHTML='<span class="spinner"></span>'; }
   try {
     const r = await fetch(FLIGHT_API,{method:"POST",body:JSON.stringify({action:"score",jogo:"luademel-"+DESTINATIONS[currentDest].id,nome,pontos:score})});
     const j = await r.json();
     if (j.sucesso) {
-      me.style.color="var(--fl-sage-dk)"; me.textContent="Recorde salvo! ";
+      me.style.color="var(--fl-sage-dk)"; me.textContent=t_("Recorde salvo! ","Record salvato! ");
       me.insertAdjacentHTML("beforeend","<img src='assets/img/icon-trophy.png' alt='' style='width:1em;height:1em;vertical-align:middle' onerror=\"this.style.display='none'\">");
-      if (btn) { btn.disabled=true; btn.textContent="Salvo ✓"; }
+      if (btn) { btn.disabled=true; btn.textContent=t_("Salvo ✓","Salvato ✓"); }
       if (ni) ni.disabled=true;
       loadTop10("flight-top10");
     } else throw new Error();
   } catch {
-    if (btn) { btn.disabled=false; btn.textContent="Salvar"; }
-    me.style.color="var(--fl-terra)"; me.textContent="Não conseguimos salvar. Tente novamente.";
+    if (btn) { btn.disabled=false; btn.textContent=t_("Salvar","Salva"); }
+    me.style.color="var(--fl-terra)"; me.textContent=t_("Não conseguimos salvar. Tente novamente.","Non siamo riusciti a salvare. Riprova.");
   }
 };
 
 async function loadTop10(elId) {
   const el = document.getElementById(elId); if (!el) return;
   const jogo = "luademel-"+DESTINATIONS[currentDest].id;
-  el.innerHTML=`<h3>🏆 Top 10 — ${DESTINATIONS[currentDest].name}</h3><p class="t10-loading">Carregando…</p>`;
+  el.innerHTML=`<h3>🏆 ${t_("Top 10 — ","Top 10 — ")}${DESTINATIONS[currentDest].name}</h3><p class="t10-loading">${t_("Carregando…","Caricamento…")}</p>`;
   try {
     const r = await fetch(`${FLIGHT_API}?action=top10&jogo=${jogo}`);
     const d = await r.json();
-    if (!d?.lista?.length) { el.innerHTML=`<h3>🏆 Top 10 — ${DESTINATIONS[currentDest].name}</h3><p class="t10-empty">Nenhum recorde ainda!</p>`; return; }
+    if (!d?.lista?.length) { el.innerHTML=`<h3>🏆 ${t_("Top 10 — ","Top 10 — ")}${DESTINATIONS[currentDest].name}</h3><p class="t10-empty">${t_("Nenhum recorde ainda!","Nessun record ancora!")}</p>`; return; }
     const medals=["🥇","🥈","🥉"]; const cls=["top10-item--gold","top10-item--silver","top10-item--bronze"];
-    el.innerHTML=`<h3>🏆 Top 10 — ${DESTINATIONS[currentDest].name}</h3><ul class="top10-list">${
+    el.innerHTML=`<h3>🏆 ${t_("Top 10 — ","Top 10 — ")}${DESTINATIONS[currentDest].name}</h3><ul class="top10-list">${
       d.lista.map((it,i)=>`<li class="top10-item ${cls[i]||""}"><span class="t10-pos">${medals[i]||i+1}</span><span class="t10-name">${escJ(it.nome)}</span><span class="t10-pts">${it.pontos} pts</span></li>`).join("")}</ul>`;
-  } catch { el.innerHTML=`<h3>🏆 Top 10 — ${DESTINATIONS[currentDest].name}</h3><p class="t10-empty">Não foi possível carregar.</p>`; }
+  } catch { el.innerHTML=`<h3>🏆 ${t_("Top 10 — ","Top 10 — ")}${DESTINATIONS[currentDest].name}</h3><p class="t10-empty">${t_("Não foi possível carregar.","Non è stato possibile caricare.")}</p>`; }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1437,1532 +1455,6 @@ ctx.fillStyle = "#EBF0E6";
 ctx.fillRect(0,0,GAME_W,GAME_H);
 ctx.font="40px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
 ctx.fillText("✈️", GAME_W/2, GAME_H/2);
-  </script>
-  <script src="assets/js/scroll-to-game.js"></script>
-</body>
-</html>
-    /* ── TOKENS ─────────────────────────────── */
-    :root {
-      --fl-cream:     #FBF7EF;
-      --fl-cream2:    #F4F1EB;
-      --fl-sage:      #7A9B6E;
-      --fl-sage-dk:   #506B45;
-      --fl-sage-lt:   #EBF0E6;
-      --fl-terra:     #C46D28;
-      --fl-amber:     #B87B3E;
-      --fl-rose:      #D98A82;
-      --fl-navy:      #1A1A40;
-      --fl-gold:      #C8A050;
-      --fl-gold-lt:   #F4D878;
-    }
-
-    body.game-page {
-      min-height: 100svh;
-      background: var(--fl-cream2);
-      color: var(--fl-navy);
-      overscroll-behavior: none;
-    }
-
-    /* ── NAV ────────────────────────────────── */
-    .game-nav {
-      position: sticky; top: 0; z-index: 30;
-      background: rgba(251,247,239,.94);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(196,109,40,.18);
-    }
-    .game-nav__inner {
-      width: 90%; max-width: 960px; margin: auto;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 13px 0; gap: 1rem;
-    }
-    .game-brand { font-family: var(--font-display); letter-spacing: .14em; text-transform: uppercase; font-size: .84rem; color: var(--fl-amber); }
-    .game-back  { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--fl-sage-dk); text-decoration: underline; text-underline-offset: 3px; }
-
-    /* ── SHELL ──────────────────────────────── */
-    .game-shell { width: 94%; max-width: 560px; margin: 0 auto; padding: 24px 0 80px; }
-
-    /* ── KICKER / TITLE ─────────────────────── */
-    .game-kicker { font-size: .7rem; letter-spacing: .22em; text-transform: uppercase; color: var(--fl-terra); text-align: center; margin-bottom: .4rem; }
-    .game-title  { font-family: var(--font-display); font-size: clamp(2rem, 8vw, 3.4rem); font-weight: 300; line-height: .95; text-align: center; margin-bottom: .5rem; color: var(--fl-navy); }
-    .game-sub    { max-width: 400px; margin: 0 auto 1.2rem; text-align: center; color: var(--fl-amber); font-size: .86rem; line-height: 1.65; }
-
-    /* ── SCREEN MANAGER ─────────────────────── */
-    .screen { display: none; }
-    .screen.active { display: block; }
-
-    /* ── DESTINATION SELECT ─────────────────── */
-    .dest-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-    .dest-card {
-      background: var(--fl-cream);
-      border: 1.5px solid rgba(196,109,40,.25);
-      border-radius: 16px;
-      padding: 1.25rem 1rem 1rem;
-      text-align: center;
-      cursor: pointer;
-      transition: transform .18s, box-shadow .18s, border-color .18s;
-      position: relative;
-    }
-    .dest-card:hover:not(.locked) {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(196,109,40,.18);
-      border-color: var(--fl-terra);
-    }
-    .dest-card.locked { opacity: .55; cursor: not-allowed; }
-    .dest-card__flag  { font-size: 2.4rem; margin-bottom: .4rem; display: block; }
-    .dest-card__name  { font-family: var(--font-display); font-size: 1.1rem; font-weight: 400; color: var(--fl-navy); margin-bottom: .2rem; }
-    .dest-card__sub   { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--fl-amber); margin-bottom: .6rem; }
-    .dest-card__stars { letter-spacing: .1em; font-size: .95rem; margin-bottom: .5rem; display: block; }
-    .dest-card__rec   { font-size: .68rem; color: var(--fl-sage-dk); background: var(--fl-sage-lt); padding: .2rem .5rem; border-radius: 20px; display: inline-block; }
-    .dest-card__lock  { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 14px; font-size: 1.8rem; }
-    .dest-card .btn-play {
-      margin-top: .5rem;
-      display: inline-block; font-size: .7rem; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase;
-      background: var(--fl-terra); color: #fff;
-      padding: .45rem 1rem; border-radius: 20px;
-      border: none; cursor: pointer;
-      transition: background .15s;
-    }
-    .dest-card .btn-play:hover { background: var(--fl-amber); }
-
-    /* ── GAME CANVAS ────────────────────────── */
-    .game-panel {
-      position: relative;
-      border-radius: 18px;
-      overflow: hidden;
-      border: 2px solid rgba(196,109,40,.22);
-      box-shadow: 0 16px 60px rgba(26,26,64,.14);
-    }
-    canvas { display: block; width: 100%; touch-action: none; }
-
-    /* ── HUD ────────────────────────────────── */
-    .hud {
-      position: absolute; top: 0; left: 0; right: 0;
-      padding: 10px 14px 8px;
-      display: flex; align-items: center; gap: 8px;
-      background: linear-gradient(to bottom, rgba(26,26,64,.55) 0%, transparent 100%);
-      pointer-events: none;
-    }
-    .hud-lives { display: flex; gap: 3px; }
-    .hud-lives span { font-size: 1rem; transition: transform .2s, opacity .3s; }
-    .hud-lives span.lost { opacity: .2; transform: scale(.7); }
-    .hud-bar-wrap { flex: 1; height: 8px; background: rgba(255,255,255,.2); border-radius: 4px; overflow: hidden; }
-    .hud-bar-fill { height: 100%; background: var(--fl-gold); border-radius: 4px; transition: width .15s; }
-    .hud-score { font-size: .78rem; font-weight: 600; color: #fff; min-width: 56px; text-align: right; letter-spacing: .04em; }
-    .hud-dest  { font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.75); }
-
-    /* ── POWER-UP BADGE ─────────────────────── */
-    .powerup-badge {
-      position: absolute; bottom: 14px; right: 14px;
-      background: rgba(26,26,64,.75);
-      border: 1.5px solid var(--fl-gold);
-      border-radius: 10px;
-      padding: 5px 10px;
-      font-size: .7rem; font-weight: 600;
-      color: var(--fl-gold-lt);
-      pointer-events: none;
-      display: none;
-    }
-
-    /* ── COMBO BADGE ─────────────────────────── */
-    .combo-badge {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      background: var(--fl-terra);
-      color: #fff;
-      font-family: var(--font-display);
-      font-size: 1.6rem; font-weight: 500;
-      padding: .3rem 1.1rem;
-      border-radius: 6px;
-      pointer-events: none;
-      transition: transform .15s cubic-bezier(.22,1.4,.5,1), opacity .3s;
-    }
-    .combo-badge.show { transform: translate(-50%, -50%) scale(1); }
-
-    /* ── OVERLAY ────────────────────────────── */
-    .game-overlay {
-      position: absolute; inset: 0;
-      display: none; flex-direction: column;
-      align-items: center; justify-content: center;
-      background: rgba(251,247,239,.92);
-      border-radius: 16px;
-      text-align: center; padding: 2rem 1.5rem;
-      backdrop-filter: blur(4px);
-    }
-    .game-overlay.show { display: flex; }
-    .ov-emoji  { font-size: 3rem; margin-bottom: .5rem; }
-    .ov-title  { font-family: var(--font-display); font-size: 2.2rem; font-weight: 300; color: var(--fl-navy); margin-bottom: .3rem; }
-    .ov-sub    { font-size: .9rem; color: var(--fl-amber); margin-bottom: 1.2rem; line-height: 1.6; }
-    .ov-stars  { font-size: 1.8rem; letter-spacing: .15em; margin-bottom: 1rem; }
-    .ov-score  { font-size: .8rem; font-weight: 600; color: var(--fl-sage-dk); background: var(--fl-sage-lt); padding: .35rem .8rem; border-radius: 20px; display: inline-block; margin-bottom: 1rem; }
-    .ov-btns   { display: flex; gap: .65rem; flex-wrap: wrap; justify-content: center; }
-
-    /* ── BUTTONS ─────────────────────────────── */
-    .game-btn {
-      display: inline-flex; align-items: center; justify-content: center;
-      border-radius: 30px; border: 1.5px solid rgba(196,109,40,.35);
-      background: var(--fl-cream); color: var(--fl-navy);
-      padding: .7rem 1.3rem; font-size: .73rem; font-weight: 600;
-      letter-spacing: .09em; text-transform: uppercase;
-      cursor: pointer; transition: all .15s; gap: .4rem;
-      font-family: 'Inter', sans-serif;
-    }
-    .game-btn:hover { background: var(--fl-cream2); border-color: var(--fl-terra); }
-    .game-btn--main { background: var(--fl-terra); color: #fff; border-color: transparent; }
-    .game-btn--main:hover { background: var(--fl-amber); }
-    .game-btn--sage { background: var(--fl-sage-dk); color: #fff; border-color: transparent; }
-    .game-btn--sage:hover { background: var(--fl-sage); }
-
-    /* ── MOBILE CONTROLS ─────────────────────── */
-    .mobile-hint {
-      text-align: center; font-size: .72rem; color: var(--fl-amber);
-      margin-top: .6rem; letter-spacing: .04em;
-    }
-    .tap-zone {
-      position: absolute; inset: 0; cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* ── SAVE / TOP10 ────────────────────────── */
-    .save-box {
-      margin-top: 1rem;
-      background: var(--fl-cream); border: 1px solid rgba(196,109,40,.2);
-      border-radius: 14px; padding: .9rem;
-    }
-    .save-box h3 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 400; margin-bottom: .6rem; color: var(--fl-navy); }
-    .save-row { display: flex; gap: .5rem; }
-    .save-input {
-      flex: 1; min-width: 0;
-      border: 1px solid rgba(196,109,40,.3); border-radius: 30px;
-      background: #fff; padding: .6rem .9rem;
-      font: inherit; font-size: .88rem; outline: none; color: var(--fl-navy);
-    }
-    .save-msg { font-size: .72rem; color: var(--fl-amber); margin-top: .35rem; min-height: 1em; }
-
-    .top10-box {
-      margin-top: 1rem;
-      background: var(--fl-cream); border: 1px solid rgba(196,109,40,.15);
-      border-radius: 14px; padding: .9rem;
-    }
-    .top10-box h3 {
-      font-family: var(--font-display); font-size: 1.15rem; font-weight: 400;
-      margin-bottom: .5rem; display: flex; align-items: center; gap: .4rem;
-    }
-    .top10-box h3 img { width: 1.5rem; height: 1.5rem; object-fit: contain; }
-    .top10-list { list-style: none; display: grid; gap: .28rem; }
-    .top10-item {
-      display: flex; align-items: center; gap: .55rem;
-      background: rgba(255,255,255,.7); border: 1px solid rgba(196,109,40,.12);
-      border-radius: 10px; padding: .4rem .65rem; font-size: .82rem;
-    }
-    .top10-item--gold   { background: #FFF8E7; border-color: #E8C84A; }
-    .top10-item--silver { background: #F5F5F5; border-color: #C0C0C0; }
-    .top10-item--bronze { background: #FFF2EC; border-color: #CD7F32; }
-    .t10-pos  { font-family: var(--font-display); font-size: .95rem; width: 1.3rem; text-align: center; color: var(--fl-amber); }
-    .t10-pos img { width: 18px; height: 18px; object-fit: contain; }
-    .t10-name { flex: 1; font-weight: 500; color: var(--fl-navy); }
-    .t10-pts  { font-weight: 700; color: var(--fl-sage-dk); font-size: .8rem; }
-    .t10-empty, .t10-loading { text-align: center; padding: 1rem; font-size: .82rem; color: var(--fl-amber); font-style: italic; }
-
-    .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── BRIEFING SCREEN ─────────────────────── */
-    .briefing {
-      text-align: center; padding: 3rem 1rem;
-    }
-    .briefing__flag { font-size: 4rem; margin-bottom: .5rem; }
-    .briefing__dest { font-family: var(--font-display); font-size: 2.8rem; font-weight: 300; color: var(--fl-navy); margin-bottom: .25rem; }
-    .briefing__tagline { font-size: .9rem; color: var(--fl-amber); margin-bottom: 1.5rem; }
-    .briefing__tip {
-      background: var(--fl-sage-lt); border: 1px solid rgba(122,155,110,.3);
-      border-radius: 12px; padding: .9rem 1.2rem;
-      font-size: .82rem; color: var(--fl-sage-dk); line-height: 1.65;
-      max-width: 360px; margin: 0 auto 1.5rem;
-    }
-
-    /* ── WIN SCREEN ──────────────────────────── */
-    .album-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: .5rem;
-      margin: 1rem 0;
-    }
-    .album-polaroid {
-      background: #fff; border: 1px solid rgba(196,109,40,.2);
-      border-radius: 6px; padding: .4rem .4rem .8rem;
-      text-align: center; font-size: 1.5rem;
-      box-shadow: 0 3px 10px rgba(26,26,64,.1);
-      transition: transform .3s;
-    }
-    .album-polaroid.earned { transform: rotate(-2deg); }
-    .album-polaroid:nth-child(even).earned { transform: rotate(2deg); }
-    .album-flag { font-size: 1.2rem; }
-
-    @media(max-width: 480px) {
-      .save-row { flex-direction: column; }
-      .game-btn  { width: 100%; }
-      .dest-grid { grid-template-columns: repeat(2, 1fr); }
-      .album-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-    html, body { overscroll-behavior: none; }
-  </style>
-</head>
-<body class="game-page">
-
-  <nav class="game-nav">
-    <div class="game-nav__inner">
-      <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
-      <div class="game-brand">Tiago &amp; Gian</div>
-    </div>
-  </nav>
-
-  <main class="game-shell">
-
-    <!-- ═══ TELA 1: SELECT ═══ -->
-    <div class="screen active" id="screen-select">
-      <div style="text-align:center;margin-bottom:.5rem">
-        <img src="assets/img/icon-route.png" alt="" style="width:3rem;height:3rem;object-fit:contain;display:inline-block;filter:drop-shadow(0 4px 8px rgba(196,109,40,.22))" onerror="this.style.display='none'">
-      </div>
-      <p class="game-kicker">✈️ 5 Destinos · 5 Voos</p>
-      <h1 class="game-title">Lua de Mel<br><em>de Papel</em></h1>
-      <p class="game-sub">Voe pelo avião de papel sobre a Europa. Segure para subir, solte para planar.</p>
-
-      <div class="dest-grid" id="dest-grid">
-        <!-- preenchido por JS -->
-      </div>
-    </div>
-
-    <!-- ═══ TELA 2: BRIEFING ═══ -->
-    <div class="screen" id="screen-briefing">
-      <div class="briefing">
-        <div class="briefing__flag" id="br-flag"></div>
-        <div class="briefing__dest" id="br-dest"></div>
-        <div class="briefing__tagline" id="br-tagline"></div>
-        <div class="briefing__tip" id="br-tip"></div>
-        <button class="game-btn game-btn--main" id="br-start-btn" onclick="startFlight()">✈️ Decolar!</button>
-      </div>
-    </div>
-
-    <!-- ═══ TELA 3: GAMEPLAY ═══ -->
-    <div class="screen" id="screen-game">
-      <div class="game-panel" id="game-panel">
-        <canvas id="flight-canvas" tabindex="0"></canvas>
-        <div class="hud" id="hud">
-          <div class="hud-lives" id="hud-lives"></div>
-          <div style="flex:1">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-              <div class="hud-dest" id="hud-dest"></div>
-              <div class="hud-bar-wrap"><div class="hud-bar-fill" id="hud-bar" style="width:0%"></div></div>
-            </div>
-          </div>
-          <div class="hud-score" id="hud-score">0</div>
-        </div>
-        <div class="powerup-badge" id="powerup-badge"></div>
-        <div class="combo-badge" id="combo-badge"></div>
-        <div class="game-overlay" id="game-overlay">
-          <div class="ov-emoji" id="ov-emoji">✈️</div>
-          <div class="ov-title" id="ov-title">Pronto para voar?</div>
-          <div class="ov-sub" id="ov-sub">Segure para subir, solte para planar e descer.</div>
-          <div class="ov-stars" id="ov-stars"></div>
-          <div class="ov-score" id="ov-score-display" style="display:none"></div>
-          <div class="ov-btns" id="ov-btns">
-            <button class="game-btn game-btn--main" onclick="beginPlay()">✈️ Voar!</button>
-            <button class="game-btn" onclick="goToSelect()">← Destinos</button>
-          </div>
-        </div>
-        <div class="tap-zone" id="tap-zone"></div>
-      </div>
-      <p class="mobile-hint">Segure para ↑ subir · Solte para ↘ planar</p>
-    </div>
-
-    <!-- ═══ TELA 4: RESULTADO ═══ -->
-    <div class="screen" id="screen-result">
-      <div style="text-align:center;padding:1.5rem 0">
-        <div style="font-size:3rem;margin-bottom:.4rem" id="res-emoji">🎉</div>
-        <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:300;color:var(--fl-navy);margin-bottom:.2rem" id="res-title"></div>
-        <div style="font-size:.88rem;color:var(--fl-amber);margin-bottom:.8rem" id="res-tagline"></div>
-        <div style="font-size:2rem;letter-spacing:.15em;margin-bottom:.5rem" id="res-stars"></div>
-        <div style="font-size:.8rem;font-weight:600;color:var(--fl-sage-dk);background:var(--fl-sage-lt);padding:.35rem .9rem;border-radius:20px;display:inline-block;margin-bottom:1rem" id="res-score"></div>
-      </div>
-      <div class="save-box" id="save-box">
-        <h3>Salvar seu recorde</h3>
-        <div class="save-row">
-          <input type="text" id="flight-nome" class="save-input" placeholder="Seu nome" maxlength="30" autocomplete="name"/>
-          <button class="game-btn game-btn--main" onclick="flightSaveScore()">Salvar</button>
-        </div>
-        <p class="save-msg" id="flight-save-msg"></p>
-      </div>
-      <div class="top10-box" id="flight-top10"></div>
-      <div style="display:flex;gap:.65rem;flex-wrap:wrap;justify-content:center;margin-top:1.2rem">
-        <button class="game-btn game-btn--main" id="res-replay-btn" onclick="replayFlight()">↩ Voar de novo</button>
-        <button class="game-btn" onclick="goToSelect()">← Todos os destinos</button>
-      </div>
-    </div>
-
-    <!-- ═══ TELA 5: VITÓRIA FINAL ═══ -->
-    <div class="screen" id="screen-win">
-      <div style="text-align:center;padding:2rem 0 1rem">
-        <div style="font-size:3.5rem;margin-bottom:.5rem">💍</div>
-        <div style="font-family:var(--font-display);font-size:2.6rem;font-weight:300;color:var(--fl-navy);margin-bottom:.3rem">Lua de mel completa!</div>
-        <div style="font-size:.9rem;color:var(--fl-amber);margin-bottom:1.2rem;line-height:1.6">Vocês voaram por toda a Europa juntos. ❤️</div>
-        <div class="album-grid" id="album-grid">
-          <!-- preenche por JS -->
-        </div>
-        <div style="font-size:.8rem;color:var(--fl-sage-dk);margin:1rem 0 1.5rem;font-style:italic">5 destinos · 5 memórias · Uma vida inteira pela frente</div>
-        <button class="game-btn game-btn--main" onclick="goToSelect()">✈️ Voar de novo</button>
-      </div>
-      <div class="top10-box" id="win-top10"></div>
-    </div>
-
-  </main>
-
-  <div class="flourish-wrap" style="padding:1.5rem 0 0">
-    <img src="assets/img/footer-flourish.png" alt="" style="max-width:440px;width:85%;display:inline-block" onerror="this.style.display='none'">
-  </div>
-  <footer class="footer">
-    <div class="container footer__inner">
-      <p class="footer__names">
-        <img src="assets/img/logohorizontal_light.png" alt="Tiago e Gian" class="site-logo site-logo--footer" onerror="this.style.display='none'">
-      </p>
-      <p class="footer__date">12 · 12 · 2026</p>
-      <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
-    </div>
-  </footer>
-
-  <script src="assets/js/app.js"></script>
-  <script src="assets/js/i18n.js"></script>
-  <script>
-  "use strict";
-  /* ═══════════════════════════════════════════════════════════
-     LUA DE MEL DE PAPEL — Honeymoon Paper Flight
-     Tiago & Gian — Paper Flight game
-  ═══════════════════════════════════════════════════════════ */
-
-  const FLIGHT_API = typeof API_URL !== "undefined"
-    ? API_URL
-    : "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
-
-  const DPR = Math.min(window.devicePixelRatio || 1, 2);
-  const GAME_W = 520;
-  const GAME_H = 340;
-
-  /* ── DESTINATION DATA ─────────────────────────────────────── */
-  const DESTINATIONS = [
-    {
-      id: "lisboa",
-      name: "Lisboa",
-      flag: "🇵🇹",
-      tagline: "A cidade das sete colinas e do fado",
-      tip: "Cuidado com o eléctrico amarelo e as gaivotas! Colete pastéis de nata para pontuar.",
-      targetDist: 2800,
-      starThresholds: [2000, 4000, 6500],
-      bgColors: { sky: "#8AABCC", horizon: "#D4B890", ground: "#7A9B6E" },
-      skylineColor: "#1A1A40",
-      groundColor: "#506B45",
-      collectibles: [
-        { id: "nata",     emoji: "🥐", pts: 50,  label: "Pastel de Nata" },
-        { id: "sardinha", emoji: "🐟", pts: 35,  label: "Sardinha" },
-        { id: "azulejo",  emoji: "🟦", pts: 60,  label: "Azulejo" },
-        { id: "fado",     emoji: "🎵", pts: 45,  label: "Fado Record" },
-      ],
-      obstacles: [
-        { id: "eletrico", emoji: "🚋", w: 90, h: 55, pts: -1, label: "Eléctrico" },
-        { id: "varal",    emoji: "🧺", w: 110, h: 60, pts: -1, label: "Varal" },
-        { id: "gaivota",  emoji: "🐦", w: 55, h: 38, pts: -1, label: "Gaivota", flies: true },
-      ],
-    },
-    {
-      id: "paris",
-      name: "Paris",
-      flag: "🇫🇷",
-      tagline: "Cidade Luz — romance a cada esquina",
-      tip: "Desvie dos pombos parisienses e baguetes voadoras. Os macarons valem muito!",
-      targetDist: 3200,
-      starThresholds: [2500, 5000, 8000],
-      bgColors: { sky: "#8A9BB0", horizon: "#E8C878", ground: "#7A9B6E" },
-      skylineColor: "#1A1A40",
-      groundColor: "#506B45",
-      collectibles: [
-        { id: "macaron",   emoji: "🍬", pts: 80,  label: "Macaron" },
-        { id: "baguete",   emoji: "🥖", pts: 40,  label: "Baguete" },
-        { id: "papoula",   emoji: "🌸", pts: 55,  label: "Papoula" },
-        { id: "champagne", emoji: "🥂", pts: 100, label: "Champagne" },
-      ],
-      obstacles: [
-        { id: "pombo",     emoji: "🐦", w: 50, h: 40, pts: -1, label: "Pombo", flies: true },
-        { id: "guarda",    emoji: "☂️",  w: 58, h: 70, pts: -1, label: "Guarda-chuva" },
-        { id: "baguete",   emoji: "🥖", w: 95, h: 32, pts: -1, label: "Baguete Voadora" },
-        { id: "balao",     emoji: "🎈", w: 48, h: 68, pts: -1, label: "Balão", flies: true },
-      ],
-    },
-    {
-      id: "roma",
-      name: "Roma",
-      flag: "🇮🇹",
-      tagline: "A Cidade Eterna — dolce vita para sempre",
-      tip: "Fique longe das colunas romanas! Colete gelato e moedas da Fontana di Trevi.",
-      targetDist: 3600,
-      starThresholds: [3000, 6000, 9500],
-      bgColors: { sky: "#D4A878", horizon: "#F4E0B8", ground: "#8B7A5A" },
-      skylineColor: "#1A1A40",
-      groundColor: "#6B5840",
-      collectibles: [
-        { id: "gelato",   emoji: "🍦", pts: 75,  label: "Gelato" },
-        { id: "limone",   emoji: "🍋", pts: 50,  label: "Limone" },
-        { id: "moeda",    emoji: "🪙", pts: 90,  label: "Moeda da Fontana" },
-        { id: "espaguete",emoji: "🍝", pts: 60,  label: "Espaguete" },
-      ],
-      obstacles: [
-        { id: "scooter",  emoji: "🛵", w: 80, h: 55, pts: -1, label: "Scooter Voadora" },
-        { id: "gato",     emoji: "🐈", w: 58, h: 45, pts: -1, label: "Gato Romano" },
-        { id: "coluna",   emoji: "🏛️", w: 42, h: 100, pts: -1, label: "Coluna" },
-      ],
-    },
-    {
-      id: "santorini",
-      name: "Santorini",
-      flag: "🇬🇷",
-      tagline: "Vento do Egeu — pôr do sol eterno",
-      tip: "Ventos erráticos! O moinho gira e bloqueia. Colete alianças — valem muito.",
-      targetDist: 4000,
-      starThresholds: [3500, 7000, 11000],
-      bgColors: { sky: "#3A6BA0", horizon: "#E8784A", ground: "#1A6B9A" },
-      skylineColor: "#FBF7EF",
-      groundColor: "#1A5A80",
-      collectibles: [
-        { id: "ouzo",       emoji: "🥃", pts: 65,  label: "Ouzo" },
-        { id: "polvo",      emoji: "🐙", pts: 80,  label: "Polvo" },
-        { id: "buganvilha", emoji: "🌸", pts: 55,  label: "Buganvília" },
-        { id: "anel",       emoji: "💍", pts: 150, label: "Aliança" },
-      ],
-      obstacles: [
-        { id: "moinho",    emoji: "⚙️", w: 80, h: 110, pts: -1, label: "Moinho", spins: true },
-        { id: "burro",     emoji: "🫏", w: 72, h: 58,  pts: -1, label: "Burro" },
-        { id: "vaso",      emoji: "🏺", w: 48, h: 62,  pts: -1, label: "Vaso Caindo", falls: true },
-      ],
-    },
-    {
-      id: "positano",
-      name: "Positano",
-      flag: "🇮🇹",
-      tagline: "Costa Amalfitana — o gran finale!",
-      tip: "Cuidado com limões caindo das árvores e o ônibus da costa! Colete corações — o item mais raro.",
-      targetDist: 5000,
-      starThresholds: [4000, 8000, 13000],
-      bgColors: { sky: "#1A1A40", horizon: "#E8784A", ground: "#1A8080" },
-      skylineColor: "#F4D878",
-      groundColor: "#0A6060",
-      collectibles: [
-        { id: "limoncello", emoji: "🍋", pts: 80,  label: "Limoncello" },
-        { id: "postal",     emoji: "📮", pts: 70,  label: "Postal" },
-        { id: "flores",     emoji: "💐", pts: 60,  label: "Flores" },
-        { id: "coracao",    emoji: "❤️",  pts: 200, label: "Coração" },
-      ],
-      obstacles: [
-        { id: "limao",    emoji: "🍋", w: 55, h: 68, pts: -1, label: "Limão Caindo", falls: true },
-        { id: "onibus",   emoji: "🚌", w: 105, h: 65, pts: -1, label: "Ônibus da Costa" },
-        { id: "cabra",    emoji: "🐐", w: 65, h: 52,  pts: -1, label: "Cabra" },
-        { id: "turista",  emoji: "🧍", w: 48, h: 80,  pts: -1, label: "Turista" },
-      ],
-    },
-  ];
-
-  /* ── POWERUP DATA ─────────────────────────────────────────── */
-  const POWERUPS = [
-    { id: "wind",    emoji: "🌬️", label: "Vento Favorável", duration: 6000,  color: "#7A9B6E" },
-    { id: "star",    emoji: "⭐",  label: "Modo Estrela",    duration: 5000,  color: "#C8A050" },
-    { id: "updraft", emoji: "🔼",  label: "Corrente",        duration: 0,     color: "#C46D28", instant: true },
-    { id: "loop",    emoji: "🔁",  label: "Loop!",           duration: 0,     color: "#B87B3E", instant: true },
-    { id: "magnet",  emoji: "🧲",  label: "Ímã",             duration: 8000,  color: "#D98A82" },
-    { id: "slowmo",  emoji: "⏱️",  label: "Câmera Lenta",    duration: 5000,  color: "#1A1A40" },
-    { id: "turbo",   emoji: "💨",  label: "Turbo",           duration: 4000,  color: "#C46D28" },
-    { id: "shield",  emoji: "🛡️",  label: "Escudo",          duration: -1,    color: "#7A9B6E", oneshot: true },
-    { id: "altlock", emoji: "📍",  label: "Altitude Lock",   duration: 4000,  color: "#B87B3E" },
-    { id: "letter",  emoji: "✉️",  label: "+500 pts",        duration: 0,     color: "#C8A050", instant: true, bonus: 500 },
-  ];
-
-  /* ── IMAGE CACHE ──────────────────────────────────────────── */
-  const IMG = {};
-  function loadImg(src) {
-    if (IMG[src]) return IMG[src];
-    const i = new Image();
-    i.src = src;
-    i.loaded = false;
-    i.onload = () => { i.loaded = true; };
-    IMG[src] = i;
-    return i;
-  }
-
-  /* ── STATE ────────────────────────────────────────────────── */
-  let currentDest = 0;
-  let gameState   = "idle"; // idle | playing | dead | win
-  let score       = 0;
-  let lives       = 3;
-  let distance    = 0;
-  let combo       = 0;
-  let comboTimer  = 0;
-  let activePowerup = null;
-  let powerupTimer  = 0;
-  let shieldActive  = false;
-  let isHolding     = false;
-  let raf           = null;
-  let lastTime      = 0;
-  let _scrollY      = 0;
-
-  // Plane physics
-  let planeX, planeY, planeVY, planeAngle;
-  const PLANE_GRAVITY  = 0.28;
-  const PLANE_LIFT     = -0.45;
-  const PLANE_MAX_UP   = -6;
-  const PLANE_MAX_DOWN = 7;
-  const PLANE_X_POS    = 110;
-
-  // Scroll
-  let bgScrollX   = 0;
-  let midScrollX  = 0;
-  let fgScrollX   = 0;
-  let gameSpeed   = 2.8;
-
-  // Objects in flight
-  let fallingObjs = [];
-  let particles   = [];
-  let spawnTimer  = 0;
-  let spawnInterval = 1600;
-  let windOffset  = 0;
-
-  // Loop animation for loop powerup
-  let loopProgress = 0;
-  let loopActive   = false;
-
-  /* ── CANVAS SETUP ─────────────────────────────────────────── */
-  const canvas = document.getElementById("flight-canvas");
-  canvas.width  = GAME_W * DPR;
-  canvas.height = GAME_H * DPR;
-  canvas.style.width  = GAME_W + "px";
-  canvas.style.height = GAME_H + "px";
-  const ctx = canvas.getContext("2d");
-  ctx.scale(DPR, DPR);
-
-  /* ── LOCAL STORAGE ─────────────────────────────────────────── */
-  function getSave() {
-    try { return JSON.parse(localStorage.getItem("flight_save") || "{}"); } catch { return {}; }
-  }
-  function setSave(data) {
-    try { localStorage.setItem("flight_save", JSON.stringify(data)); } catch {}
-  }
-  function getUnlocked() {
-    const s = getSave();
-    return s.unlocked || [true, false, false, false, false];
-  }
-  function getBestScore(idx) {
-    const s = getSave();
-    return (s.bests || [0,0,0,0,0])[idx] || 0;
-  }
-  function saveBest(idx, pts) {
-    const s = getSave();
-    if (!s.bests) s.bests = [0,0,0,0,0];
-    if (!s.unlocked) s.unlocked = [true, false, false, false, false];
-    if (pts > s.bests[idx]) s.bests[idx] = pts;
-    if (idx + 1 < 5) s.unlocked[idx + 1] = true;
-    setSave(s);
-  }
-
-  /* ── SCREEN MANAGEMENT ─────────────────────────────────────── */
-  function showScreen(id) {
-    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-    document.getElementById(id).classList.add("active");
-  }
-
-  function goToSelect() {
-    stopGame();
-    unlockScroll();
-    showScreen("screen-select");
-    renderDestGrid();
-  }
-
-  /* ── DESTINATION GRID ──────────────────────────────────────── */
-  function starsStr(idx) {
-    const best = getBestScore(idx);
-    const d    = DESTINATIONS[idx];
-    let s = 0;
-    if (best >= d.starThresholds[2]) s = 3;
-    else if (best >= d.starThresholds[1]) s = 2;
-    else if (best >= d.starThresholds[0]) s = 1;
-    return "⭐".repeat(s) + "☆".repeat(3 - s);
-  }
-
-  function renderDestGrid() {
-    const unlocked = getUnlocked();
-    const grid     = document.getElementById("dest-grid");
-    grid.innerHTML = DESTINATIONS.map((d, i) => {
-      const lock = !unlocked[i];
-      const best = getBestScore(i);
-      return `<div class="dest-card${lock ? " locked" : ""}" ${lock ? "" : `onclick="selectDest(${i})"`}>
-        <span class="dest-card__flag">${d.flag}</span>
-        <div class="dest-card__name">${d.name}</div>
-        <div class="dest-card__sub">${i+1}º Destino</div>
-        <span class="dest-card__stars">${starsStr(i)}</span>
-        <div class="dest-card__rec">${best > 0 ? "Recorde: " + best + " pts" : "Ainda sem recorde"}</div>
-        ${lock ? `<div class="dest-card__lock">🔒</div>` : `<button class="btn-play">Voar →</button>`}
-      </div>`;
-    }).join("");
-  }
-
-  function selectDest(idx) {
-    currentDest = idx;
-    const d = DESTINATIONS[idx];
-    document.getElementById("br-flag").textContent    = d.flag;
-    document.getElementById("br-dest").textContent    = d.name;
-    document.getElementById("br-tagline").textContent = d.tagline;
-    document.getElementById("br-tip").textContent     = "💡 " + d.tip;
-    showScreen("screen-briefing");
-  }
-
-  /* ── START FLIGHT ──────────────────────────────────────────── */
-  function startFlight() {
-    showScreen("screen-game");
-    initGame();
-  }
-
-  function initGame() {
-    score    = 0;
-    lives    = 3;
-    distance = 0;
-    combo    = 0;
-    comboTimer  = 0;
-    activePowerup = null;
-    powerupTimer  = 0;
-    shieldActive  = false;
-    isHolding     = false;
-    loopActive    = false;
-    loopProgress  = 0;
-    fallingObjs   = [];
-    particles     = [];
-    spawnTimer    = 0;
-    spawnInterval = 1600;
-    gameSpeed     = 2.8;
-    windOffset    = 0;
-    bgScrollX     = 0;
-    midScrollX    = 0;
-    fgScrollX     = 0;
-    lastTime      = 0;
-    gameState     = "idle";
-
-    planeX    = PLANE_X_POS;
-    planeY    = GAME_H / 2;
-    planeVY   = 0;
-    planeAngle = 0;
-
-    updateHUD();
-    updateLivesHUD();
-
-    const hd = document.getElementById("hud-dest");
-    if (hd) hd.textContent = DESTINATIONS[currentDest].name.toUpperCase();
-
-    showOverlay("✈️", "Pronto para " + DESTINATIONS[currentDest].name + "?",
-      "Segure para subir · Solte para planar", "", [
-      { label: "✈️ Decolar!", fn: "beginPlay()" },
-      { label: "← Destinos",   fn: "goToSelect()" }
-    ]);
-  }
-
-  window.startFlight = startFlight;
-  window.beginPlay   = beginPlay;
-  window.goToSelect  = goToSelect;
-  window.selectDest  = selectDest;
-  window.replayFlight = replayFlight;
-
-  function beginPlay() {
-    hideOverlay();
-    gameState = "playing";
-    lockScroll();
-    if (raf) cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(loop);
-  }
-
-  function replayFlight() {
-    showScreen("screen-game");
-    initGame();
-  }
-
-  /* ── CONTROLS ──────────────────────────────────────────────── */
-  document.addEventListener("keydown", e => {
-    if (e.code === "Space" || e.key === " ") { e.preventDefault(); isHolding = true; if (gameState === "idle") beginPlay(); }
-  });
-  document.addEventListener("keyup", e => {
-    if (e.code === "Space" || e.key === " ") isHolding = false;
-  });
-
-  const tapZone = document.getElementById("tap-zone");
-  tapZone.addEventListener("mousedown",  () => { isHolding = true;  if (gameState === "idle") beginPlay(); });
-  tapZone.addEventListener("mouseup",    () => { isHolding = false; });
-  tapZone.addEventListener("mouseleave", () => { isHolding = false; });
-  tapZone.addEventListener("touchstart", e => { e.preventDefault(); isHolding = true;  if (gameState === "idle") beginPlay(); }, { passive: false });
-  tapZone.addEventListener("touchend",   e => { e.preventDefault(); isHolding = false; }, { passive: false });
-
-  /* ── SCROLL LOCK ────────────────────────────────────────────── */
-  function lockScroll() {
-    _scrollY = window.scrollY;
-    document.body.style.overflow = "hidden";
-    document.body.style.touchAction = "none";
-  }
-  function unlockScroll() {
-    document.body.style.overflow = "";
-    document.body.style.touchAction = "";
-    window.scrollTo(0, _scrollY);
-  }
-
-  /* ── HUD ────────────────────────────────────────────────────── */
-  function updateHUD() {
-    const el = document.getElementById("hud-score");
-    if (el) el.textContent = score;
-    const bar = document.getElementById("hud-bar");
-    if (bar) bar.style.width = Math.min(100, (distance / DESTINATIONS[currentDest].targetDist) * 100).toFixed(1) + "%";
-  }
-  function updateLivesHUD() {
-    const el = document.getElementById("hud-lives");
-    if (!el) return;
-    el.innerHTML = [0,1,2].map(i =>
-      `<span class="${i >= lives ? "lost" : ""}">❤️</span>`
-    ).join("");
-  }
-
-  /* ── POWERUP BADGE ──────────────────────────────────────────── */
-  function showPowerupBadge(pu, timeLeft) {
-    const el = document.getElementById("powerup-badge");
-    if (!el) return;
-    if (!pu) { el.style.display = "none"; return; }
-    el.style.display = "block";
-    el.style.borderColor = pu.color;
-    el.style.color = pu.color;
-    el.textContent = pu.emoji + " " + pu.label + (timeLeft > 0 ? " " + (timeLeft / 1000).toFixed(1) + "s" : "");
-  }
-
-  /* ── COMBO ──────────────────────────────────────────────────── */
-  function showCombo(c) {
-    const el = document.getElementById("combo-badge");
-    if (!el || c < 2) { if (el) el.classList.remove("show"); return; }
-    el.textContent = "×" + c + " COMBO!";
-    el.classList.add("show");
-    clearTimeout(el._t);
-    el._t = setTimeout(() => el.classList.remove("show"), 1200);
-  }
-
-  /* ── OVERLAY ─────────────────────────────────────────────────── */
-  function showOverlay(emoji, title, sub, stars, btns) {
-    document.getElementById("ov-emoji").textContent  = emoji;
-    document.getElementById("ov-title").textContent  = title;
-    document.getElementById("ov-sub").textContent    = sub;
-    document.getElementById("ov-stars").textContent  = stars;
-    const sc = document.getElementById("ov-score-display");
-    if (score > 0) {
-      sc.textContent = score + " pontos"; sc.style.display = "inline-block";
-    } else { sc.style.display = "none"; }
-    const btnsEl = document.getElementById("ov-btns");
-    btnsEl.innerHTML = btns.map(b =>
-      `<button class="game-btn game-btn--main" onclick="${b.fn}">${b.label}</button>`
-    ).join("");
-    document.getElementById("game-overlay").classList.add("show");
-  }
-  function hideOverlay() {
-    document.getElementById("game-overlay").classList.remove("show");
-  }
-
-  /* ── SPAWN OBJECTS ───────────────────────────────────────────── */
-  function spawnRandom() {
-    const dest = DESTINATIONS[currentDest];
-    const r    = Math.random();
-    const yMin = 55;
-    const yMax = GAME_H - 55;
-    const y    = yMin + Math.random() * (yMax - yMin);
-
-    if (r < 0.38) {
-      // collectible
-      const c = dest.collectibles[Math.floor(Math.random() * dest.collectibles.length)];
-      fallingObjs.push({ type: "collect", emoji: c.emoji, pts: c.pts, label: c.label,
-        x: GAME_W + 40, y, w: 44, h: 44, vy: 0 });
-    } else if (r < 0.62) {
-      // obstacle
-      const obs = dest.obstacles[Math.floor(Math.random() * dest.obstacles.length)];
-      const vy  = obs.falls ? (1 + Math.random() * 1.5) : (obs.flies ? (Math.sin(Date.now() * 0.002) * 0.8) : 0);
-      fallingObjs.push({ type: "obstacle", emoji: obs.emoji, pts: -1, label: obs.label,
-        x: GAME_W + 50, y, w: obs.w, h: obs.h, vy, flies: obs.flies, falls: obs.falls, spins: obs.spins,
-        rotation: 0 });
-    } else {
-      // powerup
-      const pu = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
-      fallingObjs.push({ type: "powerup", pu, emoji: pu.emoji, label: pu.label,
-        x: GAME_W + 40, y, w: 48, h: 48, vy: 0, phase: Math.random() * Math.PI * 2 });
-    }
-  }
-
-  /* ── COLLISION ───────────────────────────────────────────────── */
-  function checkCollisions(dt) {
-    const pw = 56, ph = 32;
-    const px1 = planeX - pw/2 + 8, py1 = planeY - ph/2 + 6;
-    const px2 = planeX + pw/2 - 8, py2 = planeY + ph/2 - 6;
-
-    const magnetActive = activePowerup?.id === "magnet";
-    const starActive   = activePowerup?.id === "star";
-
-    for (let i = fallingObjs.length - 1; i >= 0; i--) {
-      const o = fallingObjs[i];
-
-      // Magnet pulls collectibles
-      if (magnetActive && o.type === "collect") {
-        const dx = planeX - o.x;
-        const dy = planeY - o.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < 220) {
-          o.x += (dx / dist) * 6 * (dt / 16);
-          o.y += (dy / dist) * 6 * (dt / 16);
-        }
-      }
-
-      // AABB check (generous hitbox reduction)
-      const ox1 = o.x - o.w/2 + 6, oy1 = o.y - o.h/2 + 6;
-      const ox2 = o.x + o.w/2 - 6, oy2 = o.y + o.h/2 - 6;
-      if (px2 < ox1 || px1 > ox2 || py2 < oy1 || py1 > oy2) continue;
-
-      // HIT
-      if (o.type === "collect") {
-        combo++;
-        comboTimer = 2000;
-        const mult = combo >= 8 ? 3 : combo >= 5 ? 2 : combo >= 3 ? 1.5 : 1;
-        const earned = Math.round(o.pts * mult);
-        score += earned;
-        spawnFloatingText("+" + earned + (mult > 1 ? " ×" + mult : ""), o.x, o.y, "#C8A050");
-        spawnBurst(o.x, o.y, "#C8A050", 6);
-        fallingObjs.splice(i, 1);
-        showCombo(combo);
-        updateHUD();
-      } else if (o.type === "powerup") {
-        activatePowerup(o.pu);
-        score += 100;
-        spawnFloatingText(o.pu.emoji + " " + o.pu.label, o.x, o.y, o.pu.color);
-        spawnBurst(o.x, o.y, o.pu.color, 8);
-        fallingObjs.splice(i, 1);
-        updateHUD();
-      } else if (o.type === "obstacle") {
-        if (starActive) {
-          // invincible — destroy obstacle
-          spawnBurst(o.x, o.y, "#C8A050", 10);
-          fallingObjs.splice(i, 1);
-          score += 50;
-          updateHUD();
-        } else if (shieldActive) {
-          shieldActive = false;
-          spawnFloatingText("🛡️ Escudo quebrou!", planeX, planeY - 30, "#7A9B6E");
-          spawnBurst(planeX, planeY, "#7A9B6E", 12);
-          fallingObjs.splice(i, 1);
-        } else {
-          lives--;
-          combo = 0;
-          comboTimer = 0;
-          spawnBurst(planeX, planeY, "#C46D28", 10);
-          spawnFloatingText("💥 " + o.label + "!", planeX, planeY - 30, "#C46D28");
-          fallingObjs.splice(i, 1);
-          updateLivesHUD();
-          updateHUD();
-          // Brief invincibility
-          const tempStar = activePowerup;
-          activePowerup = { id: "invincible", label: "", emoji: "💥", color: "#C46D28", duration: 1200 };
-          powerupTimer  = 1200;
-          setTimeout(() => { if (activePowerup?.id === "invincible") { activePowerup = tempStar; powerupTimer = 0; } }, 1200);
-          if (lives <= 0) { triggerGameOver(); return; }
-        }
-      }
-    }
-  }
-
-  /* ── POWERUP ACTIVATION ─────────────────────────────────────── */
-  function activatePowerup(pu) {
-    if (pu.instant) {
-      if (pu.id === "updraft") { planeVY = PLANE_MAX_UP * 1.2; }
-      if (pu.id === "loop")    { loopActive = true; loopProgress = 0; }
-      if (pu.id === "letter")  { score += pu.bonus; spawnFloatingText("+" + pu.bonus + "✉️", planeX, planeY - 40, "#C8A050"); }
-      return;
-    }
-    if (pu.oneshot) { shieldActive = true; return; }
-    activePowerup = pu;
-    powerupTimer  = pu.duration;
-  }
-
-  /* ── PARTICLES ───────────────────────────────────────────────── */
-  function spawnBurst(x, y, color, n) {
-    for (let i = 0; i < n; i++) {
-      const angle = (Math.PI * 2 * i) / n + Math.random() * 0.5;
-      const speed = 2 + Math.random() * 3;
-      particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1,
-        color, size: 4 + Math.random() * 5, life: 1, alpha: 1, type: "burst" });
-    }
-  }
-  function spawnFloatingText(text, x, y, color) {
-    particles.push({ type: "text", text, x, y, color, alpha: 1, life: 1.2, vy: -1.2 });
-  }
-
-  /* ── TRIGGER STATES ─────────────────────────────────────────── */
-  function triggerGameOver() {
-    gameState = "dead";
-    unlockScroll();
-    const stars = calcStars();
-    showOverlay("😢", "Não chegou a " + DESTINATIONS[currentDest].name + "…",
-      "Voo encerrado! Você fez " + score + " pontos.",
-      "⭐".repeat(stars) + "☆".repeat(3-stars), [
-      { label: "↩ Tentar de novo", fn: "replayFlight()" },
-      { label: "💾 Ver resultado",  fn: "goToResult()" },
-    ]);
-  }
-
-  function triggerWin() {
-    gameState = "win";
-    unlockScroll();
-    saveBest(currentDest, score);
-    const stars = calcStars();
-    showOverlay("🎉", "Chegou a " + DESTINATIONS[currentDest].name + "!",
-      "Voo completo! " + score + " pontos.",
-      "⭐".repeat(stars) + "☆".repeat(3-stars), [
-      { label: "💾 Ver resultado",    fn: "goToResult()" },
-      { label: "↩ Próximo destino",  fn: "goToSelect()" },
-    ]);
-    // Check full completion
-    const unlocked = getUnlocked();
-    if (currentDest === 4) {
-      setTimeout(() => { goToFinalWin(); }, 3000);
-    }
-  }
-
-  window.goToResult = goToResult;
-  function goToResult() {
-    stopGame();
-    saveBest(currentDest, score);
-    const stars = calcStars();
-    const d = DESTINATIONS[currentDest];
-    document.getElementById("res-emoji").textContent   = gameState === "win" ? "🎉" : "✈️";
-    document.getElementById("res-title").textContent   = gameState === "win" ? "Chegou a " + d.name + "!" : "Voo encerrado";
-    document.getElementById("res-tagline").textContent = d.tagline;
-    document.getElementById("res-stars").textContent   = "⭐".repeat(stars) + "☆".repeat(3-stars);
-    document.getElementById("res-score").textContent   = score + " pontos";
-    document.getElementById("res-replay-btn").textContent = "↩ Voar em " + d.name;
-    showScreen("screen-result");
-    unlockScroll();
-    loadTop10("flight-top10");
-  }
-
-  function goToFinalWin() {
-    stopGame();
-    showScreen("screen-win");
-    unlockScroll();
-    const unlocked = getUnlocked();
-    const bests    = (getSave().bests || [0,0,0,0,0]);
-    const grid     = document.getElementById("album-grid");
-    grid.innerHTML = DESTINATIONS.map((d, i) =>
-      `<div class="album-polaroid ${unlocked[i] ? "earned" : ""}">
-        <div class="album-flag">${d.flag}</div>
-        <div style="font-size:.6rem;color:var(--fl-amber);margin-top:.2rem">${d.name}</div>
-        <div style="font-size:.58rem;color:var(--fl-sage-dk)">${bests[i] > 0 ? bests[i]+" pts" : "—"}</div>
-      </div>`
-    ).join("");
-    loadTop10("win-top10");
-  }
-
-  function calcStars() {
-    const d = DESTINATIONS[currentDest];
-    if (score >= d.starThresholds[2]) return 3;
-    if (score >= d.starThresholds[1]) return 2;
-    if (score >= d.starThresholds[0]) return 1;
-    return 0;
-  }
-
-  /* ── MIRROR TILE HELPER ──────────────────────────────────────── */
-  // Draws an image tiled horizontally using mirror (reflect) tiling:
-  // normal, flipped, normal, flipped… — hides the seam even without
-  // a seamless tile, at the cost of a mirror effect every repetition.
-  //
-  // scrollX  : how many pixels the layer has scrolled (increases over time)
-  // img      : HTMLImageElement (must be loaded)
-  // drawW    : rendered width of one tile on-screen
-  // y, h     : vertical position and height
-  function drawMirrorTile(scrollX, img, drawW, y, h) {
-    // Which tile index is at the left edge, and how far into it we are
-    const totalW   = drawW * 2;           // one normal + one flipped = one full period
-    const offset   = scrollX % totalW;    // position within the period [0, totalW)
-    // leftmost tile's screen x (may be negative — that's fine, canvas clips)
-    const startX   = -offset;
-
-    for (let x = startX; x < GAME_W + drawW; x += drawW) {
-      // Which copy in the period? even = normal, odd = flipped
-      const copyIndex = Math.floor((x - startX) / drawW + Math.floor(scrollX / drawW));
-      const mirrored  = copyIndex % 2 === 1;
-
-      ctx.save();
-      if (mirrored) {
-        // Flip horizontally around the tile's centre
-        ctx.translate(x + drawW, y);
-        ctx.scale(-1, 1);
-        ctx.drawImage(img, 0, 0, drawW, h);
-      } else {
-        ctx.drawImage(img, x, y, drawW, h);
-      }
-      ctx.restore();
-    }
-  }
-
-  /* ── DRAW BACKGROUND ─────────────────────────────────────────── */
-  function drawBackground(dest) {
-    const c = dest.bgColors;
-
-    /* ---- SKY LAYER ---- */
-    const skyImg = loadImg(`assets/img/bg-${dest.id}-sky.png`);
-    if (skyImg.loaded) {
-      const sh    = skyImg.naturalHeight || 400;
-      const drawH = GAME_H * 0.58;
-      const drawW = skyImg.naturalWidth * (drawH / sh);
-      drawMirrorTile(bgScrollX, skyImg, drawW, 0, drawH);
-    } else {
-      // Procedural sky fallback
-      ctx.fillStyle = c.sky;
-      ctx.fillRect(0, 0, GAME_W, GAME_H * 0.58);
-      ctx.fillStyle = c.horizon;
-      ctx.globalAlpha = 0.45;
-      ctx.fillRect(0, GAME_H * 0.38, GAME_W, GAME_H * 0.22);
-      ctx.globalAlpha = 1;
-      drawSkyline(dest, c.skylineColor);
-    }
-
-    /* ---- MID LAYER ---- */
-    const midImg = loadImg(`assets/img/bg-${dest.id}-mid.png`);
-    if (midImg.loaded) {
-      const mh    = midImg.naturalHeight || 300;
-      const drawH = GAME_H * 0.46;
-      const drawW = midImg.naturalWidth * (drawH / mh);
-      const y     = GAME_H * 0.34;
-      drawMirrorTile(midScrollX, midImg, drawW, y, drawH);
-    }
-
-    /* ---- GROUND STRIP ---- */
-    ctx.fillStyle = c.ground;
-    ctx.fillRect(0, GAME_H * 0.78, GAME_W, GAME_H * 0.22);
-    ctx.fillStyle = dest.groundColor || "#506B45";
-    ctx.fillRect(0, GAME_H * 0.78, GAME_W, 4);
-
-    /* ---- FRONT LAYER ---- */
-    const fgImg = loadImg(`assets/img/bg-${dest.id}-front.png`);
-    if (fgImg.loaded) {
-      const fh    = fgImg.naturalHeight || 280;
-      const drawH = GAME_H * 0.40;
-      const drawW = fgImg.naturalWidth * (drawH / fh);
-      const y     = GAME_H * 0.61;
-      drawMirrorTile(fgScrollX, fgImg, drawW, y, drawH);
-    }
-  }
-
-  function drawSkyline(dest, color) {
-    ctx.fillStyle = color;
-    ctx.globalAlpha = 0.22;
-    // Procedural city silhouette
-    ctx.beginPath();
-    ctx.moveTo(0, GAME_H * 0.52);
-    const seed = dest.id.charCodeAt(0);
-    const N = 18;
-    for (let i = 0; i <= N; i++) {
-      const x = (i / N) * GAME_W;
-      const h = 20 + (Math.sin(i * 1.3 + seed) * 0.5 + 0.5) * 65;
-      if (i === 0) ctx.lineTo(x, GAME_H * 0.52 - h);
-      else ctx.lineTo(x, GAME_H * 0.52 - h);
-    }
-    ctx.lineTo(GAME_W, GAME_H * 0.52);
-    ctx.closePath();
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-
-  /* ── DRAW PLANE ──────────────────────────────────────────────── */
-  function drawPlane(dt) {
-    const starActive = activePowerup?.id === "star";
-    const imgKey = starActive ? "flight-plane-star.png" : "flight-plane-neutral.png";
-    const planeImg = loadImg("assets/img/" + imgKey);
-
-    ctx.save();
-    ctx.translate(planeX, planeY);
-    ctx.rotate(planeAngle * Math.PI / 180);
-
-    // Shield glow
-    if (shieldActive) {
-      ctx.save();
-      ctx.globalAlpha = 0.3 + Math.sin(Date.now() * 0.01) * 0.15;
-      ctx.fillStyle = "#7A9B6E";
-      ctx.beginPath();
-      ctx.arc(0, 0, 42, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // Star mode shimmer
-    if (starActive) {
-      ctx.globalAlpha = 0.7 + Math.sin(Date.now() * 0.015) * 0.3;
-    }
-
-    if (planeImg.loaded) {
-      const pw = 80, ph = 50;
-      ctx.drawImage(planeImg, -pw/2, -ph/2, pw, ph);
-    } else {
-      // Fallback: draw a paper airplane procedurally
-      drawPlaneFallback(starActive);
-    }
-
-    ctx.restore();
-
-    // Trail
-    drawTrail(starActive);
-  }
-
-  function drawPlaneFallback(golden) {
-    const c1 = golden ? "#C8A050" : "#FBF7EF";
-    const c2 = golden ? "#8B6020" : "#7A9B6E";
-    const c3 = golden ? "#F4D878" : "#C46D28";
-
-    // Body
-    ctx.fillStyle = c1;
-    ctx.beginPath();
-    ctx.moveTo(38, 0);
-    ctx.lineTo(-20, -16);
-    ctx.lineTo(-10, 0);
-    ctx.lineTo(-20, 16);
-    ctx.closePath();
-    ctx.fill();
-
-    // Top wing fold shadow
-    ctx.fillStyle = c2;
-    ctx.beginPath();
-    ctx.moveTo(38, 0);
-    ctx.lineTo(-10, 0);
-    ctx.lineTo(-20, -16);
-    ctx.lineTo(10, -8);
-    ctx.closePath();
-    ctx.fill();
-
-    // Crease line
-    ctx.strokeStyle = c3;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(38, 0);
-    ctx.lineTo(-10, 0);
-    ctx.stroke();
-  }
-
-  /* ── TRAIL ───────────────────────────────────────────────────── */
-  const trailPoints = [];
-  function drawTrail(golden) {
-    trailPoints.push({ x: planeX - 28, y: planeY, t: Date.now() });
-    // Keep last 18 points
-    while (trailPoints.length > 18) trailPoints.shift();
-
-    for (let i = 0; i < trailPoints.length; i++) {
-      const p = trailPoints[i];
-      const age = (Date.now() - p.t) / 400;
-      if (age > 1) continue;
-      const alpha = (1 - age) * 0.55;
-      const size = (1 - age) * (golden ? 5 : 3.5);
-
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      if (i % 3 === 0) {
-        // heart
-        ctx.fillStyle = golden ? "#F4D878" : "#D98A82";
-        drawHeart(ctx, p.x, p.y, size);
-      } else {
-        // chip
-        ctx.fillStyle = golden ? "#C8A050" : (i % 2 === 0 ? "#7A9B6E" : "#C46D28");
-        ctx.fillRect(p.x - size/2, p.y - size/2, size, size);
-      }
-      ctx.restore();
-    }
-  }
-
-  function drawHeart(ctx, x, y, s) {
-    ctx.beginPath();
-    ctx.moveTo(x, y + s * 0.4);
-    ctx.bezierCurveTo(x - s, y - s * 0.5, x - s * 1.5, y + s * 0.5, x, y + s * 1.5);
-    ctx.bezierCurveTo(x + s * 1.5, y + s * 0.5, x + s, y - s * 0.5, x, y + s * 0.4);
-    ctx.fill();
-  }
-
-  /* ── DRAW OBJECTS ────────────────────────────────────────────── */
-  function drawObjects(now) {
-    for (const o of fallingObjs) {
-      const imgSrc = getObjImgSrc(o);
-      const img    = loadImg(imgSrc);
-
-      ctx.save();
-      ctx.translate(o.x, o.y);
-
-      if (o.spins) ctx.rotate(o.rotation * Math.PI / 180);
-
-      // Powerup bob
-      if (o.type === "powerup") {
-        const bob = Math.sin(now * 0.003 + (o.phase || 0)) * 5;
-        ctx.translate(0, bob);
-        // Glow ring
-        ctx.save();
-        ctx.globalAlpha = 0.25 + Math.sin(now * 0.005) * 0.1;
-        ctx.fillStyle = o.pu.color;
-        ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-      }
-
-      if (img.loaded) {
-        ctx.drawImage(img, -o.w/2, -o.h/2, o.w, o.h);
-      } else {
-        // Emoji fallback
-        ctx.font = `${Math.round(o.h * 0.72)}px serif`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(o.emoji, 0, 0);
-      }
-      ctx.restore();
-    }
-  }
-
-  function getObjImgSrc(o) {
-    const d = DESTINATIONS[currentDest];
-    if (o.type === "collect") return `assets/img/collect-${d.id}-${o.id || "item"}.png`;
-    if (o.type === "powerup") return `assets/img/powerup-${o.pu.id}.png`;
-    if (o.type === "obstacle") return `assets/img/obstacle-${d.id}-${o.id || "obs"}.png`;
-    return "";
-  }
-
-  /* ── DRAW PARTICLES ──────────────────────────────────────────── */
-  function drawParticles(dt) {
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i];
-      p.life -= dt / 1000;
-      if (p.life <= 0) { particles.splice(i, 1); continue; }
-
-      p.y  += p.vy * (dt / 16);
-      p.alpha = Math.max(0, p.life);
-
-      ctx.save();
-      ctx.globalAlpha = p.alpha;
-
-      if (p.type === "text") {
-        ctx.font = "bold 13px Inter, sans-serif";
-        ctx.fillStyle = p.color;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(p.text, p.x, p.y);
-      } else {
-        if (p.vx !== undefined) { p.x += p.vx * (dt / 16); p.vy += 0.12; }
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-    }
-  }
-
-  /* ── ALTITUDE BONUS ──────────────────────────────────────────── */
-  let altBonusAccum = 0;
-  function checkAltitudeBonus(dt) {
-    if (planeY < GAME_H * 0.4) {
-      altBonusAccum += dt;
-      if (altBonusAccum >= 500) {
-        score += 2;
-        altBonusAccum -= 500;
-        updateHUD();
-      }
-    } else {
-      altBonusAccum = 0;
-    }
-  }
-
-  /* ── MAIN LOOP ───────────────────────────────────────────────── */
-  function loop(ts) {
-    if (gameState !== "playing") return;
-    const dt = lastTime ? Math.min(ts - lastTime, 50) : 16;
-    lastTime = ts;
-
-    const dest = DESTINATIONS[currentDest];
-    const speedMult = activePowerup?.id === "slowmo" ? 0.45 : activePowerup?.id === "turbo" ? 1.6 : activePowerup?.id === "wind" ? 0.72 : 1;
-
-    // Speed ramp
-    gameSpeed = 2.8 + (distance / dest.targetDist) * 3.2;
-
-    // Background scroll
-    const scrollDt = gameSpeed * speedMult * (dt / 16);
-    bgScrollX  += scrollDt * 0.3;
-    midScrollX += scrollDt * 0.65;
-    fgScrollX  += scrollDt * 1.1;
-
-    // Distance
-    distance += scrollDt * 1.2;
-    if (distance >= dest.targetDist) { distance = dest.targetDist; updateHUD(); triggerWin(); return; }
-
-    // Distance score trickle
-    score += Math.round(scrollDt * 0.8);
-    updateHUD();
-
-    // Plane physics
-    if (!loopActive) {
-      const lift  = isHolding ? PLANE_LIFT : 0;
-      const altLock = activePowerup?.id === "altlock";
-      if (!altLock) {
-        planeVY = Math.max(PLANE_MAX_UP, Math.min(PLANE_MAX_DOWN, planeVY + PLANE_GRAVITY + lift));
-        planeY  += planeVY * (dt / 16);
-      }
-      // Wind effect
-      if (activePowerup?.id !== "wind") {
-        windOffset = Math.sin(ts * 0.0008) * 0.6;
-        planeVY += windOffset * (dt / 16);
-      }
-      // Target angle based on velocity
-      const targetAngle = Math.max(-28, Math.min(28, planeVY * 3.5));
-      planeAngle += (targetAngle - planeAngle) * 0.18;
-    } else {
-      // Loop animation
-      loopProgress += dt * 0.004;
-      const lx = PLANE_X_POS + Math.sin(loopProgress) * 25;
-      const ly = planeY - Math.cos(loopProgress) * 40;
-      planeX = PLANE_X_POS + (lx - PLANE_X_POS) * 0.3;
-      planeAngle = loopProgress * (180 / Math.PI);
-      if (loopProgress >= Math.PI * 2) { loopActive = false; loopProgress = 0; planeAngle = 0; }
-    }
-
-    // Clamp to sky / ground
-    planeY = Math.max(30, Math.min(GAME_H * 0.74, planeY));
-
-    // Combo decay
-    if (comboTimer > 0) {
-      comboTimer -= dt;
-      if (comboTimer <= 0) { combo = 0; showCombo(0); }
-    }
-
-    // Powerup timer
-    if (activePowerup && activePowerup.duration > 0) {
-      powerupTimer -= dt;
-      if (powerupTimer <= 0) { activePowerup = null; showPowerupBadge(null, 0); }
-      else showPowerupBadge(activePowerup, powerupTimer);
-    } else if (!activePowerup) {
-      showPowerupBadge(null, 0);
-    }
-
-    // Spawn
-    spawnTimer += dt;
-    const effectiveInterval = Math.max(600, spawnInterval - (distance / dest.targetDist) * 600);
-    if (spawnTimer >= effectiveInterval * speedMult) {
-      spawnTimer = 0;
-      spawnRandom();
-      // Double spawn at high speed
-      if (gameSpeed > 4.5 && Math.random() < 0.3) spawnRandom();
-    }
-
-    // Move objects
-    for (let i = fallingObjs.length - 1; i >= 0; i--) {
-      const o = fallingObjs[i];
-      o.x -= scrollDt * (o.type === "obstacle" && o.falls ? 0.4 : 1.05);
-      if (o.vy) o.y += o.vy * (dt / 16);
-      if (o.flies) o.y += Math.sin(ts * 0.003 + i) * 0.8;
-      if (o.spins) o.rotation += 2 * (dt / 16);
-      if (o.x < -80 || o.y > GAME_H + 60 || o.y < -60) fallingObjs.splice(i, 1);
-    }
-
-    // Altitude bonus
-    checkAltitudeBonus(dt);
-
-    // Collisions
-    checkCollisions(dt);
-
-    // ── RENDER ──
-    ctx.clearRect(0, 0, GAME_W, GAME_H);
-    drawBackground(dest);
-    drawObjects(ts);
-    drawPlane(dt);
-    drawParticles(dt);
-
-    raf = requestAnimationFrame(loop);
-  }
-
-  function stopGame() {
-    gameState = "idle";
-    if (raf) { cancelAnimationFrame(raf); raf = null; }
-  }
-
-  /* ── SCORE API ───────────────────────────────────────────────── */
-  function escJ(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-
-  window.flightSaveScore = async function() {
-    const ni  = document.getElementById("flight-nome");
-    const me  = document.getElementById("flight-save-msg");
-    const btn = ni?.nextElementSibling;
-    const nome = (ni?.value || "").trim();
-    if (!nome) { me.style.color = "var(--fl-terra)"; me.textContent = "Informe seu nome."; ni?.focus(); return; }
-    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>'; }
-    try {
-      const r = await fetch(FLIGHT_API, {
-        method: "POST",
-        body: JSON.stringify({ action: "score", jogo: "flight-" + DESTINATIONS[currentDest].id, nome, pontos: score })
-      });
-      const j = await r.json();
-      if (j.sucesso) {
-        me.style.color = "var(--fl-sage-dk)";
-        me.textContent = "Recorde salvo! ";
-        me.insertAdjacentHTML("beforeend", "<img src='assets/img/icon-trophy.png' alt='' style='width:1em;height:1em;vertical-align:middle' onerror='this.style.display=\"none\"'>");
-        if (btn) { btn.disabled = true; btn.textContent = "Salvo ✓"; }
-        if (ni) ni.disabled = true;
-        loadTop10("flight-top10");
-      } else throw new Error();
-    } catch {
-      if (btn) { btn.disabled = false; btn.textContent = "Salvar"; }
-      me.style.color = "var(--fl-terra)";
-      me.textContent = "Não conseguimos salvar. Tente novamente.";
-    }
-  };
-
-  async function loadTop10(elId) {
-    const el = document.getElementById(elId);
-    if (!el) return;
-    const jogo = "flight-" + DESTINATIONS[currentDest].id;
-    el.innerHTML = `<h3><img src="assets/img/icon-trophy.png" alt="" onerror="this.style.display='none'"> Top 10 — ${DESTINATIONS[currentDest].name}</h3><p class="t10-loading">Carregando…</p>`;
-    try {
-      const r = await fetch(`${FLIGHT_API}?action=top10&jogo=${jogo}`);
-      const d = await r.json();
-      if (!d?.lista?.length) {
-        el.innerHTML = `<h3><img src="assets/img/icon-trophy.png" alt="" onerror="this.style.display='none'"> Top 10 — ${DESTINATIONS[currentDest].name}</h3><p class="t10-empty">Nenhum recorde ainda!</p>`;
-        return;
-      }
-      const medals = [`<img src='assets/img/icon-medal-gold.png'   alt='' onerror="this.style.display='none'">`,
-                      `<img src='assets/img/icon-medal-silver.png' alt='' onerror="this.style.display='none'">`,
-                      `<img src='assets/img/icon-medal-bronze.png' alt='' onerror="this.style.display='none'">`];
-      const cls    = ["top10-item--gold","top10-item--silver","top10-item--bronze"];
-      el.innerHTML = `<h3><img src="assets/img/icon-trophy.png" alt="" onerror="this.style.display='none'"> Top 10 — ${DESTINATIONS[currentDest].name}</h3>
-        <ul class="top10-list">${d.lista.map((it,i) =>
-          `<li class="top10-item ${cls[i]||""}">
-            <span class="t10-pos">${medals[i]||String(i+1)}</span>
-            <span class="t10-name">${escJ(it.nome)}</span>
-            <span class="t10-pts">${it.pontos} pts</span>
-          </li>`).join("")}</ul>`;
-    } catch {
-      el.innerHTML = `<h3><img src="assets/img/icon-trophy.png" alt="" onerror="this.style.display='none'"> Top 10 — ${DESTINATIONS[currentDest].name}</h3><p class="t10-empty">Não foi possível carregar.</p>`;
-    }
-  }
-
-  /* ── INIT ────────────────────────────────────────────────────── */
-  renderDestGrid();
-
-  // Draw idle canvas state
-  ctx.fillStyle = "#EBF0E6";
-  ctx.fillRect(0, 0, GAME_W, GAME_H);
-  ctx.font = "bold 28px serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("✈️", GAME_W/2, GAME_H/2);
   </script>
   <script src="assets/js/scroll-to-game.js"></script>
 </body>

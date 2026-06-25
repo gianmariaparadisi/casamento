@@ -312,7 +312,7 @@
         const lista = Array.isArray(dados) ? dados : (dados ? [dados] : []);
 
         btn.disabled = false;
-        btn.textContent = "Buscar";
+        btn.textContent = I18N.t("Buscar", "Cerca");
 
         if (!lista.length) {
           resultado.innerHTML = `
@@ -346,7 +346,7 @@
       } catch (err) {
         console.error(err);
         btn.disabled = false;
-        btn.textContent = "Buscar";
+        btn.textContent = I18N.t("Buscar", "Cerca");
         resultado.innerHTML = `
           <p class="rsvp__msg rsvp__msg--erro">
             ${I18N.t("Não conseguimos buscar agora. Tente novamente ou escreva para", "Non siamo riusciti a cercare ora. Riprova o scrivi a")}

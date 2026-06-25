@@ -96,17 +96,17 @@
 </head>
 <body class="game-page">
   <nav class="game-nav"><div class="game-nav__inner">
-    <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
+    <a class="game-back" href="jogos.html" data-it="← Torna ai giochi">← Voltar aos jogos</a>
     <div class="game-brand">Tiago & Gian</div>
   </div></nav>
   <main class="game-shell">
-    <p class="game-kicker">Puzzle</p>
+    <p class="game-kicker" data-it="Puzzle">Puzzle</p>
     <h1 class="game-title">Honeymoon Packing</h1>
-    <p class="game-sub">Você tem 90 segundos para empacotar os itens CERTOS para o destino. Erros tiram pontos. Obrigatórios ★ não podem faltar!</p>
+    <p class="game-sub" data-it="Hai 90 secondi per fare la valigia con gli oggetti GIUSTI per la destinazione. Gli errori tolgono punti. Gli obbligatori ★ non possono mancare!">Você tem 90 segundos para empacotar os itens CERTOS para o destino. Erros tiram pontos. Obrigatórios ★ não podem faltar!</p>
     <div class="hud">
       <div class="hud__pill hud__pill--timer" id="timerPill">⏱ <strong id="timerEl">90</strong>s</div>
-      <div class="hud__pill">Score: <strong id="scoreEl">0</strong></div>
-      <div class="hud__pill">Fase <strong id="phaseEl">1</strong>/3</div>
+      <div class="hud__pill"><span data-it="Punti:">Score:</span> <strong id="scoreEl">0</strong></div>
+      <div class="hud__pill"><span data-it="Fase">Fase</span> <strong id="phaseEl">1</strong>/3</div>
     </div>
     <div class="dest-strip" id="destStrip"></div>
     <div class="mandatory-strip" id="mandatoryStrip"></div>
@@ -124,7 +124,7 @@
         </div>
       </div>
       <div class="item-tray">
-        <h3>Itens disponíveis</h3>
+        <h3 data-it="Oggetti disponibili">Itens disponíveis</h3>
         <div class="phase-info" id="phaseInfo"></div>
         <div class="items-grid" id="itemsGrid"></div>
       </div>
@@ -136,8 +136,8 @@
     <div class="modal__card">
       <div class="modal__icon"><img src="assets/img/packing-airplane-takeoff.png" alt=""></div>
       <h2 class="modal__title">Honeymoon Packing</h2>
-      <p class="modal__text">3 fases, 3 destinos diferentes. Você tem 90s por fase. Coloque os itens CERTOS na mala — cada item errado perde 80pts, cada certo ganha 100pts. Itens ★ obrigatórios — esquecer um item obrigatório = fase falha!</p>
-      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startPacking()">✈️ Empacotar!</button></div>
+      <p class="modal__text" data-it="3 fasi, 3 destinazioni diverse. Hai 90s per fase. Metti gli oggetti GIUSTI in valigia — ogni errore perde 80pt, ogni oggetto giusto guadagna 100pt. Gli oggetti ★ sono obbligatori — dimenticarne uno = fase fallita!">3 fases, 3 destinos diferentes. Você tem 90s por fase. Coloque os itens CERTOS na mala — cada item errado perde 80pts, cada certo ganha 100pts. Itens ★ obrigatórios — esquecer um item obrigatório = fase falha!</p>
+      <div class="btn-row"><button class="game-btn game-btn--main" onclick="startPacking()" data-it="✈️ Fai la valigia!">✈️ Empacotar!</button></div>
     </div>
   </div>
   <div class="modal" id="phaseEndModal" hidden>
@@ -146,7 +146,7 @@
       <h2 class="modal__title" id="peTitle">Fase concluída!</h2>
       <p class="modal__text" id="peText"></p>
       <div class="btn-row" style="margin-bottom:.65rem">
-        <button class="game-btn game-btn--main" id="peNextBtn" onclick="nextPhase()">Próxima fase →</button>
+        <button class="game-btn game-btn--main" id="peNextBtn" onclick="nextPhase()" data-it="Fase successiva →">Próxima fase →</button>
       </div>
     </div>
   </div>
@@ -156,10 +156,10 @@
       <h2 class="modal__title" id="endTitle">Fim da viagem!</h2>
       <p class="modal__text" id="endText"></p>
       <div class="btn-row" style="margin-bottom:.65rem">
-        <button class="game-btn game-btn--main" onclick="restartPacking()">Jogar novamente</button>
+        <button class="game-btn game-btn--main" onclick="restartPacking()" data-it="Gioca di nuovo">Jogar novamente</button>
       </div>
       <div class="save-box">
-        <div class="save-box__row"><input class="save-input" id="pName" placeholder="Seu nome" maxlength="22"/><button class="game-btn" onclick="doSave()">Salvar</button></div>
+        <div class="save-box__row"><input class="save-input" id="pName" placeholder="Seu nome" data-it-placeholder="Il tuo nome" maxlength="22"/><button class="game-btn" onclick="doSave()" data-it="Salva">Salvar</button></div>
         <p class="save-msg" id="saveMsg"></p>
       </div>
     </div>
@@ -179,40 +179,42 @@ function sndWin(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.12,.1
 function sndFail(){beep(330,.3,.08,'sawtooth');}
 function haptic(p){try{navigator.vibrate&&navigator.vibrate(p||15);}catch(e){}}
 
+function t_(pt, it) { return (window.I18N && window.I18N.lang === "it") ? it : pt; }
+
 const PHASES=[
-  {dest:"noronha",  name:"Fernando de Noronha", bg:"packing-bg-noronha.png",
+  {dest:"noronha",  name:"Fernando de Noronha", nameIt:"Fernando de Noronha", bg:"packing-bg-noronha.png",
    required:["passport","sunscreen","swimsuit","sandals","sunglasses"],
    forbidden:["jacket","pants","powerbank"],
    optional:["camera","hat","book","phone","macaron-box","binoculars"],
    mandatory:["passport"]},
-  {dest:"tailandia",name:"Tailândia", bg:"packing-bg-thailand.png",
+  {dest:"tailandia",name:"Tailândia", nameIt:"Thailandia", bg:"packing-bg-thailand.png",
    required:["passport","camera","binoculars","phone","powerbank"],
    forbidden:["swimsuit","sandals","sunscreen"],
    optional:["jacket","sunglasses","book","shirt","hat","macaron-box"],
    mandatory:["passport","camera"]},
-  {dest:"africa",   name:"África do Sul", bg:"packing-bg-southafrica.png",
+  {dest:"africa",   name:"África do Sul", nameIt:"Sudafrica", bg:"packing-bg-southafrica.png",
    required:["passport","jacket","binoculars","powerbank","camera"],
    forbidden:["swimsuit","sandals","sunscreen","hat"],
    optional:["sunglasses","book","pants","phone","shirt","macaron-box"],
    mandatory:["passport","jacket","binoculars"]},
 ];
 const ALL_ITEMS=[
-  {id:"passport",  name:"Passaporte", mandatory:true},
-  {id:"camera",    name:"Câmera"},
-  {id:"sunglasses",name:"Óculos de sol"},
-  {id:"hat",       name:"Chapéu"},
-  {id:"swimsuit",  name:"Suíte banho"},
-  {id:"sandals",   name:"Sandálias"},
-  {id:"shirt",     name:"Camisa"},
-  {id:"pants",     name:"Calça"},
-  {id:"jacket",    name:"Jaqueta"},
-  {id:"binoculars",name:"Binóculos"},
-  {id:"sunscreen", name:"Protetor"},
-  {id:"book",      name:"Livro"},
-  {id:"toothbrush",name:"Escova"},
-  {id:"powerbank", name:"Power bank"},
-  {id:"phone",     name:"Celular"},
-  {id:"macaron-box",name:"Macarons 💛"},
+  {id:"passport",  name:"Passaporte", nameIt:"Passaporto", mandatory:true},
+  {id:"camera",    name:"Câmera", nameIt:"Macchina fotografica"},
+  {id:"sunglasses",name:"Óculos de sol", nameIt:"Occhiali da sole"},
+  {id:"hat",       name:"Chapéu", nameIt:"Cappello"},
+  {id:"swimsuit",  name:"Suíte banho", nameIt:"Costume da bagno"},
+  {id:"sandals",   name:"Sandálias", nameIt:"Sandali"},
+  {id:"shirt",     name:"Camisa", nameIt:"Camicia"},
+  {id:"pants",     name:"Calça", nameIt:"Pantaloni"},
+  {id:"jacket",    name:"Jaqueta", nameIt:"Giacca"},
+  {id:"binoculars",name:"Binóculos", nameIt:"Binocolo"},
+  {id:"sunscreen", name:"Protetor", nameIt:"Crema solare"},
+  {id:"book",      name:"Livro", nameIt:"Libro"},
+  {id:"toothbrush",name:"Escova", nameIt:"Spazzolino"},
+  {id:"powerbank", name:"Power bank", nameIt:"Power bank"},
+  {id:"phone",     name:"Celular", nameIt:"Cellulare"},
+  {id:"macaron-box",name:"Macarons 💛", nameIt:"Macaron 💛"},
 ];
 const MAX_SUITCASE=12;
 let curPhase=0,packedItems=[],timeLeft=90,timerInt=null,score=0,finalScore=0;
@@ -228,7 +230,7 @@ function loadPhase(idx){
   const ph=PHASES[idx];
   document.getElementById('destPreview').src='assets/img/'+ph.bg;
   document.getElementById('phaseEl').textContent=idx+1;
-  document.getElementById('phaseInfo').textContent=`Destino: ${ph.name}. Empacote os itens certos para esse clima. Itens errados: -80pts.`;
+  document.getElementById('phaseInfo').textContent=t_(`Destino: ${ph.name}. Empacote os itens certos para esse clima. Itens errados: -80pts.`,`Destinazione: ${ph.nameIt}. Metti in valigia gli oggetti giusti per questo clima. Oggetti errati: -80pt.`);
   renderDestStrip();
   renderMandatoryStrip();
   renderDropZone();
@@ -247,22 +249,25 @@ function updateHud(){
   document.getElementById('timerPill').className='hud__pill hud__pill--timer'+(timeLeft<=10?' urgent':'');
 }
 
+function destName(p){return t_(p.name,p.nameIt);}
+function itemName(item){return item?(t_(item.name,item.nameIt)):'';}
+
 function renderDestStrip(){
   const strip=document.getElementById('destStrip');
   strip.innerHTML=PHASES.map((p,i)=>`
     <div class="dest-btn ${i===curPhase?'active':''}">
-      <img src="assets/img/${p.bg}" alt="${p.name}">
-      <span>${p.name.split(' ')[0]}</span>
+      <img src="assets/img/${p.bg}" alt="${destName(p)}">
+      <span>${destName(p).split(' ')[0]}</span>
     </div>`).join('');
 }
 
 function renderMandatoryStrip(){
   const ph=PHASES[curPhase];
   document.getElementById('mandatoryStrip').innerHTML=
-    '<span style="font-size:.62rem;color:#6C6258;font-weight:600">★ Obrigatório: </span>'+
+    `<span style="font-size:.62rem;color:#6C6258;font-weight:600">★ ${t_('Obrigatório','Obbligatorio')}: </span>`+
     ph.mandatory.map(id=>{
       const item=ALL_ITEMS.find(i=>i.id===id);
-      return `<span class="mand-tag ${packedItems.includes(id)?'done':''}" id="mand_${id}">${item?.name||id}</span>`;
+      return `<span class="mand-tag ${packedItems.includes(id)?'done':''}" id="mand_${id}">${itemName(item)||id}</span>`;
     }).join('');
   const pct=(packedItems.length/MAX_SUITCASE)*100;
   document.getElementById('progBar').style.width=pct+'%';
@@ -272,7 +277,7 @@ function renderDropZone(){
   const dz=document.getElementById('dropZone');
   dz.innerHTML=packedItems.map(id=>{
     const item=ALL_ITEMS.find(i=>i.id===id);
-    return `<div class="packed-chip"><img src="assets/img/packing-${id}.png" alt="${item?.name||id}" onerror="this.src='assets/img/icon-suitcase.png'" title="${item?.name||id}"><span class="rm" onclick="removeItem('${id}')">✕</span></div>`;
+    return `<div class="packed-chip"><img src="assets/img/packing-${id}.png" alt="${itemName(item)||id}" onerror="this.src='assets/img/icon-suitcase.png'" title="${itemName(item)||id}"><span class="rm" onclick="removeItem('${id}')">✕</span></div>`;
   }).join('');
 }
 
@@ -285,8 +290,8 @@ function renderItemsGrid(){
     const isMandatory=ph.mandatory.includes(item.id);
     const sel=selectedItem===item.id;
     return `<div class="item-chip ${packed?'packed':''} ${isMandatory?'mandatory':''} ${sel?'selected':''}" id="chip_${item.id}" onclick="selectItem('${item.id}')">
-      <img src="assets/img/packing-${item.id}.png" alt="${item.name}" onerror="this.src='assets/img/icon-suitcase.png'">
-      <span>${item.name}</span>
+      <img src="assets/img/packing-${item.id}.png" alt="${itemName(item)}" onerror="this.src='assets/img/icon-suitcase.png'">
+      <span>${itemName(item)}</span>
     </div>`;
   }).join('');
 }
@@ -294,7 +299,7 @@ function renderItemsGrid(){
 function selectItem(id){
   const ph=PHASES[curPhase];
   if(packedItems.includes(id))return;
-  if(packedItems.length>=MAX_SUITCASE){showMsg('Mala cheia!');return;}
+  if(packedItems.length>=MAX_SUITCASE){showMsg(t_('Mala cheia!','Valigia piena!'));return;}
   selectedItem=id;
   // Give immediate feedback: is this right or wrong?
   const isRequired=ph.required.includes(id)||ph.mandatory.includes(id);
@@ -311,7 +316,7 @@ function selectItem(id){
     sndWrong();haptic([10,30,10]);
     const chip=document.getElementById('chip_'+id);
     if(chip){chip.classList.add('wrong');setTimeout(()=>chip.classList.remove('wrong'),700);}
-    showMsg(`${ALL_ITEMS.find(i=>i.id===id)?.name} não serve para ${PHASES[curPhase].name}! -80pts`,'#B5423A');
+    showMsg(t_(`${itemName(ALL_ITEMS.find(i=>i.id===id))} não serve para ${destName(PHASES[curPhase])}! -80pts`,`${itemName(ALL_ITEMS.find(i=>i.id===id))} non serve per ${destName(PHASES[curPhase])}! -80pt`),'#B5423A');
     selectedItem=null;updateHud();return;
   } else {
     // Optional — can pack but no bonus
@@ -338,15 +343,15 @@ function closeSuitcase(){
   const ph=PHASES[curPhase];
   const missingMandatory=ph.mandatory.filter(id=>!packedItems.includes(id));
   if(missingMandatory.length>0){
-    const names=missingMandatory.map(id=>ALL_ITEMS.find(i=>i.id===id)?.name||id).join(', ');
-    showMsg(`Esqueceu: ${names}! Obrigatório!`,'#B5423A');sndFail();haptic([20,50,20]);return;
+    const names=missingMandatory.map(id=>itemName(ALL_ITEMS.find(i=>i.id===id))||id).join(', ');
+    showMsg(t_(`Esqueceu: ${names}! Obrigatório!`,`Hai dimenticato: ${names}! Obbligatorio!`),'#B5423A');sndFail();haptic([20,50,20]);return;
   }
   clearInterval(timerInt);sndClose();haptic(30);
   const bonusTime=timeLeft*2;phaseScore+=bonusTime;score+=bonusTime;
   const perfect=ph.forbidden.every(id=>!packedItems.includes(id))&&ph.mandatory.every(id=>packedItems.includes(id));
   document.getElementById('peIcon').innerHTML=perfect?'<img src="assets/img/packing-perfect-fit.png" alt="">':'<img src="assets/img/packing-airplane-takeoff.png" alt="">';
-  document.getElementById('peTitle').textContent=perfect?`✈️ ${ph.name}: Perfeito!`:`✅ ${ph.name}: Concluído!`;
-  document.getElementById('peText').textContent=`${packedItems.length} itens, +${bonusTime}pts bônus de tempo. Score da fase: ${phaseScore}. Total: ${score}`;
+  document.getElementById('peTitle').textContent=perfect?t_(`✈️ ${ph.name}: Perfeito!`,`✈️ ${ph.nameIt}: Perfetto!`):t_(`✅ ${ph.name}: Concluído!`,`✅ ${ph.nameIt}: Completato!`);
+  document.getElementById('peText').textContent=t_(`${packedItems.length} itens, +${bonusTime}pts bônus de tempo. Score da fase: ${phaseScore}. Total: ${score}`,`${packedItems.length} oggetti, +${bonusTime}pt bonus tempo. Punti della fase: ${phaseScore}. Totale: ${score}`);
   document.getElementById('phaseEndModal').hidden=false;
   if(perfect&&window.confettiBurst)confettiBurst({count:22});
 }
@@ -357,8 +362,8 @@ function closePhaseTime(){
   const missingMandatory=ph.mandatory.filter(id=>!packedItems.includes(id));
   if(missingMandatory.length>0){
     document.getElementById('peIcon').innerHTML='<img src="assets/img/packing-overflow.png" alt="">';
-    document.getElementById('peTitle').textContent='Tempo esgotado! ⌛';
-    document.getElementById('peText').textContent=`Esqueceu itens obrigatórios. Fase com penalidade. Próxima fase →`;
+    document.getElementById('peTitle').textContent=t_('Tempo esgotado! ⌛','Tempo scaduto! ⌛');
+    document.getElementById('peText').textContent=t_(`Esqueceu itens obrigatórios. Fase com penalidade. Próxima fase →`,`Hai dimenticato oggetti obbligatori. Fase con penalità. Fase successiva →`);
     score=Math.max(0,score-200);
     sndFail();
   } else {
@@ -375,10 +380,10 @@ function nextPhase(){
 
 function endGame(){
   finalScore=score;
-  document.getElementById('endTitle').textContent=score>=600?'🏆 Mestre do packing!':'✈️ Viagem concluída!';
+  document.getElementById('endTitle').textContent=score>=600?t_('🏆 Mestre do packing!','🏆 Maestro della valigia!'):t_('✈️ Viagem concluída!','✈️ Viaggio completato!');
   document.getElementById('endText').textContent=score>=600
-    ?`Incrível! ${score} pontos — você sabe empacotar! Boa lua de mel!`
-    :`${score} pontos nas 3 fases. Pratique mais antes da viagem!`;
+    ?t_(`Incrível! ${score} pontos — você sabe empacotar! Boa lua de mel!`,`Incredibile! ${score} punti — sai fare le valigie! Buona luna di miele!`)
+    :t_(`${score} pontos nas 3 fases. Pratique mais antes da viagem!`,`${score} punti nelle 3 fasi. Esercitati ancora prima del viaggio!`);
   document.getElementById('endModal').hidden=false;
   if(score>=600&&window.confettiBurst)confettiBurst({count:30});
 }
@@ -392,17 +397,17 @@ function showMsg(msg,color){
 async function doSave(){
   const name=(document.getElementById('pName').value||'').trim().slice(0,22);
   const msg=document.getElementById('saveMsg');
-  if(!name){msg.textContent='Coloque seu nome!';return;}
-  msg.textContent='Salvando...';
-  try{await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});msg.textContent='Salvo! ✈️';loadTop10();}
-  catch(e){msg.textContent='Erro ao salvar.';}
+  if(!name){msg.textContent=t_('Coloque seu nome!','Inserisci il tuo nome!');return;}
+  msg.textContent=t_('Salvando...','Salvataggio...');
+  try{await fetch(API,{method:'POST',body:JSON.stringify({action:'score',jogo:GAME_KEY,nome:name,pontos:finalScore})});msg.textContent=t_('Salvo! ✈️','Salvato! ✈️');loadTop10();}
+  catch(e){msg.textContent=t_('Erro ao salvar.','Errore nel salvataggio.');}
 }
 async function loadTop10(){
-  const list=document.getElementById('topList');list.innerHTML='<li><span class="name">Carregando...</span></li>';
+  const list=document.getElementById('topList');list.innerHTML=`<li><span class="name">${t_('Carregando...','Caricamento...')}</span></li>`;
   try{const r=await fetch(`${API}?action=top10&jogo=${GAME_KEY}`);const d=await r.json();const arr=d.lista||[];
-    if(!arr.length){list.innerHTML='<li><span class="name">Seja o primeiro!</span></li>';return;}
+    if(!arr.length){list.innerHTML=`<li><span class="name">${t_('Seja o primeiro!','Sii il primo!')}</span></li>`;return;}
     list.innerHTML=arr.map((it,i)=>`<li><span class="pos">${i+1}</span><span class="name">${esc(it.nome)}</span><span class="pts">${it.pontos} pts</span></li>`).join('');
-  }catch(e){list.innerHTML='<li><span class="name">Placar indisponível.</span></li>';}
+  }catch(e){list.innerHTML=`<li><span class="name">${t_('Placar indisponível.','Classifica non disponibile.')}</span></li>`;}
 }
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
 loadTop10();
