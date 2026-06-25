@@ -32,6 +32,8 @@
     .hud__pill{background:rgba(255,255,255,.7);border:1px solid rgba(196,109,40,.22);border-radius:999px;padding:.42rem .82rem;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--rn-amber);display:flex;align-items:center;gap:.35rem;}
     .hud__pill strong{color:var(--rn-navy);font-weight:600;font-size:.82rem;text-transform:none;letter-spacing:0;}
     .hud__pill .flag{font-size:1rem;}
+    .hud__pill--btn{border:1px solid rgba(196,109,40,.3);cursor:pointer;font:inherit;letter-spacing:.05em;text-transform:uppercase;-webkit-tap-highlight-color:transparent;}
+    .hud__pill--btn:active{background:var(--rn-sage-lt,rgba(196,109,40,.15));transform:scale(.97);}
 
     .dest-progress{width:100%;max-width:420px;height:6px;background:rgba(196,109,40,.15);border-radius:6px;margin:0 auto .8rem;overflow:hidden;}
     .dest-progress__fill{height:100%;width:0%;background:linear-gradient(90deg,var(--rn-terra),var(--rn-gold));border-radius:6px;transition:width .15s linear;}
@@ -105,6 +107,7 @@
       <div class="hud__pill"><span class="flag" id="rn-hud-flag">🇧🇷</span> <strong id="rn-hud-dest">Noronha</strong></div>
       <div class="hud__pill" data-it="Pontos"><span data-it="Punti">Pontos</span>: <strong id="rn-hud-score">0</strong></div>
       <div class="hud__pill">🏆 <span data-it="Record">Recorde</span>: <strong id="rn-hud-best">—</strong></div>
+      <button class="hud__pill hud__pill--btn" id="rn-btn-restart" onclick="restartRunnerNow()" data-it="Ricomincia">🔄 Recomeçar</button>
     </div>
     <div class="dest-progress"><div class="dest-progress__fill" id="rn-progress-fill"></div></div>
 
@@ -204,10 +207,12 @@ for (let i=1;i<=7;i++){
 let rnPersonagem = "tiago", rnFaceIdx = 0;
 function rnFaces(){ return rnPersonagem === "gian" ? RN_GIAN_FACES : RN_TIAGO_FACES; }
 
-/* ── Camadas de cenário (SVG provisório — depois entram assets definitivos) ──
-   Cada destino tem: fg (rápido, frente), mid x3 (árvores/casas, meio),
-   relief (montanhas/platôs, mais lento), backdrop (cenário profundo, anda
-   uma vez por nível e troca quando o destino termina). Nuvens são genéricas. */
+/* ── Camadas de cenário ──
+   Cada destino tem: ground (chão, escala 1:1 com o chão real), relief
+   (montanhas/platôs, mais lento), backdrop (cenário profundo, anda uma
+   vez por nível e troca quando o destino termina). Nuvens são genéricas.
+   relief e ground não foram desenhados pra emendar lado a lado, então o
+   jogo alterna espelhado/normal a cada tile pra disfarçar a costura. */
 const RIMG = "assets/img/runner/";
 function rImg(name){ return loadImgFallback(`${RIMG}${name}.png`, `${RIMG}${name}.svg`); }
 
@@ -217,10 +222,9 @@ const RUNNER_LAYERS = {};
 const RUNNER_OBS_IMG = {};
 DEST_IDS.forEach(id=>{
   RUNNER_LAYERS[id] = {
-    mid: [rImg(`${id}-mid-1`), rImg(`${id}-mid-2`), rImg(`${id}-mid-3`)],
     relief: rImg(`${id}-relief-1`),
     backdrop: rImg(`${id}-backdrop-1`),
-    fg: [rImg(`${id}-fg-1`), rImg(`${id}-fg-2`)],
+    ground: loadImg(`${RIMG}${id}-ground-1.png`),
   };
   /* obstáculos e colecionáveis ainda não têm SVG provisório — ficam em emoji
      até o PNG existir; em quanto não existir, loadImg simplesmente falha e
@@ -240,24 +244,24 @@ DEST_IDS.forEach(id=>{
 ══════════════════════════════════════════════════════════ */
 const DESTS = [
   { id:"noronha", flag:"🇧🇷", name:"Fernando de Noronha", tagline:"Praia do Sancho nos espera",
-    len:630, sky:["#8FD3E8","#FDEFC4"], ground:"#E8D2A0", groundLine:"#C9A968",
-    low:{e:"🦀",w:30,h:30}, tall:{e:"🪨",w:32,h:118}, trap:{e:"🐦",w:30,h:24},
+    len:1260, sky:["#8FD3E8","#FDEFC4"], ground:"#E8D2A0", groundLine:"#C9A968",
+    low:{e:"🦀",w:57,h:57}, tall:{e:"🪨",w:32,h:118}, trap:{e:"🐦",w:57,h:46},
     collect:{e:"🐚",pts:60,label:"Concha"}, bonus:{e:"🥥",pts:90,label:"Coco"} },
   { id:"tailandia", flag:"🇹🇭", name:"Tailândia", tagline:"Templos dourados e elefantes",
-    len:750, sky:["#FFD27A","#FF9E5E"], ground:"#C9A227", groundLine:"#8C701A",
-    low:{e:"🥥",w:28,h:30}, tall:{e:"🛕",w:42,h:124}, trap:{e:"🏮",w:26,h:26},
+    len:1500, sky:["#FFD27A","#FF9E5E"], ground:"#C9A227", groundLine:"#8C701A",
+    low:{e:"🥥",w:53,h:57}, tall:{e:"🛕",w:42,h:124}, trap:{e:"🏮",w:49,h:49},
     collect:{e:"🪷",pts:80,label:"Flor de Lótus"}, bonus:{e:"🥭",pts:110,label:"Manga"} },
   { id:"africa", flag:"🇿🇦", name:"África do Sul", tagline:"Savana ao pôr do sol",
-    len:810, sky:["#FF7E5F","#FEB47B"], ground:"#7A5230", groundLine:"#523515",
-    low:{e:"🦂",w:26,h:26}, tall:{e:"🌳",w:36,h:120}, trap:{e:"🦅",w:32,h:24},
+    len:1620, sky:["#FF7E5F","#FEB47B"], ground:"#7A5230", groundLine:"#523515",
+    low:{e:"🦂",w:49,h:49}, tall:{e:"🌳",w:36,h:120}, trap:{e:"🦅",w:61,h:46},
     collect:{e:"💎",pts:100,label:"Diamante"}, bonus:{e:"🦋",pts:120,label:"Borboleta"} },
   { id:"caribe", flag:"🏝️", name:"Caribe", tagline:"Águas turquesa e veleiros",
-    len:870, sky:["#4FC1E9","#B6E5D8"], ground:"#E8C99A", groundLine:"#C9A968",
-    low:{e:"🦞",w:34,h:28}, tall:{e:"⚓",w:28,h:122}, trap:{e:"🦜",w:30,h:24},
+    len:1740, sky:["#4FC1E9","#B6E5D8"], ground:"#E8C99A", groundLine:"#C9A968",
+    low:{e:"🦞",w:65,h:53}, tall:{e:"⚓",w:28,h:122}, trap:{e:"🦜",w:57,h:46},
     collect:{e:"🪙",pts:110,label:"Moeda do Tesouro"}, bonus:{e:"⭐",pts:130,label:"Estrela do Mar"} },
   { id:"maiorca", flag:"🇪🇸", name:"Maiorca", tagline:"Mediterrâneo — o gran finale",
-    len:930, sky:["#3A5BA0","#E8784A"], ground:"#5E7FA3", groundLine:"#33506E",
-    low:{e:"🐐",w:38,h:38}, tall:{e:"⚙️",w:34,h:128}, trap:{e:"🕊️",w:28,h:22},
+    len:1860, sky:["#3A5BA0","#E8784A"], ground:"#5E7FA3", groundLine:"#33506E",
+    low:{e:"🐐",w:72,h:72}, tall:{e:"⚙️",w:34,h:128}, trap:{e:"🕊️",w:53,h:42},
     collect:{e:"💍",pts:160,label:"Aliança"}, bonus:{e:"🍇",pts:140,label:"Uvas"} },
 ];
 const CYCLE_LEN = DESTS.reduce((s,d)=>s+d.len,0);
@@ -282,7 +286,7 @@ const ctx = canvas.getContext("2d");
 let rnAlive=false, rnStarted=false, rnRaf=null, rnLastTs=0;
 let distance=0, speed=0, score=0, bonus=0, best=0;
 let curDestIdx=0, lastLap=0, curT=0;
-let groundOffset=0, cloudOff=0, reliefOff=0, midOff=0, fgOff=0;
+let groundOffset=0, cloudOff=0, reliefOff=0;
 
 const PLAYER_X = 70;
 const STAND_W=30, STAND_H=44;
@@ -325,6 +329,7 @@ window.addEventListener("resize", ()=>{ setupCanvas(); if(!rnAlive) drawFrame(0)
    HOLD_MAX) = pulo mais alto e mais longo no ar.
 ══════════════════════════════════════════════════════════ */
 function jumpPress(){
+  registerCheatClick();
   if (!rnStarted) { startRunner(); return; }
   if (!rnAlive) return;
   if (!player.jumping){
@@ -333,6 +338,28 @@ function jumpPress(){
   }
 }
 function jumpRelease(){ player.holding = false; }
+
+/* CHEAT: 5 toques bem rápidos seguidos (qualquer um — tecla, clique,
+   botão) pulam pro próximo cenário, sem precisar terminar o trecho atual. */
+let cheatTaps = [];
+const CHEAT_WINDOW_MS = 1200, CHEAT_TAPS_NEEDED = 5;
+function registerCheatClick(){
+  if (!rnAlive) return;
+  const now = performance.now();
+  cheatTaps.push(now);
+  cheatTaps = cheatTaps.filter(t => now - t <= CHEAT_WINDOW_MS);
+  if (cheatTaps.length >= CHEAT_TAPS_NEEDED){
+    cheatTaps = [];
+    skipToNextDest();
+  }
+}
+function skipToNextDest(){
+  const lapStart = Math.floor(distance/CYCLE_LEN)*CYCLE_LEN;
+  let acc = 0;
+  for (let i=0;i<=curDestIdx;i++) acc += DESTS[i].len;
+  distance = lapStart + acc + 1;
+  if(window.GS){GS.combo(5);GS.hGood();}
+}
 
 document.addEventListener("keydown", e=>{
   const tag = (e.target && e.target.tagName) || "";
@@ -377,10 +404,10 @@ function hideOverlay(){ document.getElementById("rn-overlay").classList.remove("
 function resetRunner(){
   setupCanvas();
   distance=0; speed=BASE_SPEED; score=0; bonus=0; curDestIdx=0; lastLap=0; curT=0;
-  groundOffset=0; cloudOff=0; reliefOff=0; midOff=0; fgOff=0;
+  groundOffset=0; cloudOff=0; reliefOff=0;
   player = { y: GROUND_Y-STAND_H, vy:0, jumping:false, holding:false, holdT:0, runT:0, squash:0 };
   obstacles=[]; collectibles=[]; particles=[];
-  nextObsGap = 220; nextCollGap = 340;
+  nextObsGap = 220/3; nextCollGap = 340/2;
   banner = {text:"", flag:"", timer:0}; shake=0;
   rnFaceIdx = Math.floor(Math.random()*rnFaces().length);
   updateHud();
@@ -436,6 +463,18 @@ function endRunner(){
 function startRunner2(){ resetRunner(); startRunner(); }
 window.startRunner2 = startRunner2;
 
+/* botão "Recomeçar" sempre visível no HUD — interrompe a corrida atual
+   (se estiver em andamento) e volta pra tela inicial, pronta pra um novo começo. */
+function restartRunnerNow(){
+  if (rnStarted && rnAlive && !confirm("Recomeçar a corrida?")) return;
+  if (rnRaf) cancelAnimationFrame(rnRaf);
+  rnRaf = null;
+  rnAlive = false; rnStarted = false;
+  unlockScroll();
+  resetRunner();
+}
+window.restartRunnerNow = restartRunnerNow;
+
 function updateHud(){
   const d = DESTS[curDestIdx];
   document.getElementById("rn-hud-flag").textContent = d.flag;
@@ -472,10 +511,8 @@ function update(dt){
   const distDelta = (speed*dt)/16;
   distance += distDelta;
 
-  groundOffset = (groundOffset + speed*dt) % LW;
-  fgOff     = (fgOff     + speed*dt*1.6 ) % 2000;
-  midOff    = (midOff    + speed*dt*0.45) % 2000;
-  reliefOff = (reliefOff + speed*dt*0.18) % 2000;
+  groundOffset = (groundOffset + speed*dt) % (LW*10000);
+  reliefOff = (reliefOff + speed*dt*0.18) % (LW*10000);
   cloudOff  = (cloudOff  + speed*dt*0.05) % 2000;
 
   const info = destInfoAt(distance);
@@ -519,12 +556,12 @@ function update(dt){
   if (nextObsGap <= 0){
     spawnObstacle();
     const minGap = 78 + speed*0.30;
-    nextObsGap = minGap + Math.random()*minGap*0.85;
+    nextObsGap = (minGap + Math.random()*minGap*0.85) / 3; // 3x mais obstáculos
   }
   nextCollGap -= distDelta;
   if (nextCollGap <= 0){
     spawnCollectible();
-    nextCollGap = 150 + Math.random()*170;
+    nextCollGap = (150 + Math.random()*170) / 2; // 2x mais colecionáveis, desde o início
   }
 
   /* move obstáculos/colecionáveis (em px de tela, escala simples) */
@@ -557,11 +594,13 @@ function spawnObstacle(){
 }
 function spawnCollectible(){
   const d = DESTS[curDestIdx];
-  const canBonus = lastLap >= 1; // a partir da 2ª repetição das voltas
-  if (canBonus && Math.random() < 0.4){
-    collectibles.push({ x:LW+20, y0:GROUND_Y-118, w:26, e:d.bonus.e, img:RUNNER_OBS_IMG[d.id].bonus, pts:d.bonus.pts, label:d.bonus.label, bob:Math.random()*6.28, taken:false, bonus:true });
+  /* antes só liberava bônus a partir da 2ª volta — quase ninguém chegava
+     lá, então dava pra nunca ver metade dos itens (ex: a manga). Agora
+     pode aparecer desde a primeira corrida. */
+  if (Math.random() < Math.min(1, 0.4*3)){ // 3x mais bônus
+    collectibles.push({ x:LW+20, y0:GROUND_Y-118, w:48, e:d.bonus.e, img:RUNNER_OBS_IMG[d.id].bonus, pts:d.bonus.pts, label:d.bonus.label, bob:Math.random()*6.28, taken:false, bonus:true });
   } else {
-    collectibles.push({ x:LW+20, y0:GROUND_Y-78, w:24, e:d.collect.e, img:RUNNER_OBS_IMG[d.id].collect, pts:d.collect.pts, label:d.collect.label, bob:Math.random()*6.28, taken:false, bonus:false });
+    collectibles.push({ x:LW+20, y0:GROUND_Y-78, w:44, e:d.collect.e, img:RUNNER_OBS_IMG[d.id].collect, pts:d.collect.pts, label:d.collect.label, bob:Math.random()*6.28, taken:false, bonus:false });
   }
 }
 
@@ -617,14 +656,13 @@ function drawFrame(){
   drawBackdrop(d);
   drawClouds(d);
   drawRelief(d);
-  drawMid(d);
+  drawReliefHaze(d);
   drawGround(d);
 
   obstacles.forEach(drawObstacle);
   collectibles.forEach(drawCollectible);
   particles.forEach(drawParticle);
   drawPlayer();
-  drawForeground(d);
 
   if (banner.timer > 0) drawBanner();
 
@@ -655,16 +693,29 @@ function drawBackdrop(d){
 function drawClouds(){
   drawTiledImgs(RUNNER_CLOUDS, cloudOff, 260, GROUND_Y*0.16, 140, 60, 0.85);
 }
+/* ajuste fino de altura do relief por destino — alguns PNGs vieram com a
+   linha do horizonte mais alta que o resto, então o relief "flutuava"
+   acima do chão. Empurra a arte pra baixo (revela mais céu acima). */
+const RELIEF_DY = { noronha:10, tailandia:40, africa:10, caribe:40, maiorca:40 };
 function drawRelief(d){
   const img = RUNNER_LAYERS[d.id].relief;
   if (!imgOk(img)) return;
-  drawTiledImgs([img], reliefOff, LW, 0, LW, GROUND_Y*0.95, 1);
+  drawMirrorTiled(img, reliefOff, LW, 0, GROUND_Y, 1.18, RELIEF_DY[d.id]||0);
 }
-function drawMid(d){
-  drawTiledImgs(RUNNER_LAYERS[d.id].mid, midOff, 150, GROUND_Y-150, 88, 150, 1, true);
-}
-function drawForeground(d){
-  drawTiledImgs(RUNNER_LAYERS[d.id].fg, fgOff, 230, GROUND_Y-46, 96, 56, 1, true, true);
+
+/* leve véu atmosférico na frente do relief, dando uma sensação de
+   profundidade entre ele e o chão/jogador (mais perto da câmera). */
+function drawReliefHaze(d){
+  const img = RUNNER_LAYERS[d.id].relief;
+  if (!imgOk(img)) return;
+  ctx.save();
+  const g = ctx.createLinearGradient(0,0,0,GROUND_Y);
+  g.addColorStop(0, "rgba(255,255,255,0)");
+  g.addColorStop(0.55, "rgba(255,255,255,0.24)");
+  g.addColorStop(1, "rgba(255,255,255,0.46)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,LW,GROUND_Y);
+  ctx.restore();
 }
 
 /* desenha uma camada infinita de imagens lado a lado, com variação
@@ -684,24 +735,77 @@ function drawTiledImgs(imgs, offset, spacing, yTop, w, h, alpha, variants, botto
   ctx.restore();
 }
 
+/* desenha uma camada que precisa cobrir a tela toda lado a lado (relief,
+   chão) sem ter sido feita pra emendar — alterna espelhado/normal a cada
+   tile (índice de tile fixo no "mundo", não na tela, pra não tremer)
+   pra disfarçar a costura entre uma imagem e a próxima. `zoom` (>1) dá um
+   leve aproximado/recorte em cada tile, pra empurrar pra fora da margem
+   visível qualquer "espaço morto" que a arte tenha nas bordas — sem isso
+   sobra uma fresta entre um tile e o próximo. */
+function drawMirrorTiled(img, offset, tileW, y, h, zoom=1, dy=0){
+  const drawW = tileW*zoom, drawH = h*zoom;
+  const padX = (drawW-tileW)/2, padY = (drawH-h)/2;
+  for (let x = -((offset) % tileW) - tileW; x < LW + tileW; x += tileW){
+    const tileIdx = Math.round((x + offset) / tileW);
+    const flipped = (((tileIdx % 2) + 2) % 2) === 1;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x, y, tileW, h); ctx.clip();
+    if (flipped){ ctx.translate(x + tileW + padX, y - padY + dy); ctx.scale(-1, 1); ctx.drawImage(img, 0, 0, drawW, drawH); }
+    else { ctx.drawImage(img, x-padX, y-padY+dy, drawW, drawH); }
+    ctx.restore();
+  }
+}
+
 function drawGround(d){
-  ctx.fillStyle = d.ground; ctx.fillRect(0,GROUND_Y,LW,LH-GROUND_Y);
-  ctx.fillStyle = d.groundLine; ctx.fillRect(0,GROUND_Y,LW,4);
-  ctx.save();
-  ctx.strokeStyle = d.groundLine; ctx.globalAlpha=.4; ctx.lineWidth=2;
-  const off = groundOffset % 36;
-  for (let x=-off; x<LW; x+=36){ ctx.beginPath(); ctx.moveTo(x,GROUND_Y+10); ctx.lineTo(x+16,GROUND_Y+10); ctx.stroke(); }
-  ctx.restore();
+  const img = RUNNER_LAYERS[d.id].ground;
+  const hasImg = imgOk(img);
+  if (hasImg){
+    drawMirrorTiled(img, groundOffset, LW, GROUND_Y, LH-GROUND_Y, 1.1);
+  } else {
+    ctx.fillStyle = d.ground; ctx.fillRect(0,GROUND_Y,LW,LH-GROUND_Y);
+  }
+  /* a linha/tracinhos lisos abaixo eram só decoração do placeholder em SVG —
+     uma vez que o PNG real do chão tiver carregado, eles não fazem mais
+     sentido (ficam riscando por cima da arte), então só aparecem no fallback. */
+  if (!hasImg){
+    ctx.fillStyle = d.groundLine; ctx.fillRect(0,GROUND_Y,LW,3);
+    ctx.save();
+    ctx.strokeStyle = d.groundLine; ctx.globalAlpha=.4; ctx.lineWidth=2;
+    const off = groundOffset % 36;
+    for (let x=-off; x<LW; x+=36){ ctx.beginPath(); ctx.moveTo(x,GROUND_Y+10); ctx.lineTo(x+16,GROUND_Y+10); ctx.stroke(); }
+    ctx.restore();
+  }
 }
 
 function drawObstacle(o){
   const y = obstacleY(o);
   ctx.save();
+  ctx.shadowColor = "rgba(230,40,40,0.95)";
+  ctx.shadowBlur = 16;
   if (imgOk(o.img)){
-    ctx.drawImage(o.img, o.x, y, o.w, o.h);
+    if (o.kind === "tall" && o.img.naturalWidth > 0 && o.img.naturalHeight > 0){
+      /* não distorce o PNG pra encaixar na hitbox alta/fina — preserva a
+         proporção original e só encolhe o quanto precisar pra caber,
+         ancorado embaixo (a hitbox em si não muda). Desenha maior que a
+         hitbox e "enterra" a base um pouco no chão — assim dá pra aumentar
+         o tamanho visual sem deixar a margem transparente do PNG flutuando
+         e sem aumentar a dificuldade real (a colisão usa o.w/o.h originais). */
+      const VIS_SCALE = 1.45, SINK = 14;
+      const ar = o.img.naturalWidth / o.img.naturalHeight;
+      let dw = o.w*VIS_SCALE, dh = dw/ar;
+      const boxH = o.h*VIS_SCALE;
+      if (dh > boxH){ dh = boxH; dw = dh*ar; }
+      const dx = o.x + (o.w-dw)/2, dy = (y + o.h + SINK) - dh;
+      ctx.drawImage(o.img, dx, dy, dw, dh);
+      ctx.drawImage(o.img, dx, dy, dw, dh); // segunda passada: brilho mais forte
+    } else {
+      ctx.drawImage(o.img, o.x, y, o.w, o.h);
+      ctx.drawImage(o.img, o.x, y, o.w, o.h); // segunda passada: brilho mais forte
+    }
   } else {
     ctx.font = `${o.h}px serif`;
     ctx.textAlign="center"; ctx.textBaseline="bottom";
+    ctx.fillText(o.e, o.x + o.w/2, y + o.h);
     ctx.fillText(o.e, o.x + o.w/2, y + o.h);
   }
   ctx.restore();
@@ -709,17 +813,15 @@ function drawObstacle(o){
 function drawCollectible(c){
   const y = c.y0 + Math.sin(c.bob + distance*0.05)*6;
   ctx.save();
-  if (c.bonus){
-    ctx.globalAlpha = 0.55 + Math.sin(distance*0.12)*0.2;
-    ctx.fillStyle = "#F3D27A";
-    ctx.beginPath(); ctx.arc(c.x+c.w/2, y+c.w/2, c.w*0.85, 0, Math.PI*2); ctx.fill();
-    ctx.globalAlpha = 1;
-  }
+  ctx.shadowColor = "rgba(60,220,90,0.95)";
+  ctx.shadowBlur = c.bonus ? 18 : 13;
   if (imgOk(c.img)){
     ctx.drawImage(c.img, c.x, y, c.w, c.w);
+    ctx.drawImage(c.img, c.x, y, c.w, c.w); // segunda passada: brilho mais forte
   } else {
     ctx.font = `${c.w+6}px serif`;
     ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(c.e, c.x + c.w/2, y + c.w/2);
     ctx.fillText(c.e, c.x + c.w/2, y + c.w/2);
   }
   ctx.restore();
