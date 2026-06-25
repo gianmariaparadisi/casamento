@@ -87,10 +87,6 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 5%; max-width: var(--max-w); margin-inline: auto;
 }
-.nav__logo {
-  font-family: var(--font-display); font-size: 1.2rem;
-  font-weight: 400; letter-spacing: .14em; color: var(--text-main);
-}
 .nav__links {
   display: flex; align-items: center; gap: 1.75rem;
 }
@@ -201,20 +197,10 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
     radial-gradient(ellipse at 80% 25%, rgba(184,123,62,.18) 0%, transparent 50%);
   background-color: #2E3A28;
 }
-.hero__bg::before {
-  content: ''; position: absolute; inset: 0;
-  background: url('../img/hero.jpg') center/cover no-repeat;
-  opacity: .45; mix-blend-mode: multiply;
-}
 .hero__content { position: relative; z-index: 1; max-width: 700px; }
 .hero__eyebrow {
   font-size: .75rem; font-weight: 400; letter-spacing: .25em;
   text-transform: uppercase; color: rgba(255,255,255,.7); margin-bottom: 1.25rem;
-}
-.hero__title {
-  font-family: var(--font-display);
-  font-size: clamp(4rem, 10vw, 8.5rem);
-  font-weight: 300; color: var(--white); line-height: 1; letter-spacing: .02em;
 }
 .hero__amp { font-style: italic; font-weight: 300; color: var(--sage-light); }
 .hero__place {
@@ -320,10 +306,6 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* Foto destaque */
 .evento__foto-wrap {
   position: relative;
-}
-.evento__foto {
-  width: 100%; aspect-ratio: 3/4; object-fit: cover;
-  border-radius: var(--radius-lg); box-shadow: var(--shadow-green);
 }
 .evento__foto-ph {
   width: 100%; aspect-ratio: 3/4; border-radius: var(--radius-lg);
@@ -663,10 +645,6 @@ details[open] .faq__question::after { transform: rotate(45deg); }
 .footer__inner {
   display: flex; flex-direction: column;
   align-items: center; text-align: center; gap: .6rem;
-}
-.footer__names {
-  font-family: var(--font-display); font-size: 2.2rem;
-  font-weight: 300; color: var(--white); letter-spacing: .05em;
 }
 .footer__date {
   font-size: .75rem; letter-spacing: .28em;
@@ -1134,12 +1112,6 @@ canvas {
 /* Hero title vira container da imagem */
 .hero__title { font-size:0; line-height:1; margin-bottom:.75rem; }
 .hero__title .site-logo--hero { filter:drop-shadow(0 2px 12px rgba(0,0,0,.3)); }
-
-/* Footer */
-.footer__names { font-size:0; }
-
-/* ── Spin para loading hourglass ── */
-@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 
 /* ── Logo fixes ─────────────────────────────────────── */
 /* Nav: fundo claro → usa multiply para fundo preto sumir */
