@@ -331,7 +331,9 @@
   function renderPalavraHTML(texto) {
     const t = String(texto||'').trim();
     if (ehImagem(t)) {
-      return `<img src="${IMG_PASTA}${encodeURIComponent(t)}" alt="" class="conn-word-img" loading="lazy">`;
+      // Nome do arquivo em minúsculas: GitHub Pages é case-sensitive e a planilha
+      // pode trazer a palavra em CAIXA ALTA (ex.: "PUNCTMARK01.PNG").
+      return `<img src="${IMG_PASTA}${encodeURIComponent(t.toLowerCase())}" alt="" class="conn-word-img" loading="lazy">`;
     }
     return escTxt(t);
   }
