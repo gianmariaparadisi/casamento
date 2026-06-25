@@ -104,6 +104,10 @@
       overflow: hidden;
     }
     .conn-word span { position:relative;z-index:1;word-break:break-word;hyphens:auto; }
+    .conn-word-img { position:relative;z-index:1;width:100%;max-width:54px;height:54px;object-fit:contain;display:block;margin:0 auto; }
+    .conn-solved-group__words .conn-word-img,
+    .conn-gabarito .conn-word-img { width:22px;height:22px;object-fit:contain;display:inline-block;vertical-align:middle;margin:0 2px; }
+    .conn-word--img { padding:5px; }
     .conn-word:hover { border-color:var(--sage); background:rgba(235,245,230,.9); }
     .conn-word.selected { background:var(--sage-dark); border-color:var(--sage-dark); color:white; box-shadow:0 0 0 2px rgba(80,120,70,.3); }
     .conn-word.selected::before { opacity:.06; }
@@ -312,6 +316,26 @@
   let jogoFinalizado = false;
   let emojiHistorico = [];
 
+  const IMG_PASTA = "assets/img/connect4/";
+
+  function escTxt(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Se a "palavra" terminar em .png, ela é o nome de uma imagem dentro de assets/img/connect4/
+  // e deve ser exibida como imagem em vez de texto.
+  function ehImagem(texto) {
+    return /\.png$/i.test(String(texto||'').trim());
+  }
+
+  function renderPalavraHTML(texto) {
+    const t = String(texto||'').trim();
+    if (ehImagem(t)) {
+      return `<img src="${IMG_PASTA}${encodeURIComponent(t)}" alt="" class="conn-word-img" loading="lazy">`;
+    }
+    return escTxt(t);
+  }
+
   function hoje() {
     const d = new Date();
     return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
@@ -377,8 +401,8 @@
     grid.innerHTML = "";
     palavras.forEach((p, i) => {
       const div = document.createElement("div");
-      div.className = "conn-word" + (selecionados.includes(i) ? " selected" : "");
-      div.innerHTML = '<span>' + (p.texto||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>';
+      div.className = "conn-word" + (selecionados.includes(i) ? " selected" : "") + (ehImagem(p.texto) ? " conn-word--img" : "");
+      div.innerHTML = '<span>' + renderPalavraHTML(p.texto) + '</span>';
       div.dataset.idx = i;
       div.addEventListener("click", () => togglePalavra(i));
       grid.appendChild(div);
@@ -509,7 +533,7 @@
         <span class="conn-solved-group__label" style="opacity:1;font-size:.7rem;letter-spacing:.12em">${grupo.titulo}</span>
         <img src="assets/img/${groupIcons[idx]}" alt="" style="width:22px;height:22px;object-fit:contain;opacity:.75">
       </div>
-      <div class="conn-solved-group__words" style="font-weight:600">${grupo.palavras.join(" · ")}</div>
+      <div class="conn-solved-group__words" style="font-weight:600">${grupo.palavras.map(renderPalavraHTML).join(" · ")}</div>
     `;
     cont.appendChild(div);
   }
@@ -588,7 +612,7 @@
         const acertou = resolvidos.includes(i);
         div.innerHTML = `
           <div class="conn-solved-group__label">${g.titulo}</div>
-          <div class="conn-solved-group__words">${g.palavras.join(" · ")}</div>
+          <div class="conn-solved-group__words">${g.palavras.map(renderPalavraHTML).join(" · ")}</div>
           <div class="conn-solved-group__check">${acertou ? "<img src='assets/img/icon-check-decorative.png' alt=''> Você acertou" : "<img src='assets/img/icon-cancel-decorative.png' alt=''> Não foi desta vez"}</div>
         `;
         gab.appendChild(div);
