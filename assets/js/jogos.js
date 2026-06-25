@@ -480,6 +480,7 @@ async function carregarPreviewRecorde(){
     {key:"mosaico",      el:"record-mosaico-preview"},
     {key:"luademel-lisboa", el:"record-honeymoonflight-preview"},
     {key:"honeymoon-packing", el:"record-honeymoonpacking-preview"},
+    {key:"cruzadas-diretas", el:"record-cruzadinha-preview"},
   ];
   for(const j of jogos){
     const el=document.getElementById(j.el); if(!el) continue;
