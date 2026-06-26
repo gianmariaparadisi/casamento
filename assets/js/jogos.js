@@ -422,6 +422,18 @@ document.addEventListener("DOMContentLoaded",()=>{
   fc.addEventListener("click",()=>flTap());
 });
 
+/* delight bobinho: clicar na foto do hero da página de jogos troca pra
+   uma segunda variante da imagem (e volta ao clicar de novo) */
+document.addEventListener("DOMContentLoaded",()=>{
+  const heroImg=document.getElementById("jogos-hero-img");
+  if(!heroImg) return;
+  const IMG_A="assets/img/gianetiagocarro.png", IMG_B="assets/img/gianetiagocarro02.png";
+  heroImg.addEventListener("click",()=>{
+    const src=heroImg.getAttribute("src")||"";
+    heroImg.src = src.includes("gianetiagocarro02") ? IMG_A : IMG_B;
+  });
+});
+
 /* ══════════════════════════════════════════════════════════
    PLACAR
 ══════════════════════════════════════════════════════════ */
