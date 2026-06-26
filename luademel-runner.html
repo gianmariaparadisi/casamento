@@ -300,6 +300,12 @@ let player = { y: GROUND_Y-STAND_H, vy:0, jumping:false, holding:false, holdT:0,
 
 /* dificuldade já entra "na 3ª volta" — sem moleza no começo */
 const BASE_SPEED = 250, LAP_SPEED_STEP = 55, MAX_SPEED = 760, DIFF_LAP_OFFSET = 2;
+const SPEED_DIST_RATE = 0.01; // ramp contínuo pela distância total (nunca reseta — ver currentSpeed)
+
+/* o pulo mais longo (segurando o tap) fica no ar ~0.84s — todo gap real
+   entre obstáculos precisa sobrar bem mais que isso pra dar tempo de
+   pousar e reagir ao próximo, em qualquer velocidade. */
+const MIN_SAFE_GAP_S = 1.4;
 
 let obstacles = [];    // {kind:'low'|'tall'|'trap', x, w, h, e, passed}
 let collectibles = []; // {x, y0, w, e, pts, bob, taken, bonus}
@@ -501,9 +507,15 @@ function loop(ts){
 }
 
 function currentSpeed(){
+  /* cresce com a volta (lastLap) E com a distância total já percorrida —
+     as duas só aumentam, nunca diminuem, então a velocidade nunca cai em
+     relação ao que já foi atingido. Antes usava `distance % CYCLE_LEN`,
+     que zerava a cada volta nova e fazia a velocidade DESPENCAR de
+     repente no início de cada volta — dava a sensação de chão/relevo/
+     fundo "errando o passo" entre si, porque os três escalam a partir
+     dessa mesma `speed`. */
   const lapsEffective = lastLap + DIFF_LAP_OFFSET;
-  const within = distance % CYCLE_LEN;
-  return Math.min(MAX_SPEED, BASE_SPEED + lapsEffective*LAP_SPEED_STEP + within*0.045);
+  return Math.min(MAX_SPEED, BASE_SPEED + lapsEffective*LAP_SPEED_STEP + distance*SPEED_DIST_RATE);
 }
 
 function update(dt){
@@ -556,7 +568,12 @@ function update(dt){
   if (nextObsGap <= 0){
     spawnObstacle();
     const minGap = 78 + speed*0.30;
-    nextObsGap = (minGap + Math.random()*minGap*0.85) / 3; // 3x mais obstáculos
+    const rolled = (minGap + Math.random()*minGap*0.85) / 3; // 3x mais obstáculos
+    /* piso de segurança: nunca deixa o próximo obstáculo mais perto do
+       que MIN_SAFE_GAP_S segundos reais, em qualquer velocidade — garante
+       que sempre dá tempo de pousar e reagir, mesmo no pior caso aleatório. */
+    const safeFloor = MIN_SAFE_GAP_S * speed / 16;
+    nextObsGap = Math.max(rolled, safeFloor);
   }
   nextCollGap -= distDelta;
   if (nextCollGap <= 0){
