@@ -36,6 +36,7 @@
 
     /* ─── GRADE ──────────────────────────────────────── */
     .cd-board-wrap { display:flex;flex-direction:column;align-items:center;gap:1.2rem; }
+    #cdActionsWrap { display:flex;flex-direction:column;align-items:center;gap:.6rem; }
     .cd-grid-scroll { width:100%; overflow-x:auto; padding:2px; }
     .cd-grid {
       display:grid;
@@ -192,12 +193,17 @@
           </span>
         </div>
         <div class="cd-grid-scroll"><div class="cd-grid" id="cdGrid"></div></div>
-        <p class="cd-msg" id="cdMsg"></p>
-        <div class="cd-actions">
-          <button class="btn btn--primary btn--sm" id="cdBtnVerificar" data-it="Verifica">Verificar</button>
-          <button class="btn btn--outline btn--sm" id="cdBtnLimpar" data-it="Pulisci">Limpar</button>
+        <div id="cdActionsWrap">
+          <p class="cd-msg" id="cdMsg"></p>
+          <div class="cd-actions">
+            <button class="btn btn--primary btn--sm" id="cdBtnVerificar" data-it="Verifica">Verificar</button>
+            <button class="btn btn--outline btn--sm" id="cdBtnLimpar" data-it="Pulisci">Limpar</button>
+          </div>
+          <div class="cd-actions">
+            <button class="cd-reveal-link" id="cdBtnRevelarCelula" data-it="Rivela lettera">Revelar letra</button>
+            <button class="cd-reveal-link" id="cdBtnRevelar" data-it="Rivela soluzione">Revelar solução</button>
+          </div>
         </div>
-        <button class="cd-reveal-link" id="cdBtnRevelar" data-it="Rivela soluzione">Revelar solução</button>
       </div>
     </div>
 
@@ -311,6 +317,14 @@
   let entryAt = {};              // "r,c" -> { r: entry|null, d: entry|null } (apenas células de letra)
   let curDir = "r";
   let curEntry = null;
+  let curCell = null;        // [r,c] da última célula focada (usado por "Revelar letra")
+
+  /* Remove acentos pra comparação tolerante — muitos celulares/teclados
+     não têm como digitar Ó, Á, Ã etc. com facilidade, então aceitamos
+     a letra sem acento como certa também. */
+  function normalizar_(s){
+    return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase();
+  }
   let jogoFinalizado = false;
   let cronometro = null, segundos = 0, cronometroIniciado = false;
   let tentativasVerificar = 0;
@@ -553,11 +567,13 @@
 
   function onCellFocus(e){
     var r = +e.target.dataset.r, c = +e.target.dataset.c;
+    curCell = [r,c];
     highlight(r,c,curDir);
   }
 
   function onCellClick(e){
     var r = +e.target.dataset.r, c = +e.target.dataset.c;
+    curCell = [r,c];
     if (curEntry && curEntry === entriesAt(r,c,curDir)) {
       var outroDir = curDir === "r" ? "d" : "r";
       if (entriesAt(r,c,outroDir)) { highlight(r,c,outroDir); return; }
@@ -674,7 +690,7 @@
         var val = input.value.trim();
         if (!val) continue;
         algumaPreenchida = true;
-        if (val === grid[r][c]) {
+        if (normalizar_(val) === normalizar_(grid[r][c])) {
           totalCorretas++;
           cell.classList.add("correct");
           cell.classList.remove("wrong");
@@ -713,6 +729,23 @@
     focarPrimeiraCelula();
   }
 
+  /* Revela só a letra da célula ativa (dica pontual) — não termina o jogo. */
+  function revelarCelula(){
+    if (jogoFinalizado) return;
+    if (!curCell) { focarPrimeiraCelula(); return; }
+    var r = curCell[0], c = curCell[1];
+    if (!isLetterCell_(r,c)) return;
+    var input = inputEls[r][c];
+    if (input.disabled) return;
+    input.value = grid[r][c];
+    input.disabled = true;
+    cellEls[r][c].classList.add("correct");
+    cellEls[r][c].classList.remove("wrong");
+    var alvo = proximaLivre(r,c,curDir);
+    if (alvo) { moveTo(alvo[0],alvo[1]); highlight(alvo[0],alvo[1],curDir); }
+    if (isGridFull()) verificar(true);
+  }
+
   function revelar(){
     if (jogoFinalizado) { return; }
     for (var r=0;r<ROWS;r++){
@@ -731,7 +764,10 @@
     jogoFinalizado = true;
     pararCronometro();
     if (window.GS) { venceu ? GS.win() : GS.good(); if (venceu && GS.hWin) GS.hWin(); }
-    document.getElementById("cdGame").style.display   = "none";
+    // Mantém a grade (com as respostas) visível — só escondemos a barra de
+    // dica e os botões de ação, já que o jogo terminou.
+    document.getElementById("cdClueBar").style.display    = "none";
+    document.getElementById("cdActionsWrap").style.display = "none";
     document.getElementById("cdResult").style.display = "block";
     document.querySelector(".cd-result__title").textContent = venceu ? t_("Resolvido!","Risolto!") : t_("Aqui está a solução","Ecco la soluzione");
     var m = String(Math.floor(segundos/60)).padStart(2,"0");
@@ -804,6 +840,7 @@
 
   document.getElementById("cdBtnVerificar").addEventListener("click", function(){ verificar(false); });
   document.getElementById("cdBtnLimpar").addEventListener("click", limpar);
+  document.getElementById("cdBtnRevelarCelula").addEventListener("click", revelarCelula);
   document.getElementById("cdBtnRevelar").addEventListener("click", revelar);
   document.getElementById("cdBtnSalvar").addEventListener("click", salvarPontuacao);
   document.getElementById("cdBtnCompartilhar").addEventListener("click", function(){

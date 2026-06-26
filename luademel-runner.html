@@ -696,7 +696,7 @@ function drawClouds(){
 /* ajuste fino de altura do relief por destino — alguns PNGs vieram com a
    linha do horizonte mais alta que o resto, então o relief "flutuava"
    acima do chão. Empurra a arte pra baixo (revela mais céu acima). */
-const RELIEF_DY = { noronha:10, tailandia:40, africa:10, caribe:40, maiorca:40 };
+const RELIEF_DY = { noronha:10, tailandia:30, africa:10, caribe:40, maiorca:40 };
 function drawRelief(d){
   const img = RUNNER_LAYERS[d.id].relief;
   if (!imgOk(img)) return;
@@ -784,17 +784,22 @@ function drawObstacle(o){
   ctx.shadowBlur = 16;
   if (imgOk(o.img)){
     if (o.kind === "tall" && o.img.naturalWidth > 0 && o.img.naturalHeight > 0){
-      /* não distorce o PNG pra encaixar na hitbox alta/fina — preserva a
-         proporção original e só encolhe o quanto precisar pra caber,
-         ancorado embaixo (a hitbox em si não muda). Desenha maior que a
-         hitbox e "enterra" a base um pouco no chão — assim dá pra aumentar
-         o tamanho visual sem deixar a margem transparente do PNG flutuando
-         e sem aumentar a dificuldade real (a colisão usa o.w/o.h originais). */
-      const VIS_SCALE = 1.45, SINK = 14;
+      /* permite uma distorção leve no PNG pra preencher melhor a hitbox
+         alta/fina (sem ficar 100% travado na proporção original, que
+         deixava sobra vazia em volta) — mas sem exagerar, controlado por
+         DEFORM (0 = mantém proporção original, 1 = estica pra preencher a
+         caixa toda). Ancorado embaixo e "enterrado" um pouco no chão; a
+         hitbox real continua sendo o.w/o.h (ver checkCollisions), que é
+         exatamente o tamanho desenhado pra cada obstáculo — com menos
+         distorção forçada, a arte agora cobre essa área de forma mais fiel,
+         em vez de ficar bem mais estreita/alta que a caixa de colisão. */
+      const VIS_SCALE = 1.45, SINK = 14, DEFORM = 0.35;
       const ar = o.img.naturalWidth / o.img.naturalHeight;
-      let dw = o.w*VIS_SCALE, dh = dw/ar;
-      const boxH = o.h*VIS_SCALE;
-      if (dh > boxH){ dh = boxH; dw = dh*ar; }
+      const boxW = o.w*VIS_SCALE, boxH = o.h*VIS_SCALE;
+      let dwN = boxW, dhN = dwN/ar;
+      if (dhN > boxH){ dhN = boxH; dwN = dhN*ar; }
+      const dw = dwN + (boxW-dwN)*DEFORM;
+      const dh = dhN + (boxH-dhN)*DEFORM;
       const dx = o.x + (o.w-dw)/2, dy = (y + o.h + SINK) - dh;
       ctx.drawImage(o.img, dx, dy, dw, dh);
       ctx.drawImage(o.img, dx, dy, dw, dh); // segunda passada: brilho mais forte
