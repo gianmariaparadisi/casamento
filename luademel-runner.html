@@ -45,10 +45,17 @@
     .rn-char-btn img{width:20px;height:20px;border-radius:50%;object-fit:cover;}
     .rn-char-btn.active{border-color:var(--rn-sage);background:var(--rn-sage);color:#fff;}
 
-    .game-panel{position:relative;border-radius:18px;overflow:hidden;border:2px solid rgba(196,109,40,.22);box-shadow:0 16px 60px rgba(26,26,64,.14);background:#cfe8ee;}
+    /* o frame (borda/sombra) fica no wrapper externo, que NÃO recorta
+       conteúdo — só o wrapper interno (do canvas) recorta, com o mesmo
+       border-radius. Assim, se o overlay (capa/fim de jogo) precisar de
+       mais altura que o canvas (telas estreitas, onde o canvas fica baixo
+       por causa da proporção 640:260), o conteúdo do overlay nunca é
+       cortado/inacessível — o botão "Começar" sempre aparece por completo. */
+    .game-panel{position:relative;border-radius:18px;border:2px solid rgba(196,109,40,.22);box-shadow:0 16px 60px rgba(26,26,64,.14);background:#cfe8ee;}
+    .game-panel__canvas-wrap{border-radius:18px;overflow:hidden;}
     canvas{display:block;width:100%;touch-action:none;cursor:pointer;}
 
-    .game-overlay{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,247,239,.93);text-align:center;padding:1.6rem 1.3rem;backdrop-filter:blur(5px);}
+    .game-overlay{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,247,239,.93);text-align:center;padding:1.4rem 1.3rem;backdrop-filter:blur(5px);border-radius:18px;}
     .game-overlay.show{display:flex;}
     .ov-emoji{font-size:2.6rem;margin-bottom:.4rem;}
     .ov-title{font-family:var(--font-display);font-size:1.9rem;font-weight:300;color:var(--rn-navy);margin-bottom:.3rem;}
@@ -90,6 +97,21 @@
     .top10__empty,.top10__loading{text-align:center;padding:1rem;font-size:.82rem;color:var(--rn-amber);font-style:italic;}
 
     @media(max-width:480px){ .save-row{flex-direction:column;} .game-btn{width:100%;} }
+
+    /* Mobile: menos texto/espaço antes do jogo — a primeira coisa visível
+       deve ser o runner em si e o botão de começar, sem precisar rolar
+       a tela. O subtítulo fica de fora (o aviso "toque para pular" já
+       aparece embaixo do jogo, no .mobile-hint) e os respiros entre os
+       blocos acima do canvas encolhem. */
+    @media(max-width:720px){
+      .game-shell{padding-top:14px;}
+      .game-sub{display:none;}
+      .game-kicker{margin-bottom:.25rem;}
+      .game-title{margin-bottom:.35rem;}
+      .hud{margin:.4rem auto .45rem;}
+      .dest-progress{margin-bottom:.6rem;}
+      .char-row{margin-bottom:.55rem;}
+    }
   </style>
 </head>
 <body class="game-page">
@@ -107,7 +129,7 @@
       <div class="hud__pill"><span class="flag" id="rn-hud-flag">🇧🇷</span> <strong id="rn-hud-dest">Noronha</strong></div>
       <div class="hud__pill" data-it="Pontos"><span data-it="Punti">Pontos</span>: <strong id="rn-hud-score">0</strong></div>
       <div class="hud__pill">🏆 <span data-it="Record">Recorde</span>: <strong id="rn-hud-best">—</strong></div>
-      <button class="hud__pill hud__pill--btn" id="rn-btn-restart" onclick="restartRunnerNow()" data-it="Ricomincia">🔄 Recomeçar</button>
+      <button class="hud__pill hud__pill--btn" id="rn-btn-restart" onclick="restartRunnerNow()" data-it="Ricomincia" style="display:none">🔄 Recomeçar</button>
     </div>
     <div class="dest-progress"><div class="dest-progress__fill" id="rn-progress-fill"></div></div>
 
@@ -122,7 +144,7 @@
     </div>
 
     <section class="game-panel">
-      <canvas id="rn-canvas" tabindex="0"></canvas>
+      <div class="game-panel__canvas-wrap"><canvas id="rn-canvas" tabindex="0"></canvas></div>
       <div class="game-overlay" id="rn-overlay">
         <div class="ov-emoji" id="rn-ov-emoji">🧳</div>
         <p class="ov-title" id="rn-ov-title"><span data-it="Corsa della Luna di Miele">Corrida da Lua de Mel</span></p>
@@ -424,7 +446,9 @@ function showOverlay(emoji, title, sub, btns, stats){
   const ov = document.getElementById("rn-overlay");
   document.getElementById("rn-ov-emoji").textContent = emoji;
   document.getElementById("rn-ov-title").textContent = title;
-  document.getElementById("rn-ov-sub").innerHTML = sub;
+  const subEl = document.getElementById("rn-ov-sub");
+  subEl.innerHTML = sub;
+  subEl.style.display = sub ? "" : "none";
   const statsEl = document.getElementById("rn-ov-stats");
   if (stats){ statsEl.style.display="grid"; statsEl.innerHTML = stats; } else { statsEl.style.display="none"; statsEl.innerHTML=""; }
   document.getElementById("rn-ov-btns").innerHTML = btns.map(b=>`<button class="game-btn game-btn--main" onclick="${b.fn}">${b.label}</button>`).join("");
@@ -448,13 +472,20 @@ function resetRunner(){
   updateHud();
   document.getElementById("rn-postgame").style.display="none";
   drawFrame(0);
-  showOverlay("🧳","Corrida da Lua de Mel",
-    "Toque para pular os obstáculos. Segure para pular mais alto e passar os mais altos. Atravesse os 5 paraísos da nossa lua de mel.",
+  /* sem texto de instrução repetido aqui — o subtítulo da página (desktop)
+     e a dica abaixo do jogo (.mobile-hint, no celular) já explicam como
+     jogar. A capa fica só com o essencial: título + botão de começar,
+     bem visível e sem precisar rolar a tela. */
+  showOverlay("🧳","Corrida da Lua de Mel", "",
     [{label:"Começar", fn:"startRunner()"}]);
 }
 
 function startRunner(){
   rnStarted = true; rnAlive = true;
+  /* o botão "Recomeçar" só faz sentido depois que já existe uma corrida
+     em andamento (ou já jogada) — fica escondido na primeira tela pra não
+     poluir a entrada do jogo com um botão sem função ainda. */
+  document.getElementById("rn-btn-restart").style.display = "";
   hideOverlay();
   lockScroll();
   rnLastTs = 0;

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Cruzadinha — Tiago e Gian</title>
 
   <!-- Open Graph / WhatsApp / iMessage preview -->
@@ -59,9 +59,12 @@
     .cd-cell.block { background: rgba(90,64,32,.88); border-color: rgba(90,64,32,.88); box-shadow:none; }
 
     .cd-cell input {
+      -webkit-appearance:none; appearance:none; -webkit-tap-highlight-color:transparent;
+      display:block; margin:0; box-sizing:border-box;
       width:100%; height:100%; border:none; background:transparent;
       text-align:center; text-transform:uppercase;
       font-family: var(--font-display); font-weight:700; font-size:calc(var(--cd-cell) * 0.46);
+      line-height: var(--cd-cell);
       color:#5A4020; border-radius:4px; padding:0;
       caret-color: var(--sage-dark);
     }
@@ -443,8 +446,13 @@
   function ajustarTamanhoCelula() {
     var grid_ = document.getElementById("cdGrid");
     if (!grid_) return;
+    // mede o container real (não window.innerWidth) — assim nunca passa do
+    // espaço de fato disponível, mesmo se houver barra de rolagem vertical,
+    // padding herdado, etc. É isso que garante zero scroll lateral na grade.
+    var scrollWrap = grid_.parentElement;
+    var avail = (scrollWrap && scrollWrap.clientWidth) ? scrollWrap.clientWidth : (window.innerWidth - 32);
     var gap = 3;
-    var maxWidth = Math.min(window.innerWidth - 32, 720);
+    var maxWidth = Math.min(avail, 720);
     var size = Math.floor((maxWidth - gap * (COLS - 1)) / COLS);
     size = Math.max(22, Math.min(46, size));
     grid_.style.setProperty("--cd-cell", size + "px");
@@ -454,7 +462,7 @@
     var gridEl = document.getElementById("cdGrid");
     gridEl.innerHTML = "";
     ajustarTamanhoCelula();
-    gridEl.style.gridTemplateColumns = "repeat(" + COLS + ", auto)";
+    gridEl.style.gridTemplateColumns = "repeat(" + COLS + ", var(--cd-cell))";
     cellEls = Array.from({length:ROWS}, function(){ return Array(COLS).fill(null); });
     inputEls = Array.from({length:ROWS}, function(){ return Array(COLS).fill(null); });
 
