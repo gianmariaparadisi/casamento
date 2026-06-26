@@ -315,6 +315,26 @@ const MIN_SAFE_GAP_S = 1.4;
 const MIN_CROSS_SPAWN_SEP = 90;
 let lastObsSpawnD = -9999, lastCollSpawnD = -9999;
 
+/* frequência de obstáculos: é a prioridade do jogo — devem aparecer com
+   boa frequência desde o início, e essa frequência deve crescer rápido
+   com a distância percorrida (não só com a velocidade), até saturar no
+   piso de segurança (MIN_SAFE_GAP_S). */
+const OBS_GAP_START_S    = 1.7;  // gap médio real (s) no começo da corrida
+const OBS_GAP_RAMP_DIST  = 700;  // a partir desta distância já saturou no piso
+
+/* bônus/colecionáveis: sempre mais raros que obstáculos, e quase não
+   aceleram com a distância — são um extra, não o foco do desafio. */
+const COLL_GAP_START_S   = 3.0;
+const COLL_GAP_END_S     = 2.2;
+const COLL_GAP_RAMP_DIST = 3200;
+
+/* quando um bônus nasce pouco depois de um obstáculo, ele tenta ficar na
+   trajetória "certa" daquele obstáculo: se for de passar por baixo (trap),
+   o bônus fica baixo, alcançável correndo; se for de pular (low/tall), o
+   bônus fica alto, bem na curva do salto. */
+const ALIGN_WINDOW = 260;
+let lastObsKind = null;
+
 let obstacles = [];    // {kind:'low'|'tall'|'trap', x, w, h, e, passed}
 let collectibles = []; // {x, y0, w, e, pts, bob, taken, bonus}
 let particles = [];    // {x,y,vx,vy,life,total,text,color}
@@ -422,7 +442,7 @@ function resetRunner(){
   player = { y: GROUND_Y-STAND_H, vy:0, jumping:false, holding:false, holdT:0, runT:0, squash:0 };
   obstacles=[]; collectibles=[]; particles=[];
   nextObsGap = 220/3; nextCollGap = 340/2;
-  lastObsSpawnD = -9999; lastCollSpawnD = -9999;
+  lastObsSpawnD = -9999; lastCollSpawnD = -9999; lastObsKind = null;
   banner = {text:"", flag:"", timer:0}; shake=0;
   rnFaceIdx = Math.floor(Math.random()*rnFaces().length);
   updateHud();
@@ -590,8 +610,12 @@ function update(dt){
     } else {
       spawnObstacle();
       lastObsSpawnD = distance;
-      const minGap = 78 + speed*0.30;
-      const rolled = (minGap + Math.random()*minGap*0.4) / 4; // mais frequente, menos variação
+      /* frequência cresce rápido com a distância (não só com a velocidade):
+         começa em OBS_GAP_START_S e satura no piso de segurança já em
+         OBS_GAP_RAMP_DIST — depois disso fica sempre no piso. */
+      const obsT = Math.min(1, distance / OBS_GAP_RAMP_DIST);
+      const targetGapS = OBS_GAP_START_S - (OBS_GAP_START_S - MIN_SAFE_GAP_S) * obsT;
+      const rolled = targetGapS * (0.85 + Math.random()*0.3) * speed/16; // ±15% de variação
       /* piso de segurança: nunca deixa o próximo obstáculo mais perto do
          que MIN_SAFE_GAP_S segundos reais, em qualquer velocidade — garante
          que sempre dá tempo de pousar e reagir, mesmo no pior caso aleatório. */
@@ -608,7 +632,11 @@ function update(dt){
     } else {
       spawnCollectible();
       lastCollSpawnD = distance;
-      nextCollGap = (110 + Math.random()*110) / 2.5; // mais frequente, menos variação
+      /* bônus sempre mais raro que obstáculo — ramp bem mais lento e um
+         piso (COLL_GAP_END_S) bem acima do piso dos obstáculos. */
+      const collT = Math.min(1, distance / COLL_GAP_RAMP_DIST);
+      const targetGapS = COLL_GAP_START_S - (COLL_GAP_START_S - COLL_GAP_END_S) * collT;
+      nextCollGap = targetGapS * (0.85 + Math.random()*0.3) * speed/16;
     }
   }
 
@@ -632,20 +660,29 @@ function spawnObstacle(){
   const d = DESTS[curDestIdx];
   const tallChance = Math.min(0.5, 0.20 + lastLap*0.05 + curDestIdx*0.02);
   const r = Math.random();
+  let kind;
   if (r < 0.22){
-    obstacles.push({ kind:"trap", x:LW+20, w:d.trap.w, h:d.trap.h, e:d.trap.e, img:RUNNER_OBS_IMG[d.id].trap, passed:false });
+    kind = "trap";
+    obstacles.push({ kind, x:LW+20, w:d.trap.w, h:d.trap.h, e:d.trap.e, img:RUNNER_OBS_IMG[d.id].trap, passed:false });
   } else if (r < 0.22 + tallChance){
-    obstacles.push({ kind:"tall", x:LW+20, w:d.tall.w, h:d.tall.h, e:d.tall.e, img:RUNNER_OBS_IMG[d.id].tall, passed:false });
+    kind = "tall";
+    obstacles.push({ kind, x:LW+20, w:d.tall.w, h:d.tall.h, e:d.tall.e, img:RUNNER_OBS_IMG[d.id].tall, passed:false });
   } else {
-    obstacles.push({ kind:"low", x:LW+20, w:d.low.w, h:d.low.h, e:d.low.e, img:RUNNER_OBS_IMG[d.id].low, passed:false });
+    kind = "low";
+    obstacles.push({ kind, x:LW+20, w:d.low.w, h:d.low.h, e:d.low.e, img:RUNNER_OBS_IMG[d.id].low, passed:false });
   }
+  lastObsKind = kind;
 }
 function spawnCollectible(){
   const d = DESTS[curDestIdx];
-  /* antes só liberava bônus a partir da 2ª volta — quase ninguém chegava
-     lá, então dava pra nunca ver metade dos itens (ex: a manga). Agora
-     pode aparecer desde a primeira corrida. */
-  if (Math.random() < Math.min(1, 0.4*3)){ // 3x mais bônus
+  /* se este bônus nasce pouco depois de um obstáculo (ALIGN_WINDOW), ele
+     tenta cair na trajetória "certa" daquele obstáculo: trap (passa por
+     baixo) -> bônus baixo, na linha de corrida; low/tall (precisa pular)
+     -> bônus alto, na curva do salto. Sem obstáculo recente por perto,
+     mantém a chance aleatória de antes (um pouco mais rara). */
+  const alinhado = lastObsKind && (distance - lastObsSpawnD) < ALIGN_WINDOW;
+  const querBonusAlto = alinhado ? (lastObsKind !== "trap") : (Math.random() < 0.35);
+  if (querBonusAlto){
     collectibles.push({ x:LW+20, y0:GROUND_Y-118, w:48, e:d.bonus.e, img:RUNNER_OBS_IMG[d.id].bonus, pts:d.bonus.pts, label:d.bonus.label, bob:Math.random()*6.28, taken:false, bonus:true });
   } else {
     collectibles.push({ x:LW+20, y0:GROUND_Y-78, w:44, e:d.collect.e, img:RUNNER_OBS_IMG[d.id].collect, pts:d.collect.pts, label:d.collect.label, bob:Math.random()*6.28, taken:false, bonus:false });

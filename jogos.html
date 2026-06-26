@@ -171,13 +171,24 @@
           <span class="btn btn--outline btn--sm" style="pointer-events:none;opacity:.6;border-color:var(--sage);color:var(--sage-dark)" data-it="Presto">Em breve</span>
         </div>
 
-        <!-- Cruzadinha semanal — destaque a partir de 10/07/2026 (ocupa o lugar do Doce Crush) -->
+        <!-- Cruzadinha semanal — destaque de 10/07 a 31/07/2026 (ocupa o lugar do Doce Crush);
+             a partir de 01/08/2026 vira card normal e migra para depois de Conexões -->
         <a href="cruzadas-diretas.html" id="card-cruzadinha-featured" class="jogo-card reveal" style="display:none;text-decoration:none;color:inherit;position:relative;background:linear-gradient(135deg,rgba(224,242,210,.95),rgba(196,228,176,.78));border-color:rgba(122,155,110,.55);">
-          <span style="position:absolute;top:-11px;right:50%;transform:translateX(50%);background:var(--sage);color:#fff;font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.32rem .7rem;border-radius:999px;box-shadow:0 3px 8px rgba(82,57,34,.25);white-space:nowrap" data-it="Nuovo gioco!">Jogo novo!</span>
-          <span class="jogo-card__icon"><img src="assets/img/icon-wordle-grid.png" alt="" loading="lazy"></span>
+          <span id="cruzadinha-badge" style="position:absolute;top:-11px;right:50%;transform:translateX(50%);background:var(--sage);color:#fff;font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.32rem .7rem;border-radius:999px;box-shadow:0 3px 8px rgba(82,57,34,.25);white-space:nowrap" data-it="Nuovo gioco!">Jogo novo!</span>
+          <span class="jogo-card__icon"><img src="assets/img/cruzadas-diretas.png" alt="" loading="lazy"></span>
           <h2 class="jogo-card__title" data-it="Cruciverba Diretto">Cruzadinha</h2>
           <p class="jogo-card__desc" data-it="Una griglia 14x9 nuova ogni settimana, nel formato &quot;cruzada direta&quot;: la dica está dentro da própria célula.">Uma grade 14x9 nova a cada semana, no formato "cruzada direta": a dica fica dentro da própria célula.</p>
           <p class="jogo-card__record" id="record-cruzadinha-preview" data-it="Caricamento…">Carregando…</p>
+          <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
+        </a>
+
+        <!-- Corrida da Lua de Mel — assume o destaque a partir de 01/08/2026 (ocupa o lugar da Cruzadinha) -->
+        <a href="luademel-runner.html" id="card-luademel-featured" class="jogo-card reveal" style="display:none;text-decoration:none;color:inherit;position:relative;background:linear-gradient(135deg,rgba(224,242,210,.95),rgba(196,228,176,.78));border-color:rgba(122,155,110,.55);">
+          <span style="position:absolute;top:-11px;right:50%;transform:translateX(50%);background:var(--sage);color:#fff;font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.32rem .7rem;border-radius:999px;box-shadow:0 3px 8px rgba(82,57,34,.25);white-space:nowrap" data-it="Nuovo gioco!">Jogo novo!</span>
+          <span class="jogo-card__icon"><img src="assets/img/tile-luademel.png" alt="" loading="lazy"></span>
+          <h2 class="jogo-card__title" data-it="Corsa della Luna di Miele">Corrida da Lua de Mel</h2>
+          <p class="jogo-card__desc" data-it="Salta tra i 5 luoghi della nostra luna di miele, da Fernando de Noronha a Maiorca, in stile Chrome Dino.">Pule entre os 5 destinos da nossa lua de mel, de Fernando de Noronha a Maiorca, no estilo Chrome Dino.</p>
+          <p class="jogo-card__record" id="record-luademel-preview" data-it="Caricamento…">Carregando…</p>
           <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
         </a>
 
@@ -297,7 +308,8 @@
           <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
         </a>
 
-        <!-- Corrida da Lua de Mel — removida da listagem; acessível só por link direto (luademel-runner.html) -->
+        <!-- Corrida da Lua de Mel — card de destaque mais acima (id=card-luademel-featured);
+             antes de 01/08/2026 só é acessível por link direto (luademel-runner.html) -->
         <!-- Lua de Mel de Papel, Honeymoon Packing, Mosaico e Mini Cruzadinha — removidos da listagem; acessíveis só por link direto -->
 
 
@@ -480,18 +492,27 @@
   // Calendário da vitrine de jogos:
   //  · até 30/06/2026 — Doce Crush é o destaque "Jogo novo!" (estado atual)
   //  · 01/07 a 09/07/2026 — Doce Crush vira card normal (migra para antes do Snake);
-  //    o destaque mostra o card "em breve"
-  //  · a partir de 10/07/2026 — a Cruzadinha (cruzadas diretas semanal) assume o destaque
+  //    o destaque mostra o card "em breve" (contagem até a Cruzadinha)
+  //  · 10/07 a 19/07/2026 — a Cruzadinha (cruzadas diretas semanal) assume o destaque
+  //  · 20/07 a 31/07/2026 — o destaque volta a mostrar "em breve", agora contando
+  //    até a Corrida da Lua de Mel; a Cruzadinha continua destacada até lá
+  //  · a partir de 01/08/2026 — a Corrida da Lua de Mel assume o destaque;
+  //    a Cruzadinha vira card normal e migra para depois de Conexões
   (function(){
-    const cutoffDoceNormal   = new Date(2026, 6, 1);  // 1º de julho de 2026
-    const cutoffCruzadinha   = new Date(2026, 6, 10); // 10 de julho de 2026
+    const cutoffDoceNormal     = new Date(2026, 6, 1);  // 1º de julho de 2026
+    const cutoffCruzadinha     = new Date(2026, 6, 10); // 10 de julho de 2026
+    const emBreveLuademelStart = new Date(2026, 6, 20); // 20 de julho de 2026
+    const cutoffLuademel       = new Date(2026, 7, 1);  // 1º de agosto de 2026
     const now = new Date();
 
-    const emBreve     = document.getElementById('card-em-breve');
-    const doce        = document.getElementById('card-doce-crush');
-    const doceBadge   = document.getElementById('doce-badge');
-    const cruzadinha  = document.getElementById('card-cruzadinha-featured');
-    const snakeCard   = document.querySelector('a[href="snake.html"]');
+    const emBreve        = document.getElementById('card-em-breve');
+    const doce           = document.getElementById('card-doce-crush');
+    const doceBadge      = document.getElementById('doce-badge');
+    const cruzadinha     = document.getElementById('card-cruzadinha-featured');
+    const cruzadinhaBadge= document.getElementById('cruzadinha-badge');
+    const luademel       = document.getElementById('card-luademel-featured');
+    const snakeCard      = document.querySelector('a[href="snake.html"]');
+    const connect4Card   = document.querySelector('a[href="connect4.html"]');
 
     if (now >= cutoffDoceNormal) {
       // Doce Crush deixa de ser destaque: remove o selo e o fundo especial
@@ -501,22 +522,40 @@
       if (doce && snakeCard && snakeCard.parentNode) {
         snakeCard.parentNode.insertBefore(doce, snakeCard);
       }
-      if (emBreve) emBreve.style.display = '';
     }
 
     if (now >= cutoffCruzadinha) {
-      if (emBreve) emBreve.style.display = 'none';
       if (cruzadinha) cruzadinha.style.display = '';
     }
+
+    if (now >= cutoffLuademel) {
+      // Cruzadinha deixa de ser destaque: remove o selo e o fundo especial
+      if (cruzadinhaBadge) cruzadinhaBadge.remove();
+      if (cruzadinha) { cruzadinha.style.background = ''; cruzadinha.style.borderColor = ''; }
+      // Migra o card para imediatamente depois de Conexões
+      if (cruzadinha && connect4Card && connect4Card.parentNode) {
+        connect4Card.parentNode.insertBefore(cruzadinha, connect4Card.nextSibling);
+      }
+      if (luademel) luademel.style.display = '';
+    }
+
+    // "Em breve" aparece nos dois intervalos de espera entre lançamentos,
+    // e some fora deles (inclusive depois que a Lua de Mel já é o destaque).
+    const inGap1 = now >= cutoffDoceNormal && now < cutoffCruzadinha;
+    const inGap2 = now >= emBreveLuademelStart && now < cutoffLuademel;
+    if (emBreve) emBreve.style.display = (inGap1 || inGap2) ? '' : 'none';
   })();
   </script>
   <script>
-  // Countdown do card "em breve": dias até a Cruzadinha entrar (10/07/2026)
+  // Countdown do card "em breve": mostra a contagem pro próximo lançamento
+  // que ainda não chegou (Cruzadinha em 10/07, depois Lua de Mel em 01/08).
   (function(){
     const el = document.getElementById('soon-countdown');
     if(!el) return;
     const now  = new Date();
-    const next = new Date(2026, 6, 10); // 10 de julho de 2026
+    const cutoffCruzadinha = new Date(2026, 6, 10); // 10 de julho de 2026
+    const cutoffLuademel   = new Date(2026, 7, 1);  // 1º de agosto de 2026
+    const next = now < cutoffCruzadinha ? cutoffCruzadinha : cutoffLuademel;
     const diff = Math.ceil((next - now) / (1000 * 60 * 60 * 24));
     const it   = window.I18N && window.I18N.lang === 'it';
     if(diff <= 0){
