@@ -32,6 +32,9 @@
     .hud__pill{background:rgba(255,255,255,.7);border:1px solid rgba(196,109,40,.22);border-radius:999px;padding:.42rem .82rem;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--rn-amber);display:flex;align-items:center;gap:.35rem;}
     .hud__pill strong{color:var(--rn-navy);font-weight:600;font-size:.82rem;text-transform:none;letter-spacing:0;}
     .hud__pill .flag{font-size:1rem;}
+    .hud__pill img.pill-icon{width:14px;height:14px;object-fit:contain;}
+    .save-box h3 img.inline-icon,.top10__title img.inline-icon{width:18px;height:18px;object-fit:contain;vertical-align:-3px;margin-right:.15rem;}
+    .top10__medal{width:1.2rem;height:1.2rem;object-fit:contain;vertical-align:middle;}
     .hud__pill--btn{border:1px solid rgba(196,109,40,.3);cursor:pointer;font:inherit;letter-spacing:.05em;text-transform:uppercase;-webkit-tap-highlight-color:transparent;}
     .hud__pill--btn:active{background:var(--rn-sage-lt,rgba(196,109,40,.15));transform:scale(.97);}
 
@@ -51,13 +54,20 @@
        mais altura que o canvas (telas estreitas, onde o canvas fica baixo
        por causa da proporção 640:260), o conteúdo do overlay nunca é
        cortado/inacessível — o botão "Começar" sempre aparece por completo. */
-    .game-panel{position:relative;border-radius:18px;border:2px solid rgba(196,109,40,.22);box-shadow:0 16px 60px rgba(26,26,64,.14);background:#cfe8ee;}
-    .game-panel__canvas-wrap{border-radius:18px;overflow:hidden;}
+    /* canvas-wrap e overlay ocupam a MESMA célula de um grid de 1 coluna —
+       assim a altura do painel é sempre o maior dos dois (canvas vs.
+       conteúdo da capa/fim de jogo), nunca menor. Isso evita tanto o corte
+       de conteúdo (overlay maior que o canvas, ex.: capa inicial em tela
+       estreita) quanto a sobreposição/vazamento por cima de elementos
+       vizinhos (overlay de fim de jogo, com estatísticas e dois botões,
+       que é bem mais alto que o canvas curto do celular). */
+    .game-panel{position:relative;display:grid;grid-template-columns:1fr;border-radius:18px;border:2px solid rgba(196,109,40,.22);box-shadow:0 16px 60px rgba(26,26,64,.14);background:#cfe8ee;}
+    .game-panel__canvas-wrap{grid-area:1/1;min-width:0;border-radius:18px;overflow:hidden;}
     canvas{display:block;width:100%;touch-action:none;cursor:pointer;}
 
-    .game-overlay{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,247,239,.93);text-align:center;padding:1.4rem 1.3rem;backdrop-filter:blur(5px);border-radius:18px;}
+    .game-overlay{grid-area:1/1;min-width:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,247,239,.93);text-align:center;padding:1.4rem 1.3rem;backdrop-filter:blur(5px);border-radius:18px;}
     .game-overlay.show{display:flex;}
-    .ov-emoji{font-size:2.6rem;margin-bottom:.4rem;}
+    .ov-emoji{width:96px;height:auto;max-height:96px;object-fit:contain;margin-bottom:.5rem;}
     .ov-title{font-family:var(--font-display);font-size:1.9rem;font-weight:300;color:var(--rn-navy);margin-bottom:.3rem;}
     .ov-sub{font-size:.84rem;color:var(--rn-amber);margin-bottom:1rem;line-height:1.6;max-width:360px;}
     .ov-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem;width:100%;max-width:320px;}
@@ -128,8 +138,8 @@
     <div class="hud">
       <div class="hud__pill"><span class="flag" id="rn-hud-flag">🇧🇷</span> <strong id="rn-hud-dest">Noronha</strong></div>
       <div class="hud__pill" data-it="Pontos"><span data-it="Punti">Pontos</span>: <strong id="rn-hud-score">0</strong></div>
-      <div class="hud__pill">🏆 <span data-it="Record">Recorde</span>: <strong id="rn-hud-best">—</strong></div>
-      <button class="hud__pill hud__pill--btn" id="rn-btn-restart" onclick="restartRunnerNow()" data-it="Ricomincia" style="display:none">🔄 Recomeçar</button>
+      <div class="hud__pill"><img src="assets/img/icon-trophy.png" class="pill-icon" alt=""> <span data-it="Record">Recorde</span>: <strong id="rn-hud-best">—</strong></div>
+      <button class="hud__pill hud__pill--btn" id="rn-btn-restart" onclick="restartRunnerNow()" data-it="Ricomincia" style="display:none">Recomeçar</button>
     </div>
     <div class="dest-progress"><div class="dest-progress__fill" id="rn-progress-fill"></div></div>
 
@@ -146,7 +156,7 @@
     <section class="game-panel">
       <div class="game-panel__canvas-wrap"><canvas id="rn-canvas" tabindex="0"></canvas></div>
       <div class="game-overlay" id="rn-overlay">
-        <div class="ov-emoji" id="rn-ov-emoji">🧳</div>
+        <img class="ov-emoji" id="rn-ov-emoji" src="assets/img/luademelrunnerimg.png" alt="">
         <p class="ov-title" id="rn-ov-title"><span data-it="Corsa della Luna di Miele">Corrida da Lua de Mel</span></p>
         <p class="ov-sub" id="rn-ov-sub"><span data-it="Tocca per saltare gli ostacoli. Tieni premuto per saltare più in alto e superare quelli più alti. Attraversa i 5 paradisi della nostra luna di miele.">Toque para pular os obstáculos. Segure para pular mais alto e passar os mais altos. Atravesse os 5 paraísos da nossa lua de mel.</span></p>
         <div class="ov-stats" id="rn-ov-stats" style="display:none"></div>
@@ -155,14 +165,14 @@
     </section>
 
     <div class="ctrl-row">
-      <button class="ctrl-btn" id="rn-btn-jump">⬆️ <span data-it="Salta (tieni premuto = più in alto)">Saltar (segure = mais alto)</span></button>
+      <button class="ctrl-btn" id="rn-btn-jump"><span data-it="Salta (tieni premuto = più in alto)">Saltar (segure = mais alto)</span></button>
     </div>
     <p class="desk-hint" data-it="Espaço / ↑ para saltar · segure para saltare più in alto · clique para começar">Espaço / ↑ para saltar · segure para pular mais alto · clique para começar</p>
     <p class="mobile-hint" data-it="Tocca per saltare · tieni premuto per saltare più in alto">Toque para pular · segure para pular mais alto</p>
 
     <div id="rn-postgame" style="display:none">
       <div class="save-box">
-        <h3>🏆 <span data-it="Salva il tuo record">Salvar seu recorde</span></h3>
+        <h3><img src="assets/img/icon-trophy.png" class="inline-icon" alt=""> <span data-it="Salva il tuo record">Salvar seu recorde</span></h3>
         <div class="save-row">
           <input type="text" id="rn-nome" class="save-input" placeholder="Seu nome" maxlength="30" autocomplete="name"/>
           <button class="game-btn game-btn--main" onclick="salvarScoreRunner()" data-it="Salva">Salvar</button>
@@ -442,9 +452,8 @@ btnJump.addEventListener("mouseleave", ()=> jumpRelease());
 /* ══════════════════════════════════════════════════════════
    OVERLAY
 ══════════════════════════════════════════════════════════ */
-function showOverlay(emoji, title, sub, btns, stats){
+function showOverlay(title, sub, btns, stats){
   const ov = document.getElementById("rn-overlay");
-  document.getElementById("rn-ov-emoji").textContent = emoji;
   document.getElementById("rn-ov-title").textContent = title;
   const subEl = document.getElementById("rn-ov-sub");
   subEl.innerHTML = sub;
@@ -476,7 +485,7 @@ function resetRunner(){
      e a dica abaixo do jogo (.mobile-hint, no celular) já explicam como
      jogar. A capa fica só com o essencial: título + botão de começar,
      bem visível e sem precisar rolar a tela. */
-  showOverlay("🧳","Corrida da Lua de Mel", "",
+  showOverlay("Corrida da Lua de Mel", "",
     [{label:"Começar", fn:"startRunner()"}]);
 }
 
@@ -515,8 +524,8 @@ function endRunner(){
                             "Caiu rapidinho! Bora tentar de novo.";
 
   setTimeout(()=>{
-    showOverlay("💥","Que tombo!",
-      msg + (isBest ? " <strong>Novo recorde!</strong> 🏆" : ""),
+    showOverlay("Que tombo!",
+      msg + (isBest ? " <strong>Novo recorde!</strong>" : ""),
       [{label:"Jogar de novo", fn:"startRunner2()"},{label:"Voltar aos jogos", fn:"location.href='jogos.html'"}],
       `<div class="ov-stat"><strong>${score}</strong>pontos</div>
        <div class="ov-stat"><strong>${Math.floor(distance)}m</strong>percorridos</div>
@@ -604,7 +613,7 @@ function update(dt){
   const lapNow = Math.floor(distance/CYCLE_LEN);
   if (lapNow > lastLap){
     lastLap = lapNow;
-    banner = { text: lastLap===1 ? "Volta completa! Bônus saltando liberados ✨" : "Volta completa! Tudo mais rápido agora", flag:"🌍", timer:2.6 };
+    banner = { text: lastLap===1 ? "Volta completa! Bônus saltando liberados" : "Volta completa! Tudo mais rápido agora", flag:"", timer:2.6 };
     if(window.GS){GS.win();GS.hWin();}
     spawnBurst(LW/2, 60, 22);
   }
@@ -1009,7 +1018,7 @@ function drawBanner(){
   ctx.beginPath(); ctx.roundRect(LW/2-160, 16, 320, 40, 20); ctx.fill();
   ctx.fillStyle = "#fff"; ctx.textAlign="center"; ctx.textBaseline="middle";
   ctx.font = "bold 14px 'Inter',sans-serif";
-  ctx.fillText(`${banner.flag}  ${banner.text}`, LW/2, 37);
+  ctx.fillText(banner.flag ? `${banner.flag}  ${banner.text}` : banner.text, LW/2, 37);
   ctx.restore();
 }
 
@@ -1041,7 +1050,7 @@ window.salvarScoreRunner = async function(){
     const r = await fetch(RUNNER_API, { method:"POST", body: JSON.stringify({ action:"score", jogo:RUNNER_GAME_ID, nome, pontos: score }) });
     const j = await r.json();
     if (j.sucesso){
-      me.style.color = "var(--rn-sage-dk)"; me.textContent = "Recorde salvo! 🏆";
+      me.style.color = "var(--rn-sage-dk)"; me.textContent = "Recorde salvo!";
       btn.disabled = true; btn.textContent = "Salvo";
       ni.disabled = true;
       carregarTop10Runner();
@@ -1052,19 +1061,21 @@ window.salvarScoreRunner = async function(){
   }
 };
 
+const RN_TOP10_TITLE = `<h3 class="top10__title"><img src="assets/img/icon-trophy.png" class="inline-icon" alt=""> Top 10</h3>`;
+const RN_MEDAL_IMGS = ["assets/img/icon-medal-gold.png","assets/img/icon-medal-silver.png","assets/img/icon-medal-bronze.png"];
 async function carregarTop10Runner(){
   const el = document.getElementById("rn-top10"); if (!el) return;
-  el.innerHTML = `<h3 class="top10__title">🏆 Top 10</h3><p class="top10__loading">Carregando…</p>`;
+  el.innerHTML = `${RN_TOP10_TITLE}<p class="top10__loading">Carregando…</p>`;
   try{
     const r = await fetch(`${RUNNER_API}?action=top10&jogo=${RUNNER_GAME_ID}`);
     const d = await r.json();
-    if (!d?.lista?.length){ el.innerHTML = `<h3 class="top10__title">🏆 Top 10</h3><p class="top10__empty">Nenhum recorde ainda. Seja o primeiro!</p>`; return; }
-    const medals = ["🥇","🥈","🥉"], classes = ["top10__item--gold","top10__item--silver","top10__item--bronze"];
-    el.innerHTML = `<h3 class="top10__title">🏆 Top 10</h3><ul class="top10__list">${
-      d.lista.map((it,i)=>`<li class="top10__item ${classes[i]||""}"><span class="top10__pos">${medals[i]||(i+1)}</span><span class="top10__name">${escJ(it.nome)}</span><span class="top10__pts">${it.pontos} pts</span></li>`).join("")
+    if (!d?.lista?.length){ el.innerHTML = `${RN_TOP10_TITLE}<p class="top10__empty">Nenhum recorde ainda. Seja o primeiro!</p>`; return; }
+    const classes = ["top10__item--gold","top10__item--silver","top10__item--bronze"];
+    el.innerHTML = `${RN_TOP10_TITLE}<ul class="top10__list">${
+      d.lista.map((it,i)=>`<li class="top10__item ${classes[i]||""}"><span class="top10__pos">${RN_MEDAL_IMGS[i] ? `<img src="${RN_MEDAL_IMGS[i]}" class="top10__medal" alt="">` : (i+1)}</span><span class="top10__name">${escJ(it.nome)}</span><span class="top10__pts">${it.pontos} pts</span></li>`).join("")
     }</ul>`;
   } catch {
-    el.innerHTML = `<h3 class="top10__title">🏆 Top 10</h3><p class="top10__empty">Não foi possível carregar.</p>`;
+    el.innerHTML = `${RN_TOP10_TITLE}<p class="top10__empty">Não foi possível carregar.</p>`;
   }
 }
 
