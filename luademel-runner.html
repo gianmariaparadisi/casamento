@@ -249,6 +249,18 @@ const RIMG = "assets/img/runner/";
 function rImg(name){ return loadImgFallback(`${RIMG}${name}.png`, `${RIMG}${name}.svg`); }
 
 const RUNNER_CLOUDS = [ rImg("clouds-1"), rImg("clouds-2") ];
+/* ícone do power-up de impulso/invencibilidade — usa o asset
+   "match-gold-sparkles" que já existe em assets/img/, sem depender de
+   upload novo. */
+const RUNNER_POWER_IMG = loadImg("assets/img/match-gold-sparkles.png");
+/* halo de invencibilidade em PNG — fica em assets/img/runner/, igual aos
+   outros assets por destino; enquanto não for adicionada, cai no halo
+   desenhado no canvas (fallback). */
+const RUNNER_SHIELD_IMG = loadImg(`${RIMG}shield-aura.png`);
+/* rastro de confete atrás do corredor enquanto invencível — reaproveita os
+   confetes-peça já usados em outras comemorações do site, em vez de pedir
+   asset novo. */
+const CONFETTI_TRAIL_IMGS = ["01","02","03","04","05","06"].map(n=> loadImg(`assets/img/confetti-piece-${n}.png`));
 const DEST_IDS = ["noronha","tailandia","africa","caribe","maiorca"];
 const RUNNER_LAYERS = {};
 const RUNNER_OBS_IMG = {};
@@ -257,6 +269,23 @@ DEST_IDS.forEach(id=>{
     relief: rImg(`${id}-relief-1`),
     backdrop: rImg(`${id}-backdrop-1`),
     ground: loadImg(`${RIMG}${id}-ground-1.png`),
+    /* fg/mid: assets de cenário extra que já existem em SVG mas ainda não
+       são desenhados em nenhum lugar do jogo (camada não usada hoje — não
+       confundir com relief/backdrop/ground, que aparecem). Carregados aqui
+       só com a mesma busca PNG->SVG do resto (rImg), pra já ficarem prontos
+       se um dia entrarem no desenho; sem chamada de draw, continuam
+       invisíveis exatamente como antes. */
+    fg1: rImg(`${id}-fg-1`),
+    fg2: rImg(`${id}-fg-2`),
+    mid1: rImg(`${id}-mid-1`),
+    mid2: rImg(`${id}-mid-2`),
+    mid3: rImg(`${id}-mid-3`),
+    /* pedacinhos de poeira na cor/textura do chão de cada destino — 5
+       variações por destino (groundparticle01..05) pra dar variedade visual
+       no impacto do pulo (pouso/arrancada) e no rastro contínuo correndo.
+       Enquanto os PNGs não existirem, as funções de spawn caem no círculo
+       colorido simples (fallback já existente). */
+    groundParticles: ["01","02","03","04","05"].map(n=> loadImg(`${RIMG}${id}-groundparticle${n}.png`)),
   };
   /* obstáculos e colecionáveis ainda não têm SVG provisório — ficam em emoji
      até o PNG existir; em quanto não existir, loadImg simplesmente falha e
@@ -317,7 +346,10 @@ const ctx = canvas.getContext("2d");
 
 let rnAlive=false, rnStarted=false, rnRaf=null, rnLastTs=0;
 let distance=0, speed=0, score=0, bonus=0, best=0;
-let curDestIdx=0, lastLap=0, curT=0;
+/* power-up: impulso de velocidade + invencibilidade por POWER_DURATION
+   segundos, ativado por uma fração dos colecionáveis "verdes". */
+let rnPowerActive=false, rnInvincible=false, rnPowerTimer=0, rnGlowPulse=0, rnTrailTimer=0, rnRunDustTimer=0;
+let curDestIdx=0, lastLap=0, curT=0, totalDestChanges=0;
 let groundOffset=0, cloudOff=0, reliefOff=0;
 
 const PLAYER_X = 70;
@@ -328,37 +360,51 @@ const STAND_W=30, STAND_H=44;
    com um limite claro depois disso. */
 const GRAVITY = 2000, GRAVITY_HOLD = 760, JUMP_V = -600, HOLD_MAX = 0.22;
 
+/* power-up de impulso: dura POWER_DURATION segundos, multiplica a
+   velocidade por POWER_SPEED_MULT e torna o corredor invencível (atravessa
+   obstáculos em vez de morrer). POWERUP_CHANCE é a fração dos
+   colecionáveis "verdes" normais que nasce como power-up em vez de pontos. */
+const POWER_DURATION = 10, POWER_SPEED_MULT = 1.35, POWERUP_CHANCE = 0.08;
+/* pontos ganhos por atropelar um obstáculo durante o impulso — recompensa
+   o risco de continuar correndo reto em vez de só "sobreviver" passando. */
+const OBS_KNOCK_PTS = 20;
+/* a cada troca de paisagem/destino, a chance de impulso cai 20% (composto) —
+   fica mais raro conforme a corrida avança, no mesmo espírito da velocidade
+   que só sobe. Ver currentPowerupChance() e totalDestChanges. */
+const POWERUP_DECAY_PER_DEST = 0.8;
+
 let player = { y: GROUND_Y-STAND_H, vy:0, jumping:false, holding:false, holdT:0, runT:0, squash:0 };
 
-/* dificuldade já entra "na 3ª volta" — sem moleza no começo */
-const BASE_SPEED = 250, LAP_SPEED_STEP = 55, MAX_SPEED = 760, DIFF_LAP_OFFSET = 2;
+/* dificuldade já entra "na 3ª volta" — sem moleza no começo.
+   Velocidade inicial e frequência de obstáculos/colecionáveis aumentadas
+   a pedido — o jogo deve ser desafiador desde o primeiro segundo. */
+const BASE_SPEED = 330, LAP_SPEED_STEP = 55, MAX_SPEED = 760, DIFF_LAP_OFFSET = 2;
 const SPEED_DIST_RATE = 0.01; // ramp contínuo pela distância total (nunca reseta — ver currentSpeed)
 const SPEED_PROGRESSION_MULT = 2; // pedido: progressão de velocidade 2x mais rápida (sem mudar o ponto de partida)
+const DEST_SPEED_STEP = 18; // pedido: velocidade também sobe a cada troca de paisagem/destino, não só a cada volta
 
 /* o pulo mais longo (segurando o tap) fica no ar ~0.84s — todo gap real
    entre obstáculos precisa sobrar bem mais que isso pra dar tempo de
    pousar e reagir ao próximo, em qualquer velocidade. */
-const MIN_SAFE_GAP_S = 1.4;
+const MIN_SAFE_GAP_S = 1.15;
 
-/* distância mínima (em unidades de `distance`, a mesma usada nos gaps de
-   spawn abaixo) entre o nascimento de um obstáculo e de um colecionável —
-   como os dois nascem sempre no mesmo x e andam na mesma velocidade, sem
-   isso eles podiam nascer quase juntos e ficar sobrepostos a viagem toda. */
-const MIN_CROSS_SPAWN_SEP = 90;
+/* obstáculo e colecionável nascem em timers totalmente independentes —
+   podem cair perto ou sobrepostos, e tá tudo bem (pedido explícito: o
+   colecionável deve aparecer no espaço que sobrar, pegável ou não). */
 let lastObsSpawnD = -9999, lastCollSpawnD = -9999;
 
 /* frequência de obstáculos: é a prioridade do jogo — devem aparecer com
    boa frequência desde o início, e essa frequência deve crescer rápido
    com a distância percorrida (não só com a velocidade), até saturar no
    piso de segurança (MIN_SAFE_GAP_S). */
-const OBS_GAP_START_S    = 1.7;  // gap médio real (s) no começo da corrida
-const OBS_GAP_RAMP_DIST  = 700;  // a partir desta distância já saturou no piso
+const OBS_GAP_START_S    = 1.1;  // gap médio real (s) no começo da corrida
+const OBS_GAP_RAMP_DIST  = 450;  // a partir desta distância já saturou no piso
 
 /* bônus/colecionáveis: sempre mais raros que obstáculos, e quase não
    aceleram com a distância — são um extra, não o foco do desafio. */
-const COLL_GAP_START_S   = 3.0;
-const COLL_GAP_END_S     = 2.2;
-const COLL_GAP_RAMP_DIST = 3200;
+const COLL_GAP_START_S   = 1.8;
+const COLL_GAP_END_S     = 1.3;
+const COLL_GAP_RAMP_DIST = 1800;
 
 /* quando um bônus nasce pouco depois de um obstáculo, ele tenta ficar na
    trajetória "certa" daquele obstáculo: se for de passar por baixo (trap),
@@ -400,6 +446,7 @@ function jumpPress(){
   if (!rnAlive) return;
   if (!player.jumping){
     player.jumping = true; player.vy = JUMP_V; player.holding = true; player.holdT = 0;
+    spawnGroundDust(PLAYER_X+STAND_W/2, GROUND_Y, 6); // poeira mais discreta saindo do chão na arrancada
     if(window.GS){GS.pop();GS.hTap();}
   }
 }
@@ -470,13 +517,14 @@ function hideOverlay(){ document.getElementById("rn-overlay").classList.remove("
 ══════════════════════════════════════════════════════════ */
 function resetRunner(){
   setupCanvas();
-  distance=0; speed=BASE_SPEED; score=0; bonus=0; curDestIdx=0; lastLap=0; curT=0;
+  distance=0; speed=BASE_SPEED; score=0; bonus=0; curDestIdx=0; lastLap=0; curT=0; totalDestChanges=0;
   groundOffset=0; cloudOff=0; reliefOff=0;
   player = { y: GROUND_Y-STAND_H, vy:0, jumping:false, holding:false, holdT:0, runT:0, squash:0 };
   obstacles=[]; collectibles=[]; particles=[];
   nextObsGap = 220/3; nextCollGap = 340/2;
   lastObsSpawnD = -9999; lastCollSpawnD = -9999; lastObsKind = null;
   banner = {text:"", flag:"", timer:0}; shake=0;
+  rnPowerActive=false; rnInvincible=false; rnPowerTimer=0; rnGlowPulse=0; rnTrailTimer=0; rnRunDustTimer=0;
   rnFaceIdx = Math.floor(Math.random()*rnFaces().length);
   updateHud();
   document.getElementById("rn-postgame").style.display="none";
@@ -575,6 +623,11 @@ function loop(ts){
   drawFrame(ts);
 }
 
+function currentPowerupChance(){
+  /* cai 20% (composto) a cada troca de paisagem/destino — fica mais raro
+     conforme a corrida avança, sem nunca voltar a subir. */
+  return POWERUP_CHANCE * Math.pow(POWERUP_DECAY_PER_DEST, totalDestChanges);
+}
 function currentSpeed(){
   /* cresce com a volta (lastLap) E com a distância total já percorrida —
      as duas só aumentam, nunca diminuem, então a velocidade nunca cai em
@@ -588,8 +641,14 @@ function currentSpeed(){
      SPEED_PROGRESSION_MULT, pra ficar 2x mais rápido sem mudar a
      velocidade inicial. */
   const startSpeed = BASE_SPEED + DIFF_LAP_OFFSET*LAP_SPEED_STEP;
-  const growth = (lastLap*LAP_SPEED_STEP + distance*SPEED_DIST_RATE) * SPEED_PROGRESSION_MULT;
-  return Math.min(MAX_SPEED, startSpeed + growth);
+  /* totalDestChanges soma um degrau a cada troca de paisagem/destino (não
+     só a cada volta completa) — pedido: velocidade deve subir "entre cada
+     paisagem", não só quando a corrida reinicia o ciclo. */
+  const growth = (lastLap*LAP_SPEED_STEP + totalDestChanges*DEST_SPEED_STEP + distance*SPEED_DIST_RATE) * SPEED_PROGRESSION_MULT;
+  const base = Math.min(MAX_SPEED, startSpeed + growth);
+  /* durante o impulso, multiplica por POWER_SPEED_MULT — pode passar um
+     pouco do teto normal (MAX_SPEED), já que é um bônus temporário. */
+  return rnPowerActive ? Math.min(MAX_SPEED*POWER_SPEED_MULT, base*POWER_SPEED_MULT) : base;
 }
 
 function update(dt){
@@ -605,6 +664,7 @@ function update(dt){
   curT = info.t;
   if (info.idx !== curDestIdx){
     curDestIdx = info.idx;
+    totalDestChanges++;
     const d = DESTS[curDestIdx];
     banner = { text:`Chegando a ${d.name}`, flag:d.flag, timer:2.2 };
     if(window.GS){GS.combo(3);GS.hGood();}
@@ -619,6 +679,27 @@ function update(dt){
   }
   if (banner.timer > 0) banner.timer -= dt;
 
+  /* contagem do impulso/invencibilidade — termina sozinho depois de
+     POWER_DURATION segundos e avisa pelo banner, igual aos outros eventos. */
+  if (rnPowerActive){
+    /* nos últimos 3s, o brilho do escudo pisca cada vez mais rápido — avisa
+       que o impulso tá acabando antes que ele realmente acabe. */
+    const urgency = rnPowerTimer < 3 ? 1 + (3-rnPowerTimer)*1.6 : 1;
+    rnGlowPulse += dt*6*urgency;
+    rnPowerTimer -= dt;
+    /* rastro de confete tipo "exaustão de foguete" saindo de trás do
+       corredor enquanto durar o impulso. */
+    rnTrailTimer -= dt;
+    if (rnTrailTimer <= 0){
+      spawnTrailConfetti();
+      rnTrailTimer = 0.03 + Math.random()*0.015;
+    }
+    if (rnPowerTimer <= 0){
+      rnPowerActive = false; rnInvincible = false;
+      banner = { text:"Impulso acabou — atenção de novo!", flag:"", timer:1.8 };
+    }
+  }
+
   /* física do salto (tap curto = pulo baixo; segurar até HOLD_MAX = pulo mais alto/longo) */
   if (player.jumping){
     const boosting = player.holding && player.holdT < HOLD_MAX && player.vy < 0;
@@ -630,6 +711,7 @@ function update(dt){
     if (player.y >= standY){
       player.y = standY; player.vy = 0; player.jumping = false; player.holding=false;
       player.squash = 1; // delight: pequeno "splat" ao aterrissar
+      spawnGroundDust(PLAYER_X+STAND_W/2, GROUND_Y, 14);
     }
   } else {
     player.y = GROUND_Y - STAND_H;
@@ -637,59 +719,71 @@ function update(dt){
   player.runT += dt * (player.jumping ? 0 : speed*0.045);
   if (player.squash>0) player.squash = Math.max(0, player.squash - dt*6);
 
+  /* poeira leve e contínua saindo de trás dos pés enquanto corre no chão —
+     bem mais discreta que o impacto do pulo/aterrissagem, só um detalhe
+     ambiente de "peso" correndo. Some durante o salto. */
+  if (!player.jumping){
+    rnRunDustTimer -= dt;
+    if (rnRunDustTimer <= 0){
+      spawnRunDust(PLAYER_X+STAND_W*0.22, GROUND_Y);
+      rnRunDustTimer = 0.08 + Math.random()*0.06;
+    }
+  }
+
   /* spawn de obstáculos — chance de obstáculo alto cresce com volta/destino.
      Faixa de variação mais estreita (antes ia até 1.85x o mínimo, agora até
      1.4x) pra evitar aqueles trechos longos sem nada — mais previsível, sem
      ficar mecânico. */
   nextObsGap -= distDelta;
   if (nextObsGap <= 0){
-    if (distance - lastCollSpawnD < MIN_CROSS_SPAWN_SEP){
-      /* um colecionável acabou de nascer — espera só o suficiente pra não
-         nascer quase em cima dele, em vez de pular esse spawn inteiro. */
-      nextObsGap = MIN_CROSS_SPAWN_SEP - (distance - lastCollSpawnD);
-    } else {
-      spawnObstacle();
-      lastObsSpawnD = distance;
-      /* frequência cresce rápido com a distância (não só com a velocidade):
-         começa em OBS_GAP_START_S e satura no piso de segurança já em
-         OBS_GAP_RAMP_DIST — depois disso fica sempre no piso. */
-      const obsT = Math.min(1, distance / OBS_GAP_RAMP_DIST);
-      const targetGapS = OBS_GAP_START_S - (OBS_GAP_START_S - MIN_SAFE_GAP_S) * obsT;
-      const rolled = targetGapS * (0.85 + Math.random()*0.3) * speed/16; // ±15% de variação
-      /* piso de segurança: nunca deixa o próximo obstáculo mais perto do
-         que MIN_SAFE_GAP_S segundos reais, em qualquer velocidade — garante
-         que sempre dá tempo de pousar e reagir, mesmo no pior caso aleatório. */
-      const safeFloor = MIN_SAFE_GAP_S * speed / 16;
-      nextObsGap = Math.max(rolled, safeFloor);
-    }
+    spawnObstacle();
+    lastObsSpawnD = distance;
+    /* frequência cresce rápido com a distância (não só com a velocidade):
+       começa em OBS_GAP_START_S e satura no piso de segurança já em
+       OBS_GAP_RAMP_DIST — depois disso fica sempre no piso. */
+    const obsT = Math.min(1, distance / OBS_GAP_RAMP_DIST);
+    const targetGapS = OBS_GAP_START_S - (OBS_GAP_START_S - MIN_SAFE_GAP_S) * obsT;
+    const rolled = targetGapS * (0.85 + Math.random()*0.3) * speed/16; // ±15% de variação
+    /* piso de segurança: nunca deixa o próximo obstáculo mais perto do
+       que MIN_SAFE_GAP_S segundos reais, em qualquer velocidade — garante
+       que sempre dá tempo de pousar e reagir, mesmo no pior caso aleatório. */
+    const safeFloor = MIN_SAFE_GAP_S * speed / 16;
+    nextObsGap = Math.max(rolled, safeFloor);
   }
   nextCollGap -= distDelta;
   if (nextCollGap <= 0){
-    if (distance - lastObsSpawnD < MIN_CROSS_SPAWN_SEP){
-      /* mesma lógica, na outra direção — nunca nasce quase em cima de um
-         obstáculo que acabou de aparecer. */
-      nextCollGap = MIN_CROSS_SPAWN_SEP - (distance - lastObsSpawnD);
-    } else {
-      spawnCollectible();
-      lastCollSpawnD = distance;
-      /* bônus sempre mais raro que obstáculo — ramp bem mais lento e um
-         piso (COLL_GAP_END_S) bem acima do piso dos obstáculos. */
-      const collT = Math.min(1, distance / COLL_GAP_RAMP_DIST);
-      const targetGapS = COLL_GAP_START_S - (COLL_GAP_START_S - COLL_GAP_END_S) * collT;
-      nextCollGap = targetGapS * (0.85 + Math.random()*0.3) * speed/16;
-    }
+    /* nasce no timer próprio, independente do obstáculo — pode cair
+       perto ou em cima de um obstáculo recente, e tá tudo bem (intencional). */
+    spawnCollectible();
+    lastCollSpawnD = distance;
+    /* bônus sempre mais raro que obstáculo — ramp bem mais lento e um
+       piso (COLL_GAP_END_S) bem acima do piso dos obstáculos. */
+    const collT = Math.min(1, distance / COLL_GAP_RAMP_DIST);
+    const targetGapS = COLL_GAP_START_S - (COLL_GAP_START_S - COLL_GAP_END_S) * collT;
+    nextCollGap = targetGapS * (0.85 + Math.random()*0.3) * speed/16;
   }
 
   /* move obstáculos/colecionáveis (em px de tela, escala simples) */
   const pxSpeed = speed*dt*0.9;
-  obstacles.forEach(o=> o.x -= pxSpeed);
-  obstacles = obstacles.filter(o=> o.x > -80);
+  obstacles.forEach(o=>{
+    if (o.knocked){
+      /* obstáculo atropelado: física própria (sai disparado, sobe, cai e
+         gira), independente da rolagem normal da pista. */
+      o.kvy += 900*dt;
+      o.x += o.kvx*dt;
+      o.ky += o.kvy*dt;
+      o.krotation += o.krotSpeed*dt;
+    } else {
+      o.x -= pxSpeed;
+    }
+  });
+  obstacles = obstacles.filter(o=> o.knocked ? (o.x > -150 && o.ky < 900) : o.x > -80);
   collectibles.forEach(c=> c.x -= pxSpeed);
   collectibles = collectibles.filter(c=> !c.taken && c.x > -60);
 
   checkCollisions();
 
-  particles.forEach(p=>{ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=400*dt; p.life-=dt; });
+  particles.forEach(p=>{ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=(p.trail?150:400)*dt; if(p.rotSpeed) p.rot+=p.rotSpeed*dt; p.life-=dt; });
   particles = particles.filter(p=>p.life>0);
   if (shake>0) shake = Math.max(0, shake - dt*40);
 
@@ -715,6 +809,14 @@ function spawnObstacle(){
 }
 function spawnCollectible(){
   const d = DESTS[curDestIdx];
+  /* uma fração dos "verdes" é, na verdade, o power-up de impulso —
+     continua com o mesmo brilho verde da família de colecionáveis (pra não
+     ficar óbvio de longe), só com um ícone diferente (sparkle) pra quem
+     prestar atenção conseguir escolher pegar ou não. */
+  if (Math.random() < currentPowerupChance()){
+    collectibles.push({ x:LW+20, y0:GROUND_Y-100, w:46, e:"", img:RUNNER_POWER_IMG, pts:70, label:"Impulso", bob:Math.random()*6.28, taken:false, bonus:false, power:true });
+    return;
+  }
   /* se este bônus nasce pouco depois de um obstáculo (ALIGN_WINDOW), ele
      tenta cair na trajetória "certa" daquele obstáculo: trap (passa por
      baixo) -> bônus baixo, na linha de corrida; low/tall (precisa pular)
@@ -744,7 +846,25 @@ function checkCollisions(){
   for (const o of obstacles){
     const oy = obstacleY(o);
     const ob = { x:o.x+4, y:oy+4, w:o.w-8, h:o.h-8 };
-    if (!o.passed && rectsOverlap(pb, ob)){ endRunner(); return; }
+    if (!o.passed && rectsOverlap(pb, ob)){
+      if (rnInvincible){
+        /* durante o impulso, atravessa o obstáculo em vez de morrer — e o
+           obstáculo sai disparado pra trás, girando, como se tivesse sido
+           atropelado, em vez de só desaparecer. */
+        o.passed = true;
+        o.knocked = true;
+        o.ky = 0; o.krotation = 0;
+        o.kvx = -(360 + Math.random()*220);
+        o.kvy = -(260 + Math.random()*180);
+        o.krotSpeed = (Math.random()<0.5?-1:1) * (6 + Math.random()*6);
+        bonus += OBS_KNOCK_PTS;
+        spawnFloatText(o.x + o.w/2, oy, `+${OBS_KNOCK_PTS}`);
+        spawnBurst(o.x + o.w/2, oy + o.h/2, 6);
+        if(window.GS){GS.combo(2);}
+        continue;
+      }
+      endRunner(); return;
+    }
     if (!o.passed && o.x + o.w < PLAYER_X) o.passed = true;
   }
   for (const c of collectibles){
@@ -754,15 +874,93 @@ function checkCollisions(){
       c.taken = true; bonus += c.pts;
       spawnFloatText(c.x, c.y0, `+${c.pts}`);
       if(window.GS){GS.eat();GS.hGood();}
-      if (c.bonus) spawnBurst(c.x, c.y0, 8);
+      if (c.power) activatePowerUp();
+      else if (c.bonus) spawnBurst(c.x, c.y0, 8);
     }
   }
+}
+
+function activatePowerUp(){
+  rnPowerActive = true; rnInvincible = true; rnPowerTimer = POWER_DURATION; rnGlowPulse = 0; rnTrailTimer = 0;
+  banner = { text:"Impulso ativado! Mais rápido e invencível por 10s", flag:"", timer:2.2 };
+  if(window.GS){GS.win();GS.hWin();}
+  spawnBurst(PLAYER_X+STAND_W/2, player.y, 14);
 }
 
 function spawnBurst(x,y,n){
   for (let i=0;i<n;i++){
     const ang = Math.random()*Math.PI*2, spd = 60+Math.random()*120;
     particles.push({ x, y, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd-60, life:.6+Math.random()*.4, total:1, color:["#C46D28","#7A9B6E","#C8A050","#1A1A40"][i%4] });
+  }
+}
+function groundParticleImg(){
+  /* sorteia um dos 5 PNGs de poeira/terra do destino atual (assets/img/runner/
+     {id}-groundparticle01..05.png), pra variar o visual partícula a partícula;
+     enquanto nenhum existir, quem chamar usa o fallback de círculo colorido. */
+  const id = DEST_IDS[curDestIdx];
+  const imgs = RUNNER_LAYERS[id] && RUNNER_LAYERS[id].groundParticles;
+  if (!imgs) return null;
+  const ok = imgs.filter(imgOk);
+  return ok.length ? ok[Math.floor(Math.random()*ok.length)] : null;
+}
+function spawnGroundDust(x,y,n=14){
+  /* poeira ao pular/aterrissar — pedacinhos na textura do chão do destino
+     atual (PNG quando disponível, senão círculo na cor do chão). n maior
+     (aterrissagem) = nuvem mais cheia e visível; n menor (arrancada do
+     salto) = só um respingo rápido saindo do chão. */
+  const d = DESTS[curDestIdx];
+  const colA = d.groundLine || d.ground;
+  const colB = d.ground;
+  const gimg = groundParticleImg();
+  for (let i=0;i<n;i++){
+    const ang = Math.PI + (Math.random()-0.5)*Math.PI*0.95; // leque baixo e largo
+    const spd = 50+Math.random()*120;
+    const size = 5+Math.random()*6;
+    const base = {
+      x: x + (Math.random()-0.5)*14, y,
+      vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd*0.55-55,
+      life:.38+Math.random()*.3, total:.5,
+    };
+    particles.push(gimg
+      ? { ...base, img:gimg, rot:Math.random()*Math.PI*2, rotSpeed:(Math.random()-0.5)*8, size }
+      : { ...base, color: Math.random()<0.5 ? colA : colB, size:3.5+Math.random()*4.5 });
+  }
+}
+function spawnRunDust(x,y){
+  /* poeirinha ambiente e contínua enquanto corre — bem menor e mais
+     curta que o efeito de pulo/aterrissagem, só sugere atrito no chão. */
+  const d = DESTS[curDestIdx];
+  const col = d.groundLine || d.ground;
+  const gimg = groundParticleImg();
+  const ang = Math.PI + (Math.random()-0.5)*Math.PI*0.5;
+  const spd = 12+Math.random()*20;
+  const base = {
+    x: x + (Math.random()-0.5)*4, y,
+    vx: Math.cos(ang)*spd - speed*0.15, vy: Math.sin(ang)*spd*0.4-6,
+    life:.2+Math.random()*.14, total:.25,
+  };
+  particles.push(gimg
+    ? { ...base, img:gimg, rot:Math.random()*Math.PI*2, rotSpeed:(Math.random()-0.5)*6, size:3+Math.random()*2.5 }
+    : { ...base, color: col, size:1.3+Math.random()*1.4 });
+}
+function spawnTrailConfetti(){
+  /* confete saindo de trás do corredor, tipo rastro de foguete — usa os
+     mesmos PNGs de confete dos outros jogos do site. Maior e mais denso do
+     que a primeira versão, pra ficar bem visível mesmo com o jogo rolando
+     rápido. */
+  for (let i=0;i<2;i++){
+    const img = CONFETTI_TRAIL_IMGS[Math.floor(Math.random()*CONFETTI_TRAIL_IMGS.length)];
+    const px = PLAYER_X + STAND_W*0.15 - Math.random()*10;
+    const py = player.y + STAND_H*(0.2 + Math.random()*0.65);
+    particles.push({
+      x:px, y:py,
+      vx: -(speed*0.8 + 60 + Math.random()*80),
+      vy: -20 + Math.random()*70,
+      life:.6+Math.random()*.35, total:.6,
+      img, rot:Math.random()*Math.PI*2, rotSpeed:(Math.random()-0.5)*11,
+      size:10+Math.random()*7,
+      trail:true
+    });
   }
 }
 function spawnFloatText(x,y,text){
@@ -903,8 +1101,15 @@ function drawGround(d){
 }
 
 function drawObstacle(o){
-  const y = obstacleY(o);
+  const y = obstacleY(o) + (o.knocked ? o.ky : 0);
   ctx.save();
+  if (o.knocked){
+    /* gira em volta do próprio centro enquanto voa pra trás atropelado. */
+    const cx = o.x + o.w/2, cy = y + o.h/2;
+    ctx.translate(cx, cy);
+    ctx.rotate(o.krotation);
+    ctx.translate(-cx, -cy);
+  }
   ctx.shadowColor = "rgba(230,40,40,0.95)";
   ctx.shadowBlur = 16;
   if (imgOk(o.img)){
@@ -944,7 +1149,7 @@ function drawCollectible(c){
   const y = c.y0 + Math.sin(c.bob + distance*0.05)*6;
   ctx.save();
   ctx.shadowColor = "rgba(60,220,90,0.95)";
-  ctx.shadowBlur = c.bonus ? 18 : 13;
+  ctx.shadowBlur = (c.bonus || c.power) ? 18 : 13;
   if (imgOk(c.img)){
     ctx.drawImage(c.img, c.x, y, c.w, c.w);
     ctx.drawImage(c.img, c.x, y, c.w, c.w); // segunda passada: brilho mais forte
@@ -959,11 +1164,23 @@ function drawCollectible(c){
 function drawParticle(p){
   ctx.save();
   ctx.globalAlpha = Math.max(0, p.life/p.total);
-  if (p.text){
+  if (p.img){
+    if (imgOk(p.img)){
+      const s = p.size||8;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot||0);
+      if (p.trail){
+        /* rastro do impulso: passada dupla, igual obstáculos/colecionáveis,
+           pra ficar bem evidente mesmo correndo rápido. */
+        ctx.drawImage(p.img, -s/2, -s/2, s, s);
+      }
+      ctx.drawImage(p.img, -s/2, -s/2, s, s);
+    }
+  } else if (p.text){
     ctx.font="bold 13px 'Inter',sans-serif"; ctx.fillStyle=p.color; ctx.textAlign="center";
     ctx.fillText(p.text, p.x, p.y);
   } else {
-    ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x,p.y,3.2,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x,p.y,p.size||3.2,0,Math.PI*2); ctx.fill();
   }
   ctx.restore();
 }
@@ -983,6 +1200,33 @@ function drawPlayer(){
   ctx.translate(x+w/2, y+h);
   ctx.scale(1+sq*0.12, 1-sq*0.18);
   ctx.translate(-(x+w/2), -(y+h));
+
+  /* impulso/invencibilidade: halo pulsante dourado em volta do corredor —
+     sinaliza claramente que ele está protegido enquanto o efeito dura. */
+  if (rnInvincible){
+    const pulse = 0.5 + Math.sin(rnGlowPulse)*0.5;
+    const alpha = 0.55 + pulse*0.35;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if (imgOk(RUNNER_SHIELD_IMG)){
+      /* halo em PNG (ver assets/img/runner/shield-aura.png) — escala levemente
+         com o pulso, igual o halo desenhado, pra manter o piscar urgente
+         nos últimos segundos de invencibilidade. */
+      const s = Math.max(w,h)*2.1 + pulse*10;
+      ctx.translate(x+w/2, y+h/2);
+      ctx.drawImage(RUNNER_SHIELD_IMG, -s/2, -s/2, s, s);
+    } else {
+      /* fallback: halo desenhado no canvas, usado até a imagem ser adicionada */
+      ctx.shadowColor = "rgba(255,210,90,.95)";
+      ctx.shadowBlur = 18 + pulse*10;
+      ctx.strokeStyle = "rgba(255,210,90,.9)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(x+w/2, y+h/2, w*0.95 + pulse*3, h*0.72 + pulse*3, 0, 0, Math.PI*2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
 
   /* pernas */
   ctx.strokeStyle = "#3D2E1C"; ctx.lineWidth=4; ctx.lineCap="round";
