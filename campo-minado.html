@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Campo Minado do Casamento — Tiago e Gian</title>
+
+  <!-- Open Graph / WhatsApp / iMessage preview -->
+  <meta property="og:type"         content="website" />
+  <meta property="og:title"        content="Campo Minado do Casamento — Tiago e Gian" />
+  <meta property="og:description"  content="Revele as casinhas sem encontrar nenhum coração partido!" />
+  <meta property="og:image"        content="https://gianmariaparadisi.github.io/casamento/assets/img/tile-bouquet.png" />
+  <meta property="og:url"          content="https://gianmariaparadisi.github.io/casamento/campo-minado.html" />
+  <meta property="og:site_name"    content="Tiago e Gian · 12.12.2026" />
+  <meta name="twitter:card"        content="summary_large_image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="assets/css/style.css"/>
+  <style>
+    :root{
+      --cm-pink:#ff7eb6; --cm-pink-deep:#ff4f9a; --cm-text:#6b3f4d; --cm-muted:#a9728a;
+      --cm-cell:#ffe3ef; --cm-cell-hover:#ffd0e3; --cm-cell-revealed:#fffaf6;
+    }
+    body.game-page{
+      min-height:100svh;color:var(--cm-text);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255,255,255,.9), transparent 26rem),
+        radial-gradient(circle at 88% 10%, rgba(255,126,182,.18), transparent 28rem),
+        linear-gradient(180deg,#fff0f5 0%,#fff8ef 55%,#fdeef4 100%);
+    }
+    .game-nav{position:sticky;top:0;z-index:30;background:rgba(255,250,246,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,210,225,.7);}
+    .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:13px 0;}
+    .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.84rem;color:var(--cm-muted);}
+    .game-back{font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;color:#a9728a;text-decoration:underline;text-underline-offset:4px;}
+
+    .game-shell{width:92%;max-width:520px;margin:0 auto;padding:28px 0 80px;position:relative;}
+    .game-kicker{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--cm-pink-deep);text-align:center;margin-bottom:.35rem;}
+    .game-title{font-family:var(--font-display);font-size:clamp(2rem,7vw,3.2rem);font-weight:400;text-align:center;margin-bottom:.4rem;color:var(--cm-pink-deep);display:flex;align-items:center;justify-content:center;gap:.3rem;}
+    .game-title img{width:1em;height:1em;object-fit:contain;}
+    .game-sub{max-width:420px;margin:0 auto 1.1rem;text-align:center;color:var(--cm-muted);font-size:.88rem;line-height:1.65;}
+
+    .float-hearts{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+    .float-hearts img{position:absolute;bottom:-40px;opacity:.16;animation:cmFloatUp linear infinite;}
+    @keyframes cmFloatUp{0%{transform:translateY(0) rotate(0deg);opacity:0;}10%{opacity:.2;}90%{opacity:.16;}100%{transform:translateY(-640px) rotate(25deg);opacity:0;}}
+
+    .game-panel{position:relative;z-index:1;border:1px solid rgba(255,210,225,.9);background:rgba(255,255,255,.62);border-radius:22px;box-shadow:0 18px 50px rgba(255,126,182,.18);padding:1.2rem 1.1rem;}
+
+    .difficulty{display:flex;gap:8px;margin-bottom:14px;}
+    .diff-btn{flex:1;border:none;padding:9px 0;border-radius:12px;background:var(--cm-cell);color:var(--cm-text);font-size:.78rem;font-weight:700;cursor:pointer;transition:background .15s ease,color .15s ease,transform .1s ease;}
+    .diff-btn.active{background:linear-gradient(135deg,var(--cm-pink),var(--cm-pink-deep));color:#fff;box-shadow:0 6px 14px rgba(255,79,154,.35);}
+    .diff-btn:hover:not(.active){background:var(--cm-cell-hover);}
+    .diff-btn:active{transform:scale(.96);}
+
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+    .hud__pill{background:rgba(255,255,255,.7);border:1px solid rgba(255,210,225,.85);border-radius:999px;padding:.4rem .8rem;font-size:.74rem;font-weight:700;color:var(--cm-pink-deep);display:flex;align-items:center;gap:.35rem;font-variant-numeric:tabular-nums;}
+    .hud__pill img{width:1.3rem;height:1.3rem;object-fit:contain;}
+    .hud__pill span.lbl{color:var(--cm-muted);font-weight:600;text-transform:uppercase;font-size:.62rem;letter-spacing:.05em;}
+
+    .face-btn{border:none;background:var(--cm-cell);width:48px;height:48px;border-radius:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s ease,background .15s ease;}
+    .face-btn img{width:26px;height:26px;object-fit:contain;}
+    .face-btn:hover{background:var(--cm-cell-hover);transform:scale(1.05);}
+    .face-btn:active{transform:scale(.9);}
+
+    .flag-mode-row{display:flex;justify-content:center;margin-bottom:12px;}
+    .flag-mode-btn{display:inline-flex;align-items:center;gap:.4rem;border:1.5px solid rgba(255,210,225,.95);background:#fff;color:var(--cm-text);padding:.45rem .9rem;border-radius:999px;font-size:.72rem;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .15s;}
+    .flag-mode-btn img{width:1.1rem;height:1.1rem;object-fit:contain;}
+    .flag-mode-btn.active{background:linear-gradient(135deg,var(--cm-pink),var(--cm-pink-deep));color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(255,79,154,.3);}
+
+    .board-wrap{display:flex;justify-content:center;overflow:auto;padding:2px;}
+    .board{display:grid;gap:4px;touch-action:manipulation;}
+    .board.shake{animation:cmShake .4s ease;}
+    @keyframes cmShake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px) rotate(-1deg);}40%{transform:translateX(8px) rotate(1deg);}60%{transform:translateX(-6px);}80%{transform:translateX(6px);}}
+
+    .cell{border-radius:8px;background:var(--cm-cell);border:none;display:flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;user-select:none;transition:background .12s ease,transform .05s ease;padding:0;}
+    .cell:hover{background:var(--cm-cell-hover);}
+    .cell:active{transform:scale(.92);}
+    .cell.revealed{background:var(--cm-cell-revealed);cursor:default;box-shadow:inset 0 0 0 1px rgba(255,210,225,.9);animation:cmPop .16s ease;}
+    @keyframes cmPop{0%{transform:scale(.6);opacity:.4;}100%{transform:scale(1);opacity:1;}}
+    .cell.revealed:hover{background:var(--cm-cell-revealed);}
+    .cell.mine{background:#ffd3e2;}
+    .cell .icon-img{width:62%;height:62%;object-fit:contain;}
+
+    .n1{color:#4f7cff;}.n2{color:#2bb673;}.n3{color:#ff5c8a;}.n4{color:#a05cff;}
+    .n5{color:#e08a2b;}.n6{color:#0c8599;}.n7{color:#6b3f4d;}.n8{color:#b08a9a;}
+
+    .status{text-align:center;margin-top:14px;font-size:1rem;font-weight:700;min-height:24px;color:var(--cm-muted);}
+    .status.win{color:#2bb673;}
+    .status.lose{color:var(--cm-pink-deep);}
+    .hint{text-align:center;color:var(--cm-muted);font-size:.72rem;margin-top:6px;font-weight:600;}
+
+    .game-btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;border-radius:999px;border:1px solid rgba(255,126,182,.35);background:#fff;color:var(--cm-text);padding:.65rem 1.2rem;font-size:.73rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 8px 22px rgba(255,126,182,.12);cursor:pointer;transition:transform .14s ease;}
+    .game-btn:hover{transform:translateY(-1px);}
+    .game-btn--main{background:linear-gradient(135deg,var(--cm-pink),var(--cm-pink-deep));color:#fff;border-color:transparent;}
+
+    .save-box{margin-top:1rem;background:rgba(255,255,255,.65);border:1px solid rgba(255,210,225,.85);border-radius:14px;padding:.85rem;}
+    .save-box__row{display:flex;gap:.45rem;}
+    .save-input{flex:1;min-width:0;border:1px solid rgba(255,210,225,.95);border-radius:999px;background:#fff;padding:.6rem .85rem;font:inherit;font-size:.85rem;outline:none;}
+    .save-msg{font-size:.72rem;color:var(--cm-muted);margin-top:.3rem;min-height:1em;}
+    .top10{margin-top:1.1rem;background:rgba(255,255,255,.5);border:1px solid rgba(255,210,225,.8);border-radius:14px;padding:.85rem;}
+    .top10 h3{font-family:var(--font-display);font-size:1.15rem;font-weight:400;margin-bottom:.45rem;text-align:center;color:var(--cm-pink-deep);}
+    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.3rem;}
+    .top10 li{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.7);border:1px solid rgba(255,210,225,.7);border-radius:10px;padding:.42rem .6rem;font-size:.8rem;}
+    .top10 .pos{font-family:var(--font-display);font-size:.95rem;width:1.3rem;text-align:center;color:var(--cm-pink-deep);}
+    .top10 .name{flex:1;font-weight:500;}
+    .top10 .pts{font-weight:700;color:var(--cm-pink-deep);}
+
+    .btn-row{display:flex;gap:.5rem;justify-content:center;margin-top:.9rem;flex-wrap:wrap;}
+
+    @media(max-width:480px){
+      .save-box__row{flex-direction:column;}
+      .game-btn{width:100%;}
+    }
+  </style>
+</head>
+<body class="game-page">
+  <nav class="game-nav"><div class="game-nav__inner">
+    <a class="game-back" href="jogos.html" data-it="← Torna ai giochi">← Voltar aos jogos</a>
+    <div class="game-brand">Tiago &amp; Gian</div>
+  </div></nav>
+
+  <main class="game-shell">
+    <div class="float-hearts" id="floatHearts"></div>
+
+    <p class="game-kicker" data-it="Tabellone">Tabuleiro</p>
+    <h1 class="game-title"><img src="assets/img/icon-heart-full.png" alt="">
+      <span data-it="Campo Minato del Matrimonio">Campo Minado do Casamento</span></h1>
+    <p class="game-sub" data-it="Rivela tutte le casette senza trovare un cuore spezzato! Tocca per scoprire, tieni premuto (o clic destro) per segnare il bouquet.">Revele todas as casinhas sem encontrar nenhum coração partido! Toque para revelar, mantenha pressionado (ou clique direito) para marcar o buquê.</p>
+
+    <section class="game-panel">
+      <div class="difficulty">
+        <button class="diff-btn" data-level="easy" data-it="Facile">Fácil</button>
+        <button class="diff-btn active" data-level="medium" data-it="Medio">Médio</button>
+        <button class="diff-btn" data-level="hard" data-it="Difficile">Difícil</button>
+      </div>
+
+      <div class="toolbar">
+        <div class="hud__pill"><img src="assets/img/icon-heart-broken.png" alt=""><span class="lbl" data-it="Cuori">Corações</span> <strong id="mineCount">10</strong></div>
+        <button class="face-btn" id="resetBtn" aria-label="Recomeçar"><img id="resetIcon" src="assets/img/icon-heart-full.png" alt=""></button>
+        <div class="hud__pill"><img src="assets/img/icon-clock.png" alt=""><strong id="timer">0</strong>s</div>
+      </div>
+
+      <div class="flag-mode-row">
+        <button class="flag-mode-btn" id="flagModeBtn">
+          <img src="assets/img/match-bouquet.png" alt="">
+          <span data-it="Modo: Segnare il bouquet">Modo: Marcar buquê</span>
+        </button>
+      </div>
+
+      <div class="board-wrap">
+        <div class="board" id="board"></div>
+      </div>
+
+      <div class="status" id="status">&nbsp;</div>
+      <p class="hint" data-it="Sullo smartphone: tieni premuto per segnare. Sul computer: clic destro o usa il modo bouquet qui sopra.">No celular: mantenha pressionado para marcar. No computador: clique direito ou use o modo buquê acima.</p>
+    </section>
+
+    <section class="top10"><h3>Top 10</h3><ol id="topList"></ol></section>
+  </main>
+
+  <script>
+    "use strict";
+
+    /* ───────────────── Score API (padrão do site) ───────────────── */
+    const SCORE_API = (typeof API_URL !== "undefined") ? API_URL : "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+    const GAME_KEY = "campo-minado";
+    function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+    function t(pt,it){ return (window.I18N && window.I18N.lang==="it") ? it : pt; }
+
+    async function saveScore(name, score, msgEl, btn){
+      name=(name||"").trim().slice(0,22);
+      if(!name){ if(msgEl) msgEl.textContent=t("Coloque seu nome para salvar.","Inserisci il tuo nome per salvare."); return; }
+      if(msgEl) msgEl.textContent=t("Salvando...","Salvataggio...");
+      if(btn) btn.disabled=true;
+      try{
+        await fetch(SCORE_API,{method:"POST",body:JSON.stringify({action:"score",jogo:GAME_KEY,nome:name,pontos:score})});
+        if(msgEl) msgEl.textContent=t("Salvo! 🏆","Salvato! 🏆").replace(" 🏆","");
+        loadTop10();
+      }catch(e){
+        if(btn) btn.disabled=false;
+        if(msgEl) msgEl.textContent=t("Não conseguimos salvar agora.","Non siamo riusciti a salvare ora.");
+      }
+    }
+    async function loadTop10(){
+      const list=document.getElementById("topList"); if(!list) return;
+      list.innerHTML=`<li><span class="name">${t("Carregando…","Caricamento…")}</span></li>`;
+      try{
+        const r=await fetch(`${SCORE_API}?action=top10&jogo=${GAME_KEY}`);
+        const d=await r.json();
+        const arr=d.lista||[];
+        if(!arr.length){ list.innerHTML=`<li><span class="name">${t("Seja o primeiro!","Sii il primo!")}</span></li>`; return; }
+        list.innerHTML=arr.map((it,i)=>`<li><span class="pos">${i+1}</span><span class="name">${esc(it.nome)}</span><span class="pts">${it.pontos} pts</span></li>`).join("");
+      }catch(e){ list.innerHTML=`<li><span class="name">${t("Placar indisponível.","Classifica non disponibile.")}</span></li>`; }
+    }
+
+    /* ───────────────── corações flutuantes ───────────────── */
+    function setupFloatingHearts(){
+      const wrap=document.getElementById("floatHearts");
+      for(let i=0;i<7;i++){
+        const img=document.createElement("img");
+        img.src="assets/img/icon-heart-full.png"; img.alt="";
+        const size=14+Math.random()*16;
+        img.style.width=size+"px"; img.style.height=size+"px";
+        img.style.left=Math.random()*100+"%";
+        const duration=9+Math.random()*8;
+        img.style.animationDuration=duration+"s";
+        img.style.animationDelay=(Math.random()*duration)+"s";
+        wrap.appendChild(img);
+      }
+    }
+
+    /* ───────────────── burst de corações partidos (derrota) ───────────────── */
+    function heartBreakBurst(){
+      const rect=boardEl.getBoundingClientRect();
+      for(let i=0;i<12;i++){
+        const img=document.createElement("img");
+        img.src="assets/img/icon-heart-broken.png"; img.alt="";
+        img.style.position="fixed";
+        img.style.left=(rect.left+rect.width/2+(Math.random()-0.5)*70)+"px";
+        img.style.top=(rect.top+rect.height/2)+"px";
+        const size=14+Math.random()*12;
+        img.style.width=size+"px"; img.style.height=size+"px";
+        img.style.zIndex=999; img.style.pointerEvents="none";
+        img.style.transition="transform .8s ease, opacity .8s ease";
+        document.body.appendChild(img);
+        requestAnimationFrame(()=>{
+          img.style.transform=`translate(${(Math.random()-0.5)*150}px, ${-60-Math.random()*90}px) rotate(${(Math.random()-0.5)*90}deg)`;
+          img.style.opacity="0";
+        });
+        setTimeout(()=>img.remove(),850);
+      }
+    }
+
+    /* ───────────────── jogo ───────────────── */
+    const LEVELS = {
+      easy:   { rows:9,  cols:9,  mines:10 },
+      medium: { rows:12, cols:12, mines:24 },
+      hard:   { rows:14, cols:14, mines:40 },
+    };
+    const DIFF_MULT = { easy:1, medium:1.5, hard:2.2 };
+
+    let level="medium";
+    let rows, cols, mineCount;
+    let grid=[];
+    let revealedCount=0;
+    let flagsPlaced=0;
+    let gameOver=false;
+    let gameWon=false;
+    let firstClick=true;
+    let timerInterval=null;
+    let seconds=0;
+    let flagMode=false;
+    let finalScore=0;
+
+    const boardEl=document.getElementById("board");
+    const mineCountEl=document.getElementById("mineCount");
+    const timerEl=document.getElementById("timer");
+    const statusEl=document.getElementById("status");
+    const resetBtn=document.getElementById("resetBtn");
+    const resetIcon=document.getElementById("resetIcon");
+    const flagModeBtn=document.getElementById("flagModeBtn");
+    const diffBtns=document.querySelectorAll(".diff-btn");
+
+    function cellPx(){
+      const wrapW = boardEl.parentElement.clientWidth || 320;
+      const px = Math.floor((wrapW - (cols-1)*4) / cols);
+      return Math.max(20, Math.min(34, px));
+    }
+
+    function init(){
+      const cfg=LEVELS[level];
+      rows=cfg.rows; cols=cfg.cols; mineCount=cfg.mines;
+      grid=[]; revealedCount=0; flagsPlaced=0;
+      gameOver=false; gameWon=false; firstClick=true;
+      stopTimer(); seconds=0;
+      timerEl.textContent="0";
+      mineCountEl.textContent=mineCount;
+      statusEl.textContent=" ";
+      statusEl.className="status";
+      resetIcon.src="assets/img/icon-heart-full.png";
+      boardEl.classList.remove("shake");
+
+      for(let r=0;r<rows;r++){
+        const row=[];
+        for(let c=0;c<cols;c++) row.push({mine:false,revealed:false,flagged:false,count:0});
+        grid.push(row);
+      }
+      renderBoard();
+    }
+
+    function renderBoard(){
+      boardEl.innerHTML="";
+      const size=cellPx();
+      boardEl.style.gridTemplateColumns=`repeat(${cols}, ${size}px)`;
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<cols;c++){
+          const btn=document.createElement("button");
+          btn.className="cell";
+          btn.style.width=size+"px"; btn.style.height=size+"px";
+          btn.style.fontSize=Math.max(11,Math.round(size*0.45))+"px";
+          btn.dataset.r=r; btn.dataset.c=c;
+          btn.addEventListener("click", onCellClick);
+          btn.addEventListener("contextmenu", onCellFlag);
+          btn.addEventListener("touchstart", onTouchStart, {passive:true});
+          btn.addEventListener("touchend", onTouchEnd);
+          boardEl.appendChild(btn);
+        }
+      }
+    }
+
+    let touchTimer=null, touchMoved=false;
+    function onTouchStart(e){
+      touchMoved=false;
+      const target=e.currentTarget;
+      touchTimer=setTimeout(()=>{
+        if(!touchMoved){
+          const r=+target.dataset.r, c=+target.dataset.c;
+          toggleFlag(r,c);
+          if(window.GS) GS.hTap();
+        }
+      },450);
+    }
+    function onTouchEnd(){ clearTimeout(touchTimer); }
+
+    function placeMines(excludeR, excludeC){
+      let placed=0;
+      while(placed<mineCount){
+        const r=Math.floor(Math.random()*rows);
+        const c=Math.floor(Math.random()*cols);
+        if(grid[r][c].mine) continue;
+        if(Math.abs(r-excludeR)<=1 && Math.abs(c-excludeC)<=1) continue;
+        grid[r][c].mine=true; placed++;
+      }
+      for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) grid[r][c].count=countAdjacentMines(r,c);
+    }
+
+    function countAdjacentMines(r,c){
+      let count=0;
+      for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+        if(dr===0 && dc===0) continue;
+        const nr=r+dr, nc=c+dc;
+        if(nr>=0 && nr<rows && nc>=0 && nc<cols && grid[nr][nc].mine) count++;
+      }
+      return count;
+    }
+
+    function onCellClick(e){
+      if(gameOver || gameWon) return;
+      const r=+e.currentTarget.dataset.r, c=+e.currentTarget.dataset.c;
+      if(grid[r][c].flagged) return;
+
+      if(flagMode){ toggleFlag(r,c); if(window.GS) GS.hTap(); return; }
+
+      if(firstClick){ placeMines(r,c); firstClick=false; startTimer(); }
+
+      const wasMine=grid[r][c].mine;
+      revealCell(r,c);
+      if(window.GS) (wasMine ? GS.bad() : GS.pop());
+      if(wasMine) heartBreakBurst();
+      checkWin();
+    }
+
+    function onCellFlag(e){
+      e.preventDefault();
+      if(gameOver || gameWon) return;
+      const r=+e.currentTarget.dataset.r, c=+e.currentTarget.dataset.c;
+      toggleFlag(r,c);
+    }
+
+    function toggleFlag(r,c){
+      if(gameOver || gameWon) return;
+      const cell=grid[r][c];
+      if(cell.revealed) return;
+      cell.flagged=!cell.flagged;
+      flagsPlaced+=cell.flagged?1:-1;
+      mineCountEl.textContent=mineCount-flagsPlaced;
+      updateCellDisplay(r,c);
+    }
+
+    function revealCell(r,c){
+      const cell=grid[r][c];
+      if(cell.revealed || cell.flagged) return;
+      cell.revealed=true; revealedCount++;
+      updateCellDisplay(r,c);
+
+      if(cell.mine){ endGame(false); return; }
+
+      if(cell.count===0){
+        for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+          if(dr===0 && dc===0) continue;
+          const nr=r+dr, nc=c+dc;
+          if(nr>=0 && nr<rows && nc>=0 && nc<cols && !grid[nr][nc].revealed) revealCell(nr,nc);
+        }
+      }
+    }
+
+    function updateCellDisplay(r,c){
+      const cell=grid[r][c];
+      const idx=r*cols+c;
+      const btn=boardEl.children[idx];
+      const wasSize = btn.style.width;
+      btn.className="cell";
+      btn.style.width=wasSize; btn.style.height=wasSize;
+      btn.innerHTML="";
+
+      if(cell.revealed){
+        btn.classList.add("revealed");
+        if(cell.mine){
+          btn.classList.add("mine");
+          const img=document.createElement("img");
+          img.src="assets/img/icon-heart-broken.png"; img.alt=""; img.className="icon-img";
+          btn.appendChild(img);
+        } else if(cell.count>0){
+          btn.textContent=cell.count;
+          btn.classList.add("n"+cell.count);
+        }
+      } else if(cell.flagged){
+        const img=document.createElement("img");
+        img.src="assets/img/match-bouquet.png"; img.alt=""; img.className="icon-img";
+        btn.appendChild(img);
+      }
+    }
+
+    function revealAllMines(){
+      for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+        if(grid[r][c].mine){ grid[r][c].revealed=true; updateCellDisplay(r,c); }
+      }
+    }
+
+    function checkWin(){
+      const totalCells=rows*cols;
+      if(revealedCount===totalCells-mineCount) endGame(true);
+    }
+
+    function computeScore(won){
+      const mult=DIFF_MULT[level]||1;
+      if(won){
+        const base=(rows*cols-mineCount)*8*mult;
+        const timeBonus=Math.max(0,360-seconds)*1.5*mult;
+        return Math.round(base+timeBonus);
+      }
+      return Math.round(revealedCount*4*mult);
+    }
+
+    function endGame(won){
+      gameOver=!won; gameWon=won;
+      stopTimer();
+      finalScore=computeScore(won);
+      if(won){
+        statusEl.textContent=t("Vocês vão casar!","Vi sposerete!");
+        statusEl.className="status win";
+        resetIcon.src="assets/img/icon-medal-gold.png";
+        if(window.confettiBurst) confettiBurst({count:50,hearts:true});
+        if(window.GS){ GS.win(); GS.hWin(); }
+      } else {
+        statusEl.textContent=t("Ihh, achou um coração partido!","Ahi, hai trovato un cuore spezzato!");
+        statusEl.className="status lose";
+        resetIcon.src="assets/img/icon-heart-broken.png";
+        boardEl.classList.add("shake");
+        setTimeout(()=>boardEl.classList.remove("shake"),400);
+        revealAllMines();
+        if(window.GS){ GS.lose(); GS.hLose(); }
+      }
+      renderEndExtras(won);
+      loadTop10();
+    }
+
+    function renderEndExtras(won){
+      let extra=document.getElementById("cmExtra");
+      if(!extra){
+        extra=document.createElement("div");
+        extra.id="cmExtra";
+        statusEl.insertAdjacentElement("afterend", extra);
+      }
+      extra.innerHTML=`
+        <div class="btn-row">
+          <button class="game-btn game-btn--main" id="cmPlayAgain">${t("Jogar de novo","Gioca di nuovo")}</button>
+        </div>
+        <div class="save-box">
+          <p style="font-size:.78rem;font-weight:700;color:var(--cm-pink-deep);margin-bottom:.5rem;text-align:center;">${t("Pontuação","Punteggio")}: ${finalScore} pts</p>
+          <div class="save-box__row">
+            <input class="save-input" id="cmName" placeholder="${t("Seu nome","Il tuo nome")}" maxlength="22"/>
+            <button class="game-btn" id="cmSaveBtn">${t("Salvar","Salva")}</button>
+          </div>
+          <p class="save-msg" id="cmSaveMsg"></p>
+        </div>`;
+      document.getElementById("cmPlayAgain").addEventListener("click", init);
+      document.getElementById("cmSaveBtn").addEventListener("click", ()=>{
+        const btn=document.getElementById("cmSaveBtn");
+        saveScore(document.getElementById("cmName").value, finalScore, document.getElementById("cmSaveMsg"), btn);
+      });
+    }
+
+    function startTimer(){
+      timerInterval=setInterval(()=>{ seconds++; timerEl.textContent=seconds; },1000);
+    }
+    function stopTimer(){ clearInterval(timerInterval); timerInterval=null; }
+
+    resetBtn.addEventListener("click", init);
+
+    diffBtns.forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        diffBtns.forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        level=btn.dataset.level;
+        init();
+      });
+    });
+
+    flagModeBtn.addEventListener("click", ()=>{
+      flagMode=!flagMode;
+      flagModeBtn.classList.toggle("active", flagMode);
+    });
+
+    window.addEventListener("resize", ()=>{
+      if(!gameOver && !gameWon) renderRevealedAfterResize();
+    });
+    function renderRevealedAfterResize(){
+      // Re-render preserving state (simple approach: redraw sizes only)
+      const size=cellPx();
+      boardEl.style.gridTemplateColumns=`repeat(${cols}, ${size}px)`;
+      Array.from(boardEl.children).forEach(btn=>{
+        btn.style.width=size+"px"; btn.style.height=size+"px";
+        btn.style.fontSize=Math.max(11,Math.round(size*0.45))+"px";
+      });
+    }
+
+    setupFloatingHearts();
+    init();
+    loadTop10();
+  </script>
+
+  <script src="assets/js/game-sounds.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/delights.js"></script>
+  <script src="assets/js/bg-music.js"></script>
+</body>
+</html>

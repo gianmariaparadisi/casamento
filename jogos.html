@@ -55,6 +55,7 @@
     .jogo-card__icon svg { width:100%;height:100%; }
     .jogo-card__icon img { width:100%;height:100%;object-fit:contain;display:block; }
     .jogo-card__title { font-family:var(--font-display);font-size:1.35rem;font-weight:400;margin-bottom:.35rem; }
+    .ss-cor-accent{color:var(--terracotta);}
     .jogo-card__desc { font-size:.82rem;color:var(--text-muted);line-height:1.6;margin-bottom:1rem; }
     .jogo-card__record { font-size:.72rem;color:var(--sage-dark);font-weight:500;background:var(--bg-green);padding:.3rem .65rem;border-radius:20px;display:inline-block;margin-bottom:.85rem; }
 
@@ -307,6 +308,17 @@
           <p class="jogo-card__record" id="record-seat-preview" data-it="Caricamento…">Carregando…</p>
           <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
         </a>
+
+        <!-- De-COR-ação -->
+        <a href="sexto-sentido.html" class="jogo-card reveal" style="text-decoration:none;color:inherit">
+          <span class="jogo-card__icon"><img src="assets/img/icon-sparkle.png" alt="" loading="lazy"></span>
+          <h2 class="jogo-card__title" data-it-html="De-<span class=&quot;ss-cor-accent&quot;>COR</span>-azione">De-<span class="ss-cor-accent">COR</span>-ação</h2>
+          <p class="jogo-card__desc" data-it="Memorizza il colore, poi ricrealo a memoria. Quanto più ti avvicini, più punti fai.">Memorize a cor, depois recrie de memória. Quanto mais perto, mais pontos você faz.</p>
+          <p class="jogo-card__record" id="record-sexto-sentido-preview" data-it="Caricamento…">Carregando…</p>
+          <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
+        </a>
+
+        <!-- Campo Minado do Casamento — removido da listagem por ora; acessível só por link direto (campo-minado.html) -->
 
         <!-- Corrida da Lua de Mel — card de destaque mais acima (id=card-luademel-featured);
              antes de 01/08/2026 só é acessível por link direto (luademel-runner.html) -->
