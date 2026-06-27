@@ -113,24 +113,6 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;}
 #bonus-banner.show{opacity:1;}
 #bonus-banner .bline{font-size:clamp(13px,2.8vw,17px);color:var(--offwhite);margin:2px 0;}
 #bonus-banner .bscore{font-size:clamp(18px,4vw,26px);color:var(--gold);margin-top:4px;}
-#ability-bar{
-  position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
-  display:flex;gap:8px;z-index:10;
-}
-.ability{
-  width:42px;height:42px;border-radius:10px;
-  background:rgba(23,20,30,0.78);border:1px solid rgba(201,162,75,0.4);
-  display:flex;align-items:center;justify-content:center;font-size:19px;
-  position:relative;overflow:hidden;
-}
-.ability .cd{
-  position:absolute;left:0;right:0;bottom:0;background:rgba(10,8,18,0.78);
-  height:100%;transform-origin:bottom;
-}
-.ability .lbl{
-  position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);
-  font-size:8px;color:var(--lilac);white-space:nowrap;
-}
 #gameover-screen .stat-line{font-size:14px;color:var(--offwhite);margin:1px 0;}
 #gameover-screen .stat-line b{color:var(--gold);}
 .speech-bubble{
@@ -139,63 +121,77 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;}
   pointer-events:none;white-space:nowrap;transform:translate(-50%,-100%);
   box-shadow:0 2px 4px rgba(0,0,0,0.3);
 }
+.combo-icon{width:16px;height:16px;object-fit:contain;}
+.sym-ic-img{width:18px;height:18px;object-fit:contain;vertical-align:-4px;}
+.emoji-fallback{font-size:15px;display:inline-block;}
 </style>
 </head>
-<body>
-<div id="game-container">
-  <canvas id="game" width="800" height="520"></canvas>
+<body class="game-page">
+  <nav class="game-nav"><div class="game-nav__inner">
+    <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
+    <div class="game-brand">Tiago &amp; Gian</div>
+  </div></nav>
 
-  <div id="hud" class="hidden">
-    <div class="hud-pill">
-      <span style="color:var(--lilac);">Rodada</span>
-      <b id="hud-round" style="color:var(--gold);">1</b>
-    </div>
-    <div id="right-pills">
-      <div class="hud-pill" id="hearts"></div>
-      <div class="hud-pill"><span style="color:var(--lilac);">Pontos</span> <b id="hud-score" style="color:var(--gold);">0</b></div>
-      <div class="hud-pill" id="combo-pill" style="opacity:0;"><span>🔥</span> <b id="hud-combo" style="color:var(--burnt);">0</b></div>
-    </div>
-  </div>
+  <main class="game-shell">
+    <p class="game-kicker">Jogo assombrado</p>
+    <h1 class="game-title"><img src="assets/img/morte/boss_death_patience.png" alt="">Até que a Morte nos Separe</h1>
+    <p class="game-sub">Gian &amp; Tiago disseram "sim" num salão antigo — e despertaram quem já tinha dito "sim" antes. Desenhe os símbolos para afastar as assombrações e proteja o Clima da Festa pelo maior tempo possível.</p>
 
-  <div id="round-banner">
-    <div class="rname" id="round-banner-name">Rodada 1</div>
-    <div class="rsub" id="round-banner-sub">A Casa Assombrada</div>
-  </div>
+    <section class="game-panel">
+      <div id="game-container">
+        <canvas id="game" width="800" height="520"></canvas>
 
-  <div id="bonus-banner">
-    <div class="bline" id="bonus-line1">O clima sobreviveu.</div>
-    <div class="bline" id="bonus-line2">+0 por Clima da Festa · +0 de combo</div>
-    <div class="bscore" id="bonus-score">+0</div>
-  </div>
+        <div id="hud" class="hidden">
+          <div class="hud-pill">
+            <span style="color:var(--lilac);">Rodada</span>
+            <b id="hud-round" style="color:var(--gold);">1</b>
+          </div>
+          <div id="right-pills">
+            <div class="hud-pill" id="hearts"></div>
+            <div class="hud-pill"><span style="color:var(--lilac);">Pontos</span> <b id="hud-score" style="color:var(--gold);">0</b></div>
+            <div class="hud-pill" id="combo-pill" style="opacity:0;"><span id="combo-fire-icon">🔥</span> <b id="hud-combo" style="color:var(--burnt);">0</b></div>
+          </div>
+        </div>
 
-  <div id="ability-bar" class="hidden"></div>
+        <div id="round-banner">
+          <div class="rname" id="round-banner-name">Rodada 1</div>
+          <div class="rsub" id="round-banner-sub">A Casa Assombrada</div>
+        </div>
 
-  <div id="menu-screen" class="overlay">
-    <div class="title-main">💀 Até que a Morte nos Separe 💀</div>
-    <div class="subtitle">Gian &amp; Tiago disseram "sim" num salão antigo — e despertaram quem já tinha dito "sim" antes. Desenhe os símbolos para afastar as assombrações e proteja o Clima da Festa pelo maior tempo possível.</div>
-    <div class="tutorial">
-      <div><b>Como jogar:</b> arraste o dedo ou o mouse desenhando o símbolo sobre uma assombração.</div>
-      <div>▬ <b>Traço horizontal</b> — Cortar assombração</div>
-      <div>┃ <b>Traço vertical</b> — Selar o voto</div>
-      <div>V <b>V</b> — Voto · ⋀ <b>V invertido</b> — Altar</div>
-      <div>○ <b>Círculo</b> — Aliança protetora (escudo) · ♥ <b>Coração</b> — Amor verdadeiro (cura)</div>
-      <div>⚡ <b>Raio</b> — Brinde explosivo (atinge vários) · 🌀 <b>Espiral</b> — Primeira dança (empurra todos)</div>
-    </div>
-    <button class="btn" id="start-btn">Começar a festa</button>
-  </div>
+        <div id="bonus-banner">
+          <div class="bline" id="bonus-line1">O clima sobreviveu.</div>
+          <div class="bline" id="bonus-line2">+0 por Clima da Festa · +0 de combo</div>
+          <div class="bscore" id="bonus-score">+0</div>
+        </div>
 
-  <div id="gameover-screen" class="overlay hidden">
-    <div class="title-main" style="font-size:clamp(18px,4vw,28px);">A festa foi oficialmente assombrada.</div>
-    <div class="subtitle" id="gameover-flavor">A Morte da Paciência venceu dessa vez.</div>
-    <div class="stat-line">Rodada alcançada: <b id="final-round">1</b></div>
-    <div class="stat-line">Pontuação: <b id="final-score">0</b></div>
-    <div class="stat-line">Melhor combo: <b id="final-combo">0</b></div>
-    <div class="stat-line">Tempo sobrevivido: <b id="final-time">0s</b></div>
-    <button class="btn" id="retry-btn" style="margin-top:10px;">Tentar de novo</button>
-  </div>
+        <div id="bubble-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:12;"></div>
+      </div>
 
-  <div id="bubble-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:12;"></div>
-</div>
+      <div id="menu-screen" class="overlay">
+        <div class="subtitle">Toque ou arraste para desenhar os símbolos sobre as assombrações.</div>
+        <div class="tutorial">
+          <div><b>Como jogar:</b> arraste o dedo ou o mouse desenhando o símbolo sobre uma assombração.</div>
+          <div><span class="sym-ic" data-sym="horizontal"></span> <b>Traço horizontal</b> — Cortar assombração</div>
+          <div><span class="sym-ic" data-sym="vertical"></span> <b>Traço vertical</b> — Selar o voto</div>
+          <div><span class="sym-ic" data-sym="V"></span> <b>V</b> — Voto · <span class="sym-ic" data-sym="caret"></span> <b>V invertido</b> — Altar</div>
+          <div>Nas assombrações mais difíceis também aparecem: <span class="sym-ic" data-sym="circle"></span> <b>Círculo</b> · <span class="sym-ic" data-sym="heart"></span> <b>Coração</b> · <span class="sym-ic" data-sym="lightning"></span> <b>Raio</b> · <span class="sym-ic" data-sym="spiral"></span> <b>Espiral</b> — raros, mas funcionam igual aos outros.</div>
+        </div>
+        <button class="btn" id="start-btn">Começar a festa</button>
+      </div>
+
+      <div id="gameover-screen" class="overlay hidden">
+        <div class="title-main" style="font-size:clamp(18px,4vw,28px);">A festa foi oficialmente assombrada.</div>
+        <div class="subtitle" id="gameover-flavor">A Morte da Paciência venceu dessa vez.</div>
+        <div class="stat-line">Rodada alcançada: <b id="final-round">1</b></div>
+        <div class="stat-line">Pontuação: <b id="final-score">0</b></div>
+        <div class="stat-line">Melhor combo: <b id="final-combo">0</b></div>
+        <div class="stat-line">Tempo sobrevivido: <b id="final-time">0s</b></div>
+        <button class="btn" id="retry-btn" style="margin-top:10px;">Tentar de novo</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/js/delights.js"></script>
 
 <script>
 "use strict";
@@ -438,11 +434,18 @@ function getSprite(name){
   }catch(e){ rec.ready = false; }
   return rec;
 }
-// draws centered at (x,y) with width w / height h; fallback() is called when PNG isn't available yet
+// draws centered at (x,y), "contain"-fit inside the w/h box (preserves aspect ratio, no stretching/skew);
+// fallback() is called when PNG isn't available yet
 function drawSprite(name, x, y, w, h, fallback){
   const rec = name ? getSprite(name) : null;
   if(rec && rec.ready){
-    ctx.drawImage(rec.img, x - w/2, y - h/2, w, h);
+    const iw = rec.img.naturalWidth, ih = rec.img.naturalHeight;
+    let dw = w, dh = h;
+    if(iw>0 && ih>0){
+      const scale = Math.min(w/iw, h/ih);
+      dw = iw*scale; dh = ih*scale;
+    }
+    ctx.drawImage(rec.img, x - dw/2, y - dh/2, dw, dh);
   } else if(fallback){
     fallback();
   }
@@ -454,6 +457,21 @@ function drawEmoji(emoji, x, y, size){
   ctx.textBaseline = 'middle';
   ctx.fillText(emoji, x, y);
   ctx.restore();
+}
+
+/* ---------- DOM icon helper: <img> com fallback automático para emoji caso o PNG não exista ---------- */
+function makeIconImg(src, emojiFallback, cls){
+  const img = document.createElement('img');
+  if(cls) img.className = cls;
+  img.alt = '';
+  img.onerror = function(){
+    const span = document.createElement('span');
+    span.className = 'emoji-fallback' + (cls ? ' ' + cls : '');
+    span.textContent = emojiFallback;
+    if(img.parentNode) img.parentNode.replaceChild(span, img);
+  };
+  img.src = src;
+  return img;
 }
 
 /* ---------- Audio (WebAudio oscillator SFX, no external files) ---------- */
@@ -477,10 +495,6 @@ function sfxHit(){ beep(520,0.12,'square',0.05); }
 function sfxKill(){ beep(300,0.18,'sawtooth',0.06); beep(150,0.22,'sine',0.04); }
 function sfxMiss(){ beep(120,0.15,'sine',0.05); }
 function sfxHurt(){ beep(90,0.3,'sawtooth',0.08); }
-function sfxHeal(){ beep(660,0.18,'sine',0.05); beep(880,0.18,'sine',0.04); }
-function sfxShield(){ beep(440,0.2,'triangle',0.06); }
-function sfxLightning(){ beep(800,0.08,'square',0.06); beep(200,0.25,'sawtooth',0.05); }
-function sfxSpiral(){ beep(500,0.3,'sine',0.05); }
 function sfxBoss(){ beep(110,0.5,'sawtooth',0.08); }
 function sfxRound(){ beep(700,0.15,'sine',0.05); beep(900,0.2,'sine',0.05); }
 
@@ -664,11 +678,8 @@ let state = {
   bubbles:[], // {x,y,text,ttl,maxTtl,el}
   trail:[],
   drawing:false,
-  shieldActive:false,
-  shieldTimer:0,
   dimAccum:0, // bloqueador screen-dim effect
   tempoPulseMul:1, tempoPulseTimer:0,
-  abilityCd:{ circle:0, heart:0, lightning:0, spiral:0 },
   round_phase:'intro', // intro | waves | climax | bonus
   phaseTimer:0,
   subWaveIndex:0,
@@ -690,20 +701,35 @@ let state = {
 const DIFFICULTY_LEVEL_START = 2; // the game already plays at "nivel 2" difficulty from round 1
 function difficultyParams(){
   const c = state.cycle + (DIFFICULTY_LEVEL_START-1);
-  const speedMul = Math.min(2.5, 1 + (c-1)*0.12);
-  const spawnMul = Math.min(2.2, 1 + (c-1)*0.10);
+  const speedMul = Math.min(2.8, 1 + (c-1)*0.14);
+  const spawnMul = Math.min(2.6, 1 + (c-1)*0.13);
   const symbolBonus = Math.min(3, Math.floor((c-1)/2));
   const maxEnemiesBonus = Math.min(5, Math.floor((c-1)/2));
   const maxEnemies = Math.min(10, 4 + maxEnemiesBonus);
   return { speedMul, spawnMul, symbolBonus, maxEnemies };
 }
 
-const BASE_SPEED = 26; // px/s
+const BASE_SPEED = 36; // px/s
 const SYMBOL_KEYS = ['horizontal','vertical','V','caret'];
-function randomBaseSymbol(){ return SYMBOL_KEYS[Math.floor(Math.random()*SYMBOL_KEYS.length)]; }
-function buildSymbolQueue(count){
+// símbolos raros: coração, espiral, raio e círculo — não são mais poderes do jogador,
+// aparecem ocasionalmente nas sequências de inimigos mais difíceis (especial/miniboss/chefe).
+const SYMBOL_KEYS_RARE = ['heart','spiral','lightning','circle'];
+function randomBaseSymbol(rareChance){
+  if(rareChance && Math.random()<rareChance){
+    return SYMBOL_KEYS_RARE[Math.floor(Math.random()*SYMBOL_KEYS_RARE.length)];
+  }
+  return SYMBOL_KEYS[Math.floor(Math.random()*SYMBOL_KEYS.length)];
+}
+function rareChanceForTier(tier){
+  if(tier==='boss') return 0.32;
+  if(tier==='miniboss') return 0.24;
+  if(tier==='especial') return 0.14;
+  return 0; // 'comum' nunca recebe os símbolos raros
+}
+function buildSymbolQueue(count, tier){
+  const rareChance = rareChanceForTier(tier);
   const out=[];
-  for(let i=0;i<count;i++) out.push(randomBaseSymbol());
+  for(let i=0;i<count;i++) out.push(randomBaseSymbol(rareChance));
   return out;
 }
 
@@ -751,7 +777,7 @@ function spawnEnemySpec(spec, opts){
     x, y, angle,
     baseSpeed: speedBase * dp.speedMul * (opts.speedMulOverride||1),
     radius,
-    symbols: buildSymbolQueue(Math.max(1,symCount)),
+    symbols: buildSymbolQueue(Math.max(1,symCount), spec.tier),
     symbolIndex:0,
     dead:false,
     wobble: Math.random()*Math.PI*2,
@@ -917,10 +943,10 @@ function buildSubWavePlan(pattern, duration){
 function startSubWave(){
   const dp = difficultyParams();
   state.subWavePattern = pickWavePattern();
-  let baseDur = Math.max(5, 9/dp.spawnMul);
+  let baseDur = Math.max(3.8, 7/dp.spawnMul);
   if(state.subWavePattern==='swarm') baseDur *= 0.8;
   else if(state.subWavePattern==='heavy') baseDur *= 1.3;
-  state.subWaveDuration = Math.max(4, baseDur + (Math.random()-0.5)*2.4);
+  state.subWaveDuration = Math.max(3.2, baseDur + (Math.random()-0.5)*2.0);
   state.subWaveTimer = state.subWaveDuration;
   state.subWaveElapsed = 0;
   state.subWavePlanIdx = 0;
@@ -970,7 +996,7 @@ function updateClimaxProgress(dt){
         state.enemies.push(en);
         state.enxameSpawned++;
       }
-      state.spawnTimer = Math.max(0.3, 0.65/dp.spawnMul);
+      state.spawnTimer = Math.max(0.22, 0.5/dp.spawnMul);
     }
     if(state.enxameSpawned >= state.enxameTarget && state.enemies.length===0){
       state.score += theme.climax.points;
@@ -999,6 +1025,7 @@ function finishClimax(){
   document.getElementById('bonus-line2').textContent = `+${lifeBonus} por Clima da Festa · +${comboBonus} de combo`;
   document.getElementById('bonus-score').textContent = '+' + total;
   banner.classList.add('show');
+  fireConfetti(CENTER.x, CENTER.y, { count: 26, spread: 160, hearts: true });
   updateHud();
   sfxRound();
 }
@@ -1051,7 +1078,7 @@ function spawnDeathBoss(){
     bossState:'approach', // approach | active | preparing | lunging | retreat
     stateTimer: 0,
     standoff: 175,
-    symbols: buildSymbolQueue(symCount),
+    symbols: buildSymbolQueue(symCount, 'boss'),
     symbolIndex:0,
     dead:false,
     wobble:0,
@@ -1118,7 +1145,7 @@ function onBossPhaseCleared(boss){
   }
   const dp = difficultyParams();
   const symCount = Math.min(8, 4 + dp.symbolBonus*2 + boss.phase);
-  boss.symbols = buildSymbolQueue(symCount);
+  boss.symbols = buildSymbolQueue(symCount, 'boss');
   boss.symbolIndex = 0;
   boss.bossState='active'; boss.stateTimer=0;
   queueBubble(boss, pickLine(DEATH_BOSS.battleLines), true);
@@ -1131,6 +1158,7 @@ function killBoss(boss){
   const pts = 1000 + cycleBonus;
   state.score += pts;
   spawnBurst(boss.x, boss.y, 28);
+  fireConfetti(boss.x, boss.y, { count: 40, spread: 140, hearts: true });
   showDefeatExchange();
   state.bossDefeatedPending = true;
   setTimeout(()=>{
@@ -1150,12 +1178,6 @@ function showDefeatExchange(){
 
 /* ========================= ENEMY BEHAVIOR / MOVEMENT ========================= */
 function hitCenter(){
-  if(state.shieldActive){
-    state.shieldActive = false;
-    spawnBurst(CENTER.x, CENTER.y, 14);
-    sfxShield();
-    return;
-  }
   state.clima = Math.max(0, state.clima-1);
   state.combo = 0;
   spawnBurst(CENTER.x, CENTER.y, 18);
@@ -1273,6 +1295,7 @@ function killEnemy(en){
   const pts = Math.round((en.points||0) * mult);
   state.score += pts;
   spawnBurst(en.x, en.y, en.tier==='miniboss'?22:12, en.isBoss?'#5e1f30':'#c9a24b');
+  fireConfetti(en.x, en.y, { count: en.tier==='miniboss'?18:9, spread: 50 });
   sfxKill();
   if(en.isClimax && !en.isBoss && !en.isEnxameUnit){
     state.climaxEntity = en; // mark resolved (already same ref, dead=true triggers finishClimax check)
@@ -1313,64 +1336,15 @@ function applyPreciseSymbol(symbol){
   return true;
 }
 
-function tryShield(){
-  if(state.abilityCd.circle>0) return false;
-  state.shieldActive = true;
-  state.abilityCd.circle = 9;
-  spawnBurst(CENTER.x, CENTER.y, 16, '#8b80a0');
-  sfxShield();
-  registerHit();
-  return true;
-}
-function tryHeal(){
-  if(state.abilityCd.heart>0) return false;
-  if(state.clima>=MAX_CLIMA) { state.abilityCd.heart = 4; registerHit(); return true; }
-  state.clima = Math.min(MAX_CLIMA, state.clima+1);
-  state.abilityCd.heart = 12;
-  spawnBurst(CENTER.x, CENTER.y, 16, '#b5572b');
-  sfxHeal();
-  registerHit();
-  updateHud();
-  return true;
-}
-function tryLightning(){
-  if(state.abilityCd.lightning>0) return false;
-  state.abilityCd.lightning = 11;
-  const alive = state.enemies.filter(e=>!e.dead);
-  alive.sort((a,b)=>timeToImpact(a)-timeToImpact(b));
-  const hitN = Math.min(alive.length, 4);
-  for(let i=0;i<hitN;i++) applyDamageToQueueOwner(alive[i]);
-  spawnBurst(CENTER.x, CENTER.y, 22, '#c9a24b');
-  sfxLightning();
-  registerHit();
-  return true;
-}
-function trySpiral(){
-  if(state.abilityCd.spiral>0) return false;
-  state.abilityCd.spiral = 10;
-  for(const en of state.enemies){
-    if(en.dead || en.isBoss) continue;
-    const dx = en.x-CENTER.x, dy = en.y-CENTER.y;
-    const d = Math.hypot(dx,dy)||1;
-    en.x += (dx/d)*70;
-    en.y += (dy/d)*70;
-  }
-  spawnBurst(CENTER.x, CENTER.y, 26, '#1f3a2e');
-  sfxSpiral();
-  registerHit();
-  return true;
-}
-
 function resolveCast(symbol){
   if(!symbol) { registerMiss(); return; }
-  switch(symbol){
-    case 'circle': tryShield(); break;
-    case 'heart': tryHeal(); break;
-    case 'lightning': tryLightning(); break;
-    case 'spiral': trySpiral(); break;
-    default: applyPreciseSymbol(symbol); break;
-  }
+  applyPreciseSymbol(symbol);
 }
+
+/* ---------- body scroll lock while playing (mesmo padrão dos outros jogos do site) ---------- */
+let _scrollY = 0;
+function lockScroll(){ _scrollY = window.scrollY; document.body.style.overflow='hidden'; document.body.style.touchAction='none'; }
+function unlockScroll(){ document.body.style.overflow=''; document.body.style.touchAction=''; window.scrollTo(0,_scrollY); }
 
 /* ========================= INPUT ========================= */
 function getPos(evt){
@@ -1381,6 +1355,17 @@ function getPos(evt){
     x: (cx - rect.left) * (W/rect.width),
     y: (cy - rect.top) * (H/rect.height)
   };
+}
+// inverso de getPos: converte coordenadas internas do canvas (0..W,0..H) em coordenadas de viewport (clientX/clientY),
+// para alimentar os delights globais (confetti etc), que são posicionados via position:fixed.
+function canvasToPageXY(x, y){
+  const rect = canvas.getBoundingClientRect();
+  return { x: rect.left + x * (rect.width/W), y: rect.top + y * (rect.height/H) };
+}
+function fireConfetti(x, y, opts){
+  if(typeof window.confettiBurst !== 'function') return;
+  const p = canvasToPageXY(x, y);
+  window.confettiBurst(Object.assign({ originX: p.x, originY: p.y }, opts||{}));
 }
 function onDown(evt){
   if(!state.running) return;
@@ -1415,42 +1400,32 @@ function updateHud(){
   const heartsEl = document.getElementById('hearts');
   heartsEl.innerHTML = '';
   for(let i=0;i<MAX_CLIMA;i++){
-    const span = document.createElement('span');
-    span.className = 'heart-icon' + (i<state.clima?'':' empty');
-    span.textContent = '♥';
-    heartsEl.appendChild(span);
+    const filled = i<state.clima;
+    const img = makeIconImg(
+      filled ? 'assets/img/fx-life-icon.png' : 'assets/img/fx-life-lost.png',
+      '♥', 'heart-icon'
+    );
+    heartsEl.appendChild(img);
   }
   const comboPill = document.getElementById('combo-pill');
   document.getElementById('hud-combo').textContent = state.combo;
   comboPill.style.opacity = state.combo>0 ? '1' : '0';
 }
 
-const ABILITY_DEFS = [
-  { key:'circle', emoji:'💍', label:'Aliança' },
-  { key:'heart', emoji:'💗', label:'Amor' },
-  { key:'lightning', emoji:'🥂', label:'Brinde' },
-  { key:'spiral', emoji:'💃', label:'Dança' },
-];
-function setupAbilityBar(){
-  const bar = document.getElementById('ability-bar');
-  bar.innerHTML = '';
-  for(const a of ABILITY_DEFS){
-    const div = document.createElement('div');
-    div.className = 'ability';
-    div.innerHTML = `<span>${a.emoji}</span><div class="cd" id="cd-${a.key}" style="height:0%;"></div><span class="lbl">${a.label}</span>`;
-    bar.appendChild(div);
-  }
+function setupComboIcon(){
+  const holder = document.getElementById('combo-fire-icon');
+  if(!holder) return;
+  const icon = makeIconImg('assets/img/moum-combo-multiplier-icon.png', '🔥', 'combo-icon');
+  holder.replaceWith(icon);
+  icon.id = 'combo-fire-icon';
 }
-function updateAbilityBar(){
-  const maxCd = { circle:9, heart:12, lightning:11, spiral:10 };
-  for(const k in state.abilityCd){
-    const el = document.getElementById('cd-'+k);
-    if(!el) continue;
-    const pct = Math.max(0, state.abilityCd[k]) / maxCd[k];
-    el.style.height = Math.min(100,pct*100) + '%';
-  }
+function setupSymbolIcons(){
+  document.querySelectorAll('.sym-ic').forEach(el=>{
+    const sym = el.getAttribute('data-sym');
+    const icon = makeIconImg(ASSET_BASE + SYMBOL_ASSET[sym] + '.png', SYMBOL_GLYPH[sym]||'?', 'sym-ic-img');
+    el.replaceWith(icon);
+  });
 }
-
 /* ========================= SPEECH BUBBLE DOM RENDER ========================= */
 function renderBubbles(){
   const layer = document.getElementById('bubble-layer');
@@ -1472,33 +1447,30 @@ function renderBubbles(){
 
 /* ========================= RENDERING ========================= */
 const SYMBOL_GLYPH = { horizontal:'▬', vertical:'┃', V:'V', caret:'⋀', circle:'○', heart:'♥', lightning:'⚡', spiral:'🌀' };
+const SYMBOL_ASSET = { horizontal:'icon_symbol_horizontal', vertical:'icon_symbol_vertical', V:'icon_symbol_v', caret:'icon_symbol_caret', circle:'icon_symbol_circle', heart:'icon_symbol_heart', lightning:'icon_symbol_raio', spiral:'icon_symbol_spirale' };
 
+const NOIVOS_R = 172;
 function drawNoivos(){
-  const pulse = Math.sin(performance.now()/450)*3;
-  drawSprite('noivos_idle', CENTER.x, CENTER.y, 86, 86, ()=>{
+  const t = performance.now();
+  const pulse = Math.sin(t/450)*3;
+  const floatX = Math.sin(t/1100)*7;
+  const floatY = Math.cos(t/850)*9;
+  const nx = CENTER.x + floatX, ny = CENTER.y + floatY;
+  drawSprite('noivos_idle', nx, ny, NOIVOS_R, NOIVOS_R, ()=>{
     ctx.save();
-    ctx.translate(CENTER.x, CENTER.y);
-    ctx.font = (34+pulse*0.2) + 'px serif';
+    ctx.translate(nx, ny);
+    ctx.font = (68+pulse*0.4) + 'px serif';
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('🤵', -16, 0);
-    ctx.fillText('🤵', 16, 0);
+    ctx.fillText('🤵', -32, 0);
+    ctx.fillText('🤵', 32, 0);
     ctx.restore();
   });
-  if(state.shieldActive){
-    ctx.save();
-    ctx.strokeStyle = 'rgba(139,128,160,0.85)';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(CENTER.x, CENTER.y, CENTER.r+14+Math.sin(performance.now()/200)*2, 0, Math.PI*2);
-    ctx.stroke();
-    ctx.restore();
-  }
 }
 
 function drawEnemyShape(en){
   ctx.save();
   if(en.hitFlash>0){ ctx.globalAlpha = 0.6; }
-  const size = en.isBoss ? 64 : (en.tier==='miniboss'?54:38);
+  const size = (en.isBoss ? 64 : (en.tier==='miniboss'?54:38)) * 4;
   drawSprite(en.sprite, en.x, en.y, size, size, ()=>{
     drawEmoji(en.emoji||'👻', en.x, en.y, size*0.62);
   });
@@ -1507,21 +1479,28 @@ function drawEnemyShape(en){
   // symbol queue above enemy
   const remaining = en.symbols.slice(en.symbolIndex);
   const total = remaining.length;
-  const spacing = 15;
+  const symSize = 34;
+  const spacing = 40;
   const startX = en.x - ((total-1)*spacing)/2;
+  const symY = en.y - size/2 - 28;
   for(let i=0;i<total;i++){
     const sym = remaining[i];
+    const sx = startX+i*spacing;
+    const isNext = i===0;
     ctx.save();
-    ctx.font = '12px monospace';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillStyle = i===0 ? '#c9a24b' : 'rgba(241,236,226,0.7)';
-    ctx.fillText(SYMBOL_GLYPH[sym]||'?', startX+i*spacing, en.y - size/2 - 12);
+    ctx.globalAlpha = isNext ? 1 : 0.65;
+    drawSprite(SYMBOL_ASSET[sym], sx, symY, symSize, symSize, ()=>{
+      ctx.font = '22px monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle = isNext ? '#c9a24b' : 'rgba(241,236,226,0.7)';
+      ctx.fillText(SYMBOL_GLYPH[sym]||'?', sx, symY);
+    });
     ctx.restore();
   }
   if(en.isBoss){
     ctx.save();
-    ctx.fillStyle='#f1ece2'; ctx.font='10px Georgia'; ctx.textAlign='center';
-    ctx.fillText('Fase ' + en.phase + '/' + en.maxPhases, en.x, en.y - size/2 - 26);
+    ctx.fillStyle='#f1ece2'; ctx.font='22px Georgia'; ctx.textAlign='center';
+    ctx.fillText('Fase ' + en.phase + '/' + en.maxPhases, en.x, symY - 34);
     ctx.restore();
   }
 }
@@ -1588,8 +1567,6 @@ function update(dt){
   shakeT = Math.max(0, shakeT-dt);
   state.dimAccum = Math.max(0, state.dimAccum - dt*0.01);
   if(state.tempoPulseTimer>0){ state.tempoPulseTimer -= dt; }
-  for(const k in state.abilityCd){ if(state.abilityCd[k]>0) state.abilityCd[k] -= dt; }
-  updateAbilityBar();
 
   advanceRoundPhase(dt);
 
@@ -1610,8 +1587,7 @@ function resetGame(){
   state.round=1; state.themeIndex=0; state.cycle=1;
   state.clima=MAX_CLIMA; state.score=0; state.combo=0; state.bestCombo=0; state.bestComboRound=0;
   state.enemies=[]; state.particles=[]; state.trail=[]; state.drawing=false;
-  state.shieldActive=false; state.dimAccum=0; state.tempoPulseMul=1; state.tempoPulseTimer=0;
-  state.abilityCd={circle:0,heart:0,lightning:0,spiral:0};
+  state.dimAccum=0; state.tempoPulseMul=1; state.tempoPulseTimer=0;
   state.bossActive=false; state.bossDefeatedPending=false; state.gameOver=false;
   updateHud();
 }
@@ -1622,13 +1598,15 @@ function startGame(){
   document.getElementById('menu-screen').classList.add('hidden');
   document.getElementById('gameover-screen').classList.add('hidden');
   document.getElementById('hud').classList.remove('hidden');
-  document.getElementById('ability-bar').classList.remove('hidden');
   setupRound(1);
   updateHud();
+  lockScroll();
 }
 function triggerGameOver(){
   state.running = false;
   state.gameOver = true;
+  unlockScroll();
+  fireConfetti(CENTER.x, CENTER.y, { count: 20, spread: 120 });
   const timeSec = Math.round((performance.now()-state.startTime)/1000);
   document.getElementById('final-round').textContent = state.round;
   document.getElementById('final-score').textContent = state.score;
@@ -1637,7 +1615,6 @@ function triggerGameOver(){
   const flavors = ['A Morte da Paciência venceu dessa vez.','O Clima da Festa não resistiu.','Até que a paciência nos separe.'];
   document.getElementById('gameover-flavor').textContent = flavors[Math.floor(Math.random()*flavors.length)];
   document.getElementById('hud').classList.add('hidden');
-  document.getElementById('ability-bar').classList.add('hidden');
   document.getElementById('bonus-banner').classList.remove('show');
   document.getElementById('round-banner').classList.remove('show');
   document.getElementById('gameover-screen').classList.remove('hidden');
@@ -1646,7 +1623,8 @@ function triggerGameOver(){
 document.getElementById('start-btn').addEventListener('click', startGame);
 document.getElementById('retry-btn').addEventListener('click', startGame);
 
-setupAbilityBar();
+setupComboIcon();
+setupSymbolIcons();
 updateHud();
 requestAnimationFrame(loop);
 
