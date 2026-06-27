@@ -422,12 +422,16 @@ document.addEventListener("DOMContentLoaded",()=>{
   fc.addEventListener("click",()=>flTap());
 });
 
-/* delight bobinho: clicar na foto do hero da página de jogos troca pra
-   uma segunda variante da imagem (e volta ao clicar de novo) */
+/* delight bobinho: a foto do hero da página de jogos muda o padrão pelo
+   dia da semana — sex/sáb/dom usa a variante 02, seg-qui usa a original —
+   e clicar na imagem troca pra outra variante (e volta ao clicar de novo). */
 document.addEventListener("DOMContentLoaded",()=>{
   const heroImg=document.getElementById("jogos-hero-img");
   if(!heroImg) return;
   const IMG_A="assets/img/gianetiagocarro.png", IMG_B="assets/img/gianetiagocarro02.png";
+  const dow = new Date().getDay(); // 0=dom,5=sex,6=sáb
+  const isWeekend = dow===0 || dow===5 || dow===6;
+  heroImg.src = isWeekend ? IMG_B : IMG_A;
   heroImg.addEventListener("click",()=>{
     const src=heroImg.getAttribute("src")||"";
     heroImg.src = src.includes("gianetiagocarro02") ? IMG_A : IMG_B;
@@ -493,6 +497,9 @@ async function carregarPreviewRecorde(){
     {key:"luademel-lisboa", el:"record-honeymoonflight-preview"},
     {key:"honeymoon-packing", el:"record-honeymoonpacking-preview"},
     {key:"cruzadas-diretas", el:"record-cruzadinha-preview"},
+    {key:"luademel-runner", el:"record-luademel-preview"},
+    {key:"sexto-sentido", el:"record-sexto-sentido-preview"},
+    {key:"campo-minado", el:"record-campominado-preview"},
   ];
   for(const j of jogos){
     const el=document.getElementById(j.el); if(!el) continue;
