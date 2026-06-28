@@ -50,15 +50,18 @@ body.game-page{height:100svh;background:var(--night);color:var(--offwhite);font-
 .game-title img{width:1em;height:1em;object-fit:contain;}
 .game-sub{flex-shrink:0;max-width:560px;margin:0 auto 1rem;text-align:center;color:var(--lilac);font-size:.86rem;line-height:1.65;}
 
-.game-panel{position:relative;display:grid;grid-template-columns:1fr;width:100%;max-width:900px;aspect-ratio:800/520;margin:0 auto;border-radius:18px;overflow:hidden;border:2px solid rgba(201,162,75,0.3);box-shadow:0 16px 50px rgba(0,0,0,0.45);background:#0c0d1c;flex-shrink:0;}
+.game-panel{position:relative;display:grid;grid-template-columns:1fr;width:100%;max-width:1300px;aspect-ratio:800/520;margin:0 auto;border-radius:18px;overflow:hidden;border:2px solid rgba(201,162,75,0.3);box-shadow:0 16px 50px rgba(0,0,0,0.45);background:#0c0d1c;flex-shrink:0;}
 
-/* short viewports (typically a phone in landscape) — trim chrome so the panel fits with no scroll */
+/* short viewports (typically a phone in landscape) — trim chrome and let the panel use the full
+   screen width (not just the 960px desktop reading-width cap) so it fits with no scroll and no
+   wasted horizontal space. */
 @media (max-height:520px){
   .game-nav__inner{padding:6px 0;}
   .game-kicker{display:none;}
   .game-title{font-size:clamp(1.1rem,4vw,1.6rem);margin:0;}
   .game-sub{display:none;}
-  .game-shell{padding:4px 0;}
+  .game-shell{padding:4px 0;width:98%;max-width:none;}
+  .game-panel{max-width:none;}
 }
 #game-container{
   grid-area:1/1;
@@ -1704,7 +1707,12 @@ function fitGamePanel(){
   const availH = Math.max(120, shell.clientHeight - usedH);
   if(availW<=0 || availH<=0) return;
   const ratio = 800/520;
-  let w = Math.min(availW, 900);
+  // Sane upper bound only — exists to stop the panel from getting absurdly large on huge desktop
+  // monitors. It must never be tighter than what a phone screen actually offers, otherwise it
+  // wastes horizontal space instead of letting the panel grow to fill it (the previous 900px cap
+  // did exactly that in landscape, where height was plentiful but width got clipped to 900).
+  const maxW = 1300;
+  let w = Math.min(availW, maxW);
   let h = w/ratio;
   if(h > availH){
     h = availH;
