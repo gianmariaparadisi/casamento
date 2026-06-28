@@ -1916,15 +1916,29 @@ function fitGamePanel(){
   // wastes horizontal space instead of letting the panel grow to fill it (the previous 900px cap
   // did exactly that in landscape, where height was plentiful but width got clipped to 900).
   const maxW = 1300;
-  let w = Math.min(availW, maxW);
-  let h = w/ratio;
-  if(h > availH){
-    // Not enough height to letterbox the panel at the native 900:450 ratio (typical short/landscape
-    // phone viewport). Rather than shrinking the panel narrower than the available width — which
-    // leaves blank space beside it — fill the full available box and let the canvas inside it use
-    // "cover" sizing to crop the background top/bottom instead. See the canvas math below.
-    h = availH;
+
+  // Decide cover-fill vs. classic letterbox based on the DEVICE's own shape (window.innerWidth /
+  // innerHeight), not on how much height happens to be free in the shell right now. The menu's
+  // title/subtitle take up real height and disappear the moment the game starts (see the
+  // body.in-game CSS rule) — if the decision were based on availH directly, that single height
+  // change would flip the branch and make the panel visibly snap to a different shape right when
+  // pressing "Começar a festa". Basing it on the stable device shape instead means the same
+  // strategy (cover-fill landscape vs. letterbox portrait) applies continuously across that
+  // transition; only the exact pixel size adjusts smoothly as more height is reclaimed.
+  const screenRatio = window.innerWidth / window.innerHeight;
+  let w, h;
+  if(screenRatio >= ratio){
+    // Wide/landscape-shaped device: always fill the full available box and let the canvas below
+    // "cover"-crop the background top/bottom, so the panel fills the available width with no
+    // blank space beside it.
     w = Math.min(availW, maxW);
+    h = availH;
+  } else {
+    // Taller/portrait-shaped device: keep the classic letterboxed fit at the native ratio, sized
+    // by whichever dimension is the binding constraint.
+    w = Math.min(availW, maxW);
+    h = w/ratio;
+    if(h > availH){ h = availH; w = h*ratio; }
   }
   panel.style.width = Math.round(w)+'px';
   panel.style.height = Math.round(h)+'px';
