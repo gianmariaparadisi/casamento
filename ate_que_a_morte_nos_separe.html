@@ -132,6 +132,14 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;}
 #round-banner.show{opacity:1;}
 #round-banner .rname{font-size:clamp(20px,4.5vw,32px);color:var(--gold);text-shadow:0 0 16px rgba(201,162,75,0.6);}
 #round-banner .rsub{font-size:clamp(12px,2.6vw,16px);color:var(--offwhite);margin-top:4px;}
+#death-banner{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;z-index:17;pointer-events:none;
+  opacity:0;transition:opacity 0.5s;
+}
+#death-banner.show{opacity:1;}
+#death-banner .dname{font-size:clamp(30px,8vw,56px);color:#b5572b;text-shadow:0 0 10px #000,0 0 26px rgba(181,87,43,0.85);font-weight:bold;letter-spacing:3px;}
+#death-banner .dsub{font-size:clamp(12px,2.6vw,16px);color:var(--offwhite);margin-top:6px;}
 #bonus-banner{
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   text-align:center;z-index:16;pointer-events:none;opacity:0;transition:opacity 0.4s;
@@ -210,6 +218,11 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;}
         <div id="round-banner">
           <div class="rname" id="round-banner-name">Rodada 1</div>
           <div class="rsub" id="round-banner-sub">A Casa Assombrada</div>
+        </div>
+
+        <div id="death-banner">
+          <div class="dname">A MORTE</div>
+          <div class="dsub">chegou a hora.</div>
         </div>
 
         <div id="bonus-banner">
@@ -626,7 +639,7 @@ const THEMES = [
       { id:'ghost_fancy', label:'Convidado Transparente', sprite:'ghost_fancy', emoji:'🥻', tier:'especial', points:250, behavior:'tanque', baseSymbols:2,
         lines:['Esse lugar é meu.','Cheguei antes. Em 1923.','Eu estava na primeira lista.'] },
     ],
-    climax:{ id:'haunted_music_notes', label:'A Marcha Fúnebre', sprite:'haunted_music_notes', emoji:'🎵', tier:'miniboss', points:500, behavior:'enxame', baseSymbols:1,
+    climax:{ id:'haunted_music_notes', label:'A Marcha Fúnebre', sprite:'haunted_music_notes', emoji:'🎵', tier:'miniboss', points:500, behavior:'tanque', baseSymbols:2,
       lines:['Essa entrada está muito alegre.','Vamos mudar o tom.','Mais dramático, por favor.'] }
   },
   {
@@ -781,6 +794,8 @@ let state = {
   drawing:false,
   dimAccum:0, // bloqueador screen-dim effect
   tempoPulseMul:1, tempoPulseTimer:0,
+  spiralSlowTimer:0, // delight do símbolo espiral: lentidão global temporária
+  lightningFlash:0, // delight do símbolo raio: flash visual rápido
   round_phase:'intro', // intro | waves | climax | bonus
   phaseTimer:0,
   subWaveIndex:0,
@@ -793,8 +808,10 @@ let state = {
   subWavePattern:'trickle',
   spawnTimer:0,
   climaxEntity:null,
+  climaxStage:null, // 'enxame' | 'preboss' | 'boss' | 'entity'
   enxameSpawned:0,
   enxameTarget:0,
+  preBossT:0, preBossDur:0, preBossFlash:0, preBossNextFlash:0,
   bossActive:false,
   gameOver:false,
 };
@@ -943,7 +960,7 @@ function setupRound(round){
   state.round_phase = 'intro';
   state.phaseTimer = ROUND_INTRO_DUR;
   state.subWaveIndex = 0;
-  state.subWaveTarget = 3 + Math.floor(Math.random()*4); // 3..6
+  state.subWaveTarget = 6;
   startSubWave();
   state.spawnTimer = 0.6;
   state.climaxEntity = null;
@@ -1081,50 +1098,83 @@ function spawnPlannedBurst(item, dp){
   }
 }
 
+// Toda rodada agora abre o clímax com um enxame genérico (inimigos comuns do roster da fase,
+// em rajada rápida) e só depois disso entra o "evento" do clímax: nas rodadas múltiplas de 5,
+// a Morte chega (cartão de título + chefe mais forte); nas demais, um mini-chefe temático.
 function startClimax(){
   state.round_phase = 'climax';
-  const theme = themeOf();
-  if(isBossRound(state.round)){
+  state.climaxStage = 'enxame';
+  state.enxameSpawned = 0;
+  state.enxameTarget = 4 + Math.floor(state.cycle*1.1);
+  state.spawnTimer = 0.15;
+}
+
+function spawnMiniChefe(theme){
+  state.climaxStage = 'entity';
+  const en = spawnEnemySpec(theme.climax, {isClimax:true});
+  en.x = CENTER.x + Math.cos(en.angle)* (Math.max(W,H)*0.62);
+  en.y = CENTER.y + Math.sin(en.angle)* (Math.max(W,H)*0.62);
+  state.enemies.push(en);
+  state.climaxEntity = en;
+  queueBubble(en, pickLine(en.lines), true);
+}
+
+function startPreBoss(){
+  state.climaxStage = 'preboss';
+  state.preBossT = 0;
+  state.preBossDur = 3.2;
+  state.preBossFlash = 0;
+  state.preBossNextFlash = 0.35;
+  const banner = document.getElementById('death-banner');
+  banner.classList.add('show');
+}
+
+function updatePreBoss(dt){
+  state.preBossT += dt;
+  state.preBossFlash = Math.max(0, state.preBossFlash - dt*3);
+  state.preBossNextFlash -= dt;
+  if(state.preBossNextFlash<=0){
+    state.preBossFlash = 1;
+    state.preBossNextFlash = 0.45 + Math.random()*0.55;
+    sfxBoss();
+  }
+  if(state.preBossT >= state.preBossDur){
+    document.getElementById('death-banner').classList.remove('show');
+    state.climaxStage = 'boss';
     spawnDeathBoss();
-  } else if(theme.climax.behavior === 'enxame'){
-    state.enxameSpawned = 0;
-    state.climaxEntity = { enxame:true };
-  } else {
-    const en = spawnEnemySpec(theme.climax, {isClimax:true});
-    en.x = CENTER.x + Math.cos(en.angle)* (Math.max(W,H)*0.62);
-    en.y = CENTER.y + Math.sin(en.angle)* (Math.max(W,H)*0.62);
-    state.enemies.push(en);
-    state.climaxEntity = en;
-    queueBubble(en, pickLine(en.lines), true);
   }
 }
 
 function updateClimaxProgress(dt){
   const theme = themeOf();
-  if(isBossRound(state.round)){
-    // boss defeat + round resolution handled by killBoss()'s timeout (showDefeatExchange -> finishClimax)
-    return;
-  }
-  if(theme.climax.behavior==='enxame'){
+  if(state.climaxStage === 'enxame'){
     state.spawnTimer -= dt;
     if(state.enxameSpawned < state.enxameTarget && state.spawnTimer<=0){
       const dp = difficultyParams();
       if(state.enemies.length < dp.maxEnemies+2){
-        const en = spawnEnemySpec(theme.climax, {isClimax:true});
-        en.points = 0; // points awarded once at the end via climax bonus, avoid farming
-        en.isEnxameUnit = true;
-        state.enemies.push(en);
+        spawnSubwaveEnemy({});
         state.enxameSpawned++;
       }
-      state.spawnTimer = Math.max(0.22, 0.5/dp.spawnMul);
+      state.spawnTimer = Math.max(0.2, 0.45/dp.spawnMul);
     }
     if(state.enxameSpawned >= state.enxameTarget && state.enemies.length===0){
-      state.score += theme.climax.points;
-      finishClimax();
+      if(isBossRound(state.round)){
+        startPreBoss();
+      } else {
+        spawnMiniChefe(theme);
+      }
     }
     return;
   }
-  // single climax entity
+  if(state.climaxStage === 'preboss'){
+    updatePreBoss(dt);
+    return;
+  }
+  if(state.climaxStage === 'boss'){
+    // boss defeat + round resolution handled by killBoss()'s timeout (showDefeatExchange -> finishClimax)
+    return;
+  }
+  // 'entity' — mini-chefe da fase
   if(state.climaxEntity && state.climaxEntity.dead && state.enemies.length===0){
     finishClimax();
   } else if(!state.climaxEntity){
@@ -1175,14 +1225,14 @@ function updateSpeech(en, dt){
 /* ========================= DEATH BOSS STATE MACHINE ========================= */
 function bossMaxPhases(){
   const repeatN = Math.floor(state.round/5); // 1,2,3...
-  return Math.min(4, 2 + Math.floor((repeatN-1)/2));
+  return Math.min(5, 3 + Math.floor((repeatN-1)/2));
 }
 function spawnDeathBoss(){
   const dp = difficultyParams();
   const spawnR = Math.max(W,H)*0.6;
   const angle = Math.PI/2 + (Math.random()-0.5)*0.6; // mostly from bottom-ish, varied
   const maxPhases = bossMaxPhases();
-  const symCount = Math.min(8, 4 + dp.symbolBonus*2);
+  const symCount = Math.min(8, 5 + dp.symbolBonus*2);
   const boss = {
     uid: enemyUid++,
     isBoss:true,
@@ -1191,8 +1241,8 @@ function spawnDeathBoss(){
     emoji: DEATH_BOSS.emoji,
     x: CENTER.x + Math.cos(angle)*spawnR,
     y: CENTER.y + Math.sin(angle)*spawnR,
-    radius: 40,
-    baseSpeed: BASE_SPEED*0.5*dp.speedMul,
+    radius: 44,
+    baseSpeed: BASE_SPEED*0.58*dp.speedMul,
     phase: 1,
     maxPhases,
     bossState:'approach', // approach | active | preparing | lunging | retreat
@@ -1205,6 +1255,7 @@ function spawnDeathBoss(){
     speechTimer:0.3, speechText:null, speechTtl:0,
     lines: DEATH_BOSS.battleLines,
     hitFlash:0,
+    summonTimer: 6 + Math.random()*2, // a Morte agora também invoca outros assombrados durante a luta
   };
   state.enemies.push(boss);
   state.bossActive = true;
@@ -1213,13 +1264,14 @@ function spawnDeathBoss(){
 }
 
 function updateBoss(boss, dt){
+  const sm = speedMulNow();
   const dx = CENTER.x - boss.x, dy = CENTER.y - boss.y;
   const d = Math.hypot(dx,dy);
   switch(boss.bossState){
     case 'approach':
       if(d > boss.standoff){
-        boss.x += (dx/d)*boss.baseSpeed*dt;
-        boss.y += (dy/d)*boss.baseSpeed*dt;
+        boss.x += (dx/d)*boss.baseSpeed*sm*dt;
+        boss.y += (dy/d)*boss.baseSpeed*sm*dt;
       } else {
         boss.bossState='active'; boss.stateTimer=0;
       }
@@ -1227,6 +1279,19 @@ function updateBoss(boss, dt){
     case 'active':
       boss.stateTimer += dt;
       boss.x += Math.sin(boss.stateTimer*0.8)*6*dt;
+      if(boss.summonTimer!=null){
+        boss.summonTimer -= dt;
+        if(boss.summonTimer<=0){
+          boss.summonTimer = 7 + Math.random()*3;
+          const dp = difficultyParams();
+          if(state.enemies.length < dp.maxEnemies+3){
+            const theme = themeOf();
+            const minion = spawnEnemySpec(theme.roster[Math.floor(Math.random()*theme.roster.length)]);
+            minion.x = boss.x; minion.y = boss.y;
+            state.enemies.push(minion);
+          }
+        }
+      }
       if(boss.stateTimer>3.5 && Math.random()<dt*0.4){
         boss.bossState='preparing'; boss.stateTimer=0;
       }
@@ -1238,8 +1303,8 @@ function updateBoss(boss, dt){
       }
       break;
     case 'lunging':
-      boss.x += (dx/(d||1))*boss.baseSpeed*3.2*dt;
-      boss.y += (dy/(d||1))*boss.baseSpeed*3.2*dt;
+      boss.x += (dx/(d||1))*boss.baseSpeed*sm*3.2*dt;
+      boss.y += (dy/(d||1))*boss.baseSpeed*sm*3.2*dt;
       boss.stateTimer += dt;
       if(d < CENTER.r + boss.radius){
         hitCenter();
@@ -1249,8 +1314,8 @@ function updateBoss(boss, dt){
       }
       break;
     case 'retreat':
-      boss.x += (-dx/(d||1))*boss.baseSpeed*1.4*dt;
-      boss.y += (-dy/(d||1))*boss.baseSpeed*1.4*dt;
+      boss.x += (-dx/(d||1))*boss.baseSpeed*sm*1.4*dt;
+      boss.y += (-dy/(d||1))*boss.baseSpeed*sm*1.4*dt;
       boss.stateTimer += dt;
       if(boss.stateTimer>1.0){ boss.bossState='active'; boss.stateTimer=0; }
       break;
@@ -1277,6 +1342,8 @@ function killBoss(boss){
   const cycleBonus = (state.cycle-1)*100;
   const pts = 1000 + cycleBonus;
   state.score += pts;
+  state.clima = Math.min(MAX_CLIMA, state.clima + 1); // cada vez que a Morte é vencida, recupera um coração
+  updateHud();
   spawnBurst(boss.x, boss.y, 28);
   fireConfetti(boss.x, boss.y, { count: 40, spread: 140, hearts: true });
   showDefeatExchange();
@@ -1310,10 +1377,19 @@ function hitCenter(){
 let shakeT = 0;
 function shakeScreen(){ shakeT = 0.25; }
 
+// Multiplicador de velocidade global combinando o pulso de tempo do DJ com a lentidão do delight
+// de espiral — usado tanto pelos inimigos comuns quanto pela Morte (chefe).
+function speedMulNow(){
+  let m = 1;
+  if(state.tempoPulseTimer>0) m *= state.tempoPulseMul;
+  if(state.spiralSlowTimer>0) m *= 0.45;
+  return m;
+}
+
 function updateEnemyMovement(en, dt){
   const dx = CENTER.x - en.x, dy = CENTER.y - en.y;
   const d = Math.hypot(dx,dy) || 1;
-  let speed = en.baseSpeed * (state.tempoPulseTimer>0 ? state.tempoPulseMul : 1);
+  let speed = en.baseSpeed * speedMulNow();
 
   switch(en.behavior){
     case 'invocador': {
@@ -1456,9 +1532,41 @@ function applyPreciseSymbol(symbol){
   return true;
 }
 
+/* ---------- Delights dos símbolos raros (coração, raio, espiral, círculo) ---------- */
+function triggerLightningDelight(){
+  state.lightningFlash = 1;
+  for(const en of state.enemies){
+    if(en.dead) continue;
+    const dx = en.x-CENTER.x, dy = en.y-CENTER.y;
+    const d = Math.hypot(dx,dy) || 1;
+    const push = en.isBoss ? 22 : 46;
+    en.x += (dx/d)*push;
+    en.y += (dy/d)*push;
+  }
+  spawnBurst(CENTER.x, CENTER.y, 10, '#cfe0ff');
+}
+function triggerSymbolDelight(symbol){
+  switch(symbol){
+    case 'heart':
+      spawnBurst(CENTER.x, CENTER.y, 16, '#e85d75');
+      fireConfetti(CENTER.x, CENTER.y, { count: 14, spread: 90, hearts:true });
+      break;
+    case 'lightning':
+      triggerLightningDelight();
+      break;
+    case 'spiral':
+      state.spiralSlowTimer = 3;
+      break;
+    case 'circle':
+      // sem efeito especial — confirmado pelo usuário
+      break;
+  }
+}
+
 function resolveCast(symbol){
   if(!symbol) { registerMiss(); return; }
-  applyPreciseSymbol(symbol);
+  const hit = applyPreciseSymbol(symbol);
+  if(hit) triggerSymbolDelight(symbol);
 }
 
 /* ---------- body scroll lock while playing (mesmo padrão dos outros jogos do site) ---------- */
@@ -1654,6 +1762,23 @@ function drawParticles(){
   }
 }
 
+function drawLightningBolt(){
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, state.lightningFlash*1.4);
+  ctx.strokeStyle = '#eaf2ff';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  let x = CENTER.x + (Math.random()-0.5)*40, y = 0;
+  ctx.moveTo(x,y);
+  while(y < CENTER.y){
+    x += (Math.random()-0.5)*60;
+    y += 26+Math.random()*28;
+    ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
 function render(){
   ctx.save();
   if(shakeT>0){
@@ -1666,6 +1791,20 @@ function render(){
   }
   for(const en of state.enemies){ if(!en.dead) drawEnemyShape(en); }
   drawNoivos();
+  if(state.round_phase==='climax' && state.climaxStage==='preboss'){
+    const k = Math.min(1, state.preBossT/0.6);
+    ctx.fillStyle = 'rgba(0,0,0,'+(0.62*k)+')';
+    ctx.fillRect(0,0,W,H);
+    if(state.preBossFlash>0){
+      ctx.fillStyle = 'rgba(200,215,255,'+(state.preBossFlash*0.45)+')';
+      ctx.fillRect(0,0,W,H);
+    }
+  }
+  if(state.lightningFlash>0){
+    ctx.fillStyle = 'rgba(220,230,255,'+(state.lightningFlash*0.35)+')';
+    ctx.fillRect(0,0,W,H);
+    drawLightningBolt();
+  }
   drawParticles();
   drawTrail();
   ctx.restore();
@@ -1690,6 +1829,8 @@ function update(dt){
   shakeT = Math.max(0, shakeT-dt);
   state.dimAccum = Math.max(0, state.dimAccum - dt*0.01);
   if(state.tempoPulseTimer>0){ state.tempoPulseTimer -= dt; }
+  if(state.spiralSlowTimer>0){ state.spiralSlowTimer = Math.max(0, state.spiralSlowTimer-dt); }
+  if(state.lightningFlash>0){ state.lightningFlash = Math.max(0, state.lightningFlash-dt*4); }
 
   advanceRoundPhase(dt);
 
@@ -1711,7 +1852,10 @@ function resetGame(){
   state.clima=MAX_CLIMA; state.score=0; state.combo=0; state.bestCombo=0; state.bestComboRound=0;
   state.enemies=[]; state.particles=[]; state.trail=[]; state.drawing=false;
   state.dimAccum=0; state.tempoPulseMul=1; state.tempoPulseTimer=0;
+  state.spiralSlowTimer=0; state.lightningFlash=0; state.climaxStage=null;
+  state.preBossT=0; state.preBossDur=0; state.preBossFlash=0; state.preBossNextFlash=0;
   state.bossActive=false; state.bossDefeatedPending=false; state.gameOver=false;
+  document.getElementById('death-banner').classList.remove('show');
   updateHud();
 }
 function startGame(){
@@ -1742,6 +1886,7 @@ function triggerGameOver(){
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('bonus-banner').classList.remove('show');
   document.getElementById('round-banner').classList.remove('show');
+  document.getElementById('death-banner').classList.remove('show');
   document.getElementById('gameover-screen').classList.remove('hidden');
 }
 
