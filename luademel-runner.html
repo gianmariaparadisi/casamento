@@ -94,7 +94,12 @@
        que é bem mais alto que o canvas curto do celular). */
     .game-panel{position:relative;display:grid;grid-template-columns:1fr;border-radius:18px;border:2px solid rgba(196,109,40,.22);box-shadow:0 16px 60px rgba(26,26,64,.14);background:#cfe8ee;}
     .game-panel__canvas-wrap{grid-area:1/1;min-width:0;border-radius:18px;overflow:hidden;}
-    canvas{display:block;width:100%;touch-action:none;cursor:pointer;}
+    /* aspect-ratio é uma trava de segurança: garante que a proporção
+       640:260 do jogo nunca seja distorcida (esticada/"squished") mesmo se
+       algo em algum canto redefinir só a largura ou só a altura do canvas
+       — o navegador SEMPRE deriva a dimensão que faltar a partir dessa
+       proporção, então não tem como as duas saírem dessincronizadas. */
+    canvas{display:block;width:100%;aspect-ratio:640/260;touch-action:none;cursor:pointer;}
 
     .game-overlay{grid-area:1/1;min-width:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,247,239,.93);text-align:center;padding:1.4rem 1.3rem;backdrop-filter:blur(5px);border-radius:18px;}
     .game-overlay.show{display:flex;}
@@ -165,18 +170,18 @@
        de celular, exatamente a bagunça relatada. Largura + pointer:coarse
        é bem mais estável entre aparelhos. */
     @media (orientation:landscape) and (pointer:coarse) and (max-width:1000px){
-      .game-shell{max-width:1100px;padding-top:6px;padding-bottom:10px;}
-      .game-nav__inner{padding:4px 0;}
+      .game-shell{max-width:1100px;padding-top:4px;padding-bottom:8px;}
+      .game-nav__inner{padding:3px 0;}
       .game-kicker,.game-sub,.mobile-hint{display:none;}
-      .game-title{font-size:clamp(1rem,3vw,1.3rem);margin-bottom:.15rem;line-height:1;}
-      .hud{margin:.25rem auto;gap:.35rem;}
-      .hud__pill{padding:.28rem .6rem;font-size:.62rem;}
-      .hud__pill strong{font-size:.74rem;}
-      .dest-progress{margin-bottom:.25rem;}
-      .char-row{margin-bottom:.25rem;gap:.4rem;}
+      .game-title{font-size:clamp(.9rem,2.6vw,1.15rem);margin-bottom:.1rem;line-height:1;}
+      .hud{margin:.15rem auto;gap:.3rem;}
+      .hud__pill{padding:.22rem .55rem;font-size:.6rem;}
+      .hud__pill strong{font-size:.7rem;}
+      .dest-progress{margin-bottom:.15rem;}
+      .char-row{margin-bottom:.15rem;gap:.35rem;}
       .char-row span{display:none;}
-      .rn-char-btn{padding:.28rem .6rem;font-size:.74rem;}
-      .ctrl-row{margin-top:.3rem;}
+      .rn-char-btn{padding:.22rem .55rem;font-size:.7rem;}
+      .ctrl-row{margin-top:.25rem;}
       .desk-hint{display:none;}
 
       /* Assim que a corrida começa, a rolagem trava — título e "Jogar como"
@@ -192,14 +197,15 @@
          conteúdo aqui, a capa/fim de jogo sozinha já obriga o painel a
          ficar bem mais alto que o canvas, deixando tudo desproporcional
          numa tela de celular deitado. */
-      .game-overlay{padding:.6rem .8rem;}
-      .ov-emoji{width:56px;max-height:56px;margin-bottom:.3rem;}
-      .ov-title{font-size:1.15rem;margin-bottom:.15rem;}
-      .ov-sub{font-size:.72rem;margin-bottom:.5rem;line-height:1.35;}
-      .ov-stats{gap:.35rem;margin-bottom:.5rem;}
-      .ov-stat{padding:.35rem .45rem;font-size:.6rem;}
-      .ov-stat strong{font-size:.88rem;}
-      .game-btn{padding:.5rem .95rem;font-size:.66rem;}
+      .game-overlay{padding:.4rem .8rem;}
+      .ov-emoji{width:40px;max-height:40px;margin-bottom:.2rem;}
+      .ov-title{font-size:1rem;margin-bottom:.1rem;}
+      .ov-sub{font-size:.7rem;margin-bottom:.35rem;line-height:1.3;}
+      .ov-sub:empty{margin-bottom:0;}
+      .ov-stats{gap:.3rem;margin-bottom:.35rem;}
+      .ov-stat{padding:.3rem .4rem;font-size:.58rem;}
+      .ov-stat strong{font-size:.84rem;}
+      .game-btn{padding:.45rem .9rem;font-size:.64rem;}
     }
   </style>
 </head>
@@ -555,7 +561,15 @@ function setupCanvas(){
   canvas.width  = LW * DPR;
   canvas.height = LH * DPR;
   canvas.style.width  = dispW + "px";
-  canvas.style.height = dispH + "px";
+  // A altura NÃO é mais fixada aqui à mão — o CSS (`aspect-ratio:640/260`
+  // no seletor `canvas`) deriva sozinho a partir da largura. Antes, largura
+  // e altura eram dois números calculados separadamente e só ficavam
+  // corretos se a matemática dos dois batesse EXATAMENTE em todo caminho
+  // do código; qualquer divergência (arredondamento, algum branch futuro
+  // esquecido, cache de layout) esticava a imagem sem que nada acusasse
+  // erro. Com aspect-ratio a proporção é garantida pelo navegador, não por
+  // contas manuais — dispH continua calculado acima só pra decidir o
+  // clamp de altura logo atrás, não pra ser aplicado diretamente.
   ctx.setTransform(DPR,0,0,DPR,0,0);
 }
 window.addEventListener("resize", ()=>{ setupCanvas(); if(!rnAlive) drawFrame(0); });
