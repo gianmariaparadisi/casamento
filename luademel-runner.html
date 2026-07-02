@@ -99,7 +99,20 @@
        algo em algum canto redefinir só a largura ou só a altura do canvas
        — o navegador SEMPRE deriva a dimensão que faltar a partir dessa
        proporção, então não tem como as duas saírem dessincronizadas. */
-    canvas{display:block;width:100%;aspect-ratio:640/260;touch-action:none;cursor:pointer;}
+    /* Seletor por ID (#rn-canvas), não pelo tipo (canvas) — o CSS
+       compartilhado do site (assets/css/style.css) tem uma regra genérica
+       `canvas { max-width: 420px }` (dentro de @media max-width:767px,
+       feita pro Snake/Flappy) que vale pra QUALQUER canvas de QUALQUER
+       página, já que é seletor de tipo. Como max-width é uma restrição
+       independente da largura (nossa ou dela), ela cortava o canvas em
+       420px por cima de qualquer coisa que o JS calculasse — o painel
+       ficava do tamanho certo, mas o canvas dentro dele era truncado,
+       sobrando o fundo do painel à direita. Isso era a causa real do
+       "png squished" em várias proporções de tela. Um seletor por ID tem
+       especificidade maior que o seletor de tipo, então nossas regras
+       (incluindo max-width:none abaixo) sempre vencem, não importa o que
+       outra página declare para "canvas" em geral. */
+    #rn-canvas{display:block;width:100%;max-width:none;aspect-ratio:640/260;touch-action:none;cursor:pointer;}
 
     .game-overlay{grid-area:1/1;min-width:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,247,239,.93);text-align:center;padding:1.4rem 1.3rem;backdrop-filter:blur(5px);border-radius:18px;}
     .game-overlay.show{display:flex;}
