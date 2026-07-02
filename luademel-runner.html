@@ -18,6 +18,37 @@
     body.game-page{min-height:100svh;background:var(--rn-cream2);color:var(--rn-navy);overscroll-behavior:none;}
     html,body{overscroll-behavior:none;}
 
+    /* Pede pra girar o celular em modo retrato — mesma ideia do jogo de
+       Halloween (Até que a Morte nos Separe): o runner é bem mais largo que
+       alto (proporção 640:260), então na horizontal o canvas fica bem maior
+       e mais confortável de jogar do que espremido na largura estreita do
+       retrato. */
+    #rn-rotate-overlay{
+      display:none;
+      position:fixed;inset:0;z-index:9999;
+      flex-direction:column;align-items:center;justify-content:center;gap:18px;
+      background:linear-gradient(180deg, rgba(251,247,239,.98), rgba(244,241,235,.99));
+      text-align:center;padding:24px;
+    }
+    #rn-rotate-overlay .phone{
+      width:34px;height:58px;border:3px solid var(--rn-terra);border-radius:7px;position:relative;
+      animation:rn-rotate-hint 2.2s ease-in-out infinite;
+    }
+    #rn-rotate-overlay .phone::before{
+      content:'';position:absolute;top:7px;left:50%;transform:translateX(-50%);
+      width:11px;height:2px;background:var(--rn-terra);border-radius:1px;
+    }
+    @keyframes rn-rotate-hint{
+      0%,12%{transform:rotate(0deg);}
+      45%,55%{transform:rotate(-90deg);}
+      88%,100%{transform:rotate(0deg);}
+    }
+    #rn-rotate-overlay p{font-size:1rem;color:var(--rn-amber);max-width:280px;line-height:1.55;margin:0;}
+    #rn-rotate-overlay .title-main{margin:0;font-family:var(--font-display);font-size:clamp(18px,5vw,24px);color:var(--rn-navy);}
+    @media (orientation:portrait) and (pointer:coarse){
+      #rn-rotate-overlay{display:flex;}
+    }
+
     .game-nav{position:sticky;top:0;z-index:30;background:rgba(251,247,239,.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(196,109,40,.18);}
     .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:13px 0;gap:1rem;}
     .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.84rem;color:var(--rn-amber);}
@@ -122,9 +153,32 @@
       .dest-progress{margin-bottom:.6rem;}
       .char-row{margin-bottom:.55rem;}
     }
+
+    /* Celular deitado (tela curta): larga o teto de 680px do .game-shell —
+       que existe só pra dar uma largura confortável de leitura no desktop —
+       e usa a largura horizontal de verdade que o telefone tem disponível,
+       igual foi feito no jogo de Halloween. Cabeçalho também encolhe pra
+       sobrar altura pro canvas. */
+    @media (orientation:landscape) and (max-height:520px){
+      .game-shell{max-width:1100px;padding-top:8px;padding-bottom:24px;}
+      .game-nav__inner{padding:6px 0;}
+      .game-kicker,.game-sub{display:none;}
+      .game-title{font-size:clamp(1.05rem,3.4vw,1.6rem);margin-bottom:.2rem;}
+      .hud{margin:.3rem auto .3rem;}
+      .dest-progress{margin-bottom:.35rem;}
+      .char-row{margin-bottom:.35rem;}
+      .ctrl-row{margin-top:.5rem;}
+      .mobile-hint{margin-top:.3rem;}
+    }
   </style>
 </head>
 <body class="game-page">
+  <div id="rn-rotate-overlay">
+    <div class="phone"></div>
+    <p class="title-main" data-it="Gira il telefono">Gire o celular</p>
+    <p data-it="Per giocare a 'Corsa della Luna di Miele' sul telefono, gira lo schermo in orizzontale.">Para jogar "Corrida da Lua de Mel" no celular, vire a tela na horizontal.</p>
+  </div>
+
   <nav class="game-nav"><div class="game-nav__inner">
     <a class="game-back" href="jogos.html">← Voltar aos jogos</a>
     <div class="game-brand">Tiago & Gian</div>
@@ -424,10 +478,40 @@ function getSave(){ try{ return JSON.parse(localStorage.getItem("luademelRunnerS
 function setSave(d){ try{ localStorage.setItem("luademelRunnerSave", JSON.stringify(d)); }catch{} }
 best = getSave().best || 0;
 
+/* Em paisagem com pouca altura (celular deitado), o .game-shell larga o teto
+   de 680px (ver CSS) e o canvas pode crescer bem mais na largura — mas
+   também precisa travar pela ALTURA disponível na tela, senão fica maior
+   que a viewport e empurra HUD/controles pra fora sem dar pra rolar até
+   eles. Mesma lógica de "medir o que já está ocupado e sobrar o resto pro
+   canvas" usada no fitGamePanel do jogo de Halloween. */
 function setupCanvas(){
   const wrap = canvas.parentElement;
-  const dispW = Math.min(wrap.clientWidth, 680);
-  const dispH = dispW * (LH/LW);
+  const isLandscapeShort = window.matchMedia("(orientation:landscape) and (max-height:520px)").matches;
+  const widthCap = isLandscapeShort ? 1100 : 680;
+  let dispW = Math.min(wrap.clientWidth, widthCap);
+  let dispH = dispW * (LH/LW);
+
+  if (isLandscapeShort){
+    const shell = document.querySelector(".game-shell");
+    const panel = document.querySelector(".game-panel");
+    const nav   = document.querySelector(".game-nav");
+    if (shell && panel){
+      const navH = nav ? nav.getBoundingClientRect().height : 0;
+      let usedH = 0;
+      for (const child of shell.children){
+        if (child === panel) continue;
+        if (getComputedStyle(child).display === "none") continue;
+        usedH += child.getBoundingClientRect().height;
+      }
+      const availH = Math.max(120, window.innerHeight - navH - usedH - 24);
+      if (dispH > availH){
+        dispH = availH;
+        dispW = Math.min(dispH * (LW/LH), widthCap, wrap.clientWidth);
+        dispH = dispW * (LH/LW);
+      }
+    }
+  }
+
   canvas.width  = LW * DPR;
   canvas.height = LH * DPR;
   canvas.style.width  = dispW + "px";
@@ -435,6 +519,10 @@ function setupCanvas(){
   ctx.setTransform(DPR,0,0,DPR,0,0);
 }
 window.addEventListener("resize", ()=>{ setupCanvas(); if(!rnAlive) drawFrame(0); });
+window.addEventListener("orientationchange", ()=> setTimeout(()=>{ setupCanvas(); if(!rnAlive) drawFrame(0); }, 60));
+if (window.visualViewport){
+  window.visualViewport.addEventListener("resize", ()=>{ setupCanvas(); if(!rnAlive) drawFrame(0); });
+}
 
 /* ══════════════════════════════════════════════════════════
    CONTROLES — só pular. Tap curto = pulo baixo. Segurar (até
