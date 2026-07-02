@@ -483,11 +483,25 @@ document.addEventListener("keyup", e=>{
   if ([" ","ArrowUp"].includes(e.key)) jumpRelease();
 });
 
-canvas.addEventListener("mousedown", ()=> jumpPress());
-canvas.addEventListener("mouseup", ()=> jumpRelease());
-canvas.addEventListener("mouseleave", ()=> jumpRelease());
-canvas.addEventListener("touchstart", e=>{ e.preventDefault(); jumpPress(); }, {passive:false});
-canvas.addEventListener("touchend", e=>{ e.preventDefault(); jumpRelease(); }, {passive:false});
+/* Pulo funciona em qualquer clique/toque na tela — não precisa acertar o
+   canvas. Só ficam de fora os controles de verdade (nav, botões, input) e a
+   área de pós-jogo/ranking, que precisa continuar rolável e clicável normal. */
+function isRunnerControlTarget(el){
+  return !!(el && el.closest && el.closest("a, button, input, textarea, #rn-postgame"));
+}
+document.addEventListener("mousedown", e=>{ if (!isRunnerControlTarget(e.target)) jumpPress(); });
+document.addEventListener("mouseup",   ()=> jumpRelease());
+window.addEventListener("blur",        ()=> jumpRelease());
+document.addEventListener("touchstart", e=>{
+  if (isRunnerControlTarget(e.target)) return;
+  e.preventDefault();
+  jumpPress();
+}, {passive:false});
+document.addEventListener("touchend", e=>{
+  if (isRunnerControlTarget(e.target)) return;
+  e.preventDefault();
+  jumpRelease();
+}, {passive:false});
 
 const btnJump = document.getElementById("rn-btn-jump");
 btnJump.addEventListener("touchstart", e=>{ e.preventDefault(); jumpPress(); }, {passive:false});
