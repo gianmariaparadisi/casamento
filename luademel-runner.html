@@ -321,6 +321,20 @@ let _rnScrollY = 0;
 function lockScroll(){ _rnScrollY = window.scrollY; document.body.style.overflow="hidden"; document.body.style.touchAction="none"; }
 function unlockScroll(){ document.body.style.overflow=""; document.body.style.touchAction=""; window.scrollTo(0,_rnScrollY); }
 
+/* Centraliza o painel do jogo na tela antes de travar a rolagem (ver
+   lockScroll acima) — sem isso, o jogo travava rolado exatamente onde o
+   usuário estava (podendo deixar HUD/canvas cortados no topo ou embaixo
+   da tela, especialmente no celular). Instantâneo (não "smooth"), porque
+   um scroll suave ficaria pela metade quando lockScroll trava a rolagem
+   logo em seguida. */
+function centerGamePanel(){
+  const panel = document.querySelector(".game-panel");
+  if (!panel) return;
+  const rect = panel.getBoundingClientRect();
+  const targetY = window.scrollY + rect.top + rect.height/2 - window.innerHeight/2;
+  window.scrollTo(0, Math.max(0, targetY));
+}
+
 function loadImg(src){ const i = new Image(); i.loaded=false; i.onload=()=>{i.loaded=true;}; i.src=src; return i; }
 function imgOk(img){ return img && (img.loaded || img.complete) && (img.naturalWidth>0 || img.loaded); }
 /* tenta o PNG definitivo primeiro; se não existir ainda, cai pro SVG provisório
@@ -696,8 +710,15 @@ function startRunner(){
      espaço (ver CSS da paisagem curta). */
   document.body.classList.add("rn-playing");
   hideOverlay();
-  lockScroll();
   setupCanvas();
+  /* Centraliza o painel na tela e SÓ DEPOIS trava a rolagem — precisa ser
+     nessa ordem: hideOverlay/setupCanvas mudam o layout (título e "Jogar
+     como" saem, painel pode mudar de tamanho), então a centralização tem
+     que medir o layout JÁ final. Se travasse a rolagem antes, o jogo
+     ficaria preso onde o usuário estava rolado, não necessariamente
+     centralizado. */
+  centerGamePanel();
+  lockScroll();
   rnLastTs = 0;
   if (rnRaf) cancelAnimationFrame(rnRaf);
   rnRaf = requestAnimationFrame(loop);
