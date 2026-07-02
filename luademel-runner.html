@@ -485,33 +485,40 @@ best = getSave().best || 0;
    eles. Mesma lógica de "medir o que já está ocupado e sobrar o resto pro
    canvas" usada no fitGamePanel do jogo de Halloween. */
 function setupCanvas(){
-  const wrap = canvas.parentElement;
+  const wrap  = canvas.parentElement;   // .game-panel__canvas-wrap
+  const panel = wrap.parentElement;     // .game-panel — precisa ficar do MESMO
+                                         // tamanho do canvas, senão sobra vão
+                                         // com o fundo do painel aparecendo
+                                         // (foi o que quebrou no desktop).
+  const shell = document.querySelector(".game-shell");
   const isLandscapeShort = window.matchMedia("(orientation:landscape) and (max-height:520px)").matches;
   const widthCap = isLandscapeShort ? 1100 : 680;
-  let dispW = Math.min(wrap.clientWidth, widthCap);
+
+  // A largura disponível vem do .game-shell (estável), não do wrap — o wrap
+  // é o que estamos prestes a redimensionar, então medi-lo geraria loop.
+  const shellW = shell ? shell.clientWidth : wrap.clientWidth;
+  let dispW = Math.min(shellW, widthCap);
   let dispH = dispW * (LH/LW);
 
-  if (isLandscapeShort){
-    const shell = document.querySelector(".game-shell");
-    const panel = document.querySelector(".game-panel");
-    const nav   = document.querySelector(".game-nav");
-    if (shell && panel){
-      const navH = nav ? nav.getBoundingClientRect().height : 0;
-      let usedH = 0;
-      for (const child of shell.children){
-        if (child === panel) continue;
-        if (getComputedStyle(child).display === "none") continue;
-        usedH += child.getBoundingClientRect().height;
-      }
-      const availH = Math.max(120, window.innerHeight - navH - usedH - 24);
-      if (dispH > availH){
-        dispH = availH;
-        dispW = Math.min(dispH * (LW/LH), widthCap, wrap.clientWidth);
-        dispH = dispW * (LH/LW);
-      }
+  if (isLandscapeShort && shell){
+    const nav = document.querySelector(".game-nav");
+    const navH = nav ? nav.getBoundingClientRect().height : 0;
+    let usedH = 0;
+    for (const child of shell.children){
+      if (child === panel) continue;
+      if (getComputedStyle(child).display === "none") continue;
+      usedH += child.getBoundingClientRect().height;
+    }
+    const availH = Math.max(120, window.innerHeight - navH - usedH - 24);
+    if (dispH > availH){
+      dispH = availH;
+      dispW = Math.min(dispH * (LW/LH), widthCap, shellW);
+      dispH = dispW * (LH/LW);
     }
   }
 
+  // Painel e canvas sempre com a MESMA largura em qualquer ramo acima.
+  if (panel) panel.style.width = dispW + "px";
   canvas.width  = LW * DPR;
   canvas.height = LH * DPR;
   canvas.style.width  = dispW + "px";
