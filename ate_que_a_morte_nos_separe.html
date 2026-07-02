@@ -202,7 +202,7 @@ canvas{position:absolute;display:block;max-width:none;max-height:none;width:auto
   <main class="game-shell">
     <p class="game-kicker">Jogo assombrado</p>
     <h1 class="game-title"><img src="assets/img/morte/boss_death_patience.png" alt="">Até que a Morte nos Separe</h1>
-    <p class="game-sub">Gian &amp; Tiago disseram "sim" num salão antigo — e despertaram quem já tinha dito "sim" antes. Desenhe os símbolos para afastar as assombrações e proteja o Clima da Festa pelo maior tempo possível.</p>
+    <p class="game-sub">Ajude os noivos a afastar as assombrações e proteja o Clima da Festa pelo maior tempo possível. Desenhe os símbolos!</p>
 
     <section class="game-panel">
       <div id="game-container">
@@ -239,7 +239,7 @@ canvas{position:absolute;display:block;max-width:none;max-height:none;width:auto
       </div>
 
       <div id="gameover-screen" class="overlay hidden">
-        <div class="title-main" style="font-size:clamp(18px,4vw,28px);">A festa foi oficialmente assombrada.</div>
+        <div class="title-main" style="font-size:clamp(18px,4vw,28px);">A festa está oficialmente assombrada.</div>
         <div class="subtitle" id="gameover-flavor">A Morte da Paciência venceu dessa vez.</div>
         <div class="stat-line">Rodada alcançada: <b id="final-round">1</b></div>
         <div class="stat-line">Pontuação: <b id="final-score">0</b></div>
@@ -619,68 +619,68 @@ const THEMES = [
     colors:{ a:'#1f3a2e', b:'#171a33', accent:'#c9a24b' },
     roster:[
       { id:'ghost_basic', label:'Fantasminha Penetra', sprite:'ghost_basic', emoji:'👻', tier:'comum', points:100, behavior:'basico', baseSymbols:1,
-        lines:['Eu também vim.','Tem lugar pra mim?','Só vou ficar no canto.','Morri, mas cheguei.'] },
+        lines:['E a noiva? Cadê?','Ah...são DOIS noivos?'] },
       { id:'haunted_portrait', label:'Retrato Fofoqueiro', sprite:'haunted_portrait', emoji:'🖼️', tier:'especial', points:250, behavior:'invocador', baseSymbols:2,
         lines:['Eu vi tudo.','No meu tempo era diferente.','Esse casamento vai dar história.','Anotem isso.'] },
       { id:'floating_candle', label:'Vela Apagada', sprite:'floating_candle', emoji:'🕯️', tier:'comum', points:100, behavior:'bloqueador', baseSymbols:1,
-        lines:['Apaguei o clima.','Ficou sombrio, né?','Ninguém pediu luz.'] },
+        lines:['Apaguei o clima.','Acendi, pensei melhor, apaguei.'] },
     ],
     climax:{ id:'boss_portrait', label:'O Retrato da Família', sprite:'boss_portrait', emoji:'🖼️', tier:'miniboss', points:500, behavior:'invocador', baseSymbols:2,
-      lines:['Quem são esses dois?','Na minha época era diferente.','Essa família já viu coisa pior.'] }
+      lines:['Ah então são duas noivAs?'] }
   },
   {
     key:'corredor_altar', name:'O Corredor do Altar', bg:'bg_altar_corridor',
     colors:{ a:'#5e1f30', b:'#171a33', accent:'#c9a24b' },
     roster:[
       { id:'ghost_veil', label:'Véu Fantasma', sprite:'ghost_veil', emoji:'👰', tier:'comum', points:100, behavior:'curvo', baseSymbols:2,
-        lines:['Alguém me esqueceu aqui.','Eu também caso hoje.','Combina com tudo.'] },
+        lines:['Cadê minha noiva?'] },
       { id:'flying_bouquet', label:'Buquê Murcho', sprite:'flying_bouquet', emoji:'💐', tier:'comum', points:100, behavior:'rapido', baseSymbols:1,
-        lines:['Me joga!','Eu escolho quem pega.','Hoje eu pego o buquê.'] },
+        lines:['SE joga, gata'] },
       { id:'ghost_fancy', label:'Convidado Transparente', sprite:'ghost_fancy', emoji:'🥻', tier:'especial', points:250, behavior:'tanque', baseSymbols:2,
-        lines:['Esse lugar é meu.','Cheguei antes. Em 1923.','Eu estava na primeira lista.'] },
+        lines:['Não tem chopp?','E os netos?'] },
     ],
     climax:{ id:'haunted_music_notes', label:'A Marcha Fúnebre', sprite:'haunted_music_notes', emoji:'🎵', tier:'miniboss', points:500, behavior:'tanque', baseSymbols:2,
-      lines:['Essa entrada está muito alegre.','Vamos mudar o tom.','Mais dramático, por favor.'] }
+      lines:['Mais drama, por favor.'] }
   },
   {
     key:'sim_dos_mortos', name:'O Sim dos Mortos', bg:'bg_vows_of_dead',
     colors:{ a:'#1b1620', b:'#5e1f30', accent:'#c9a24b' },
     roster:[
       { id:'ghost_objection', label:'Objeção Fantasma', sprite:'ghost_objection', emoji:'🙋', tier:'especial', points:250, behavior:'rapido', baseSymbols:2,
-        lines:['Eu me oponho!','Só queria dizer uma coisa.','Não vai demorar.'] },
+        lines:['Não consigo imaginar dois homens felizes','Posso fazer um discursinho?'] },
       { id:'wedding_ring', label:'Aliança Fugitiva', sprite:'wedding_ring', emoji:'💍', tier:'comum', points:100, behavior:'fugitivo', baseSymbols:1,
-        lines:['Me perdeu?','Não estou pronta.','Foge comigo.'] },
+        lines:['Seu dedo engordou é?'] },
       { id:'torn_vows', label:'Voto Rasgado', sprite:'torn_vows', emoji:'📜', tier:'comum', points:100, behavior:'grupo', baseSymbols:1,
-        lines:['Esqueci a parte bonita.','Improvisa aí.','Era pra ser emocionante.'] },
+        lines:['Improvisa aí os votos vai','Me escreve na IA'] },
     ],
     climax:{ id:'boss_objection', label:'A Objeção', sprite:'boss_objection', emoji:'🙋', tier:'miniboss', points:500, behavior:'invocador', baseSymbols:3,
-      lines:['Alguém se opõe?','Eu.','Só uma coisinha rapidinho.'] }
+      lines:['Alguém se opõe? Euzinho'] }
   },
   {
     key:'salao_possuido', name:'O Salão Possuído', bg:'bg_possessed_hall',
     colors:{ a:'#b5572b', b:'#1b1620', accent:'#c9a24b' },
     roster:[
       { id:'haunted_cake', label:'Bolo com Olhos', sprite:'haunted_cake', emoji:'🎂', tier:'especial', points:250, behavior:'tanque', baseSymbols:3,
-        lines:['Me corta.','Não me corta.','Escolhe.','Eu sei que você quer.'] },
+        lines:['Bolo de cake?','Servidos?'] },
       { id:'floating_glass', label:'Taça Fantasma', sprite:'floating_glass', emoji:'🥂', tier:'comum', points:100, behavior:'curvo', baseSymbols:1,
-        lines:['Tim-tim.','Derrubei.','Foi sem querer.'] },
+        lines:['Tim-tim','Um banho de chuva, um banho de chuvaaAAAAAAAIIAIAIAI---'] },
       { id:'haunted_chair', label:'Cadeira Arrastando Sozinha', sprite:'haunted_chair', emoji:'🪑', tier:'comum', points:100, behavior:'empurrador', baseSymbols:1,
-        lines:['Ninguém senta em paz.','Com licença.','Só ajeitando.'] },
+        lines:['Não sentei bem com essa energia'] },
     ],
     climax:{ id:'boss_cake', label:'O Bolo Possuído', sprite:'boss_cake', emoji:'🎂', tier:'miniboss', points:500, behavior:'tanque', baseSymbols:3,
-      lines:['Agora é minha festa.','Quem quer o primeiro pedaço?','Ninguém corta a noiva... err, o bolo.'] }
+      lines:['Bolo de cake, servidos?'] }
   },
   {
     key:'ultima_danca', name:'A Última Dança', bg:'bg_last_dance',
     colors:{ a:'#171a33', b:'#8b80a0', accent:'#c9a24b' },
     roster:[
       { id:'dancing_ghost', label:'Fantasma Dançarino', sprite:'dancing_ghost', emoji:'🕺', tier:'comum', points:100, behavior:'curvo', baseSymbols:2,
-        lines:['Essa é minha música.','Eu ensaiei isso.','Olha esse passo.'] },
+        lines:['Toca um pagodinho vai'] },
       { id:'haunted_dj_speaker', label:'DJ do Além', sprite:'haunted_dj_speaker', emoji:'🔊', tier:'especial', points:250, behavior:'dj', baseSymbols:1,
-        lines:['Confia.','Agora muda tudo.','Essa aqui é conceitual.'] },
+        lines:['Toca legião urbana'] },
       { id:'ghost_old_lady', label:'Vó Fantasma', sprite:'ghost_old_lady', emoji:'👵', tier:'comum', points:100, behavior:'tanque',
         baseSymbols:2, rareLabel:'Fantasma da Minha Vó', rareChance:0.18,
-        lines:['Eu avisei.','No meu tempo era diferente.','Tá magrinho, comeu?','Esse salão é frio.','Quando que vocês casam de verdade?'] },
+        lines:['No meu tempo era diferente...','Tiago e Gian...que nome feio'] },
     ],
     climax: null // theme 5 climax is always the recurring main boss "A Morte da Paciência"
   }
@@ -689,10 +689,10 @@ const THEMES = [
 /* ---------- Death boss: A Morte da Paciência ---------- */
 const DEATH_BOSS = {
   id:'death_patience', label:'A Morte da Paciência', sprite:'boss_death_patience', emoji:'💀',
-  entryLines:['Eu não fui convidada. Mas vim.','Vocês demoraram. Eu não.','Com licença, esse lugar é meu agora.'],
-  battleLines:['Ainda não acabou.','Eu tenho a noite toda.','Vocês estão demorando demais.','Eu sirvo o brinde quando eu quiser.'],
-  defeatLine:'Hoje não.',
-  defeatReply:'Tá. Mas eu fico pra festa.'
+  entryLines:['Até tenho amigos gay mas...'],
+  battleLines:['Ainda não acabou?','Que horas acaba a festa mesmo?'],
+  defeatLine:'Ugh...gays',
+  defeatReply:'' // sem réplica
 };
 
 /* ---------- Backgrounds (vector fallback) ---------- */
@@ -795,6 +795,7 @@ let state = {
   dimAccum:0, // bloqueador screen-dim effect
   tempoPulseMul:1, tempoPulseTimer:0,
   spiralSlowTimer:0, // delight do símbolo espiral: lentidão global temporária
+  spiralEffectT:0, // delight do símbolo espiral: espiral visual crescendo do centro
   lightningFlash:0, // delight do símbolo raio: flash visual rápido
   round_phase:'intro', // intro | waves | climax | bonus
   phaseTimer:0,
@@ -919,7 +920,7 @@ function spawnEnemySpec(spec, opts){
     dead:false,
     wobble: Math.random()*Math.PI*2,
     burstTag: opts.burstTag || null,
-    speechTimer: 1 + Math.random()*3,
+    speechTimer: 3.3 + Math.random()*10, // intervalo inicial também ~3.3x maior (frequência -70%)
     speechText:null,
     speechTtl:0,
     pushTimer:0,
@@ -1190,9 +1191,11 @@ function finishClimax(){
   const total = lifeBonus + comboBonus;
   state.score += total;
   const banner = document.getElementById('bonus-banner');
-  const flavors = ['O clima sobreviveu.','A festa continua — por enquanto.','Ninguém mais vai estragar essa noite. Por agora.'];
-  document.getElementById('bonus-line1').textContent = flavors[Math.floor(Math.random()*flavors.length)];
-  document.getElementById('bonus-line2').textContent = `+${lifeBonus} por Clima da Festa · +${comboBonus} de combo`;
+  const flavors = ['A festa continua, por enquanto','Tem uma cocuxa pra dar uma energia? Vamos continuar'];
+  document.getElementById('bonus-line1').textContent = pickLine(flavors);
+  const line2El = document.getElementById('bonus-line2');
+  line2El.style.display = '';
+  line2El.textContent = `+${lifeBonus} por Clima da Festa · +${comboBonus} de combo`;
   document.getElementById('bonus-score').textContent = '+' + total;
   banner.classList.add('show');
   fireConfetti(CENTER.x, CENTER.y, { count: 26, spread: 160, hearts: true });
@@ -1218,7 +1221,9 @@ function updateSpeech(en, dt){
   en.speechTimer -= dt;
   if(en.speechTimer<=0){
     queueBubble(en, pickLine(en.lines));
-    en.speechTimer = 4 + Math.random()*4;
+    // intervalo ~3.3x maior que o original: reduz a frequência das falas em ~70%, sem remover
+    // os diálogos do jogo — pedido do usuário (eram falas demais aparecendo durante a partida).
+    en.speechTimer = 13 + Math.random()*14;
   }
 }
 
@@ -1252,7 +1257,7 @@ function spawnDeathBoss(){
     symbolIndex:0,
     dead:false,
     wobble:0,
-    speechTimer:0.3, speechText:null, speechTtl:0,
+    speechTimer:1, speechText:null, speechTtl:0,
     lines: DEATH_BOSS.battleLines,
     hitFlash:0,
     summonTimer: 6 + Math.random()*2, // a Morte agora também invoca outros assombrados durante a luta
@@ -1358,7 +1363,10 @@ function killBoss(boss){
 function showDefeatExchange(){
   const banner = document.getElementById('bonus-banner');
   document.getElementById('bonus-line1').textContent = DEATH_BOSS.defeatLine;
-  document.getElementById('bonus-line2').textContent = DEATH_BOSS.defeatReply;
+  // sem réplica dos noivos — a Morte simplesmente some
+  const replyEl = document.getElementById('bonus-line2');
+  replyEl.textContent = DEATH_BOSS.defeatReply || '';
+  replyEl.style.display = replyEl.textContent ? '' : 'none';
   document.getElementById('bonus-score').textContent = '';
   banner.classList.add('show');
 }
@@ -1545,17 +1553,26 @@ function triggerLightningDelight(){
   }
   spawnBurst(CENTER.x, CENTER.y, 10, '#cfe0ff');
 }
+const SPIRAL_EFFECT_DUR = 0.8; // duração da animação visual da espiral crescendo do centro
 function triggerSymbolDelight(symbol){
   switch(symbol){
     case 'heart':
       spawnBurst(CENTER.x, CENTER.y, 16, '#e85d75');
       fireConfetti(CENTER.x, CENTER.y, { count: 14, spread: 90, hearts:true });
+      // 25% de chance de recuperar +1 vida ao acertar o coração no momento certo
+      if(state.clima < MAX_CLIMA && Math.random() < 0.25){
+        state.clima = Math.min(MAX_CLIMA, state.clima + 1);
+        updateHud();
+        spawnBurst(CENTER.x, CENTER.y, 22, '#ff8fa3');
+        fireConfetti(CENTER.x, CENTER.y, { count: 22, spread: 140, hearts:true });
+      }
       break;
     case 'lightning':
       triggerLightningDelight();
       break;
     case 'spiral':
       state.spiralSlowTimer = 3;
+      state.spiralEffectT = SPIRAL_EFFECT_DUR; // dispara a animação visual da espiral crescendo
       break;
     case 'circle':
       // sem efeito especial — confirmado pelo usuário
@@ -1779,6 +1796,37 @@ function drawLightningBolt(){
   ctx.restore();
 }
 
+// Espiral visual crescendo do centro para fora — toca quando o jogador acerta o símbolo espiral,
+// no mesmo espírito do flash/empurrão do raio e do burst de partículas do coração: dá um retorno
+// visual claro de que um delight especial aconteceu. A curva nasce no centro (raio 0) e cresce
+// junto com o tempo decorrido de SPIRAL_EFFECT_DUR, desenhando mais voltas conforme cresce, e
+// esmaece no final.
+function drawSpiralEffect(){
+  const elapsed = SPIRAL_EFFECT_DUR - state.spiralEffectT; // 0 -> SPIRAL_EFFECT_DUR
+  const growth = Math.min(1, elapsed / SPIRAL_EFFECT_DUR); // 0 -> 1
+  const fade = Math.min(1, state.spiralEffectT / (SPIRAL_EFFECT_DUR*0.4)); // esmaece só perto do fim
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, Math.min(1, fade));
+  ctx.strokeStyle = '#c9a24b';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  const turns = 3;
+  const maxR = 150;
+  const steps = 60;
+  const visibleSteps = Math.max(1, Math.round(steps*growth));
+  for(let i=0;i<=visibleSteps;i++){
+    const t = i/steps;
+    const ang = t*turns*Math.PI*2;
+    const r = t*maxR;
+    const x = CENTER.x + Math.cos(ang)*r;
+    const y = CENTER.y + Math.sin(ang)*r;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
 function render(){
   ctx.save();
   if(shakeT>0){
@@ -1805,6 +1853,7 @@ function render(){
     ctx.fillRect(0,0,W,H);
     drawLightningBolt();
   }
+  if(state.spiralEffectT>0){ drawSpiralEffect(); }
   drawParticles();
   drawTrail();
   ctx.restore();
@@ -1830,6 +1879,7 @@ function update(dt){
   state.dimAccum = Math.max(0, state.dimAccum - dt*0.01);
   if(state.tempoPulseTimer>0){ state.tempoPulseTimer -= dt; }
   if(state.spiralSlowTimer>0){ state.spiralSlowTimer = Math.max(0, state.spiralSlowTimer-dt); }
+  if(state.spiralEffectT>0){ state.spiralEffectT = Math.max(0, state.spiralEffectT-dt); }
   if(state.lightningFlash>0){ state.lightningFlash = Math.max(0, state.lightningFlash-dt*4); }
 
   advanceRoundPhase(dt);
@@ -1852,7 +1902,7 @@ function resetGame(){
   state.clima=MAX_CLIMA; state.score=0; state.combo=0; state.bestCombo=0; state.bestComboRound=0;
   state.enemies=[]; state.particles=[]; state.trail=[]; state.drawing=false;
   state.dimAccum=0; state.tempoPulseMul=1; state.tempoPulseTimer=0;
-  state.spiralSlowTimer=0; state.lightningFlash=0; state.climaxStage=null;
+  state.spiralSlowTimer=0; state.spiralEffectT=0; state.lightningFlash=0; state.climaxStage=null;
   state.preBossT=0; state.preBossDur=0; state.preBossFlash=0; state.preBossNextFlash=0;
   state.bossActive=false; state.bossDefeatedPending=false; state.gameOver=false;
   document.getElementById('death-banner').classList.remove('show');
@@ -1881,8 +1931,8 @@ function triggerGameOver(){
   document.getElementById('final-score').textContent = state.score;
   document.getElementById('final-combo').textContent = state.bestCombo;
   document.getElementById('final-time').textContent = timeSec + 's';
-  const flavors = ['A Morte da Paciência venceu dessa vez.','O Clima da Festa não resistiu.','Até que a paciência nos separe.'];
-  document.getElementById('gameover-flavor').textContent = flavors[Math.floor(Math.random()*flavors.length)];
+  const flavors = ['Ficou um climão essa festa...'];
+  document.getElementById('gameover-flavor').textContent = pickLine(flavors);
   document.getElementById('hud').classList.add('hidden');
   document.getElementById('bonus-banner').classList.remove('show');
   document.getElementById('round-banner').classList.remove('show');
