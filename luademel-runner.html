@@ -160,15 +160,19 @@
        igual foi feito no jogo de Halloween. Cabeçalho também encolhe pra
        sobrar altura pro canvas. */
     @media (orientation:landscape) and (max-height:520px){
-      .game-shell{max-width:1100px;padding-top:8px;padding-bottom:24px;}
-      .game-nav__inner{padding:6px 0;}
-      .game-kicker,.game-sub{display:none;}
-      .game-title{font-size:clamp(1.05rem,3.4vw,1.6rem);margin-bottom:.2rem;}
-      .hud{margin:.3rem auto .3rem;}
-      .dest-progress{margin-bottom:.35rem;}
-      .char-row{margin-bottom:.35rem;}
-      .ctrl-row{margin-top:.5rem;}
-      .mobile-hint{margin-top:.3rem;}
+      .game-shell{max-width:1100px;padding-top:6px;padding-bottom:10px;}
+      .game-nav__inner{padding:4px 0;}
+      .game-kicker,.game-sub,.mobile-hint{display:none;}
+      .game-title{font-size:clamp(1rem,3vw,1.3rem);margin-bottom:.15rem;}
+      .hud{margin:.25rem auto;gap:.35rem;}
+      .hud__pill{padding:.28rem .6rem;font-size:.62rem;}
+      .hud__pill strong{font-size:.74rem;}
+      .dest-progress{margin-bottom:.25rem;}
+      .char-row{margin-bottom:.25rem;gap:.4rem;}
+      .char-row span{display:none;}
+      .rn-char-btn{padding:.28rem .6rem;font-size:.74rem;}
+      .ctrl-row{margin-top:.3rem;}
+      .desk-hint{display:none;}
     }
   </style>
 </head>
@@ -479,11 +483,9 @@ function setSave(d){ try{ localStorage.setItem("luademelRunnerSave", JSON.string
 best = getSave().best || 0;
 
 /* Em paisagem com pouca altura (celular deitado), o .game-shell larga o teto
-   de 680px (ver CSS) e o canvas pode crescer bem mais na largura — mas
-   também precisa travar pela ALTURA disponível na tela, senão fica maior
-   que a viewport e empurra HUD/controles pra fora sem dar pra rolar até
-   eles. Mesma lógica de "medir o que já está ocupado e sobrar o resto pro
-   canvas" usada no fitGamePanel do jogo de Halloween. */
+   de 680px (ver CSS) e o canvas usa a largura de verdade disponível na tela
+   — é a largura que manda o tamanho aqui, não a altura (ver comentário mais
+   abaixo sobre por que travar pela altura com precisão saiu pela culatra). */
 function setupCanvas(){
   const wrap  = canvas.parentElement;   // .game-panel__canvas-wrap
   const panel = wrap.parentElement;     // .game-panel — precisa ficar do MESMO
@@ -500,18 +502,19 @@ function setupCanvas(){
   let dispW = Math.min(shellW, widthCap);
   let dispH = dispW * (LH/LW);
 
-  if (isLandscapeShort && shell){
-    const nav = document.querySelector(".game-nav");
-    const navH = nav ? nav.getBoundingClientRect().height : 0;
-    let usedH = 0;
-    for (const child of shell.children){
-      if (child === panel) continue;
-      if (getComputedStyle(child).display === "none") continue;
-      usedH += child.getBoundingClientRect().height;
-    }
-    const availH = Math.max(120, window.innerHeight - navH - usedH - 24);
-    if (dispH > availH){
-      dispH = availH;
+  // Rede de segurança só pra casos extremos (ex.: split-screen bem baixo) —
+  // NÃO deve ser o fator principal. Medir com precisão o espaço já ocupado
+  // e travar por ele (como fizemos antes) sai pela culatra: a proporção do
+  // canvas é bem larga (640:260), então pouca altura sobrando vira uma
+  // largura minúscula, deixando um vão enorme dos lados — foi exatamente
+  // isso que quebrou. Em vez disso, deixa a LARGURA mandar (o teto de
+  // 1100px acima já cuida disso) e só encolhe se a altura ficar mesmo
+  // desproporcional; nesse caso é aceitável rolar um pouco pra ver o botão
+  // de saltar, e ainda assim o jogo fica bem maior que antes.
+  if (isLandscapeShort){
+    const maxReasonableH = window.innerHeight * 0.9;
+    if (dispH > maxReasonableH){
+      dispH = maxReasonableH;
       dispW = Math.min(dispH * (LW/LH), widthCap, shellW);
       dispH = dispW * (LH/LW);
     }
