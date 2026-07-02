@@ -154,16 +154,21 @@
       .char-row{margin-bottom:.55rem;}
     }
 
-    /* Celular deitado (tela curta): larga o teto de 680px do .game-shell —
-       que existe só pra dar uma largura confortável de leitura no desktop —
-       e usa a largura horizontal de verdade que o telefone tem disponível,
-       igual foi feito no jogo de Halloween. Cabeçalho também encolhe pra
-       sobrar altura pro canvas. */
-    @media (orientation:landscape) and (max-height:520px){
+    /* Celular/tablet pequeno DEITADO — detectado por formato (landscape) +
+       toque (pointer:coarse) + largura típica de celular (até 1000px), em
+       vez de uma altura exata em px. Um limite de altura fixo (ex.:
+       max-height:520px) é frágil: a altura "CSS" de um celular deitado
+       varia com a barra de endereço do navegador e a densidade de tela
+       (DPR), então o MESMO aparelho pode ora bater ora não bater nesse
+       número — e quando não bate, o site volta pro layout de desktop
+       (título grande, painel sem o teto largo) só que espremido numa tela
+       de celular, exatamente a bagunça relatada. Largura + pointer:coarse
+       é bem mais estável entre aparelhos. */
+    @media (orientation:landscape) and (pointer:coarse) and (max-width:1000px){
       .game-shell{max-width:1100px;padding-top:6px;padding-bottom:10px;}
       .game-nav__inner{padding:4px 0;}
       .game-kicker,.game-sub,.mobile-hint{display:none;}
-      .game-title{font-size:clamp(1rem,3vw,1.3rem);margin-bottom:.15rem;}
+      .game-title{font-size:clamp(1rem,3vw,1.3rem);margin-bottom:.15rem;line-height:1;}
       .hud{margin:.25rem auto;gap:.35rem;}
       .hud__pill{padding:.28rem .6rem;font-size:.62rem;}
       .hud__pill strong{font-size:.74rem;}
@@ -179,6 +184,22 @@
          de saltar caibam todos na tela sem precisar rolar. */
       body.rn-playing .game-title,
       body.rn-playing .char-row{display:none;}
+
+      /* A capa (antes de começar) e a tela de fim de jogo (depois de
+         morrer) são o conteúdo do ".game-overlay", que fica na MESMA
+         célula do grid que o canvas — e o painel sempre cresce pro maior
+         dos dois (ver comentário acima de .game-panel). Sem encolher esse
+         conteúdo aqui, a capa/fim de jogo sozinha já obriga o painel a
+         ficar bem mais alto que o canvas, deixando tudo desproporcional
+         numa tela de celular deitado. */
+      .game-overlay{padding:.6rem .8rem;}
+      .ov-emoji{width:56px;max-height:56px;margin-bottom:.3rem;}
+      .ov-title{font-size:1.15rem;margin-bottom:.15rem;}
+      .ov-sub{font-size:.72rem;margin-bottom:.5rem;line-height:1.35;}
+      .ov-stats{gap:.35rem;margin-bottom:.5rem;}
+      .ov-stat{padding:.35rem .45rem;font-size:.6rem;}
+      .ov-stat strong{font-size:.88rem;}
+      .game-btn{padding:.5rem .95rem;font-size:.66rem;}
     }
   </style>
 </head>
@@ -488,10 +509,13 @@ function getSave(){ try{ return JSON.parse(localStorage.getItem("luademelRunnerS
 function setSave(d){ try{ localStorage.setItem("luademelRunnerSave", JSON.stringify(d)); }catch{} }
 best = getSave().best || 0;
 
-/* Em paisagem com pouca altura (celular deitado), o .game-shell larga o teto
-   de 680px (ver CSS) e o canvas usa a largura de verdade disponível na tela
-   — é a largura que manda o tamanho aqui, não a altura (ver comentário mais
-   abaixo sobre por que travar pela altura com precisão saiu pela culatra). */
+/* Em paisagem no celular (largura + pointer:coarse — ver por que não uso
+   altura em px no comentário do CSS, mesmo seletor), o .game-shell larga o
+   teto de 680px e o canvas usa a largura de verdade disponível na tela — é
+   a largura que manda o tamanho aqui, não a altura (ver comentário mais
+   abaixo sobre por que travar pela altura com precisão saiu pela culatra).
+   Precisa ser EXATAMENTE a mesma condição do media query no <style>, senão
+   CSS e JS discordam sobre qual layout está ativo. */
 function setupCanvas(){
   const wrap  = canvas.parentElement;   // .game-panel__canvas-wrap
   const panel = wrap.parentElement;     // .game-panel — precisa ficar do MESMO
@@ -499,7 +523,7 @@ function setupCanvas(){
                                          // com o fundo do painel aparecendo
                                          // (foi o que quebrou no desktop).
   const shell = document.querySelector(".game-shell");
-  const isLandscapeShort = window.matchMedia("(orientation:landscape) and (max-height:520px)").matches;
+  const isLandscapeShort = window.matchMedia("(orientation:landscape) and (pointer:coarse) and (max-width:1000px)").matches;
   const widthCap = isLandscapeShort ? 1100 : 680;
 
   // A largura disponível vem do .game-shell (estável), não do wrap — o wrap
