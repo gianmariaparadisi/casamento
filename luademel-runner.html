@@ -173,6 +173,12 @@
       .rn-char-btn{padding:.28rem .6rem;font-size:.74rem;}
       .ctrl-row{margin-top:.3rem;}
       .desk-hint{display:none;}
+
+      /* Assim que a corrida começa, a rolagem trava — título e "Jogar como"
+         saem de cena pra garantir que HUD (com o Recomeçar), canvas e botão
+         de saltar caibam todos na tela sem precisar rolar. */
+      body.rn-playing .game-title,
+      body.rn-playing .char-row{display:none;}
     }
   </style>
 </head>
@@ -539,7 +545,6 @@ if (window.visualViewport){
    HOLD_MAX) = pulo mais alto e mais longo no ar.
 ══════════════════════════════════════════════════════════ */
 function jumpPress(){
-  registerCheatClick();
   if (!rnStarted) { startRunner(); return; }
   if (!rnAlive) return;
   if (!player.jumping){
@@ -549,28 +554,6 @@ function jumpPress(){
   }
 }
 function jumpRelease(){ player.holding = false; }
-
-/* CHEAT: 5 toques bem rápidos seguidos (qualquer um — tecla, clique,
-   botão) pulam pro próximo cenário, sem precisar terminar o trecho atual. */
-let cheatTaps = [];
-const CHEAT_WINDOW_MS = 1200, CHEAT_TAPS_NEEDED = 5;
-function registerCheatClick(){
-  if (!rnAlive) return;
-  const now = performance.now();
-  cheatTaps.push(now);
-  cheatTaps = cheatTaps.filter(t => now - t <= CHEAT_WINDOW_MS);
-  if (cheatTaps.length >= CHEAT_TAPS_NEEDED){
-    cheatTaps = [];
-    skipToNextDest();
-  }
-}
-function skipToNextDest(){
-  const lapStart = Math.floor(distance/CYCLE_LEN)*CYCLE_LEN;
-  let acc = 0;
-  for (let i=0;i<=curDestIdx;i++) acc += DESTS[i].len;
-  distance = lapStart + acc + 1;
-  if(window.GS){GS.combo(5);GS.hGood();}
-}
 
 document.addEventListener("keydown", e=>{
   const tag = (e.target && e.target.tagName) || "";
@@ -655,8 +638,15 @@ function startRunner(){
      em andamento (ou já jogada) — fica escondido na primeira tela pra não
      poluir a entrada do jogo com um botão sem função ainda. */
   document.getElementById("rn-btn-restart").style.display = "";
+  /* Assim que o jogo começa, a rolagem trava (ver lockScroll abaixo) — em
+     paisagem no celular isso significa que tudo (HUD com o Recomeçar, o
+     canvas, o botão de saltar) PRECISA caber na tela, porque não dá mais
+     pra rolar até o que ficar de fora. Título e "Jogar como" saem pra abrir
+     espaço (ver CSS da paisagem curta). */
+  document.body.classList.add("rn-playing");
   hideOverlay();
   lockScroll();
+  setupCanvas();
   rnLastTs = 0;
   if (rnRaf) cancelAnimationFrame(rnRaf);
   rnRaf = requestAnimationFrame(loop);
@@ -1368,13 +1358,21 @@ function drawFaceCircle(cx,cy,r){
 function drawBanner(){
   const t = banner.timer;
   const alpha = t > 2.2 ? (2.6-t)/0.4 : t < 0.4 ? t/0.4 : 1;
+  const label = banner.flag ? `${banner.flag}  ${banner.text}` : banner.text;
   ctx.save();
   ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
-  ctx.fillStyle = "rgba(26,26,64,.78)";
-  ctx.beginPath(); ctx.roundRect(LW/2-160, 16, 320, 40, 20); ctx.fill();
   ctx.fillStyle = "#fff"; ctx.textAlign="center"; ctx.textBaseline="middle";
   ctx.font = "bold 14px 'Inter',sans-serif";
-  ctx.fillText(banner.flag ? `${banner.flag}  ${banner.text}` : banner.text, LW/2, 37);
+  // Largura do fundo acompanha o texto (com respiro) em vez de um valor fixo
+  // de 320px — nomes de destino mais longos (ex.: "Chegando a Fernando de
+  // Noronha") estouravam a pílula fixa e ficavam cortados/deformados.
+  // Trava num máximo pra nunca vazar pra fora do canvas (LW=640).
+  const textW = ctx.measureText(label).width;
+  const pillW = Math.min(LW - 20, Math.max(200, textW + 48));
+  ctx.fillStyle = "rgba(26,26,64,.78)";
+  ctx.beginPath(); ctx.roundRect(LW/2-pillW/2, 16, pillW, 40, 20); ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.fillText(label, LW/2, 37);
   ctx.restore();
 }
 
