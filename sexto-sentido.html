@@ -31,21 +31,36 @@
     .ss-desc{max-width:420px;margin:0 auto;text-align:center;color:#6C6258;font-size:.86rem;line-height:1.65;}
     .ss-start-wrap{display:flex;justify-content:center;margin-top:1.3rem;}
 
-    /* ── Stage (full-bleed card, holds every play phase) ── */
-    .ss-stage{position:relative;width:100%;min-height:480px;border-radius:26px;overflow:hidden;box-shadow:0 18px 50px rgba(70,50,20,.18),inset 0 0 0 1px rgba(0,0,0,.04);background:linear-gradient(160deg,#fbf8f2,#efe6d6);user-select:none;touch-action:none;}
-    .ss-counter{position:absolute;top:16px;left:18px;font-size:.78rem;letter-spacing:.06em;font-weight:600;z-index:5;color:#5A534D;}
-    .ss-cd-wrap{position:absolute;top:14px;right:18px;text-align:right;z-index:5;color:#3A342B;}
+    /* ── Stage (full-bleed card, holds every fase do jogo) ──
+       A cena (decoracao01.png) é em retrato (941×1672) — o stage acompanha
+       essa proporção com aspect-ratio em vez do min-height quase-quadrado
+       de antes (pensado pros ícones avulsos, um de cada vez). */
+    .ss-stage{position:relative;width:100%;max-width:380px;aspect-ratio:941/1672;margin:0 auto;border-radius:26px;overflow:hidden;box-shadow:0 18px 50px rgba(70,50,20,.18),inset 0 0 0 1px rgba(0,0,0,.04);background:linear-gradient(160deg,#fbf8f2,#efe6d6);user-select:none;touch-action:none;}
+    .ss-counter{position:absolute;top:16px;left:18px;font-size:.78rem;letter-spacing:.06em;font-weight:600;z-index:5;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);}
+    .ss-cd-wrap{position:absolute;top:14px;right:18px;text-align:right;z-index:5;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);}
     .ss-cd-num{font-family:var(--font-display);font-size:2.5rem;line-height:1;font-weight:600;white-space:nowrap;}
     .ss-cd-num .lead{font-weight:700;}
     .ss-cd-num .trail{font-weight:400;opacity:.55;font-size:.82em;}
-    .ss-cd-caption{font-size:.64rem;letter-spacing:.05em;text-transform:uppercase;font-weight:600;margin-top:.25rem;opacity:.8;}
-    .ss-wordmark{position:absolute;bottom:20px;left:20px;font-family:var(--font-display);font-size:.85rem;letter-spacing:.03em;opacity:.45;z-index:5;color:#3A342B;}
-    .ss-icon-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:opacity .25s ease;}
-    .ss-icon-box{position:relative;height:92%;width:auto;max-height:520px;max-width:96%;}
-    .ss-icon-fill{position:absolute;inset:0;width:100%;height:100%;display:block;border-radius:14px;}
-    .ss-icon-svg{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;overflow:visible;}
+    .ss-cd-caption{font-size:.64rem;letter-spacing:.05em;text-transform:uppercase;font-weight:600;margin-top:.25rem;opacity:.9;}
+    .ss-wordmark{position:absolute;bottom:20px;left:20px;font-family:var(--font-display);font-size:.85rem;letter-spacing:.03em;opacity:.7;z-index:5;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);}
     .ss-cor-accent{color:var(--terracotta);}
-    @media(max-width:480px){.ss-icon-box{height:88%;max-height:340px;}}
+    /* A cena inteira (fundo real + as 5 partes mascaradas por cor-chave) —
+       ver buildSceneSvg() no JS. Fica montada uma vez só e persiste durante
+       toda a partida; só as cores de preenchimento de cada parte mudam. */
+    .ss-scene-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+    .ss-scene-svg{position:absolute;inset:0;width:100%;height:100%;display:block;}
+    /* Camada por cima da cena, só com a UI de cada fase (contador, cronômetro,
+       controles, botão) — a cena em si fica intacta por baixo, nunca é reconstruída
+       entre as fases de uma mesma rodada. */
+    .ss-stage-overlay{position:absolute;inset:0;z-index:4;}
+    /* Prévia final da cena completa, usada na tela de resultado. */
+    .ss-final-scene{position:relative;width:170px;max-width:55%;aspect-ratio:941/1672;margin:0 auto 1rem;border-radius:16px;overflow:hidden;box-shadow:0 12px 32px rgba(70,50,20,.22);}
+    .ss-scene-svg .ss-part{transition:fill .35s ease;}
+    @keyframes ssPulseGlow{
+      0%,100%{filter:drop-shadow(0 0 3px rgba(255,214,120,.85)) drop-shadow(0 0 3px rgba(255,214,120,.85));}
+      50%{filter:drop-shadow(0 0 15px rgba(255,214,120,.95)) drop-shadow(0 0 15px rgba(255,214,120,.95));}
+    }
+    .ss-scene-svg .ss-part.ss-active{animation:ssPulseGlow 1.5s ease-in-out infinite;}
     .ss-pickers{position:absolute;top:18px;bottom:18px;left:16px;display:flex;gap:8px;z-index:6;}
     .ss-pick-track{position:relative;width:26px;height:100%;border-radius:999px;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5),0 2px 10px rgba(0,0,0,.12);cursor:pointer;}
     .ss-pick-thumb{position:absolute;left:50%;top:0;width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid rgba(0,0,0,.16);box-shadow:0 3px 8px rgba(0,0,0,.32);transform:translate(-50%,-50%);cursor:grab;}
@@ -53,23 +68,25 @@
     .ss-circle-btn{position:absolute;bottom:18px;right:18px;width:58px;height:58px;border-radius:50%;background:#fff;border:none;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(0,0,0,.26);cursor:pointer;z-index:6;transition:transform .12s;}
     .ss-circle-btn:hover{transform:scale(1.07);}
     .ss-circle-btn svg{width:24px;height:24px;}
-    .ss-reveal-cols{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:2.4rem;padding-top:18px;}
-    .ss-reveal-col{text-align:center;}
-    .ss-reveal-col .ss-icon-wrap{position:relative;inset:auto;height:190px;display:flex;align-items:center;justify-content:center;}
-    .ss-reveal-col .ss-icon-box{height:100%;max-width:none;max-height:none;}
-    .ss-reveal-label{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:#8C8074;margin-top:.3rem;}
-    .ss-reveal-value{font-weight:700;font-size:.82rem;color:#3A342B;margin-top:.1rem;}
+    /* Comparação na revelação: dois "chips" de cor (sua escolha vs. original)
+       flutuando sobre a cena, em vez de dois ícones lado a lado (não faz
+       mais sentido comparar ícones agora que é uma cena só). */
+    .ss-reveal-swatches{position:absolute;left:0;right:0;bottom:20px;display:flex;justify-content:center;gap:1.6rem;z-index:6;}
+    .ss-swatch-col{text-align:center;background:rgba(255,255,255,.92);border-radius:14px;padding:.5rem .7rem .6rem;box-shadow:0 8px 22px rgba(0,0,0,.22);}
+    .ss-swatch{width:44px;height:44px;border-radius:12px;margin:0 auto .35rem;box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12);}
+    .ss-reveal-label{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#8C8074;}
+    .ss-reveal-value{font-weight:700;font-size:.76rem;color:#3A342B;margin-top:.05rem;}
     .ss-reveal-score{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.95);border-radius:16px;padding:.32rem 1rem;font-family:var(--font-display);font-size:1.55rem;font-weight:600;box-shadow:0 8px 22px rgba(0,0,0,.2);z-index:7;display:flex;align-items:baseline;gap:.18rem;color:#2A2820;}
     .ss-reveal-score small{font-size:.58rem;font-weight:600;opacity:.55;text-transform:uppercase;}
     .ss-reveal-score.ss-tier-good{color:var(--sage-dark);}
     .ss-reveal-score.ss-tier-mid{color:var(--terracotta-hover);}
     .ss-reveal-score.ss-tier-low{color:#9A4A3E;}
     @media(max-width:480px){
-      .ss-stage{min-height:420px;}
+      .ss-stage{max-width:300px;}
       .ss-cd-num{font-size:2.05rem;}
       .ss-circle-btn{width:52px;height:52px;}
-      .ss-reveal-cols{gap:1.2rem;}
-      .ss-reveal-col .ss-icon-wrap{height:135px;}
+      .ss-reveal-swatches{gap:1rem;}
+      .ss-swatch{width:38px;height:38px;}
     }
 
     /* ── Results ── */
@@ -117,12 +134,12 @@
   <main class="game-shell">
     <p class="game-kicker" data-it="Percezione">Percepção</p>
     <h1 class="game-title" data-it-html="De-<span class=&quot;ss-cor-accent&quot;>COR</span>-azione">De-<span class="ss-cor-accent">COR</span>-ação</h1>
-    <p class="game-sub" data-it="Bolo, bouquet, carta, champagne e abito: ognuno appare con un colore. Osservalo, poi ricrealo a memoria. Ogni round vale fino a 10 punti, per un totale massimo di 50.">Bolo, buquê, carta, champanhe e terno: cada um aparece pintado de uma cor. Observe bem, depois recrie de memória. Cada rodada vale até 10 pontos, num total de até 50.</p>
+    <p class="game-sub" data-it="Un'unica scena del matrimonio, in tonalità di grigio. Cinque parti — abito, vestito, fiori, champagne e torta — guadagnano colore una alla volta, con la tonalità che tu ricrei a memoria. Ogni round vale fino a 10 punti, per un totale massimo di 50.">Uma única cena do casamento, em tons de cinza. Cinco partes — terno, vestido, flores, champanhe e bolo — vão ganhando cor uma a uma, com a tonalidade que você recriar de memória. Cada rodada vale até 10 pontos, num total de até 50.</p>
 
     <!-- ══ SETUP ══ -->
     <section class="game-panel" id="setupPanel">
       <p class="ss-section-label" data-it="Come funziona">Como funciona</p>
-      <p class="ss-desc" data-it="Cinque icone del matrimonio — torta, bouquet, carta, champagne e abito — appaiono uno alla volta con un colore. Memorizza il colore e poi ricrealo con i controlli verticali di tonalità, saturazione e luminosità.">Cinco ícones do casamento — bolo, buquê, carta, champanhe e terno — aparecem um a um, cada um pintado de uma cor. Memorize a cor e depois recrie com os controles verticais de matiz, saturação e brilho.</p>
+      <p class="ss-desc" data-it="Cinque parti da colorare — abito, vestito, fiori, champagne e torta — appaiono con un colore, una alla volta. Memorizza il colore e poi ricrealo con i controlli verticali di tonalità, saturazione e luminosità: a ogni round, quella parte della scena guadagna il colore che hai scelto, per sempre.">Cinco partes da cena vão ganhar cor, uma de cada vez — terno, vestido, flores, champanhe e bolo. Memorize a cor mostrada e recrie com os controles verticais de matiz, saturação e brilho: a cada rodada, aquela parte da cena ganha a cor que você escolheu, para sempre.</p>
       <div class="ss-start-wrap">
         <button class="game-btn game-btn--main" id="startBtn"><span data-it="Inizia">Começar</span></button>
       </div>
@@ -185,71 +202,75 @@
       }catch(e){}
     }
 
-    /* ───────────────────────── Ícones do casamento (fotos PNG com máscara) ─────────────────────────
-       Cada PNG tem: fundo+traços opacos em preto, e as áreas de "preencher" (a parte da
-       imagem que deve mostrar a cor) totalmente transparentes. A gente recolore o preto
-       opaco para um bege claro (#F2EFE9, fixo, nunca muda) e por baixo da imagem entra um
-       quadrado com a cor da rodada — que só aparece através dos recortes transparentes. */
-    const ROUND_ICON_ORDER = ["bolo","buque","carta","champanhe","terno"];
-    const ICON_PNG_SRC = {
-      bolo:      "assets/img/colorgame-bolo.png",
-      buque:     "assets/img/colorgame-buque.png",
-      carta:     "assets/img/colorgame-cartas.png",
-      champanhe: "assets/img/colorgame-champagne.png",
-      terno:     "assets/img/colorgame-terno.png",
-    };
-    const _iconImgCache = {};
-    function getIconImg(key){
-      if(!_iconImgCache[key]){
-        const img=new Image();
-        img.src=ICON_PNG_SRC[key];
-        _iconImgCache[key]=img;
-      }
-      return _iconImgCache[key];
-    }
-    // Pré-carrega as 5 imagens assim que o script roda, para já estarem prontas no 1º round.
-    Object.keys(ICON_PNG_SRC).forEach(getIconImg);
+    /* ───────────────────────── Cena única (decoracao01.png) com recortes de alfa pré-gerados ─────────────────────────
+       Em vez de 5 fotos separadas (uma por rodada), agora é UMA cena só do casamento,
+       com 5 partes: terno · vestido · flores · champanhe · bolo.
+       Cada parte começa cinza-neutro e ganha, pra sempre, a cor que o jogador recriar
+       naquela rodada — a cena vai sendo "revelada" aos poucos.
 
-    /* Pinta o ícone dentro de um elemento: o quadrado colorido fica visível só dentro do
-       recorte do objeto (a área que era "transparente" no PNG) — onde antes havia traço
-       preto + fundo do PNG, agora fica TRANSPARENTE de verdade, deixando ver o fundo normal
-       do palco do jogo. Para isso invertemos o canal alfa do PNG com um filtro SVG
-       (feColorMatrix) e usamos esse resultado como máscara do retângulo colorido — assim só
-       o "objeto" fica colorido, com uma sombra (drop-shadow) em volta para dar profundidade.
-       Tudo via primitivas nativas de SVG (mask + filter), sem leitura de pixels via canvas —
-       então não há risco do erro de "tainted canvas" ao abrir o arquivo direto local. */
-    let _ssIconUid=0;
-    function paintIconInto(el,key,h,s,b){
-      if(!el) return;
-      const col=hsbCss(h,s,b);
-      const img=getIconImg(key);
-      const src=ICON_PNG_SRC[key];
-      const ready=img.complete && img.naturalWidth>0;
-      if(!ready){
-        el.innerHTML=`<div class="ss-icon-box" style="aspect-ratio:1/1"><div class="ss-icon-fill" style="background:${col}"></div></div>`;
-        img.addEventListener("load",()=>paintIconInto(el,key,h,s,b),{once:true});
-        return;
-      }
-      const w=img.naturalWidth, ih=img.naturalHeight;
-      const uid="ssink"+(++_ssIconUid);
-      el.innerHTML=`<div class="ss-icon-box" style="aspect-ratio:${w}/${ih}">
-          <svg class="ss-icon-svg" viewBox="0 0 ${w} ${ih}" preserveAspectRatio="xMidYMid meet">
-            <defs>
-              <filter id="${uid}-inv" x="-10%" y="-10%" width="120%" height="120%">
-                <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 -1 1"/>
-              </filter>
-              <mask id="${uid}" mask-type="alpha">
-                <image href="${src}" xlink:href="${src}" x="0" y="0" width="${w}" height="${ih}" filter="url(#${uid}-inv)"></image>
-              </mask>
-              <filter id="${uid}-shadow" x="-50%" y="-50%" width="200%" height="220%">
-                <feDropShadow dx="0" dy="${Math.max(4,Math.round(ih*0.012))}" stdDeviation="${Math.max(6,Math.round(ih*0.018))}" flood-color="#281C0E" flood-opacity="0.38"/>
-              </filter>
-            </defs>
-            <g mask="url(#${uid})" filter="url(#${uid}-shadow)">
-              <rect width="${w}" height="${ih}" fill="${col}"></rect>
-            </g>
-          </svg>
-        </div>`;
+       A primeira versão tentava calcular a máscara de cada parte NO NAVEGADOR, com um
+       filtro SVG (feColorMatrix) lendo as cores-chave da própria decoracao01.png. Isso
+       não funcionou de forma confiável em todos os aparelhos (a imagem aparecia sem
+       nenhuma máscara aplicada). Em vez de continuar apostando em matemática de filtro
+       dentro do navegador, os 5 recortes foram gerados previamente (fora do navegador,
+       a partir da posição real de cada cor-chave na imagem) como PNGs com transparência
+       de verdade — a mesma técnica, já comprovada, dos ícones antigos do jogo (só
+       leitura de alfa real, sem cálculo). */
+    const SCENE_SRC = "assets/img/decoracao01.png";
+    const SCENE_W = 941, SCENE_H = 1672;
+    const NEUTRAL_GRAY = "#9C958A";
+    const OBJECT_LABELS = { terno:"Terno", vestido:"Vestido", flores:"Flores", champanhe:"Champanhe", bolo:"Bolo" };
+    const OBJECT_MASK_SRC = {
+      terno:     "assets/img/decoracao-mask-terno.png",
+      vestido:   "assets/img/decoracao-mask-vestido.png",
+      flores:    "assets/img/decoracao-mask-flores.png",
+      champanhe: "assets/img/decoracao-mask-champanhe.png",
+      bolo:      "assets/img/decoracao-mask-bolo.png",
+    };
+    const OBJECT_KEYS = Object.keys(OBJECT_MASK_SRC);
+    // Pré-carrega a cena e os 5 recortes assim que o script roda.
+    [SCENE_SRC, ...Object.values(OBJECT_MASK_SRC)].forEach(src=>{ const i=new Image(); i.src=src; });
+
+    /* Monta uma instância da cena dentro de "el" (fundo real + as 5 máscaras/retângulos)
+       e devolve um objeto com .paint(colors, activeKey) pra só trocar o "fill" depois —
+       bem mais barato que reconstruir a SVG inteira a cada frame do arraste do slider.
+       Cada instância usa IDs únicos (uid), porque o jogo precisa de DUAS cenas ao mesmo
+       tempo no DOM: o palco durante a partida e a prévia final na tela de resultado. */
+    let _ssSceneUid=0;
+    function buildScene(el){
+      if(!el) return null;
+      const uid="ssc"+(++_ssSceneUid);
+      const defs = OBJECT_KEYS.map(key=>{
+        const src = OBJECT_MASK_SRC[key];
+        return `
+        <mask id="${uid}-m-${key}" mask-type="alpha">
+          <image href="${src}" xlink:href="${src}" x="0" y="0" width="${SCENE_W}" height="${SCENE_H}"></image>
+        </mask>`;
+      }).join("");
+      const layers = OBJECT_KEYS.map(key=>`
+        <g mask="url(#${uid}-m-${key})">
+          <rect class="ss-part" data-key="${key}" width="${SCENE_W}" height="${SCENE_H}" fill="${NEUTRAL_GRAY}"></rect>
+        </g>`).join("");
+      el.innerHTML = `
+        <svg class="ss-scene-svg" viewBox="0 0 ${SCENE_W} ${SCENE_H}" preserveAspectRatio="xMidYMid meet">
+          <defs>${defs}</defs>
+          <image href="${SCENE_SRC}" xlink:href="${SCENE_SRC}" x="0" y="0" width="${SCENE_W}" height="${SCENE_H}"></image>
+          ${layers}
+        </svg>`;
+      const rects={};
+      el.querySelectorAll(".ss-part").forEach(r=>{ rects[r.dataset.key]=r; });
+      return {
+        el, rects,
+        /* Aplica a cor atual de cada parte (cinza ou já jogada) e, opcionalmente, marca
+           uma parte como "ativa" (brilho pulsante) pra guiar o olhar na rodada em curso. */
+        paint(colors, activeKey){
+          OBJECT_KEYS.forEach(key=>{
+            const rect=rects[key]; if(!rect) return;
+            rect.setAttribute("fill", (colors && colors[key]) || NEUTRAL_GRAY);
+            rect.classList.toggle("ss-active", key===activeKey);
+          });
+        }
+      };
     }
 
     /* ───────────────────────── Constantes do jogo ───────────────────────── */
@@ -282,6 +303,12 @@
       return [(r+m)*255,(g+m)*255,(bl+m)*255];
     }
     function hsbCss(h,s,b){ const [r,g,bl]=hsbToRgb(h,s,b); return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(bl)})`; }
+    // Embaralha a ordem das 5 partes — muda a cada partida (Fisher-Yates).
+    function shuffledKeys(){
+      const arr=OBJECT_KEYS.slice();
+      for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+      return arr;
+    }
 
     /* Distância → nota de 0 a 10 (quanto maior, melhor) — fórmula própria */
     function distanceFor(t,g){
@@ -297,23 +324,30 @@
     /* ───────────────────────── Fluxo do jogo ───────────────────────── */
     function startGame(){
       ssAc();
-      ssRound={ targets:genTargets(), idx:0, guesses:[], scores:[] };
+      ssRound={ order:shuffledKeys(), targets:genTargets(), idx:0, guesses:[], scores:[], colors:{} };
       setupPanel.hidden=true; resultsPanel.hidden=true; playPanel.hidden=false;
+      // Palco montado UMA vez por partida: a cena persiste, só a camada de UI
+      // por cima (contador, cronômetro, controles) troca a cada fase/rodada.
+      stageEl.innerHTML=`<div class="ss-scene-wrap" id="sceneWrap"></div><div class="ss-stage-overlay" id="stageOverlay"></div>`;
+      ssRound.scene = buildScene(document.getElementById("sceneWrap"));
+      ssRound.scene.paint(ssRound.colors, null);
       startMemorize(0);
     }
 
     function startMemorize(i){
       const t=ssRound.targets[i];
-      const key=ROUND_ICON_ORDER[i];
-      stageEl.style.background="";
-      stageEl.innerHTML=`
-        <div class="ss-counter">${i+1} / ${ROUNDS}</div>
+      const key=ssRound.order[i];
+      const overlay=document.getElementById("stageOverlay");
+      overlay.innerHTML=`
+        <div class="ss-counter">${i+1} / ${ROUNDS} · ${OBJECT_LABELS[key]}</div>
         <div class="ss-cd-wrap">
           <div class="ss-cd-num" id="cdNum"><span class="lead">4</span><span class="trail">40</span></div>
           <div class="ss-cd-caption">Segundos para memorizar</div>
-        </div>
-        <div class="ss-icon-wrap" id="memIconWrap"></div>`;
-      paintIconInto(document.getElementById("memIconWrap"), key, t.h, t.s, t.b);
+        </div>`;
+      // Mostra a cor-alvo só nessa parte, em destaque — o resto da cena fica
+      // como já está (cinza ou já colorido nas rodadas anteriores).
+      const preview=Object.assign({},ssRound.colors,{ [key]: hsbCss(t.h,t.s,t.b) });
+      ssRound.scene.paint(preview, key);
       const cdEl=document.getElementById("cdNum");
       const t0=performance.now();
       let lastSecond=6;
@@ -331,7 +365,7 @@
     }
 
     function startRecreate(i){
-      const key=ROUND_ICON_ORDER[i];
+      const key=ssRound.order[i];
       const guess={ h:Math.floor(Math.random()*360), s:55, b:60 };
       let touched=false;
 
@@ -345,15 +379,19 @@
         posThumb("thumbSat", guess.s/100);
         posThumb("thumbBri", 1-guess.b/100);
       }
-      function paintGuessIcon(){
-        paintIconInto(document.getElementById("recIconWrap"), key, guess.h, guess.s, guess.b);
+      // Enquanto o jogador não mexe em nada, a parte fica cinza (não queremos
+      // ancorar a escolha dele numa cor de partida aleatória) — só depois do
+      // primeiro toque é que a prévia ao vivo da cor escolhida aparece.
+      function paintGuessScene(){
+        const preview=Object.assign({},ssRound.colors);
+        preview[key]= touched ? hsbCss(guess.h,guess.s,guess.b) : NEUTRAL_GRAY;
+        ssRound.scene.paint(preview, key);
       }
 
-      stageEl.style.background="";
-      stageEl.innerHTML=`
-        <div class="ss-counter">${i+1} / ${ROUNDS}</div>
+      const overlay=document.getElementById("stageOverlay");
+      overlay.innerHTML=`
+        <div class="ss-counter">${i+1} / ${ROUNDS} · ${OBJECT_LABELS[key]}</div>
         <div class="ss-wordmark">Tiago &amp; Gian</div>
-        <div class="ss-icon-wrap" id="recIconWrap" style="opacity:.18"></div>
         <div class="ss-pickers">
           <div class="ss-pick-track" id="trackHue" style="background:linear-gradient(to bottom,hsl(0,100%,50%),hsl(60,100%,50%),hsl(120,100%,50%),hsl(180,100%,50%),hsl(240,100%,50%),hsl(300,100%,50%),hsl(360,100%,50%))"><div class="ss-pick-thumb" id="thumbHue"></div></div>
           <div class="ss-pick-track" id="trackSat"><div class="ss-pick-thumb" id="thumbSat"></div></div>
@@ -363,7 +401,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="#2A2820" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 13 9 18 20 6"></polyline></svg>
         </button>`;
       repaintControls();
-      paintGuessIcon();
+      paintGuessScene();
 
       function bindTrack(trackId,onFrac){
         const track=document.getElementById(trackId);
@@ -372,8 +410,9 @@
           const r=track.getBoundingClientRect();
           let f=(clientY-r.top)/r.height;
           f=Math.max(0,Math.min(1,f));
-          onFrac(f); repaintControls(); paintGuessIcon();
-          if(!touched){ touched=true; const w=document.getElementById("recIconWrap"); if(w) w.style.opacity="1"; }
+          onFrac(f); repaintControls();
+          touched=true;
+          paintGuessScene();
         }
         track.addEventListener("pointerdown",e=>{ dragging=true; try{track.setPointerCapture(e.pointerId);}catch(err){} update(e.clientY); });
         track.addEventListener("pointermove",e=>{ if(dragging) update(e.clientY); });
@@ -392,35 +431,38 @@
 
     function startReveal(i,guess){
       const t=ssRound.targets[i];
-      const key=ROUND_ICON_ORDER[i];
+      const key=ssRound.order[i];
       const dist=distanceFor(t,guess);
       const score10=scoreFromDist(dist);
       ssRound.guesses.push(guess);
       ssRound.scores.push(score10);
+      // Essa parte da cena trava, PRA SEMPRE, na cor que o jogador escolheu
+      // (acertando ou não) — é a escolha dele que "revela" a cena aos poucos.
+      ssRound.colors[key]=hsbCss(guess.h,guess.s,guess.b);
 
       const tierCls = score10>=8?"ss-tier-good":score10>=5.5?"ss-tier-mid":"ss-tier-low";
 
-      stageEl.style.background="";
-      stageEl.innerHTML=`
-        <div class="ss-counter">${i+1} / ${ROUNDS}</div>
-        <div class="ss-reveal-cols">
-          <div class="ss-reveal-col">
-            <div class="ss-icon-wrap" id="revGuessWrap"></div>
+      const overlay=document.getElementById("stageOverlay");
+      overlay.innerHTML=`
+        <div class="ss-counter">${i+1} / ${ROUNDS} · ${OBJECT_LABELS[key]}</div>
+        <div class="ss-reveal-score ${tierCls}">${score10.toFixed(1)}<small>/10</small></div>
+        <div class="ss-reveal-swatches">
+          <div class="ss-swatch-col">
+            <div class="ss-swatch" style="background:${hsbCss(guess.h,guess.s,guess.b)}"></div>
             <div class="ss-reveal-label">Sua escolha</div>
             <div class="ss-reveal-value">H${guess.h} S${guess.s} B${guess.b}</div>
           </div>
-          <div class="ss-reveal-col">
-            <div class="ss-icon-wrap" id="revOrigWrap"></div>
+          <div class="ss-swatch-col">
+            <div class="ss-swatch" style="background:${hsbCss(t.h,t.s,t.b)}"></div>
             <div class="ss-reveal-label">Original</div>
             <div class="ss-reveal-value">H${t.h} S${t.s} B${t.b}</div>
           </div>
         </div>
-        <div class="ss-reveal-score ${tierCls}">${score10.toFixed(1)}<small>/10</small></div>
         <button class="ss-circle-btn" id="nextBtn" aria-label="Próxima" title="Próxima">
           <svg viewBox="0 0 24 24" fill="none" stroke="#2A2820" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg>
         </button>`;
-      paintIconInto(document.getElementById("revGuessWrap"), key, guess.h, guess.s, guess.b);
-      paintIconInto(document.getElementById("revOrigWrap"), key, t.h, t.s, t.b);
+      // A parte dessa rodada já fica travada na cor escolhida, com destaque.
+      ssRound.scene.paint(ssRound.colors, key);
 
       if(window.GS){ if(score10>=7){GS.good();GS.hGood();} else {GS.bad();GS.hBad();} }
       if(score10>=9.5) ssMiniConfetti();
@@ -447,13 +489,17 @@
       const tier=tierMsg(pct);
       const body=document.getElementById("resultsBody");
 
-      let html=`<div class="ss-result-big"><div class="num" style="color:${pct>=80?"var(--sage-dark)":pct>=55?"var(--terracotta-hover)":"#9A4A3E"}">${total.toFixed(1)}<span style="font-size:.42em;opacity:.55;margin-left:.18em">/ 50</span></div></div>`;
+      // Prévia da cena completa (as 5 partes já coloridas com as escolhas do
+      // jogador) como recompensa visual da partida.
+      let html=`<div class="ss-final-scene" id="finalScene"></div>`;
+      html+=`<div class="ss-result-big"><div class="num" style="color:${pct>=80?"var(--sage-dark)":pct>=55?"var(--terracotta-hover)":"#9A4A3E"}">${total.toFixed(1)}<span style="font-size:.42em;opacity:.55;margin-left:.18em">/ 50</span></div></div>`;
       html+=`<p class="ss-result-tier">${tier.icon?`<img src="${tier.icon}" alt="">`:""}${tier.text}</p>`;
 
       html+=`<div class="ss-round-list">`;
       for(let i=0;i<ROUNDS;i++){
+        const key=ssRound.order[i];
         const t=ssRound.targets[i], s=ssRound.scores[i];
-        html+=`<div class="ss-round-row"><span class="ix">#${i+1}</span><span class="chip" style="background:${hsbCss(t.h,t.s,t.b)}"></span><span>Rodada ${i+1}</span><span class="pct" style="color:${s>=8?"var(--sage-dark)":s>=5.5?"var(--terracotta-hover)":"#9A4A3E"}">${s.toFixed(1)} / 10</span></div>`;
+        html+=`<div class="ss-round-row"><span class="ix">#${i+1}</span><span class="chip" style="background:${hsbCss(t.h,t.s,t.b)}"></span><span>${OBJECT_LABELS[key]}</span><span class="pct" style="color:${s>=8?"var(--sage-dark)":s>=5.5?"var(--terracotta-hover)":"#9A4A3E"}">${s.toFixed(1)} / 10</span></div>`;
       }
       html+=`</div>`;
 
@@ -463,6 +509,8 @@
       </div>`;
 
       body.innerHTML=html;
+      const finalScene=buildScene(document.getElementById("finalScene"));
+      if(finalScene) finalScene.paint(ssRound.colors, null);
       document.getElementById("saveP1").addEventListener("click",()=>saveScore(GAME_KEY, document.getElementById("nameP1").value, Math.round(total*10)/10, document.getElementById("msgP1")));
 
       if(window.GS && pct>=85){ GS.win(); GS.hWin(); }
