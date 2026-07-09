@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>Pizza de Memória — Tiago &amp; Gian</title>
+<meta name="description" content="Memorize a pizza, monte de novo e sirva o cliente! Um arcade de memória visual com 20 níveis, ingredientes desbloqueáveis e high score."/>
+
+<!-- Open Graph -->
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Pizza de Memória — Tiago &amp; Gian"/>
+<meta property="og:description" content="Memorize. Monte. Sirva. 20 níveis de memória visual numa pizzaria cozy."/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/css/pizza-memory.css"/>
+</head>
+<body class="pz-body">
+
+  <div class="pz-frame" id="pz-frame">
+
+    <header class="pz-topbar">
+      <a class="pz-back" href="jogos.html">← Voltar aos jogos</a>
+      <div class="pz-brand">Tiago &amp; Gian</div>
+    </header>
+
+    <div class="pz-stage" id="pz-stage">
+
+      <!-- ═══ ZONA SUPERIOR — cliente + pedido + HUD ═══ -->
+      <div class="pz-counter" id="pz-counter">
+        <div class="pz-counter__wall"></div>
+        <div class="pz-hud" id="pz-hud" hidden>
+          <div class="pz-hud__row">
+            <div class="pz-pill pz-pill--level">
+              <span class="pz-pill__label">Nível</span>
+              <strong><span id="hud-level">1</span>/<span id="hud-level-total">20</span></strong>
+            </div>
+            <div class="pz-pill pz-pill--score">
+              <span class="pz-pill__label">Pontos</span>
+              <strong id="hud-score">0</strong>
+            </div>
+            <div class="pz-pill pz-pill--best">
+              <span class="pz-pill__label">Recorde</span>
+              <strong id="hud-best">0</strong>
+            </div>
+            <button class="pz-icon-btn" id="btn-sound" aria-label="Som" title="Som">
+              <span class="pz-icon-sound" id="icon-sound"></span>
+            </button>
+          </div>
+          <div class="pz-hud__row pz-hud__row--bottom">
+            <div class="pz-pill pz-pill--lives" id="hud-lives-wrap">
+              <span class="pz-life" data-i="0"></span><span class="pz-life" data-i="1"></span><span class="pz-life" data-i="2"></span>
+            </div>
+            <div class="pz-pill pz-pill--state" id="hud-state">
+              <strong id="hud-state-text">Memorize!</strong>
+            </div>
+            <div class="pz-pill pz-pill--timer" id="hud-timer-wrap">
+              <div class="pz-timer-bar"><div class="pz-timer-bar__fill" id="hud-timer-fill"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pz-customer" id="pz-customer">
+          <div class="pz-customer__avatar" id="customer-avatar">
+            <div class="pz-customer__face">
+              <span class="pz-customer__eye pz-customer__eye--l"></span>
+              <span class="pz-customer__eye pz-customer__eye--r"></span>
+              <span class="pz-customer__mouth" id="customer-mouth"></span>
+            </div>
+          </div>
+          <div class="pz-speech" id="customer-speech">
+            <p id="customer-msg">Bem-vindo à pizzaria!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ ZONA CENTRAL — bancada com pizzas ═══ -->
+      <div class="pz-bench" id="pz-bench">
+        <div class="pz-bench__grid"></div>
+        <div class="pz-pizzas" id="pz-pizzas"><!-- pizzas montadas via JS --></div>
+      </div>
+
+      <!-- ═══ ZONA INFERIOR — caixas de ingredientes + ações ═══ -->
+      <div class="pz-ingredients" id="pz-ingredients">
+        <div class="pz-ingredients__row" id="ingredient-boxes"><!-- caixas via JS --></div>
+        <div class="pz-actions" id="pz-actions" hidden>
+          <button class="pz-btn pz-btn--ghost" id="btn-undo">Desfazer</button>
+          <button class="pz-btn pz-btn--ghost" id="btn-clear">Limpar</button>
+          <button class="pz-btn pz-btn--main" id="btn-serve">Servir</button>
+        </div>
+      </div>
+
+      <!-- ═══ Ghost de arrastar (drag) ═══ -->
+      <div class="pz-drag-ghost" id="pz-drag-ghost" hidden></div>
+
+      <!-- ═══ OVERLAYS ═══ -->
+
+      <!-- Tela inicial -->
+      <div class="pz-overlay pz-overlay--start" id="ov-start">
+        <div class="pz-overlay__card pz-overlay__card--wide">
+          <p class="pz-kicker">Tiago &amp; Gian · Pizzaria</p>
+          <h1 class="pz-title">Pizza de<br/><em>Memória</em></h1>
+          <p class="pz-sub">Memorize. Monte. Sirva.</p>
+          <p class="pz-instr">Veja a pizza por alguns segundos e recrie de memória, colocando os ingredientes certos nos lugares certos.</p>
+
+          <div class="pz-howto">
+            <div class="pz-howto__step">
+              <span class="pz-howto__num">1</span>
+              <span>Memorize a pizza-modelo</span>
+            </div>
+            <div class="pz-howto__step">
+              <span class="pz-howto__num">2</span>
+              <span>Escolha o ingrediente e toque na pizza</span>
+            </div>
+            <div class="pz-howto__step">
+              <span class="pz-howto__num">3</span>
+              <span>Sirva antes que o cliente perca a paciência!</span>
+            </div>
+          </div>
+
+          <button class="pz-btn pz-btn--main pz-btn--lg" id="btn-play">Jogar</button>
+          <p class="pz-best-line">Recorde atual: <strong id="start-best">0</strong> pontos</p>
+        </div>
+      </div>
+
+      <!-- Resultado do nível -->
+      <div class="pz-overlay pz-overlay--result" id="ov-result" hidden>
+        <div class="pz-overlay__card">
+          <p class="pz-kicker" id="result-kicker">Pizza servida!</p>
+          <h2 class="pz-title pz-title--sm" id="result-title">Boa!</h2>
+          <div class="pz-score-ring" id="result-ring">
+            <svg viewBox="0 0 120 120" class="pz-score-ring__svg">
+              <circle cx="60" cy="60" r="52" class="pz-score-ring__track"/>
+              <circle cx="60" cy="60" r="52" class="pz-score-ring__fill" id="result-ring-fill"/>
+            </svg>
+            <div class="pz-score-ring__num"><strong id="result-note">0</strong><span>/100</span></div>
+          </div>
+          <div class="pz-score-breakdown" id="result-breakdown"><!-- via JS --></div>
+          <div class="pz-total-line">Pontos ganhos: <strong id="result-points">0</strong></div>
+          <button class="pz-btn pz-btn--main" id="btn-next">Próxima pizza</button>
+        </div>
+      </div>
+
+      <!-- Cliente bravo -->
+      <div class="pz-overlay pz-overlay--angry" id="ov-angry" hidden>
+        <div class="pz-overlay__card">
+          <p class="pz-kicker">Cliente bravo!</p>
+          <h2 class="pz-title pz-title--sm" id="angry-title">Isso não era o que eu pedi.</h2>
+          <p class="pz-sub">Você perdeu uma vida.</p>
+          <div class="pz-lives-display" id="angry-lives"></div>
+          <button class="pz-btn pz-btn--main" id="btn-retry">Tentar de novo</button>
+        </div>
+      </div>
+
+      <!-- Desbloqueio de ingrediente -->
+      <div class="pz-toast pz-toast--unlock" id="toast-unlock" hidden>
+        <div class="pz-toast__box" id="toast-unlock-box"></div>
+        <div class="pz-toast__text">
+          <strong>Novo ingrediente desbloqueado!</strong>
+          <span id="toast-unlock-name"></span>
+        </div>
+      </div>
+
+      <!-- Game Over -->
+      <div class="pz-overlay pz-overlay--gameover" id="ov-gameover" hidden>
+        <div class="pz-overlay__card">
+          <p class="pz-kicker">Fim de jogo</p>
+          <h2 class="pz-title pz-title--sm">A cozinha fechou por hoje</h2>
+          <div class="pz-final-score">
+            <span class="pz-final-score__label">Pontuação final</span>
+            <strong id="gameover-score">0</strong>
+          </div>
+          <p class="pz-best-line" id="gameover-newbest" hidden>Novo recorde!</p>
+          <p class="pz-best-line">Recorde: <strong id="gameover-best">0</strong></p>
+          <button class="pz-btn pz-btn--main" id="btn-playagain">Jogar de novo</button>
+        </div>
+      </div>
+
+      <!-- Vitória final -->
+      <div class="pz-overlay pz-overlay--victory" id="ov-victory" hidden>
+        <div class="pz-overlay__card pz-overlay__card--wide">
+          <p class="pz-kicker">Pizzaria fechada com chave de ouro</p>
+          <h2 class="pz-title" id="victory-title">Você é o mestre da pizza!</h2>
+          <div class="pz-final-score">
+            <span class="pz-final-score__label">Pontuação final</span>
+            <strong id="victory-score">0</strong>
+          </div>
+          <p class="pz-best-line" id="victory-newbest" hidden>Novo recorde!</p>
+          <div class="pz-final-stats" id="victory-stats"><!-- via JS --></div>
+          <button class="pz-btn pz-btn--main" id="btn-playagain2">Jogar de novo</button>
+        </div>
+      </div>
+
+      <div class="pz-confetti-layer" id="confetti-layer"></div>
+
+    </div>
+  </div>
+
+  <script src="assets/js/pizza-memory.js"></script>
+</body>
+</html>
