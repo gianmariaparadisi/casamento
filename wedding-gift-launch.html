@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>Mira do Casamento — Tiago &amp; Gian</title>
+<meta name="description" content="Arremesse os noivos no estilingue e destrua os presentes empacotados! Um jogo de física com tema de casamento, inspirado em estilingues clássicos."/>
+
+<!-- Open Graph -->
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Mira do Casamento — Tiago &amp; Gian"/>
+<meta property="og:description" content="Arremesse os noivos no estilingue e destrua os presentes empacotados!"/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/css/wedding-gift-launch.css"/>
+</head>
+<body class="wgl-body">
+
+  <!-- ══ Aviso de girar o celular (só aparece em retrato + toque) ══ -->
+  <div id="wgl-rotate-hint" class="wgl-rotate-hint" aria-hidden="true">
+    <div class="wgl-rotate-hint__phone"></div>
+    <p class="wgl-rotate-hint__text">Vire o celular pra jogar na horizontal</p>
+  </div>
+
+  <!-- ══ Moldura do jogo ══ -->
+  <div class="wgl-frame" id="wgl-frame">
+    <header class="wgl-topbar">
+      <a class="wgl-back" href="jogos.html">← Voltar aos jogos</a>
+      <div class="wgl-brand">Tiago &amp; Gian</div>
+    </header>
+
+    <div class="wgl-stage" id="wgl-stage">
+      <canvas id="wgl-canvas"></canvas>
+
+      <!-- ══ HUD (durante o jogo) ══ -->
+      <div class="wgl-hud" id="wgl-hud" hidden>
+        <div class="wgl-hud__row">
+          <div class="wgl-pill wgl-pill--level">
+            <span class="wgl-pill__label">Fase</span>
+            <strong><span id="hud-level">1</span></strong>
+          </div>
+          <div class="wgl-pill wgl-pill--score">
+            <span class="wgl-pill__label">Pontos</span>
+            <strong id="hud-score">0</strong>
+          </div>
+          <div class="wgl-pill wgl-pill--best">
+            <span class="wgl-pill__label">Recorde</span>
+            <strong id="hud-best">0</strong>
+          </div>
+        </div>
+        <div class="wgl-hud__row wgl-hud__row--bottom">
+          <div class="wgl-pill wgl-pill--lives" id="hud-lives-wrap">
+            <span class="wgl-heart" data-i="0">♥</span><span class="wgl-heart" data-i="1">♥</span><span class="wgl-heart" data-i="2">♥</span>
+          </div>
+          <div class="wgl-pill wgl-pill--throws">
+            <span class="wgl-pill__label">Arremessos</span>
+            <strong id="hud-throws">3</strong>
+          </div>
+          <div class="wgl-pill wgl-pill--gifts">
+            <span class="wgl-pill__label">Presentes</span>
+            <strong id="hud-gifts">0</strong>
+          </div>
+        </div>
+      </div>
+
+      <button id="wgl-pause-btn" class="wgl-icon-btn" aria-label="Pausar" hidden>❚❚</button>
+
+      <div class="wgl-combo-flash" id="wgl-combo-flash" hidden></div>
+
+      <!-- ══ Tela inicial ══ -->
+      <div class="wgl-overlay wgl-overlay--start" id="ov-start">
+        <div class="wgl-overlay__card wgl-overlay__card--wide">
+          <p class="wgl-kicker">Tiago &amp; Gian · 12·12·2026</p>
+          <h1 class="wgl-title">Mira do<br/><em>Casamento</em></h1>
+          <p class="wgl-sub">Arremesse as cabecinhas dos noivos no estilingue e destrua os presentes empacotados antes que os arremessos acabem!</p>
+
+          <div class="wgl-howto">
+            <div class="wgl-howto__step">
+              <span class="wgl-howto__icon">👆</span>
+              <span>Arraste pra trás no estilingue</span>
+            </div>
+            <div class="wgl-howto__step">
+              <span class="wgl-howto__icon">🎯</span>
+              <span>Mire nos presentes</span>
+            </div>
+            <div class="wgl-howto__step">
+              <span class="wgl-howto__icon">✨</span>
+              <span>Solte e arrase!</span>
+            </div>
+          </div>
+
+          <button class="wgl-btn wgl-btn--main" id="btn-play">Jogar</button>
+          <p class="wgl-best-line">Recorde atual: <strong id="start-best">0</strong> pontos</p>
+          <p class="wgl-rotate-note" id="start-rotate-note">Dica: jogue com o celular deitado 📱↔️</p>
+        </div>
+      </div>
+
+      <!-- ══ Fase completa ══ -->
+      <div class="wgl-overlay wgl-overlay--complete" id="ov-complete" hidden>
+        <div class="wgl-overlay__card">
+          <p class="wgl-kicker" id="complete-kicker">Fase 1 completa!</p>
+          <h2 class="wgl-title wgl-title--sm">Uau! 🎉</h2>
+          <div class="wgl-score-breakdown" id="complete-breakdown"><!-- preenchido via JS --></div>
+          <div class="wgl-total-line">Total da fase: <strong id="complete-total">0</strong></div>
+          <button class="wgl-btn wgl-btn--main" id="btn-continue">Continuar</button>
+        </div>
+      </div>
+
+      <!-- ══ Falhou a fase (ainda tem vida) ══ -->
+      <div class="wgl-overlay wgl-overlay--fail" id="ov-fail" hidden>
+        <div class="wgl-overlay__card">
+          <p class="wgl-kicker">Quase!</p>
+          <h2 class="wgl-title wgl-title--sm">Mais uma vez ✨</h2>
+          <p class="wgl-sub">Ainda sobraram presentes na fase. Suas vidas:</p>
+          <div class="wgl-lives-display" id="fail-lives"></div>
+          <button class="wgl-btn wgl-btn--main" id="btn-retry">Tentar de novo</button>
+        </div>
+      </div>
+
+      <!-- ══ Pausa ══ -->
+      <div class="wgl-overlay wgl-overlay--pause" id="ov-pause" hidden>
+        <div class="wgl-overlay__card">
+          <p class="wgl-kicker">Pausado</p>
+          <h2 class="wgl-title wgl-title--sm">Respira um pouco 🌿</h2>
+          <button class="wgl-btn wgl-btn--main" id="btn-resume">Continuar jogando</button>
+          <button class="wgl-btn wgl-btn--ghost" id="btn-restart-run">Reiniciar partida</button>
+        </div>
+      </div>
+
+      <!-- ══ Fim de run (vitória nas 20 fases OU game over) ══ -->
+      <div class="wgl-overlay wgl-overlay--final" id="ov-final" hidden>
+        <div class="wgl-overlay__card wgl-overlay__card--wide">
+          <p class="wgl-kicker" id="final-kicker">Fim de jogo</p>
+          <h2 class="wgl-title wgl-title--sm" id="final-title">Foi por pouco!</h2>
+          <div class="wgl-final-score">
+            <span class="wgl-final-score__label">Pontuação final</span>
+            <strong id="final-score">0</strong>
+          </div>
+          <p class="wgl-best-line" id="final-newbest" hidden>🏆 Novo recorde!</p>
+          <div class="wgl-final-stats" id="final-stats"><!-- preenchido via JS --></div>
+          <button class="wgl-btn wgl-btn--main" id="btn-playagain">Jogar de novo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Matter.js via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <script src="assets/js/wedding-gift-launch.js"></script>
+</body>
+</html>

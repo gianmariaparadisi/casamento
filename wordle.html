@@ -267,9 +267,16 @@
   let historicoCores = {};
   let emojiGrid = [];
 
+  // "Hoje" precisa ser calculado no fuso de Brasília, igual o servidor
+  // (dataHoje_() no Code.gs) — usar o fuso local do navegador causava um
+  // descompasso pra quem acessa de outro fuso (ex.: Itália): perto da meia-
+  // noite, um lado já virou o dia e o outro não, e a busca não encontrava
+  // a palavra de "hoje" na planilha. Falhava de forma intermitente,
+  // dependendo só do horário exato do teste — não era cache nem sorte.
   function hoje() {
     var d = new Date();
-    return String(d.getDate()).padStart(2,'0') + "/" + String(d.getMonth()+1).padStart(2,'0') + "/" + d.getFullYear();
+    var brt = new Date(d.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+    return String(brt.getDate()).padStart(2,'0') + "/" + String(brt.getMonth()+1).padStart(2,'0') + "/" + brt.getFullYear();
   }
 
   /* Chama a API via JSONP */

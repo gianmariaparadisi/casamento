@@ -332,9 +332,12 @@
   let cronometro = null, segundos = 0, cronometroIniciado = false;
   let tentativasVerificar = 0;
 
+  // "Hoje" no fuso de Brasília, igual o servidor (dataHoje_() no Code.gs) —
+  // ver explicação detalhada em wordle.html (mesmo bug corrigido lá).
   function hoje() {
     var d = new Date();
-    return String(d.getDate()).padStart(2,'0') + "/" + String(d.getMonth()+1).padStart(2,'0') + "/" + d.getFullYear();
+    var brt = new Date(d.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+    return String(brt.getDate()).padStart(2,'0') + "/" + String(brt.getMonth()+1).padStart(2,'0') + "/" + brt.getFullYear();
   }
 
   function carregarPuzzle() {

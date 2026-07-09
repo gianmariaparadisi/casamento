@@ -161,8 +161,10 @@ const GAME_KEY="mosaico";
 const ROWS=6, COLS=5, TOTAL=ROWS*COLS;
 const LAYERS=['bg','shape','line','accent'];
 
-/* ---------- util: data do dia (mesmo formato usado pelo connect4: DD/MM/YYYY) ---------- */
-function hoje(){ const d=new Date(); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
+/* ---------- util: data do dia (mesmo formato usado pelo connect4: DD/MM/YYYY) ----------
+   Calculada no fuso de Brasília, igual o servidor (dataHoje_() no Code.gs) — usar o fuso
+   local do navegador causava descompasso pra quem acessa de outro fuso (ver wordle.html). */
+function hoje(){ const d=new Date(); const brt=new Date(d.toLocaleString("en-US",{timeZone:"America/Sao_Paulo"})); return String(brt.getDate()).padStart(2,'0')+'/'+String(brt.getMonth()+1).padStart(2,'0')+'/'+brt.getFullYear(); }
 
 /* ---------- PRNG determinístico por seed (mesmo board pra todo mundo, no mesmo dia) ---------- */
 function mulberry32(seed){
