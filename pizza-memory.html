@@ -54,8 +54,11 @@
             <div class="pz-pill pz-pill--timer" id="hud-timer-wrap">
               <div class="pz-timer-bar"><div class="pz-timer-bar__fill" id="hud-timer-fill"></div></div>
             </div>
+            <button class="pz-btn pz-btn--pw pz-btn--extratime" id="btn-extratime" hidden title="Adiciona alguns segundos de memorização">+2s</button>
           </div>
         </div>
+
+        <div class="pz-variant-badge" id="variant-badge" hidden><span id="variant-badge-text"></span></div>
 
         <div class="pz-customer" id="pz-customer">
           <div class="pz-customer__avatar" id="customer-avatar">
@@ -81,6 +84,12 @@
       <div class="pz-ingredients" id="pz-ingredients">
         <div class="pz-ingredients__row" id="ingredient-boxes"><!-- caixas via JS --></div>
         <div class="pz-actions" id="pz-actions" hidden>
+          <button class="pz-btn pz-btn--pw" id="btn-peek" title="Dá uma espiadinha rápida na pizza-modelo">
+            Espiadinha <span class="pz-btn__badge" id="badge-peek">0</span>
+          </button>
+          <button class="pz-btn pz-btn--pw" id="btn-coringa" title="O próximo ingrediente colocado sempre conta como certo">
+            Coringa <span class="pz-btn__badge" id="badge-coringa">0</span>
+          </button>
           <button class="pz-btn pz-btn--ghost" id="btn-undo">Desfazer</button>
           <button class="pz-btn pz-btn--ghost" id="btn-clear">Limpar</button>
           <button class="pz-btn pz-btn--main" id="btn-serve">Servir</button>
