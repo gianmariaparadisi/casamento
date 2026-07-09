@@ -81,8 +81,28 @@ img{ display:block; max-width:100%; }
   aspect-ratio: 16/9;
   min-height: 560px;
 }
+
+/* Mobile: o jogo prioriza o formato vertical e ocupa a tela inteira,
+   sem depender de aspect-ratio — o stage vira um flex-child que
+   preenche toda a altura disponível abaixo da topbar. */
 @media (max-width: 860px){
-  .pz-stage{ aspect-ratio:auto; min-height: calc(100vh - 90px); }
+  html, body.pz-body{ height:100%; }
+  .pz-frame{
+    height: 100dvh;
+    height: 100vh; /* fallback para navegadores sem suporte a dvh */
+    max-height: 100dvh;
+    padding: 6px 6px 6px;
+  }
+  .pz-topbar{ flex:0 0 auto; padding:4px 2px 6px; }
+  .pz-stage{
+    aspect-ratio: auto;
+    flex: 1 1 auto;
+    min-height: 0; /* essencial para o filho flex conseguir encolher/crescer certo */
+    border-radius: 16px;
+  }
+  /* pizza maior, aproveitando a altura extra que sobrou pro modo vertical */
+  .pz-board{ width: min(60vh, 82vw, 380px); }
+  .pz-pizzas--dual .pz-board{ width: min(40vh, 44vw, 250px); }
 }
 
 /* ── 4. ZONA SUPERIOR — CLIENTE / HUD ───────────────────── */
@@ -300,13 +320,17 @@ img{ display:block; max-width:100%; }
   to{ filter: drop-shadow(0 0 14px rgba(255,227,138,.85)); }
 }
 
-/* Cloche / cobertura da pizza-modelo */
+/* Cloche / cobertura da pizza-modelo — some antes da fase de montagem
+   e nunca deve capturar cliques (por isso pointer-events:none), senão
+   o jogador não consegue tocar a pizza para colocar ingredientes. */
 .pz-cloche{
   position:absolute; inset:0; border-radius:50%;
   background: linear-gradient(160deg, rgba(217,183,216,.94), rgba(199,150,197,.94));
   display:flex; align-items:center; justify-content:center;
   z-index:5;
+  pointer-events:none;
   box-shadow: inset 0 0 0 4px rgba(255,255,255,.35), 0 6px 14px rgba(106,59,43,.2);
+  transition: opacity .25s ease;
 }
 .pz-cloche__handle{
   width:18%; height:18%; border-radius:50%;
