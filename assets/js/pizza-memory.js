@@ -10,7 +10,9 @@
    CONFIG
 ══════════════════════════════════════════════════════════ */
 const CONFIG = {
-  TOTAL_LEVELS: 20,
+  TOTAL_LEVELS: 50,
+  DUAL_PIZZA_LEVELS: [10, 20, 30, 40, 50], // só nesses níveis aparecem 2 pizzas
+  UNLOCK_EVERY: 5, // novo ingrediente a cada N níveis
   START_LIVES: 3,
   MAX_R: 0.86,          // raio normalizado máximo (0..1) dentro da pizza
   RADIUS_PCT: 40,       // conversão de coordenada normalizada -> % de posição
@@ -38,43 +40,23 @@ const INGREDIENTS = [
 const ING_BY_ID = Object.fromEntries(INGREDIENTS.map(i => [i.id, i]));
 
 function ingredientCountForLevel(level) {
-  if (level <= 2) return 2;
-  if (level <= 4) return 3;
-  if (level <= 6) return 4;
-  if (level <= 8) return 5;
-  if (level <= 10) return 6;
-  if (level <= 12) return 7;
-  if (level <= 14) return 8;
-  if (level <= 16) return 9;
-  return 10;
+  // +1 ingrediente a cada 5 níveis, começando com 2, até os 10 disponíveis
+  const count = 2 + Math.floor(level / CONFIG.UNLOCK_EVERY);
+  return Math.max(2, Math.min(INGREDIENTS.length, count));
 }
 
 /* ══════════════════════════════════════════════════════════
-   LEVELS — toppings por pizza / número de pizzas
+   LEVELS — toppings por pizza / número de pizzas (calculado)
+   Duas pizzas só nos níveis marcos (10, 20, 30, 40, 50).
+   A quantidade de toppings cresce progressivamente com o nível;
+   nos níveis de 2 pizzas, reduz um pouco por pizza para não poluir.
 ══════════════════════════════════════════════════════════ */
-const LEVELS = [
-  null, // índice 0 não usado
-  { toppings: 4,  pizzas: 1 },
-  { toppings: 5,  pizzas: 1 },
-  { toppings: 5,  pizzas: 1 },
-  { toppings: 6,  pizzas: 1 },
-  { toppings: 6,  pizzas: 1 },
-  { toppings: 7,  pizzas: 1 },
-  { toppings: 7,  pizzas: 1 },
-  { toppings: 8,  pizzas: 1 },
-  { toppings: 8,  pizzas: 1 },
-  { toppings: 9,  pizzas: 1 },
-  { toppings: 9,  pizzas: 1 },
-  { toppings: 10, pizzas: 1 },
-  { toppings: 6,  pizzas: 2 },
-  { toppings: 7,  pizzas: 2 },
-  { toppings: 7,  pizzas: 2 },
-  { toppings: 8,  pizzas: 2 },
-  { toppings: 8,  pizzas: 2 },
-  { toppings: 9,  pizzas: 2 },
-  { toppings: 10, pizzas: 2 },
-  { toppings: 11, pizzas: 2 },
-];
+function getLevelConfig(level) {
+  const isDual = CONFIG.DUAL_PIZZA_LEVELS.includes(level);
+  const raw = Math.min(14, 4 + Math.floor((level - 1) / 3));
+  const toppings = isDual ? Math.max(4, raw - 2) : raw;
+  return { toppings, pizzas: isDual ? 2 : 1 };
+}
 
 function memorizeTimeForLevel(level) {
   const t = 5 - (level - 1) * (1.5 / (CONFIG.TOTAL_LEVELS - 1));
@@ -337,7 +319,6 @@ const $ = (id) => document.getElementById(id);
 const dom = {
   stage: $("pz-stage"),
   hud: $("pz-hud"),
-  hudLevel: $("hud-level"),
   hudScore: $("hud-score"),
   hudBest: $("hud-best"),
   hudStateText: $("hud-state-text"),
@@ -501,7 +482,7 @@ function renderPlayerPizza(pizzaIndex) {
    HUD
 ══════════════════════════════════════════════════════════ */
 function updateHUD() {
-  dom.hudLevel.textContent = String(gameState.level);
+  // O nível atual não é exibido de propósito — o jogador não deve saber em que fase está.
   dom.hudScore.textContent = String(gameState.score);
   dom.hudBest.textContent = String(gameState.highScore);
   dom.hudLivesWrap.querySelectorAll(".pz-life").forEach((life, i) => {
@@ -660,7 +641,7 @@ function showUnlockSequence(ids, done) {
 }
 
 function beginLevelSetup(level) {
-  const cfg = LEVELS[level];
+  const cfg = getLevelConfig(level);
   buildPizzasDom(cfg.pizzas);
   const target = generateTargetPizza(cfg.toppings, INGREDIENTS.slice(0, gameState.unlockedCount).map(i => i.id), gameState.pattern);
   gameState.pattern = target.pattern;
@@ -702,20 +683,31 @@ function showMemoryPhase() {
 }
 
 /* ── FASE 2: MONTAR ────────────────────────────────────── */
+// A tampa aparece só como uma transição rápida (cobrindo a troca da
+// pizza-modelo pela pizza vazia) e depois é levantada — ela NUNCA fica
+// sobre a pizza durante a montagem, senão o jogador não consegue tocar
+// nos ingredientes já colocados nem colocar novos.
 function startBuildPhase() {
-  gameState.phase = "build";
+  gameState.phase = "covering"; // trava temporária durante a transição da tampa
   setHudState("Monte!");
   setCustomerState("waiting", pick(CUSTOMER_MESSAGES.build));
   setTimerFill(1, false);
 
-  gameState.pizzas.forEach((pz, i) => {
-    pz.cloche.classList.remove("pz-cloche--hidden");
-    pz.player = [];
-    renderPlayerPizza(i);
+  gameState.pizzas.forEach((pz) => {
+    pz.cloche.classList.remove("pz-cloche--hidden"); // tampa desce
   });
-  setActivePizza(0);
-  dom.actions.hidden = false;
-  gameState.buildStartTime = performance.now();
+
+  setTimeout(() => {
+    gameState.pizzas.forEach((pz, i) => {
+      pz.player = [];
+      renderPlayerPizza(i);
+      pz.cloche.classList.add("pz-cloche--hidden"); // tampa sobe e some
+    });
+    setActivePizza(0);
+    dom.actions.hidden = false;
+    gameState.buildStartTime = performance.now();
+    gameState.phase = "build";
+  }, 500);
 }
 
 /* ── SELEÇÃO / COLOCAÇÃO DE INGREDIENTES ──────────────── */
@@ -924,7 +916,7 @@ function servePizza() {
   vibrate(35);
 
   const elapsedSec = (performance.now() - gameState.buildStartTime) / 1000;
-  const cfg = LEVELS[gameState.level];
+  const cfg = getLevelConfig(gameState.level);
   const budgetSec = buildBudgetSeconds(cfg.toppings * cfg.pizzas);
 
   const results = gameState.pizzas.map(pz => scorePizza(pz.target, pz.player, elapsedSec, budgetSec));
