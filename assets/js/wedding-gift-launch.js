@@ -60,18 +60,24 @@ const CFG = {
   GROUND_H: 90,               // altura do chão, a partir da base do mundo
   /* Calibrado empiricamente rodando o Matter.js de verdade (fora do navegador,
      via Node) até o arco ficar parabólico e satisfatório: em força máxima o
-     projétil percorre ~1300-1650px em ~1-1.3s (cobre até o alvo mais distante
-     da fase 20) e desacelera visivelmente ao subir — não uma linha quase reta
-     saindo da tela, que era o que a calibração antiga fazia (a fórmula de
-     gravidade do Matter usa o quadrado do passo de tempo, então uma conta
-     "no olho" erra fácil por uma ordem de grandeza). */
+     projétil percorre ~1350-1660px (dependendo do ângulo) em ~1-1.2s, e
+     desacelera visivelmente ao subir — não uma linha quase reta saindo da
+     tela, que era o que a calibração antiga fazia (a fórmula de gravidade do
+     Matter usa o quadrado do passo de tempo, então uma conta "no olho" erra
+     fácil por uma ordem de grandeza). Todas as 50 fases são desenhadas com
+     folga desse alcance máximo (ver auditoria de alcance nos comentários de
+     LEVELS), pra nunca ter presente "quase impossível" de acertar. */
   GRAVITY_Y: 1.9,
 
   SLING_X_ANCHOR_OFFSET: 0,   // ajuste fino opcional da forquilha do estilingue
   SLING_Y_OFFSET: 190,        // altura do bolso do estilingue acima do chão
   SLING_MAX_DRAG: 165,        // distância máxima de arrasto (px lógicos)
-  SLING_FORCE_MULT: 0.1576,   // velocidade de lançamento = distância arrastada * isso (165*isso ≈ força máxima)
-  SLING_MAX_LAUNCH_SPEED: 26, // trava de força máxima (o jogo não fica caótico)
+  // Força aumentada (testada de verdade no Matter.js): no arrasto máximo e no
+  // melhor ângulo, o alcance real foi de ~1350px (força antiga) pra ~1660px
+  // (força atual) — dá mais espaço pra fase ter alvos "de verdade" longe sem
+  // ficarem impossíveis de acertar.
+  SLING_FORCE_MULT: 0.175,    // velocidade de lançamento = distância arrastada * isso (165*isso ≈ força máxima)
+  SLING_MAX_LAUNCH_SPEED: 29, // trava de força máxima (o jogo não fica caótico)
 
   PROJECTILE_RADIUS: 32,
 
@@ -83,7 +89,10 @@ const CFG = {
   NEXT_THROW_DELAY_MS: 550,
   MAX_FLIGHT_MS: 9000,           // segurança: nunca deixa um arremesso "pendurado" pra sempre
 
-  MIN_HIT_SPEED: 5.2,          // velocidade mínima de colisão pra contar como "impacto de verdade"
+  // Baixado (era 5.2) pra presentes quebrarem mesmo com arremessos mais fracos —
+  // continua bem acima do "tremor de acomodação" de um corpo assentando
+  // (~0.35, ver SETTLE_SPEED_THRESHOLD), então não conta toque de bandeja.
+  MIN_HIT_SPEED: 3.6,          // velocidade mínima de colisão pra contar como "impacto de verdade"
   BLOCK_FALL_ANGLE: 0.5,        // ~28.6°: acima disso o bloco é considerado "derrubado"
 
   /* Bombas: explodem ao serem atingidas (ou atingidas por estilhaços de
@@ -1577,12 +1586,29 @@ function onPointerUp(e) {
    confirmado rodando o motor de verdade num teste isolado, a prévia batia
    pixel a pixel com o voo real usando essa fórmula. */
 const GRAV_ACCEL_APPROX = CFG.GRAVITY_Y * 0.001 * (16.667 * 16.667);
+/* O Matter.js também amortece a velocidade a cada passo pelo frictionAir do
+   projétil (ver spawnNextProjectile: frictionAir:0.0002) — MULTIPLICANDO a
+   velocidade por (1-frictionAir) ANTES de somar a gravidade (confirmado
+   isolando esse efeito num teste no motor de verdade). Faltando esse termo,
+   a prévia divergia cada vez mais do voo real conforme a distância aumentava
+   (chegava a ~26px de erro no fim do arco) — com o termo, o erro cai pra
+   frações de pixel em qualquer ângulo/força testado. */
+const AIR_FRICTION_DECAY = 1 - 0.0002;
 function computeTrajectoryPoints(anchor, vx, vy) {
   const pts = [];
   let x = anchor.x, y = anchor.y, cvx = vx, cvy = vy;
+  // Pára de prever um pouco antes da linha do chão (descontando o raio do
+  // projétil) — é onde o CENTRO da bola de verdade vai parar de cair, não a
+  // linha visual do chão. Sem isso, os últimos pontos previam a bola
+  // "afundando" no chão, bem diferente de onde ela realmente assenta.
+  const stopY = CFG.VIEW_H - CFG.GROUND_H - CFG.PROJECTILE_RADIUS;
   for (let i = 0; i < 20; i++) {
-    for (let s = 0; s < 3; s++) { cvy += GRAV_ACCEL_APPROX; x += cvx; y += cvy; }
-    if (y > CFG.VIEW_H - CFG.GROUND_H) break;
+    for (let s = 0; s < 3; s++) {
+      cvx *= AIR_FRICTION_DECAY;
+      cvy = cvy * AIR_FRICTION_DECAY + GRAV_ACCEL_APPROX;
+      x += cvx; y += cvy;
+    }
+    if (y > stopY) break;
     pts.push({ x: x, y: y });
   }
   return pts;
@@ -1795,6 +1821,39 @@ function drawBlock(body) {
   ctx.restore();
 }
 
+/* Telhado triangular decorativo no topo de cada "torre de casinhas"
+   (frameTower) — puramente visual (não é corpo de física), só pra dar
+   aquele contorno de casinha clássico de estilingue como nos prints de
+   referência (moldura + telhado em ângulo). Sempre no topo da viga mais
+   alta da pilha de andares. */
+function drawFrameRoofs() {
+  const groundY = CFG.VIEW_H - CFG.GROUND_H;
+  (Game.level.frameTowers || []).forEach(function (ft) {
+    let baseY = groundY;
+    const n = (ft.levels || []).length;
+    for (let i = 0; i < n; i++) { baseY -= (ft.legH + ft.beamH); }
+    const beamW = ft.width + ft.postW * 1.6;
+    const roofH = Math.max(30, beamW * 0.24);
+    const halfW = beamW / 2 + 8;
+    ctx.save();
+    ctx.fillStyle = PALETTE.slingWood;
+    ctx.strokeStyle = PALETTE.slingWoodDark;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(ft.x - halfW, baseY);
+    ctx.lineTo(ft.x, baseY - roofH);
+    ctx.lineTo(ft.x + halfW, baseY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // friso central, só de enfeite
+    ctx.strokeStyle = "rgba(0,0,0,.12)";
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(ft.x, baseY - roofH); ctx.lineTo(ft.x, baseY); ctx.stroke();
+    ctx.restore();
+  });
+}
+
 function drawBomb(body) {
   const r = CFG.BOMB_RADIUS;
   ctx.save();
@@ -1952,6 +2011,7 @@ function render() {
   drawSlingshot();
   drawTrajectory();
   activeBlocks.forEach(drawBlock);
+  drawFrameRoofs();
   activeGifts.forEach(function (b) { if (!b.wglGift.destroyed) drawGift(b); });
   activeBombs.forEach(function (b) { if (!b.wglBomb.exploded) drawBomb(b); });
   restBodies.forEach(function (b) { drawHead(b, b.wglHeadKey || "gian"); });
@@ -2041,19 +2101,40 @@ function stat(label, value) {
    16. LOOP PRINCIPAL / BOOT
    ══════════════════════════════════════════════════════════════════════ */
 let lastTs = 0;
+/* Passo de física FIXO (16.667ms = 60fps), com acumulador — em vez de mandar
+   pro Matter.js o dt variável de cada frame (que muda com a taxa de
+   atualização do aparelho: 30fps, 60fps, 90fps, 120fps...). Isso é
+   necessário porque a prévia pontilhada da trajetória (computeTrajectoryPoints)
+   assume passos de exatamente 16.667ms — se o motor rodasse com um dt
+   diferente do aparelho, o arremesso real ia divergir do pontilhado
+   (mais rápido em telas de alta taxa de atualização, mais devagar em
+   aparelhos travando). Com passo fixo, o jogo sempre simula os mesmos
+   16.667ms por passo não importa o dispositivo, e o pontilhado bate com
+   o voo de verdade sempre. */
+const FIXED_DT = 16.667;
+const MAX_PHYSICS_STEPS_PER_FRAME = 5; // trava "espiral da morte" se o aparelho travar de vez
+let physicsAccumulator = 0;
+
 function frame(ts) {
   requestAnimationFrame(frame);
   if (!lastTs) lastTs = ts;
-  let dt = ts - lastTs; lastTs = ts;
-  dt = clamp(dt, 0, 34); // trava passos gigantes (aba em segundo plano etc.)
+  let frameDt = ts - lastTs; lastTs = ts;
+  frameDt = clamp(frameDt, 0, 250); // trava intervalos gigantes (aba em segundo plano etc.)
 
   if (Game.screen === "playing") {
-    Engine.update(engine, dt);
+    physicsAccumulator += frameDt;
+    let steps = 0;
+    while (physicsAccumulator >= FIXED_DT && steps < MAX_PHYSICS_STEPS_PER_FRAME) {
+      Engine.update(engine, FIXED_DT);
+      physicsAccumulator -= FIXED_DT;
+      steps++;
+    }
+    if (steps >= MAX_PHYSICS_STEPS_PER_FRAME) physicsAccumulator = 0; // aparelho lento demais: não acumula atraso
     checkFallenBlocks();
-    updateProjectileLifecycle(dt);
+    updateProjectileLifecycle(frameDt);
     updateCamera();
   }
-  updateParticles(dt);
+  updateParticles(frameDt);
   render();
 }
 

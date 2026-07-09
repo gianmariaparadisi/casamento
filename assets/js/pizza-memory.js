@@ -16,10 +16,24 @@ const CONFIG = {
   START_LIVES: 3,
   MAX_R: 0.86,          // raio normalizado máximo (0..1) dentro da pizza
   RADIUS_PCT: 40,       // conversão de coordenada normalizada -> % de posição
-  CLOSE_DIST: 0.18,     // distância normalizada considerada "perto o suficiente"
-  FAR_DIST: 0.55,       // distância normalizada considerada "longe demais"
+  CLOSE_DIST: 0.11,     // distância normalizada considerada "perto o suficiente" (mais rígido)
+  FAR_DIST: 0.4,        // distância normalizada considerada "longe demais" (mais rígido)
   HIGH_SCORE_KEY: "pizzaMemoriaHighScore",
   SOUND_KEY: "pizzaMemoriaSom",
+
+  // ── Power-ups ──
+  POWERUP_START_CHARGES: { peek: 3, coringa: 3, extraTime: 3 },
+  POWERUP_REPLENISH_EVERY: 10, // a cada 10 níveis, ganha +1 carga de cada
+  POWERUP_REPLENISH_AMOUNT: 1,
+  PEEK_DURATION_MS: 1500,
+  EXTRA_TIME_SECONDS: 2,
+
+  // ── Vida bônus ──
+  EXCELENTE_STREAK_FOR_LIFE: 3, // 3 notas excelentes seguidas = vida extra
+  MAX_LIVES: 5,
+
+  // ── Níveis especiais ──
+  VARIANT_MOD: 5, // a cada 5 níveis (que não caem num nível de pizza dupla) vira especial
 };
 
 /* ══════════════════════════════════════════════════════════
@@ -65,6 +79,24 @@ function memorizeTimeForLevel(level) {
 
 function buildBudgetSeconds(toppingsCount) {
   return toppingsCount * 3.5 + 12;
+}
+
+/* ══════════════════════════════════════════════════════════
+   NÍVEIS ESPECIAIS — variedade no meio do jogo, sem revelar o
+   número do nível. Nunca cai num nível de pizza dupla (marco).
+══════════════════════════════════════════════════════════ */
+const VARIANT_CYCLE = ["relampago", "neblina", "exigente", "surpresa"];
+const VARIANT_LABELS = {
+  relampago: "Pedido relâmpago",
+  neblina: "Pizza com neblina",
+  exigente: "Cliente exigente",
+  surpresa: "Fique de olho na pizza...",
+};
+function getLevelVariant(level) {
+  if (level % CONFIG.VARIANT_MOD !== CONFIG.VARIANT_MOD - 1) return null; // níveis 4,9,14,19...
+  if (CONFIG.DUAL_PIZZA_LEVELS.includes(level)) return null;
+  const idx = Math.floor(level / CONFIG.VARIANT_MOD) % VARIANT_CYCLE.length;
+  return VARIANT_CYCLE[idx];
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -250,6 +282,18 @@ const gameState = {
   soundOn: true,
   stats: { perfeitas: 0, completas: 0, ingredientUsage: {} },
   audioCtx: null,
+
+  // ── Power-ups (cargas por partida) ──
+  powerups: { peek: 0, coringa: 0, extraTime: 0 },
+  coringaArmed: false,
+  peeking: false,
+  usedExtraTimeThisLevel: false,
+
+  // ── Vida bônus ──
+  excelenteStreak: 0,
+
+  // ── Nível especial ──
+  levelVariant: null, // "relampago" | "neblina" | "exigente" | "surpresa" | null
 };
 
 function loadHighScore() {
@@ -335,6 +379,13 @@ const dom = {
   btnUndo: $("btn-undo"),
   btnClear: $("btn-clear"),
   btnServe: $("btn-serve"),
+  btnPeek: $("btn-peek"),
+  badgePeek: $("badge-peek"),
+  btnCoringa: $("btn-coringa"),
+  badgeCoringa: $("badge-coringa"),
+  btnExtratime: $("btn-extratime"),
+  variantBadge: $("variant-badge"),
+  variantBadgeText: $("variant-badge-text"),
   dragGhost: $("pz-drag-ghost"),
   ovStart: $("ov-start"),
   btnPlay: $("btn-play"),
@@ -397,6 +448,17 @@ function syncSelectedBoxUI() {
   });
 }
 
+// Trava visual + funcional das caixas de ingredientes fora da fase de montar:
+// o jogador não deve conseguir "escolher" nada enquanto ainda está memorizando
+// (ou entre fases), mesmo que só toque na caixa sem soltar.
+function setIngredientsInteractive(active) {
+  dom.ingredientBoxes.classList.toggle("is-waiting", !active);
+  if (!active) {
+    gameState.selectedIngredient = null;
+    syncSelectedBoxUI();
+  }
+}
+
 /* ══════════════════════════════════════════════════════════
    RENDER — PIZZAS / BANCADA
 ══════════════════════════════════════════════════════════ */
@@ -414,6 +476,7 @@ function buildPizzasDom(count) {
         <div class="pz-pizza__sauce"></div>
         <div class="pz-pizza__cheese"></div>
         <div class="pz-pizza__toppings"></div>
+        <div class="pz-fog"></div>
       </div>
       <div class="pz-cloche pz-cloche--hidden"><div class="pz-cloche__handle"></div></div>
     `;
@@ -421,11 +484,12 @@ function buildPizzasDom(count) {
     const pizzaEl = board.querySelector(".pz-pizza");
     const toppingsEl = board.querySelector(".pz-pizza__toppings");
     const cloche = board.querySelector(".pz-cloche");
+    const fogEl = board.querySelector(".pz-fog");
 
     pizzaEl.addEventListener("click", (e) => onPizzaClick(e, p));
     board.addEventListener("click", () => setActivePizza(p));
 
-    gameState.pizzas.push({ target: [], player: [], boardEl: board, pizzaEl, toppingsEl, cloche });
+    gameState.pizzas.push({ target: [], player: [], boardEl: board, pizzaEl, toppingsEl, cloche, fogEl });
   }
   setActivePizza(0);
 }
@@ -500,6 +564,77 @@ function setTimerFill(fraction, low) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   SELO DE NÍVEL ESPECIAL — mostra o "tipo" sem revelar o número
+══════════════════════════════════════════════════════════ */
+function applyVariantBadge() {
+  const v = gameState.levelVariant;
+  if (!v) { dom.variantBadge.hidden = true; return; }
+  dom.variantBadgeText.textContent = VARIANT_LABELS[v];
+  dom.variantBadge.hidden = false;
+}
+
+/* ══════════════════════════════════════════════════════════
+   POWER-UPS
+══════════════════════════════════════════════════════════ */
+function updatePowerupButtons() {
+  const pw = gameState.powerups;
+  dom.badgePeek.textContent = String(pw.peek);
+  dom.badgeCoringa.textContent = String(pw.coringa);
+  const inBuild = gameState.phase === "build";
+  dom.btnPeek.disabled = !inBuild || pw.peek <= 0 || gameState.peeking;
+  dom.btnCoringa.disabled = !inBuild || pw.coringa <= 0;
+  dom.btnCoringa.classList.toggle("is-armed", gameState.coringaArmed);
+  dom.btnExtratime.hidden = !(gameState.phase === "memorize" && pw.extraTime > 0 && !gameState.usedExtraTimeThisLevel);
+}
+
+// Espiadinha: revela a pizza-modelo de novo por alguns segundos durante a montagem
+function usePeek() {
+  if (gameState.phase !== "build" || gameState.peeking) return;
+  if (gameState.powerups.peek <= 0) return;
+  gameState.powerups.peek--;
+  gameState.peeking = true;
+  updatePowerupButtons();
+  playSound("select");
+  vibrate(20);
+
+  gameState.pizzas.forEach((pz, i) => {
+    pz.toppingsEl.innerHTML = "";
+    pz.target.forEach(t => pz.toppingsEl.appendChild(createToppingEl(t)));
+    pz.pizzaEl.classList.add("is-peeking");
+  });
+
+  setTimeout(() => {
+    gameState.pizzas.forEach((pz, i) => {
+      pz.pizzaEl.classList.remove("is-peeking");
+      renderPlayerPizza(i);
+    });
+    gameState.peeking = false;
+    updatePowerupButtons();
+  }, CONFIG.PEEK_DURATION_MS);
+}
+
+// Coringa: arma o próximo ingrediente colocado pra sempre contar como certo
+function useCoringa() {
+  if (gameState.phase !== "build") return;
+  if (gameState.powerups.coringa <= 0 && !gameState.coringaArmed) return;
+  gameState.coringaArmed = !gameState.coringaArmed;
+  updatePowerupButtons();
+  playSound("select");
+}
+
+// Tempo extra: adiciona alguns segundos à fase de memorizar (um uso por nível)
+function useExtraTime() {
+  if (gameState.phase !== "memorize" || gameState.usedExtraTimeThisLevel) return;
+  if (gameState.powerups.extraTime <= 0) return;
+  gameState.powerups.extraTime--;
+  gameState.usedExtraTimeThisLevel = true;
+  gameState.memorizeDeadline += CONFIG.EXTRA_TIME_SECONDS * 1000;
+  playSound("select");
+  vibrate(20);
+  updatePowerupButtons();
+}
+
+/* ══════════════════════════════════════════════════════════
    CLIENTE — reações e mensagens
 ══════════════════════════════════════════════════════════ */
 const CUSTOMER_MESSAGES = {
@@ -520,21 +655,24 @@ function setCustomerState(state, msg) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   CONFETE
+   CONFETE — feito das próprias formas dos ingredientes (sem PNG/SVG
+   externo disponível, reaproveita os desenhos CSS já usados na pizza)
 ══════════════════════════════════════════════════════════ */
-const CONFETTI_COLORS = ["#D8503D", "#FFE38A", "#8EAD7B", "#D9B7D8", "#F3A6A6", "#C7653A", "#3F8A4C"];
 function launchConfetti(amount) {
   const layer = dom.confettiLayer;
   for (let i = 0; i < amount; i++) {
+    const ing = INGREDIENTS[Math.floor(Math.random() * INGREDIENTS.length)];
+    const size = rand(14, 28);
     const piece = document.createElement("div");
-    piece.className = "pz-confetti-piece";
+    piece.className = `pz-confetti-piece pz-topping--${ing.cls}`;
     piece.style.left = rand(0, 100) + "%";
-    piece.style.background = pick(CONFETTI_COLORS);
-    piece.style.animationDuration = rand(1.4, 2.6) + "s";
-    piece.style.animationDelay = rand(0, 0.4) + "s";
-    piece.style.borderRadius = Math.random() < 0.5 ? "50%" : "2px";
+    piece.style.width = size + "px";
+    piece.style.height = size + "px";
+    piece.style.animationDuration = rand(1.5, 3.2) + "s";
+    piece.style.animationDelay = rand(0, 0.6) + "s";
+    piece.innerHTML = '<div class="pz-shape" style="width:100%;height:100%"></div>';
     layer.appendChild(piece);
-    setTimeout(() => piece.remove(), 3200);
+    setTimeout(() => piece.remove(), 4200);
   }
 }
 
@@ -565,6 +703,9 @@ function bindStaticEvents() {
   dom.btnUndo.addEventListener("click", undoLast);
   dom.btnClear.addEventListener("click", clearPizza);
   dom.btnServe.addEventListener("click", servePizza);
+  dom.btnPeek.addEventListener("click", usePeek);
+  dom.btnCoringa.addEventListener("click", useCoringa);
+  dom.btnExtratime.addEventListener("click", useExtraTime);
   dom.btnNext.addEventListener("click", () => {
     dom.ovResult.hidden = true;
     advanceLevel();
@@ -587,8 +728,13 @@ function resetRun() {
   gameState.unlockedCount = 2;
   gameState.stats = { perfeitas: 0, completas: 0, ingredientUsage: {} };
   gameState.pattern = null;
+  gameState.powerups = { ...CONFIG.POWERUP_START_CHARGES };
+  gameState.coringaArmed = false;
+  gameState.excelenteStreak = 0;
+  gameState.levelVariant = null;
   dom.hud.hidden = false;
   updateHUD();
+  updatePowerupButtons();
   startLevel(1);
 }
 
@@ -596,8 +742,18 @@ function startLevel(level) {
   gameState.level = level;
   gameState.selectedIngredient = null;
   gameState.usedUndoOrClear = false;
+  gameState.usedExtraTimeThisLevel = false;
+  gameState.coringaArmed = false;
   gameState.undoStack = [];
+  gameState.levelVariant = getLevelVariant(level);
   updateHUD();
+  applyVariantBadge();
+
+  // A cada N níveis, repõe uma carga de cada power-up (mantém eles relevantes até o fim)
+  if (level > 1 && level % CONFIG.POWERUP_REPLENISH_EVERY === 0) {
+    Object.keys(gameState.powerups).forEach(k => { gameState.powerups[k] += CONFIG.POWERUP_REPLENISH_AMOUNT; });
+  }
+  updatePowerupButtons();
 
   const requiredCount = ingredientCountForLevel(level);
   if (requiredCount > gameState.unlockedCount) {
@@ -654,6 +810,14 @@ function beginLevelSetup(level) {
   }
   gameState.pizzas.forEach((pz) => { pz.player = []; });
 
+  // Nível especial "Pizza com neblina": cobre metade da pizza-modelo
+  // (lado sorteado) durante a memorização, testando lembrança parcial.
+  if (gameState.levelVariant === "neblina") {
+    const pz = gameState.pizzas[0];
+    pz.fogEl.classList.add("is-active");
+    pz.fogEl.style.transform = `rotate(${Math.round(rand(0, 360))}deg)`;
+  }
+
   dom.actions.hidden = true;
   showMemoryPhase();
 }
@@ -661,6 +825,7 @@ function beginLevelSetup(level) {
 /* ── FASE 1: MEMORIZAR ─────────────────────────────────── */
 function showMemoryPhase() {
   gameState.phase = "memorize";
+  setIngredientsInteractive(false);
   setHudState("Memorize!");
   setCustomerState("waiting", pick(CUSTOMER_MESSAGES.memorize));
   gameState.pizzas.forEach((_, i) => {
@@ -689,6 +854,7 @@ function showMemoryPhase() {
 // nos ingredientes já colocados nem colocar novos.
 function startBuildPhase() {
   gameState.phase = "covering"; // trava temporária durante a transição da tampa
+  setIngredientsInteractive(false);
   setHudState("Monte!");
   setCustomerState("waiting", pick(CUSTOMER_MESSAGES.build));
   setTimerFill(1, false);
@@ -707,6 +873,7 @@ function startBuildPhase() {
     dom.actions.hidden = false;
     gameState.buildStartTime = performance.now();
     gameState.phase = "build";
+    setIngredientsInteractive(true);
   }, 500);
 }
 
@@ -839,7 +1006,9 @@ function onDragEnd(e) {
 function positionScoreForDist(d) {
   if (d <= CONFIG.CLOSE_DIST) return 100;
   if (d >= CONFIG.FAR_DIST) return 0;
-  return 100 * (1 - (d - CONFIG.CLOSE_DIST) / (CONFIG.FAR_DIST - CONFIG.CLOSE_DIST));
+  const t = (d - CONFIG.CLOSE_DIST) / (CONFIG.FAR_DIST - CONFIG.CLOSE_DIST);
+  // queda mais acentuada que linear — distâncias medianas já pontuam bem menos (mais rígido)
+  return 100 * Math.pow(1 - t, 1.6);
 }
 
 function countByType(list) {
@@ -863,7 +1032,8 @@ function scorePizza(target, player, elapsedSec, budgetSec) {
   let qtySum = 0, qtyN = 0;
   unionTypes.forEach(t => {
     const a = cm[t] || 0, b = cp[t] || 0;
-    qtySum += 1 - Math.min(1, Math.abs(a - b) / Math.max(a, b, 1));
+    // multiplicador >1 deixa a diferença de quantidade pesar mais (mais rígido)
+    qtySum += 1 - Math.min(1, (Math.abs(a - b) / Math.max(a, b, 1)) * 1.4);
     qtyN++;
   });
   const quantityScore = qtyN === 0 ? 100 : (qtySum / qtyN) * 100;
@@ -891,15 +1061,15 @@ function scorePizza(target, player, elapsedSec, budgetSec) {
   // 4. tempo restante / eficiência (10%)
   const ratio = budgetSec > 0 ? elapsedSec / budgetSec : 1;
   let timeScore;
-  if (ratio <= 0.5) timeScore = 100;
-  else if (ratio >= 1.5) timeScore = 0;
-  else timeScore = 100 * (1 - (ratio - 0.5) / 1.0);
+  if (ratio <= 0.4) timeScore = 100;
+  else if (ratio >= 1.3) timeScore = 0;
+  else timeScore = 100 * (1 - (ratio - 0.4) / 0.9);
 
   let raw = ingredientScore * 0.35 + quantityScore * 0.25 + positionScore * 0.30 + timeScore * 0.10;
 
-  // Toppings extras (colocados sem corresponder a nenhum alvo) reduzem a nota
+  // Toppings extras (colocados sem corresponder a nenhum alvo) reduzem a nota — penalidade mais pesada
   const extraCount = Math.max(0, player.length - matchedCount);
-  const penalty = Math.min(30, extraCount * 5);
+  const penalty = Math.min(45, extraCount * 8);
   const nota = Math.max(0, Math.min(100, Math.round(raw - penalty)));
 
   return { nota, ingredientScore, quantityScore, positionScore, timeScore, extraCount };
@@ -911,6 +1081,7 @@ function scorePizza(target, player, elapsedSec, budgetSec) {
 function servePizza() {
   if (gameState.phase !== "build") return;
   gameState.phase = "result";
+  setIngredientsInteractive(false);
   clearInterval(gameState.memorizeTimer);
   playSound("serve");
   vibrate(35);
@@ -982,7 +1153,7 @@ function showResult(nota, results, elapsedSec, budgetSec) {
   setCustomerState(mood, pick(CUSTOMER_MESSAGES[tier]));
 
   if (excelente) {
-    launchConfetti(perfeita ? 60 : 34);
+    launchConfetti(perfeita ? 140 : 80);
     gameState.pizzas.forEach(pz => pz.pizzaEl.classList.toggle("is-glow", perfeita));
     playSound("excelente");
     vibrate(perfeita ? [30, 30, 30, 30] : [40, 30]);
@@ -1046,7 +1217,11 @@ function showVictory() {
   gameState.phase = "victory";
   playSound("vitoria");
   vibrate([40, 30, 40, 30, 40, 30, 80]);
-  launchConfetti(90);
+  // bastante confete pra comemorar de verdade — várias ondas em sequência
+  launchConfetti(160);
+  setTimeout(() => launchConfetti(160), 400);
+  setTimeout(() => launchConfetti(140), 900);
+  setTimeout(() => launchConfetti(100), 1500);
   const isNew = saveHighScoreIfNeeded();
   dom.victoryScore.textContent = String(gameState.score);
   dom.victoryNewbest.hidden = !isNew;
