@@ -86,11 +86,15 @@ img{ display:block; max-width:100%; }
    sem depender de aspect-ratio — o stage vira um flex-child que
    preenche toda a altura disponível abaixo da topbar. */
 @media (max-width: 860px){
-  html, body.pz-body{ height:100%; }
+  html, body.pz-body{ height:100%; overflow:hidden; overscroll-behavior:none; touch-action:manipulation; }
   .pz-frame{
-    height: 100dvh;
-    height: 100vh; /* fallback para navegadores sem suporte a dvh */
-    max-height: 100dvh;
+    /* svh = "small viewport height": não recalcula quando a barra de
+       endereço do navegador aparece/some, evitando o jogo "pular" de
+       tamanho ao tocar na tela. vh fica só como fallback antigo. */
+    height: 100vh;
+    height: 100svh;
+    max-height: 100vh;
+    max-height: 100svh;
     padding: 6px 6px 6px;
   }
   .pz-topbar{ flex:0 0 auto; padding:4px 2px 6px; }
@@ -100,9 +104,10 @@ img{ display:block; max-width:100%; }
     min-height: 0; /* essencial para o filho flex conseguir encolher/crescer certo */
     border-radius: 16px;
   }
-  /* pizza maior, aproveitando a altura extra que sobrou pro modo vertical */
-  .pz-board{ width: min(60vh, 82vw, 380px); }
-  .pz-pizzas--dual .pz-board{ width: min(40vh, 44vw, 250px); }
+  /* pizza maior, aproveitando a altura extra que sobrou pro modo vertical —
+     usa svh pelo mesmo motivo acima (tamanho estável, sem pular) */
+  .pz-board{ width: min(60vh, 82vw, 380px); width: min(60svh, 82vw, 380px); }
+  .pz-pizzas--dual .pz-board{ width: min(40vh, 44vw, 250px); width: min(40svh, 44vw, 250px); }
 }
 
 /* ── 4. ZONA SUPERIOR — CLIENTE / HUD ───────────────────── */
@@ -320,6 +325,9 @@ img{ display:block; max-width:100%; }
   to{ filter: drop-shadow(0 0 14px rgba(255,227,138,.85)); }
 }
 
+/* Espiadinha (power-up) — realce roxo suave enquanto mostra a pizza-modelo de novo */
+.pz-pizza.is-peeking{ box-shadow: inset 0 0 0 6px #E0AE5E, 0 0 0 5px rgba(217,183,216,.8), 0 6px 14px rgba(106,59,43,.20); }
+
 /* Cloche / cobertura da pizza-modelo — some antes da fase de montagem
    e nunca deve capturar cliques (por isso pointer-events:none), senão
    o jogador não consegue tocar a pizza para colocar ingredientes. */
@@ -338,6 +346,20 @@ img{ display:block; max-width:100%; }
   border:3px solid var(--pz-lilas);
 }
 .pz-cloche.pz-cloche--hidden{ display:none; }
+
+/* Neblina — cobre parte da pizza-modelo durante a memorização em
+   níveis "Pizza com neblina", testando lembrança parcial. Nunca
+   intercepta clique (só aparece na fase de memorizar). */
+.pz-fog{
+  position:absolute; inset:0; border-radius:50%;
+  pointer-events:none;
+  background: rgba(255,244,220,.9);
+  backdrop-filter: blur(3px);
+  z-index:4;
+  display:none;
+  clip-path: inset(0 0 0 50%); /* cobre metade da pizza — JS gira pra variar o lado */
+}
+.pz-fog.is-active{ display:block; }
 
 /* Toppings — posicionados via left/top % (definidos inline por JS) */
 .pz-topping{
@@ -459,15 +481,31 @@ img{ display:block; max-width:100%; }
   border-top: 2px solid var(--pz-line);
 }
 .pz-ingredients__row{
-  display:flex; gap:8px; overflow-x:auto; padding:2px 2px 8px;
+  display:flex; gap:10px; overflow-x:auto; padding:2px 4px 8px;
   scrollbar-width: thin;
+  transition: opacity .2s ease, filter .2s ease;
+  /* carrossel: desliza suave e "encaixa" em cada caixa, fácil de escolher com o dedo */
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 14px;
+  -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
 }
 .pz-ingredients__row::-webkit-scrollbar{ height:6px; }
 .pz-ingredients__row::-webkit-scrollbar-thumb{ background:var(--pz-line); border-radius:99px; }
 
+/* Fora da fase de montar (memorizando, servindo, etc.) as caixas ficam
+   visivelmente "adormecidas" e não reagem ao toque — assim fica claro
+   que ainda não dá pra escolher ingrediente. */
+.pz-ingredients__row.is-waiting{
+  pointer-events:none;
+  opacity:.5;
+  filter:grayscale(.5);
+}
+
 .pz-ibox{
   flex: 0 0 auto;
   width: 74px; height: 84px;
+  scroll-snap-align: center;
   background: linear-gradient(180deg, var(--pz-creme), #FBE9C7);
   border: 2px solid var(--pz-line);
   border-radius: var(--pz-radius-sm);
@@ -533,6 +571,42 @@ img{ display:block; max-width:100%; }
 .pz-btn--ghost:hover{ border-color: var(--pz-terracota); }
 .pz-btn--lg{ padding:14px 32px; font-size:1rem; }
 .pz-btn:disabled{ opacity:.45; pointer-events:none; }
+
+/* Power-ups — Espiadinha / Coringa (na barra de ações) e +2s (no HUD) */
+.pz-btn--pw{
+  background: var(--pz-lilas);
+  color: var(--pz-marrom);
+  display:inline-flex; align-items:center; gap:6px;
+  padding: 11px 14px;
+}
+.pz-btn--pw:hover{ background:#CDA0CC; }
+.pz-btn--pw.is-armed{
+  background: var(--pz-manjericao); color:var(--pz-white);
+  box-shadow: 0 0 0 3px rgba(63,138,76,.3), 0 3px 10px rgba(106,59,43,.15);
+}
+.pz-btn__badge{
+  background: rgba(255,255,255,.75);
+  color: var(--pz-marrom);
+  font-size:.7rem; font-weight:800;
+  min-width:18px; height:18px; border-radius:999px;
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:0 4px;
+}
+.pz-btn--extratime{
+  padding:5px 10px; font-size:.68rem; border-radius:999px;
+  background: var(--pz-queijo); color:var(--pz-marrom); box-shadow:none;
+  flex:0 0 auto;
+}
+.pz-btn--extratime:disabled{ opacity:.35; }
+
+/* Selo de nível especial — não revela o número do nível, só o "tipo" */
+.pz-variant-badge{
+  position:absolute; top:8px; right:12px; z-index:3;
+  background: var(--pz-terracota); color: var(--pz-white);
+  font-size:.68rem; font-weight:700; letter-spacing:.02em;
+  padding:5px 12px; border-radius:999px;
+  box-shadow: 0 3px 10px rgba(106,59,43,.2);
+}
 
 /* ── 7. DRAG GHOST ──────────────────────────────────────── */
 .pz-drag-ghost{
@@ -650,27 +724,33 @@ img{ display:block; max-width:100%; }
   position:absolute; inset:0; z-index:90; pointer-events:none; overflow:hidden;
 }
 .pz-confetti-piece{
-  position:absolute; top:-14px; width:9px; height:14px; opacity:.9;
+  position:absolute; top:-28px; opacity:.95;
+  pointer-events:none;
   animation: pzConfettiFall linear forwards;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.15));
 }
 @keyframes pzConfettiFall{
-  to{ transform: translateY(120vh) rotate(540deg); opacity:.2; }
+  0%{ transform: translateY(0) rotate(0deg) scale(1); }
+  100%{ transform: translateY(125vh) rotate(620deg) scale(.9); opacity:.15; }
 }
 
 /* ── 9. RESPONSIVIDADE ─────────────────────────────────── */
 @media (max-width: 640px){
-  .pz-frame{ padding:8px 6px 20px; }
   .pz-title{ font-size:1.7rem; }
   .pz-pill{ font-size:.66rem; padding:4px 8px; }
   .pz-pill strong{ font-size:.8rem; }
   .pz-speech{ max-width:56%; font-size:.75rem; }
   .pz-customer__avatar{ width:44px; height:44px; }
-  .pz-ibox{ width:64px; height:76px; }
+  /* caixas de ingrediente GRANDES no mobile (mais fáceis de ver e tocar),
+     o carrossel é que fica deslizável — não precisa encolher a caixa */
+  .pz-ibox{ width:80px; height:92px; }
+  .pz-ibox__icon{ width:36px; height:36px; }
   .pz-btn{ padding:10px 16px; font-size:.8rem; }
 }
 @media (max-width: 420px){
   .pz-hud__row{ gap:5px; }
   .pz-pill--timer{ order:5; flex-basis:100%; }
+  .pz-ibox{ width:76px; height:88px; }
 }
 
 @media (prefers-reduced-motion: reduce){
