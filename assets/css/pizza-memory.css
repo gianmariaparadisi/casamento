@@ -379,6 +379,7 @@ img{ display:block; max-width:100%; }
   100%{ transform:translate(-50%,-50%) scale(1); }
 }
 .pz-topping--ghost{ opacity:.55; }
+.pz-topping--wildcard .pz-shape{ box-shadow: 0 0 0 2.5px var(--pz-manjericao), inset 0 0 0 1px rgba(255,255,255,.4); }
 
 /* Ingrediente: queijo (fios/manchas) */
 .pz-topping--queijo{ width:11%; }
