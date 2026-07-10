@@ -4,12 +4,12 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
 <title>Pizza de Memória — Tiago &amp; Gian</title>
-<meta name="description" content="Memorize a pizza, monte de novo e sirva o cliente! Um arcade de memória visual com 20 níveis, ingredientes desbloqueáveis e high score."/>
+<meta name="description" content="Memorize a pizza, monte de novo e sirva o cliente! Um arcade de memória visual com 50 níveis, ingredientes desbloqueáveis e high score."/>
 
 <!-- Open Graph -->
 <meta property="og:type" content="website"/>
 <meta property="og:title" content="Pizza de Memória — Tiago &amp; Gian"/>
-<meta property="og:description" content="Memorize. Monte. Sirva. 20 níveis de memória visual numa pizzaria cozy."/>
+<meta property="og:description" content="Memorize. Monte. Sirva. 50 níveis de memória visual numa pizzaria cozy."/>
 
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -45,9 +45,7 @@
             </button>
           </div>
           <div class="pz-hud__row pz-hud__row--bottom">
-            <div class="pz-pill pz-pill--lives" id="hud-lives-wrap">
-              <span class="pz-life" data-i="0"></span><span class="pz-life" data-i="1"></span><span class="pz-life" data-i="2"></span>
-            </div>
+            <div class="pz-pill pz-pill--lives" id="hud-lives-wrap"><!-- corações via JS, quantidade pode crescer com vida bônus --></div>
             <div class="pz-pill pz-pill--state" id="hud-state">
               <strong id="hud-state-text">Memorize!</strong>
             </div>
