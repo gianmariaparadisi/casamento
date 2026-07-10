@@ -510,7 +510,7 @@ function createToppingEl(t, opts) {
   opts = opts || {};
   const ing = ING_BY_ID[t.type];
   const el = document.createElement("div");
-  el.className = `pz-topping pz-topping--${ing.cls}` + (opts.placing ? " pz-topping--placing" : "");
+  el.className = `pz-topping pz-topping--${ing.cls}` + (opts.placing ? " pz-topping--placing" : "") + (t.wildcard ? " pz-topping--wildcard" : "");
   const pct = toppingCoordsToPct(t.x, t.y);
   el.style.left = pct.left + "%";
   el.style.top = pct.top + "%";
@@ -549,9 +549,9 @@ function updateHUD() {
   // O nível atual não é exibido de propósito — o jogador não deve saber em que fase está.
   dom.hudScore.textContent = String(gameState.score);
   dom.hudBest.textContent = String(gameState.highScore);
-  dom.hudLivesWrap.querySelectorAll(".pz-life").forEach((life, i) => {
-    life.classList.toggle("is-lost", i >= gameState.lives);
-  });
+  // Renderizado dinamicamente (não fixo em 3) porque a vida bônus pode aumentar o total.
+  dom.hudLivesWrap.innerHTML = Array.from({ length: Math.max(0, gameState.lives) })
+    .map(() => '<span class="pz-life"></span>').join("");
 }
 
 function setHudState(text) {
@@ -594,6 +594,9 @@ function usePeek() {
   gameState.powerups.peek--;
   gameState.peeking = true;
   updatePowerupButtons();
+  dom.btnUndo.disabled = true;
+  dom.btnClear.disabled = true;
+  dom.btnServe.disabled = true;
   playSound("select");
   vibrate(20);
 
@@ -609,6 +612,9 @@ function usePeek() {
       renderPlayerPizza(i);
     });
     gameState.peeking = false;
+    dom.btnUndo.disabled = false;
+    dom.btnClear.disabled = false;
+    dom.btnServe.disabled = false;
     updatePowerupButtons();
   }, CONFIG.PEEK_DURATION_MS);
 }
@@ -833,9 +839,12 @@ function showMemoryPhase() {
     gameState.pizzas[i].cloche.classList.add("pz-cloche--hidden");
   });
 
-  const duration = memorizeTimeForLevel(gameState.level);
+  // Nível especial "Pedido relâmpago": memorização bem mais curta
+  const variantMultiplier = gameState.levelVariant === "relampago" ? 0.55 : 1;
+  const duration = Math.max(2, memorizeTimeForLevel(gameState.level) * variantMultiplier);
   gameState.memorizeDeadline = performance.now() + duration * 1000;
   clearInterval(gameState.memorizeTimer);
+  updatePowerupButtons(); // mostra o botão "+2s" se ainda houver carga
   gameState.memorizeTimer = setInterval(() => {
     const remain = gameState.memorizeDeadline - performance.now();
     const frac = Math.max(0, remain / (duration * 1000));
@@ -861,11 +870,17 @@ function startBuildPhase() {
 
   gameState.pizzas.forEach((pz) => {
     pz.cloche.classList.remove("pz-cloche--hidden"); // tampa desce
+    pz.fogEl.classList.remove("is-active"); // neblina só existe na memorização
   });
 
   setTimeout(() => {
     gameState.pizzas.forEach((pz, i) => {
       pz.player = [];
+      // Nível especial "Ingrediente surpresa": um topping errado já vem
+      // colocado na pizza vazia — o jogador precisa notar e remover.
+      if (i === 0 && gameState.levelVariant === "surpresa") {
+        pz.player.push(makeDecoyTopping(pz.target));
+      }
       renderPlayerPizza(i);
       pz.cloche.classList.add("pz-cloche--hidden"); // tampa sobe e some
     });
@@ -874,19 +889,42 @@ function startBuildPhase() {
     gameState.buildStartTime = performance.now();
     gameState.phase = "build";
     setIngredientsInteractive(true);
+    updatePowerupButtons();
   }, 500);
+}
+
+// Cria um topping "decoy" (ingrediente errado) numa posição livre da pizza,
+// usado pelo nível especial "Ingrediente surpresa".
+function makeDecoyTopping(target) {
+  const wrongTypes = INGREDIENTS.slice(0, gameState.unlockedCount)
+    .map(i => i.id)
+    .filter(id => !target.some(t => t.type === id));
+  const type = wrongTypes.length > 0
+    ? wrongTypes[Math.floor(Math.random() * wrongTypes.length)]
+    : INGREDIENTS[Math.floor(Math.random() * gameState.unlockedCount)].id;
+  const minDist = minDistForCount(target.length + 1);
+  let pos = { x: 0, y: 0 };
+  for (let tries = 0; tries < 20; tries++) {
+    const ang = rand(0, Math.PI * 2);
+    const r = Math.sqrt(Math.random()) * CONFIG.MAX_R;
+    const p = { x: Math.cos(ang) * r, y: Math.sin(ang) * r };
+    const nearest = target.reduce((min, t) => Math.min(min, Math.hypot(p.x - t.x, p.y - t.y)), Infinity);
+    if (nearest >= minDist) { pos = p; break; }
+    pos = p;
+  }
+  return { id: toppingIdCounter++, type, x: +pos.x.toFixed(3), y: +pos.y.toFixed(3), rot: Math.round(rand(-12, 12)), scale: 1 };
 }
 
 /* ── SELEÇÃO / COLOCAÇÃO DE INGREDIENTES ──────────────── */
 function selectIngredient(id) {
-  if (gameState.phase !== "build") return;
+  if (gameState.phase !== "build" || gameState.peeking) return;
   gameState.selectedIngredient = gameState.selectedIngredient === id ? null : id;
   syncSelectedBoxUI();
   playSound("select");
 }
 
 function onPizzaClick(e, pizzaIndex) {
-  if (gameState.phase !== "build") return;
+  if (gameState.phase !== "build" || gameState.peeking) return;
   if (e.target.closest(".pz-topping")) return; // clique num topping já tratado no próprio elemento
   setActivePizza(pizzaIndex);
   if (!gameState.selectedIngredient) return;
@@ -909,10 +947,16 @@ function clampToDisk(x, y) {
 
 function placeTopping(pizzaIndex, type, nx, ny) {
   const { x, y } = clampToDisk(nx, ny);
-  const t = { id: toppingIdCounter++, type, x: +x.toFixed(3), y: +y.toFixed(3), rot: Math.round(rand(-12, 12)), scale: 1 };
+  const isWildcard = gameState.coringaArmed;
+  const t = { id: toppingIdCounter++, type, x: +x.toFixed(3), y: +y.toFixed(3), rot: Math.round(rand(-12, 12)), scale: 1, wildcard: isWildcard };
   gameState.pizzas[pizzaIndex].player.push(t);
   gameState.undoStack.push({ pizzaIndex, toppingId: t.id });
   gameState.stats.ingredientUsage[type] = (gameState.stats.ingredientUsage[type] || 0) + 1;
+  if (isWildcard) {
+    gameState.coringaArmed = false;
+    gameState.powerups.coringa--;
+    updatePowerupButtons();
+  }
   renderPlayerPizza(pizzaIndex);
   const el = gameState.pizzas[pizzaIndex].toppingsEl.querySelector(`[data-topping-id="${t.id}"]`);
   if (el) el.classList.add("pz-topping--placing");
@@ -921,7 +965,7 @@ function placeTopping(pizzaIndex, type, nx, ny) {
 }
 
 function removeTopping(pizzaIndex, toppingId) {
-  if (gameState.phase !== "build") return;
+  if (gameState.phase !== "build" || gameState.peeking) return;
   const pz = gameState.pizzas[pizzaIndex];
   pz.player = pz.player.filter(t => t.id !== toppingId);
   gameState.undoStack = gameState.undoStack.filter(u => !(u.pizzaIndex === pizzaIndex && u.toppingId === toppingId));
@@ -930,7 +974,7 @@ function removeTopping(pizzaIndex, toppingId) {
 }
 
 function undoLast() {
-  if (gameState.phase !== "build" || gameState.undoStack.length === 0) return;
+  if (gameState.phase !== "build" || gameState.peeking || gameState.undoStack.length === 0) return;
   const last = gameState.undoStack.pop();
   const pz = gameState.pizzas[last.pizzaIndex];
   pz.player = pz.player.filter(t => t.id !== last.toppingId);
@@ -940,7 +984,7 @@ function undoLast() {
 }
 
 function clearPizza() {
-  if (gameState.phase !== "build") return;
+  if (gameState.phase !== "build" || gameState.peeking) return;
   const pz = gameState.pizzas[gameState.activePizza];
   if (pz.player.length === 0) return;
   const ids = new Set(pz.player.map(t => t.id));
@@ -957,7 +1001,7 @@ function clearPizza() {
 const DRAG_THRESHOLD = 6; // px
 let dragState = null;
 function startDrag(e, ingId) {
-  if (gameState.phase !== "build") return;
+  if (gameState.phase !== "build" || gameState.peeking) return;
   dragState = { ingId, startX: e.clientX, startY: e.clientY, moved: false };
 }
 function onDragMove(e) {
@@ -1003,10 +1047,12 @@ function onDragEnd(e) {
 /* ══════════════════════════════════════════════════════════
    SCORING — comparação pizza-modelo x pizza do jogador
 ══════════════════════════════════════════════════════════ */
-function positionScoreForDist(d) {
-  if (d <= CONFIG.CLOSE_DIST) return 100;
-  if (d >= CONFIG.FAR_DIST) return 0;
-  const t = (d - CONFIG.CLOSE_DIST) / (CONFIG.FAR_DIST - CONFIG.CLOSE_DIST);
+function positionScoreForDist(d, close, far) {
+  close = close != null ? close : CONFIG.CLOSE_DIST;
+  far = far != null ? far : CONFIG.FAR_DIST;
+  if (d <= close) return 100;
+  if (d >= far) return 0;
+  const t = (d - close) / (far - close);
   // queda mais acentuada que linear — distâncias medianas já pontuam bem menos (mais rígido)
   return 100 * Math.pow(1 - t, 1.6);
 }
@@ -1017,7 +1063,53 @@ function countByType(list) {
   return m;
 }
 
-function scorePizza(target, player, elapsedSec, budgetSec) {
+// Power-up Coringa: cada topping marcado como "wildcard" vira, na hora de
+// pontuar, uma cópia perfeita (mesmo tipo e posição) de um topping-modelo
+// que AINDA NÃO foi coberto pelos toppings normais do jogador — ou seja,
+// o coringa preenche uma lacuna de verdade, em vez de duplicar acerto que
+// o jogador já tinha conseguido sozinho.
+function applyWildcards(target, player) {
+  const normalPlayers = player.filter(p => !p.wildcard);
+  const wildcards = player.filter(p => p.wildcard);
+  if (wildcards.length === 0) return player;
+
+  // Quais toppings-modelo já estão cobertos por um topping normal do mesmo tipo?
+  const usedNormal = new Set();
+  const covered = new Set();
+  target.forEach(mt => {
+    let best = null, bestD = Infinity;
+    normalPlayers.forEach(pt => {
+      if (pt.type !== mt.type || usedNormal.has(pt.id)) return;
+      const d = Math.hypot(mt.x - pt.x, mt.y - pt.y);
+      if (d < bestD) { bestD = d; best = pt; }
+    });
+    if (best) { usedNormal.add(best.id); covered.add(mt.id); }
+  });
+
+  // Os coringas preenchem, do mais próximo, os alvos que ainda faltam
+  const gaps = target.filter(mt => !covered.has(mt.id));
+  const claimedGaps = new Set();
+  const resolvedWildcards = wildcards.map(p => {
+    let best = null, bestD = Infinity;
+    gaps.forEach(mt => {
+      if (claimedGaps.has(mt.id)) return;
+      const d = Math.hypot(mt.x - p.x, mt.y - p.y);
+      if (d < bestD) { bestD = d; best = mt; }
+    });
+    if (best) {
+      claimedGaps.add(best.id);
+      return { ...p, type: best.type, x: best.x, y: best.y };
+    }
+    return p; // não sobrou lacuna pra preencher — vira um topping normal
+  });
+
+  return [...normalPlayers, ...resolvedWildcards];
+}
+
+function scorePizza(target, player, elapsedSec, budgetSec, tol) {
+  player = applyWildcards(target, player);
+  const closeD = tol && tol.close != null ? tol.close : undefined;
+  const farD = tol && tol.far != null ? tol.far : undefined;
   const modelTypes = new Set(target.map(t => t.type));
   const playerTypes = new Set(player.map(t => t.type));
   const unionTypes = new Set([...modelTypes, ...playerTypes]);
@@ -1038,23 +1130,26 @@ function scorePizza(target, player, elapsedSec, budgetSec) {
   });
   const quantityScore = qtyN === 0 ? 100 : (qtySum / qtyN) * 100;
 
-  // 3. posição aproximada (30%) — casamento guloso do topping mais próximo do mesmo tipo
-  const usedPlayer = new Set();
-  let posSum = 0, matchedCount = 0;
+  // 3. posição aproximada (30%) — casamento guloso GLOBAL: monta todos os
+  // pares (alvo, jogador) do mesmo tipo, ordena pela distância e vai
+  // casando do par mais próximo pro mais distante. Isso evita que um
+  // alvo "roube" por engano o topping que na verdade era o par perfeito
+  // de outro alvo do mesmo ingrediente (bug do casamento por ordem simples).
+  const pairs = [];
   target.forEach(mt => {
-    let best = null, bestD = Infinity;
     player.forEach(pt => {
-      if (pt.type !== mt.type || usedPlayer.has(pt.id)) return;
-      const d = Math.hypot(mt.x - pt.x, mt.y - pt.y);
-      if (d < bestD) { bestD = d; best = pt; }
+      if (pt.type === mt.type) pairs.push({ mt, pt, d: Math.hypot(mt.x - pt.x, mt.y - pt.y) });
     });
-    if (best) {
-      usedPlayer.add(best.id);
-      posSum += positionScoreForDist(bestD);
-      matchedCount++;
-    } else {
-      posSum += 0;
-    }
+  });
+  pairs.sort((a, b) => a.d - b.d);
+  const usedTarget = new Set(), usedPlayer = new Set();
+  let posSum = 0, matchedCount = 0;
+  pairs.forEach(({ mt, pt, d }) => {
+    if (usedTarget.has(mt.id) || usedPlayer.has(pt.id)) return;
+    usedTarget.add(mt.id);
+    usedPlayer.add(pt.id);
+    posSum += positionScoreForDist(d, closeD, farD);
+    matchedCount++;
   });
   const positionScore = target.length === 0 ? 100 : posSum / target.length;
 
@@ -1079,7 +1174,7 @@ function scorePizza(target, player, elapsedSec, budgetSec) {
    SERVIR / RESULTADO
 ══════════════════════════════════════════════════════════ */
 function servePizza() {
-  if (gameState.phase !== "build") return;
+  if (gameState.phase !== "build" || gameState.peeking) return;
   gameState.phase = "result";
   setIngredientsInteractive(false);
   clearInterval(gameState.memorizeTimer);
@@ -1090,7 +1185,12 @@ function servePizza() {
   const cfg = getLevelConfig(gameState.level);
   const budgetSec = buildBudgetSeconds(cfg.toppings * cfg.pizzas);
 
-  const results = gameState.pizzas.map(pz => scorePizza(pz.target, pz.player, elapsedSec, budgetSec));
+  // Nível especial "Cliente exigente": tolerância de posição bem mais apertada
+  const tol = gameState.levelVariant === "exigente"
+    ? { close: CONFIG.CLOSE_DIST * 0.6, far: CONFIG.FAR_DIST * 0.7 }
+    : undefined;
+
+  const results = gameState.pizzas.map(pz => scorePizza(pz.target, pz.player, elapsedSec, budgetSec, tol));
   let nota = Math.round(results.reduce((s, r) => s + r.nota, 0) / results.length);
   const minNota = Math.min(...results.map(r => r.nota));
   if (results.length > 1 && minNota < 40) nota = Math.max(0, nota - 10);
@@ -1103,6 +1203,7 @@ function showResult(nota, results, elapsedSec, budgetSec) {
   const excelente = nota >= 90;
   const perfeita = nota >= 95;
 
+  const variant = gameState.levelVariant;
   let pointsEarned = 0, bonusBreakdown = [];
   if (passed) {
     const base = nota * 100;
@@ -1111,10 +1212,8 @@ function showResult(nota, results, elapsedSec, budgetSec) {
     const bonusNoUndo = gameState.usedUndoOrClear ? 0 : 500;
     const leftoverFrac = Math.max(0, Math.min(1, 1 - elapsedSec / budgetSec));
     const bonusSpeed = Math.round(leftoverFrac * 1500);
-    pointsEarned = base + bonusLevel + bonusTier + bonusNoUndo + bonusSpeed;
-    gameState.score += pointsEarned;
-    gameState.stats.completas++;
-    if (perfeita) gameState.stats.perfeitas++;
+    const bonusExigente = variant === "exigente" ? 1500 : 0;
+    let subtotal = base + bonusLevel + bonusTier + bonusNoUndo + bonusSpeed + bonusExigente;
 
     bonusBreakdown = [
       { label: "Nota da pizza", value: base },
@@ -1122,13 +1221,26 @@ function showResult(nota, results, elapsedSec, budgetSec) {
       bonusTier ? { label: perfeita ? "Bônus perfeito" : "Bônus excelente", value: bonusTier, bonus: true } : null,
       bonusNoUndo ? { label: "Sem desfazer/limpar", value: bonusNoUndo, bonus: true } : null,
       bonusSpeed ? { label: "Bônus de velocidade", value: bonusSpeed, bonus: true } : null,
+      bonusExigente ? { label: "Bônus cliente exigente", value: bonusExigente, bonus: true } : null,
     ].filter(Boolean);
+
+    // Nível especial "Pedido relâmpago": pontos em dobro nesse nível
+    if (variant === "relampago") {
+      bonusBreakdown.push({ label: "Pedido relâmpago — pontos em dobro", value: Math.round(subtotal), bonus: true });
+      subtotal *= 2;
+    }
+
+    pointsEarned = Math.round(subtotal);
+    gameState.score += pointsEarned;
+    gameState.stats.completas++;
+    if (perfeita) gameState.stats.perfeitas++;
   }
 
   updateHUD();
 
   if (!passed) {
     gameState.lives--;
+    gameState.excelenteStreak = 0; // sequência quebra em qualquer resultado ruim
     updateHUD();
     playSound("bravo");
     vibrate([60, 40, 60]);
@@ -1136,8 +1248,8 @@ function showResult(nota, results, elapsedSec, budgetSec) {
     setTimeout(() => dom.stage.classList.remove("is-shaking"), 400);
     setCustomerState("angry", pick(CUSTOMER_MESSAGES.brava));
     dom.angryTitle.textContent = pick(CUSTOMER_MESSAGES.brava);
-    dom.angryLives.innerHTML = Array.from({ length: CONFIG.START_LIVES })
-      .map((_, i) => `<span class="pz-life${i >= gameState.lives ? " is-lost" : ""}"></span>`).join("");
+    dom.angryLives.innerHTML = Array.from({ length: Math.max(0, gameState.lives) })
+      .map(() => '<span class="pz-life"></span>').join("");
     dom.actions.hidden = true;
     if (gameState.lives <= 0) {
       setTimeout(showGameOver, 900);
@@ -1145,6 +1257,20 @@ function showResult(nota, results, elapsedSec, budgetSec) {
       dom.ovAngry.hidden = false;
     }
     return;
+  }
+
+  // Vida bônus: sequência de notas excelentes seguidas
+  let gotBonusLife = false;
+  if (excelente) {
+    gameState.excelenteStreak++;
+    if (gameState.excelenteStreak >= CONFIG.EXCELENTE_STREAK_FOR_LIFE && gameState.lives < CONFIG.MAX_LIVES) {
+      gameState.lives++;
+      gameState.excelenteStreak = 0;
+      gotBonusLife = true;
+      updateHUD();
+    }
+  } else {
+    gameState.excelenteStreak = 0;
   }
 
   // Passou de nível
@@ -1157,6 +1283,11 @@ function showResult(nota, results, elapsedSec, budgetSec) {
     gameState.pizzas.forEach(pz => pz.pizzaEl.classList.toggle("is-glow", perfeita));
     playSound("excelente");
     vibrate(perfeita ? [30, 30, 30, 30] : [40, 30]);
+  }
+
+  if (gotBonusLife) {
+    bonusBreakdown.push({ label: "Sequência incrível — vida bônus!", value: "1 vida", bonus: true });
+    setTimeout(() => { playSound("desbloqueio"); vibrate([20, 20, 20]); }, 300);
   }
 
   dom.resultKicker.textContent = perfeita ? "Perfeita!" : excelente ? "Excelente!" : nota >= 70 ? "Boa pizza!" : "Passou raspando";
