@@ -459,6 +459,14 @@ function setIngredientsInteractive(active) {
   }
 }
 
+// Mesma ideia para a barra de ações (Espiadinha/Coringa/Desfazer/Limpar/Servir):
+// fica sempre visível e com o layout normal, só "esmaece" e trava o toque
+// fora da fase de montar — nunca esconde o bloco (isso é o que causava o
+// texto colado/desformatado ao aparecer e sumir).
+function setActionsInteractive(active) {
+  dom.actions.classList.toggle("is-waiting", !active);
+}
+
 /* ══════════════════════════════════════════════════════════
    RENDER — PIZZAS / BANCADA
 ══════════════════════════════════════════════════════════ */
@@ -824,7 +832,7 @@ function beginLevelSetup(level) {
     pz.fogEl.style.transform = `rotate(${Math.round(rand(0, 360))}deg)`;
   }
 
-  dom.actions.hidden = true;
+  setActionsInteractive(false);
   showMemoryPhase();
 }
 
@@ -885,7 +893,7 @@ function startBuildPhase() {
       pz.cloche.classList.add("pz-cloche--hidden"); // tampa sobe e some
     });
     setActivePizza(0);
-    dom.actions.hidden = false;
+    setActionsInteractive(true);
     gameState.buildStartTime = performance.now();
     gameState.phase = "build";
     setIngredientsInteractive(true);
@@ -1250,7 +1258,7 @@ function showResult(nota, results, elapsedSec, budgetSec) {
     dom.angryTitle.textContent = pick(CUSTOMER_MESSAGES.brava);
     dom.angryLives.innerHTML = Array.from({ length: Math.max(0, gameState.lives) })
       .map(() => '<span class="pz-life"></span>').join("");
-    dom.actions.hidden = true;
+    setActionsInteractive(false);
     if (gameState.lives <= 0) {
       setTimeout(showGameOver, 900);
     } else {
@@ -1302,7 +1310,7 @@ function showResult(nota, results, elapsedSec, budgetSec) {
   ).join("");
   dom.resultPoints.textContent = String(pointsEarned);
 
-  dom.actions.hidden = true;
+  setActionsInteractive(false);
   dom.ovResult.hidden = false;
 
   if (gameState.level >= CONFIG.TOTAL_LEVELS) {
