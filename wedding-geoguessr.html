@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>Volta ao Mundo — Tiago &amp; Gian</title>
+<meta name="description" content="Um GeoGuessr-like: veja o Street View, use até 5 movimentos e adivinhe onde você está. 6 rodadas, pontuação máxima de 30.000 pontos."/>
+
+<!-- Open Graph -->
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="Volta ao Mundo — Tiago &amp; Gian"/>
+<meta property="og:description" content="6 lugares. 5 movimentos. Um palpite. Um arcade de geografia com Google Street View."/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/css/wedding-geoguessr.css"/>
+</head>
+<body class="gg-body">
+
+  <div class="gg-frame" id="gg-frame">
+
+    <header class="gg-topbar" id="gg-topbar">
+      <a class="gg-back" href="jogos.html">← Voltar aos jogos</a>
+      <div class="gg-brand">Tiago &amp; Gian</div>
+    </header>
+
+    <!-- ═══ TELA INICIAL ═══ -->
+    <section id="screen-start" class="gg-screen gg-screen--start">
+      <div class="gg-start-card">
+        <p class="gg-eyebrow">Arcade de geografia</p>
+        <h1 class="gg-title">Volta ao Mundo</h1>
+        <p class="gg-subtitle">6 lugares. 5 movimentos. Um palpite.</p>
+
+        <div class="gg-highscore-badge">
+          <span>Recorde</span>
+          <strong id="start-highscore">0</strong>
+        </div>
+
+        <p class="gg-instructions">Olhe ao redor, use até 5 movimentos e marque no mapa onde você acha que está.</p>
+
+        <button class="gg-btn gg-btn--primary" id="btn-play">Jogar</button>
+      </div>
+    </section>
+
+    <!-- ═══ TELA DE CARREGAMENTO ═══ -->
+    <section id="screen-loading" class="gg-screen gg-screen--loading" hidden>
+      <div class="gg-loading-card">
+        <div class="gg-spinner" aria-hidden="true"></div>
+        <p id="loading-text">Preparando sua viagem…</p>
+      </div>
+    </section>
+
+    <!-- ═══ TELA DE ERRO ═══ -->
+    <section id="screen-error" class="gg-screen gg-screen--error" hidden>
+      <div class="gg-error-card">
+        <p class="gg-eyebrow gg-eyebrow--error">Ops</p>
+        <h2 id="error-title">Algo não saiu como esperado</h2>
+        <p id="error-text">Não foi possível carregar o jogo.</p>
+        <button class="gg-btn gg-btn--ghost" id="btn-error-retry">Tentar novamente</button>
+      </div>
+    </section>
+
+    <!-- ═══ TELA DE JOGO (STREET VIEW) ═══ -->
+    <section id="screen-game" class="gg-screen gg-screen--game" hidden>
+
+      <div id="street-view" class="gg-streetview"></div>
+
+      <div class="gg-hud" id="gg-hud">
+        <div class="gg-hud__row">
+          <div class="gg-pill gg-pill--round">
+            <span class="gg-pill__label">Rodada</span>
+            <strong><span id="hud-round">1</span>/6</strong>
+          </div>
+          <div class="gg-pill gg-pill--score">
+            <span class="gg-pill__label">Pontos</span>
+            <strong id="hud-score">0</strong>
+          </div>
+          <div class="gg-pill gg-pill--moves" id="hud-moves-pill">
+            <span class="gg-pill__label">Movimentos</span>
+            <strong><span id="hud-moves">0</span>/5</strong>
+          </div>
+          <button class="gg-icon-btn" id="btn-sound" aria-label="Som" title="Som">
+            <span class="gg-icon-sound" id="icon-sound"></span>
+          </button>
+        </div>
+      </div>
+
+      <p class="gg-hint" id="gg-hint">Olhar ao redor é livre. Mover gasta 1 movimento.</p>
+
+      <p class="gg-move-limit-msg" id="move-limit-msg" hidden>Limite de movimentos atingido</p>
+
+      <div class="gg-move-controls" id="move-controls">
+        <!-- botões de movimento montados via JS a partir de panorama.getLinks() -->
+      </div>
+
+      <button class="gg-btn gg-btn--guess" id="btn-guess">Adivinhar</button>
+    </section>
+
+    <!-- ═══ MODAL: MAPA DE PALPITE ═══ -->
+    <div id="modal-guess" class="gg-modal" hidden>
+      <div class="gg-modal__card gg-modal__card--map">
+        <p class="gg-modal__hint">Clique no mapa para marcar seu palpite.</p>
+        <div id="guess-map" class="gg-guess-map"></div>
+        <div class="gg-modal__actions">
+          <button class="gg-btn gg-btn--ghost" id="btn-back-streetview">Voltar ao Street View</button>
+          <button class="gg-btn gg-btn--primary" id="btn-confirm-guess" disabled>Confirmar palpite</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TELA DE RESULTADO DA RODADA ═══ -->
+    <section id="screen-result" class="gg-screen gg-screen--result" hidden>
+      <div class="gg-result-card">
+        <h2 id="result-distance">Você ficou a 0 km</h2>
+        <p class="gg-result-points" id="result-points">+0 pontos</p>
+        <p class="gg-result-place">Era: <strong id="result-place">—</strong></p>
+        <div id="result-map" class="gg-result-map"></div>
+        <button class="gg-btn gg-btn--primary" id="btn-next-round">Próxima rodada</button>
+      </div>
+    </section>
+
+    <!-- ═══ TELA FINAL ═══ -->
+    <section id="screen-final" class="gg-screen gg-screen--final" hidden>
+      <div class="gg-final-card">
+        <p class="gg-eyebrow">Fim de jogo</p>
+        <h2 class="gg-final-title" id="final-headline">Sua volta ao mundo terminou</h2>
+
+        <div class="gg-final-score-wrap">
+          <span>Pontuação total</span>
+          <strong id="final-score">0</strong>
+        </div>
+
+        <p class="gg-final-highscore" id="final-highscore-msg">Recorde: <strong id="final-highscore">0</strong></p>
+
+        <div class="gg-final-stats">
+          <div class="gg-final-stat">
+            <span>Melhor rodada</span>
+            <strong id="final-best">—</strong>
+          </div>
+          <div class="gg-final-stat">
+            <span>Pior rodada</span>
+            <strong id="final-worst">—</strong>
+          </div>
+          <div class="gg-final-stat">
+            <span>Distância média</span>
+            <strong id="final-avg">—</strong>
+          </div>
+        </div>
+
+        <button class="gg-btn gg-btn--primary" id="btn-play-again">Jogar de novo</button>
+      </div>
+    </section>
+
+    <div id="confetti-layer" class="gg-confetti-layer" aria-hidden="true"></div>
+
+  </div>
+
+  <!--
+    IMPORTANTE — CHAVE DA GOOGLE MAPS API
+    Este é um site estático (GitHub Pages), sem backend, então a chave abaixo
+    ficará visível no HTML — isso é esperado e não pode ser evitado num front-end puro.
+    Para manter o jogo seguro:
+      1. Crie uma chave em https://console.cloud.google.com/google/maps-apis
+      2. Restrinja a chave por "HTTP referrer" ao domínio do seu GitHub Pages
+         (ex.: https://seu-usuario.github.io/*)
+      3. Habilite apenas as APIs necessárias: "Maps JavaScript API" e "Street View Static API"
+      4. Substitua SUA_GOOGLE_MAPS_API_KEY abaixo pela sua chave restrita
+    Sem uma chave válida e habilitada, o jogo mostrará uma tela de erro explicando o problema.
+  -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=SUA_GOOGLE_MAPS_API_KEY&callback=initGame" async defer></script>
+  <script src="assets/js/wedding-geoguessr.js"></script>
+</body>
+</html>
