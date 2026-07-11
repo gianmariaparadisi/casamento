@@ -557,6 +557,15 @@ img{ display:block; max-width:100%; }
 
 .pz-actions{
   display:flex; gap:8px; justify-content:center; flex-wrap:wrap;
+  transition: opacity .2s ease, filter .2s ease;
+}
+/* Fora da fase de montar, a barra continua com o layout normal (não
+   soma/some, o que causava o texto colado ao trocar de fase) — só fica
+   esmaecida e sem clique, igual às caixas de ingrediente. */
+.pz-actions.is-waiting{
+  pointer-events:none;
+  opacity:.45;
+  filter:grayscale(.6);
 }
 .pz-btn{
   padding: 11px 20px;
