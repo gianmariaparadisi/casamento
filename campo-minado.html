@@ -2,14 +2,14 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Campo Minado do Casamento — Tiago e Gian</title>
 
   <!-- Open Graph / WhatsApp / iMessage preview -->
   <meta property="og:type"         content="website" />
   <meta property="og:title"        content="Campo Minado do Casamento — Tiago e Gian" />
   <meta property="og:description"  content="Revele as casinhas sem encontrar nenhum coração partido!" />
-  <meta property="og:image"        content="https://gianmariaparadisi.github.io/casamento/assets/img/tile-bouquet.png" />
+  <meta property="og:image"        content="https://gianmariaparadisi.github.io/casamento/assets/img/match-bouquet.png" />
   <meta property="og:url"          content="https://gianmariaparadisi.github.io/casamento/campo-minado.html" />
   <meta property="og:site_name"    content="Tiago e Gian · 12.12.2026" />
   <meta name="twitter:card"        content="summary_large_image" />
@@ -20,97 +20,165 @@
   <link rel="stylesheet" href="assets/css/style.css"/>
   <style>
     :root{
-      --cm-pink:#ff7eb6; --cm-pink-deep:#ff4f9a; --cm-text:#6b3f4d; --cm-muted:#a9728a;
-      --cm-cell:#ffe3ef; --cm-cell-hover:#ffd0e3; --cm-cell-revealed:#fffaf6;
+      --gi:#2A2820; --gm:#6C6258; --gl:#D8CDBC; --gc:#FBF7EF; --gg:#C8A050; --gg-dark:#A47845;
+      --cm-tile:#FFFDF8; --cm-tile-2:#F6EEDF; --cm-tile-hover:#FFF6E6;
+      --cm-open:#F1E8D8; --cm-open-line:rgba(200,160,80,.22);
+      --cm-danger:#E8CFC2;
     }
     body.game-page{
-      min-height:100svh;color:var(--cm-text);
+      min-height:100svh;color:var(--gi);
       background:
-        radial-gradient(circle at 12% 0%, rgba(255,255,255,.9), transparent 26rem),
-        radial-gradient(circle at 88% 10%, rgba(255,126,182,.18), transparent 28rem),
-        linear-gradient(180deg,#fff0f5 0%,#fff8ef 55%,#fdeef4 100%);
+        radial-gradient(circle at 14% 0%, rgba(255,255,255,.92), transparent 28rem),
+        radial-gradient(circle at 82% 14%, rgba(246,214,151,.34), transparent 26rem),
+        linear-gradient(180deg,#FBF7EF 0%,#F2E7D7 55%,#EFE1D0 100%);
     }
-    .game-nav{position:sticky;top:0;z-index:30;background:rgba(255,250,246,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,210,225,.7);}
+    .game-nav{position:sticky;top:0;z-index:20;background:rgba(251,247,239,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(216,205,188,.7);}
     .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:13px 0;}
-    .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.84rem;color:var(--cm-muted);}
-    .game-back{font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;color:#a9728a;text-decoration:underline;text-underline-offset:4px;}
+    .game-brand{font-family:var(--font-display);letter-spacing:.14em;text-transform:uppercase;font-size:.84rem;color:var(--gm);}
+    .game-back{font-size:.73rem;letter-spacing:.1em;text-transform:uppercase;color:#766553;text-decoration:underline;text-underline-offset:4px;}
 
-    .game-shell{width:92%;max-width:520px;margin:0 auto;padding:28px 0 80px;position:relative;}
-    .game-kicker{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--cm-pink-deep);text-align:center;margin-bottom:.35rem;}
-    .game-title{font-family:var(--font-display);font-size:clamp(2rem,7vw,3.2rem);font-weight:400;text-align:center;margin-bottom:.4rem;color:var(--cm-pink-deep);display:flex;align-items:center;justify-content:center;gap:.3rem;}
-    .game-title img{width:1em;height:1em;object-fit:contain;}
-    .game-sub{max-width:420px;margin:0 auto 1.1rem;text-align:center;color:var(--cm-muted);font-size:.88rem;line-height:1.65;}
+    .game-shell{width:92%;max-width:560px;margin:0 auto;padding:28px 0 80px;position:relative;}
+    .game-kicker{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gg-dark);text-align:center;margin-bottom:.4rem;}
+    .game-title{font-family:var(--font-display);font-size:clamp(2rem,7vw,3.6rem);font-weight:300;line-height:.95;text-align:center;margin-bottom:.5rem;display:flex;align-items:center;justify-content:center;gap:.4rem;}
+    .game-title img{width:.85em;height:.85em;object-fit:contain;opacity:.9;}
+    .game-sub{max-width:440px;margin:0 auto 1rem;text-align:center;color:var(--gm);font-size:.88rem;line-height:1.65;}
 
-    .float-hearts{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
-    .float-hearts img{position:absolute;bottom:-40px;opacity:.16;animation:cmFloatUp linear infinite;}
-    @keyframes cmFloatUp{0%{transform:translateY(0) rotate(0deg);opacity:0;}10%{opacity:.2;}90%{opacity:.16;}100%{transform:translateY(-640px) rotate(25deg);opacity:0;}}
+    /* pétalas / brilhos de fundo */
+    .float-deco{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+    .float-deco img{position:absolute;bottom:-50px;opacity:0;animation:cmFloatUp linear infinite;}
+    @keyframes cmFloatUp{0%{transform:translateY(0) rotate(0deg);opacity:0}12%{opacity:.22}88%{opacity:.16}100%{transform:translateY(-700px) rotate(28deg);opacity:0}}
 
-    .game-panel{position:relative;z-index:1;border:1px solid rgba(255,210,225,.9);background:rgba(255,255,255,.62);border-radius:22px;box-shadow:0 18px 50px rgba(255,126,182,.18);padding:1.2rem 1.1rem;}
+    /* painel */
+    .game-panel{position:relative;z-index:1;border:1px solid rgba(216,205,188,.9);background:rgba(255,255,255,.55);border-radius:22px;box-shadow:0 12px 40px rgba(82,57,34,.10);padding:1.15rem 1rem 1.25rem;}
+    .panel-corner{position:absolute;width:38px;height:38px;object-fit:contain;opacity:.32;pointer-events:none;}
+    .panel-corner.tl{top:6px;left:6px;}
+    .panel-corner.br{bottom:6px;right:6px;transform:rotate(180deg);}
 
-    .difficulty{display:flex;gap:8px;margin-bottom:14px;}
-    .diff-btn{flex:1;border:none;padding:9px 0;border-radius:12px;background:var(--cm-cell);color:var(--cm-text);font-size:.78rem;font-weight:700;cursor:pointer;transition:background .15s ease,color .15s ease,transform .1s ease;}
-    .diff-btn.active{background:linear-gradient(135deg,var(--cm-pink),var(--cm-pink-deep));color:#fff;box-shadow:0 6px 14px rgba(255,79,154,.35);}
-    .diff-btn:hover:not(.active){background:var(--cm-cell-hover);}
+    .difficulty{display:flex;gap:7px;margin-bottom:13px;}
+    .diff-btn{flex:1;border:1px solid rgba(216,205,188,.9);padding:.5rem 0;border-radius:999px;background:rgba(255,255,255,.7);color:#5A4C3D;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .16s ease;}
+    .diff-btn.active{background:linear-gradient(135deg,#D6B167,#B98538);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(164,120,69,.28);}
+    .diff-btn:hover:not(.active){background:#FFF9EF;transform:translateY(-1px);}
     .diff-btn:active{transform:scale(.96);}
 
-    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
-    .hud__pill{background:rgba(255,255,255,.7);border:1px solid rgba(255,210,225,.85);border-radius:999px;padding:.4rem .8rem;font-size:.74rem;font-weight:700;color:var(--cm-pink-deep);display:flex;align-items:center;gap:.35rem;font-variant-numeric:tabular-nums;}
-    .hud__pill img{width:1.3rem;height:1.3rem;object-fit:contain;}
-    .hud__pill span.lbl{color:var(--cm-muted);font-weight:600;text-transform:uppercase;font-size:.62rem;letter-spacing:.05em;}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
+    .hud__pill{background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.85);border-radius:999px;padding:.42rem .8rem;font-size:.76rem;font-weight:700;color:#7B4B22;display:flex;align-items:center;gap:.38rem;font-variant-numeric:tabular-nums;}
+    .hud__pill img{width:1.15rem;height:1.15rem;object-fit:contain;}
+    .hud__pill .lbl{color:var(--gm);font-weight:600;text-transform:uppercase;font-size:.6rem;letter-spacing:.08em;}
 
-    .face-btn{border:none;background:var(--cm-cell);width:48px;height:48px;border-radius:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s ease,background .15s ease;}
-    .face-btn img{width:26px;height:26px;object-fit:contain;}
-    .face-btn:hover{background:var(--cm-cell-hover);transform:scale(1.05);}
+    .face-btn{border:1px solid rgba(216,205,188,.9);background:rgba(255,255,255,.8);width:50px;height:50px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .14s ease,box-shadow .15s ease;box-shadow:0 4px 14px rgba(82,57,34,.08);}
+    .face-btn img{width:27px;height:27px;object-fit:contain;}
+    .face-btn:hover{transform:scale(1.07) rotate(-4deg);box-shadow:0 7px 20px rgba(164,120,69,.22);}
     .face-btn:active{transform:scale(.9);}
+    .face-btn.celebrate{animation:cmFacePop .6s ease;}
+    @keyframes cmFacePop{0%{transform:scale(1)}35%{transform:scale(1.3) rotate(8deg)}70%{transform:scale(.94) rotate(-5deg)}100%{transform:scale(1)}}
 
-    .flag-mode-row{display:flex;justify-content:center;margin-bottom:12px;}
-    .flag-mode-btn{display:inline-flex;align-items:center;gap:.4rem;border:1.5px solid rgba(255,210,225,.95);background:#fff;color:var(--cm-text);padding:.45rem .9rem;border-radius:999px;font-size:.72rem;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:all .15s;}
-    .flag-mode-btn img{width:1.1rem;height:1.1rem;object-fit:contain;}
-    .flag-mode-btn.active{background:linear-gradient(135deg,var(--cm-pink),var(--cm-pink-deep));color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(255,79,154,.3);}
+    /* tabuleiro */
+    .board-wrap{display:flex;justify-content:center;padding:6px 2px;}
+    .board{display:grid;gap:5px;touch-action:manipulation;}
+    .board.shake{animation:cmShake .45s ease;}
+    @keyframes cmShake{0%,100%{transform:translateX(0)}18%{transform:translateX(-8px) rotate(-.8deg)}38%{transform:translateX(8px) rotate(.8deg)}58%{transform:translateX(-6px)}78%{transform:translateX(5px)}}
 
-    .board-wrap{display:flex;justify-content:center;overflow:auto;padding:2px;}
-    .board{display:grid;gap:4px;touch-action:manipulation;}
-    .board.shake{animation:cmShake .4s ease;}
-    @keyframes cmShake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px) rotate(-1deg);}40%{transform:translateX(8px) rotate(1deg);}60%{transform:translateX(-6px);}80%{transform:translateX(6px);}}
+    @property --cmp{syntax:'<percentage>';inherits:false;initial-value:0%;}
 
-    .cell{border-radius:8px;background:var(--cm-cell);border:none;display:flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;user-select:none;transition:background .12s ease,transform .05s ease;padding:0;}
-    .cell:hover{background:var(--cm-cell-hover);}
-    .cell:active{transform:scale(.92);}
-    .cell.revealed{background:var(--cm-cell-revealed);cursor:default;box-shadow:inset 0 0 0 1px rgba(255,210,225,.9);animation:cmPop .16s ease;}
-    @keyframes cmPop{0%{transform:scale(.6);opacity:.4;}100%{transform:scale(1);opacity:1;}}
-    .cell.revealed:hover{background:var(--cm-cell-revealed);}
-    .cell.mine{background:#ffd3e2;}
-    .cell .icon-img{width:62%;height:62%;object-fit:contain;}
+    .cell{
+      position:relative;border-radius:9px;padding:0;line-height:1;
+      background:linear-gradient(160deg,var(--cm-tile) 0%,var(--cm-tile-2) 100%);
+      border:1px solid rgba(216,205,188,.85);
+      box-shadow:0 2px 5px rgba(82,57,34,.07), inset 0 1px 0 rgba(255,255,255,.9);
+      display:flex;align-items:center;justify-content:center;
+      font-family:var(--font-display);font-weight:600;
+      cursor:pointer;
+      user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+      transition:background .14s ease,transform .08s ease,box-shadow .14s ease;
+    }
+    .cell:hover:not(.revealed){background:linear-gradient(160deg,#FFF9EC,var(--cm-tile-hover));transform:translateY(-1px);}
+    .cell:active:not(.revealed){transform:scale(.93);}
 
-    .n1{color:#4f7cff;}.n2{color:#2bb673;}.n3{color:#ff5c8a;}.n4{color:#a05cff;}
-    .n5{color:#e08a2b;}.n6{color:#0c8599;}.n7{color:#6b3f4d;}.n8{color:#b08a9a;}
+    /* anel de progresso do long press */
+    .cell.pressing{transform:scale(.9);box-shadow:0 0 0 1px rgba(200,160,80,.5),0 4px 12px rgba(164,120,69,.25);}
+    .cell.pressing::after{
+      content:"";position:absolute;left:50%;top:50%;width:132%;aspect-ratio:1;transform:translate(-50%,-50%);
+      border-radius:50%;pointer-events:none;z-index:4;
+      background:conic-gradient(var(--gg) var(--cmp), rgba(200,160,80,.16) 0);
+      -webkit-mask:radial-gradient(farthest-side,#0000 calc(100% - 3.5px),#000 calc(100% - 3.5px));
+      mask:radial-gradient(farthest-side,#0000 calc(100% - 3.5px),#000 calc(100% - 3.5px));
+      animation:cmFill 300ms linear forwards;
+    }
+    @keyframes cmFill{from{--cmp:0%}to{--cmp:100%}}
 
-    .status{text-align:center;margin-top:14px;font-size:1rem;font-weight:700;min-height:24px;color:var(--cm-muted);}
-    .status.win{color:#2bb673;}
-    .status.lose{color:var(--cm-pink-deep);}
-    .hint{text-align:center;color:var(--cm-muted);font-size:.72rem;margin-top:6px;font-weight:600;}
+    .cell.bump{animation:cmBump .34s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes cmBump{0%{transform:scale(.7) rotate(-10deg)}60%{transform:scale(1.14) rotate(5deg)}100%{transform:scale(1)}}
+    .cell.nudge{animation:cmNudge .32s ease;}
+    @keyframes cmNudge{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}}
 
-    .game-btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;border-radius:999px;border:1px solid rgba(255,126,182,.35);background:#fff;color:var(--cm-text);padding:.65rem 1.2rem;font-size:.73rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;box-shadow:0 8px 22px rgba(255,126,182,.12);cursor:pointer;transition:transform .14s ease;}
-    .game-btn:hover{transform:translateY(-1px);}
-    .game-btn--main{background:linear-gradient(135deg,var(--cm-pink),var(--cm-pink-deep));color:#fff;border-color:transparent;}
+    .cell.revealed{
+      background:var(--cm-open);border-color:transparent;cursor:default;
+      box-shadow:inset 0 0 0 1px var(--cm-open-line);
+      animation:cmPop .18s ease;
+    }
+    @keyframes cmPop{0%{transform:scale(.55);opacity:.3}100%{transform:scale(1);opacity:1}}
+    .cell.revealed:hover{transform:none;background:var(--cm-open);}
+    .cell.revealed.n0{background:rgba(241,232,216,.55);}
+    .cell.revealed.chordable{cursor:pointer;}
+    .cell.revealed.chordable:hover{background:#EFE3CC;}
+    .cell.mine{background:var(--cm-danger);box-shadow:inset 0 0 0 1px rgba(184,123,62,.4);}
+    .cell.mine-hit{background:#DCA98F;animation:cmBoom .45s ease;}
+    @keyframes cmBoom{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
+    .cell.saved{background:#E5EEDF;box-shadow:inset 0 0 0 1px rgba(122,155,110,.45);}
+    .cell .icon-img{width:66%;height:66%;object-fit:contain;pointer-events:none;}
+    .cell .qmark{color:var(--gg-dark);font-size:1.05em;font-weight:600;opacity:.85;pointer-events:none;}
 
-    .save-box{margin-top:1rem;background:rgba(255,255,255,.65);border:1px solid rgba(255,210,225,.85);border-radius:14px;padding:.85rem;}
-    .save-box__row{display:flex;gap:.45rem;}
-    .save-input{flex:1;min-width:0;border:1px solid rgba(255,210,225,.95);border-radius:999px;background:#fff;padding:.6rem .85rem;font:inherit;font-size:.85rem;outline:none;}
-    .save-msg{font-size:.72rem;color:var(--cm-muted);margin-top:.3rem;min-height:1em;}
-    .top10{margin-top:1.1rem;background:rgba(255,255,255,.5);border:1px solid rgba(255,210,225,.8);border-radius:14px;padding:.85rem;}
-    .top10 h3{font-family:var(--font-display);font-size:1.15rem;font-weight:400;margin-bottom:.45rem;text-align:center;color:var(--cm-pink-deep);}
-    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.3rem;}
-    .top10 li{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.7);border:1px solid rgba(255,210,225,.7);border-radius:10px;padding:.42rem .6rem;font-size:.8rem;}
-    .top10 .pos{font-family:var(--font-display);font-size:.95rem;width:1.3rem;text-align:center;color:var(--cm-pink-deep);}
-    .top10 .name{flex:1;font-weight:500;}
-    .top10 .pts{font-weight:700;color:var(--cm-pink-deep);}
+    .n1{color:#7A9B6E}.n2{color:#5C6B38}.n3{color:#B87B3E}.n4{color:#A47845}
+    .n5{color:#8E2738}.n6{color:#4B7F86}.n7{color:#2A2820}.n8{color:#9A8D7C}
 
+    .status{text-align:center;margin-top:12px;font-family:var(--font-display);font-size:1.35rem;font-weight:400;min-height:26px;color:var(--gm);}
+    .status.win{color:#5C6B38;}
+    .status.lose{color:#8E2738;}
+
+    .coach{display:flex;align-items:center;justify-content:center;gap:.4rem;text-align:center;color:var(--gm);font-size:.74rem;margin-top:8px;line-height:1.5;transition:opacity .3s ease;}
+    .coach img{width:1.05rem;height:1.05rem;object-fit:contain;}
+    .coach .hold-dot{display:inline-block;width:9px;height:9px;border-radius:50%;border:2px solid var(--gg);animation:cmHoldPulse 1.6s ease-in-out infinite;}
+    @keyframes cmHoldPulse{0%,100%{transform:scale(.75);opacity:.45}50%{transform:scale(1.15);opacity:1}}
+
+    .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);z-index:60;background:rgba(42,40,32,.9);color:#FBF7EF;font-size:.76rem;font-weight:500;padding:.55rem 1rem;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease;display:flex;align-items:center;gap:.4rem;}
+    .toast img{width:1rem;height:1rem;object-fit:contain;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+    .game-btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;border-radius:999px;border:1px solid rgba(180,137,70,.35);background:#fff;color:#5A4C3D;padding:.7rem 1.25rem;font-size:.73rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 8px 24px rgba(110,80,45,.09);cursor:pointer;transition:all .15s;}
+    .game-btn:hover{transform:translateY(-1px);background:#FFF9EF;}
+    .game-btn--main{background:linear-gradient(135deg,#D6B167,#B98538);color:#fff;border-color:transparent;}
+    .game-btn--main:hover{background:linear-gradient(135deg,#E0BB71,#C08E42);}
     .btn-row{display:flex;gap:.5rem;justify-content:center;margin-top:.9rem;flex-wrap:wrap;}
+
+    .endstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.45rem;margin:.8rem 0 0;text-align:left;}
+    .endstats div{background:rgba(255,255,255,.65);border:1px solid rgba(216,205,188,.8);border-radius:11px;padding:.45rem .6rem;font-size:.72rem;}
+    .endstats strong{display:block;font-size:1.05rem;color:#7B4B22;font-family:var(--font-display);font-weight:500;}
+    .endstats span{color:var(--gm);}
+
+    .save-box{margin-top:.85rem;background:rgba(255,255,255,.6);border:1px solid rgba(216,205,188,.8);border-radius:14px;padding:.78rem;}
+    .save-box__row{display:flex;gap:.45rem;}
+    .save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.9);border-radius:999px;background:#fff;padding:.65rem .88rem;font:inherit;font-size:.87rem;outline:none;}
+    .save-msg{font-size:.73rem;color:var(--gm);margin-top:.32rem;min-height:1em;}
+    .top10{margin-top:1.1rem;background:rgba(255,255,255,.42);border:1px solid rgba(216,205,188,.75);border-radius:14px;padding:.82rem;}
+    .top10 h3{font-family:var(--font-display);font-size:1.2rem;font-weight:400;margin-bottom:.45rem;text-align:center;}
+    .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.28rem;}
+    .top10 li{display:flex;align-items:center;gap:.55rem;background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.6);border-radius:10px;padding:.42rem .6rem;font-size:.83rem;}
+    .top10 .pos{font-family:var(--font-display);font-size:.95rem;width:1.3rem;text-align:center;color:#A47845;}
+    .top10 .name{flex:1;font-weight:500;}
+    .top10 .pts{font-weight:700;color:#7B4B22;}
+
+    .legend{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin-top:.7rem;font-size:.7rem;color:var(--gm);}
+    .legend div{display:flex;align-items:center;gap:.3rem;}
+    .legend img{width:1rem;height:1rem;object-fit:contain;}
 
     @media(max-width:480px){
       .save-box__row{flex-direction:column;}
       .game-btn{width:100%;}
+      .endstats{grid-template-columns:1fr 1fr;}
+    }
+    @media (prefers-reduced-motion: reduce){
+      .float-deco img{animation:none;opacity:.12;}
+      .cell,.cell.revealed{animation:none;}
     }
   </style>
 </head>
@@ -121,14 +189,19 @@
   </div></nav>
 
   <main class="game-shell">
-    <div class="float-hearts" id="floatHearts"></div>
+    <div class="float-deco" id="floatDeco"></div>
 
     <p class="game-kicker" data-it="Tabellone">Tabuleiro</p>
-    <h1 class="game-title"><img src="assets/img/icon-heart-full.png" alt="">
-      <span data-it="Campo Minato del Matrimonio">Campo Minado do Casamento</span></h1>
-    <p class="game-sub" data-it="Rivela tutte le casette senza trovare un cuore spezzato! Tocca per scoprire, tieni premuto (o clic destro) per segnare il bouquet.">Revele todas as casinhas sem encontrar nenhum coração partido! Toque para revelar, mantenha pressionado (ou clique direito) para marcar o buquê.</p>
+    <h1 class="game-title">
+      <img src="assets/img/match-bouquet.png" alt="">
+      <span data-it="Campo Minato">Campo Minado</span>
+    </h1>
+    <p class="game-sub" data-it="Rivela tutte le casette senza trovare un cuore spezzato. Tocca per scoprire e tieni premuto per segnare un bouquet.">Revele todas as casinhas sem esbarrar num coração partido. Toque para abrir e <strong>segure</strong> para marcar um buquê.</p>
 
     <section class="game-panel">
+      <img class="panel-corner tl" src="assets/img/corner-ornament-gold.png" alt="">
+      <img class="panel-corner br" src="assets/img/corner-ornament-gold.png" alt="">
+
       <div class="difficulty">
         <button class="diff-btn" data-level="easy" data-it="Facile">Fácil</button>
         <button class="diff-btn active" data-level="medium" data-it="Medio">Médio</button>
@@ -136,16 +209,9 @@
       </div>
 
       <div class="toolbar">
-        <div class="hud__pill"><img src="assets/img/icon-heart-broken.png" alt=""><span class="lbl" data-it="Cuori">Corações</span> <strong id="mineCount">10</strong></div>
+        <div class="hud__pill"><img src="assets/img/match-bouquet.png" alt=""><span class="lbl" data-it="Restanti">Faltam</span> <strong id="mineCount">24</strong></div>
         <button class="face-btn" id="resetBtn" aria-label="Recomeçar"><img id="resetIcon" src="assets/img/icon-heart-full.png" alt=""></button>
         <div class="hud__pill"><img src="assets/img/icon-clock.png" alt=""><strong id="timer">0</strong>s</div>
-      </div>
-
-      <div class="flag-mode-row">
-        <button class="flag-mode-btn" id="flagModeBtn">
-          <img src="assets/img/match-bouquet.png" alt="">
-          <span data-it="Modo: Segnare il bouquet">Modo: Marcar buquê</span>
-        </button>
       </div>
 
       <div class="board-wrap">
@@ -153,11 +219,23 @@
       </div>
 
       <div class="status" id="status">&nbsp;</div>
-      <p class="hint" data-it="Sullo smartphone: tieni premuto per segnare. Sul computer: clic destro o usa il modo bouquet qui sopra.">No celular: mantenha pressionado para marcar. No computador: clique direito ou use o modo buquê acima.</p>
+
+      <p class="coach" id="coach">
+        <span class="hold-dot"></span>
+        <span data-it="Tieni premuto una casella per segnare il bouquet · tieni di nuovo per il punto interrogativo · e ancora per pulire">Segure numa casinha para marcar o buquê · segure de novo para dúvida · e mais uma vez para limpar</span>
+      </p>
+
+      <div class="legend">
+        <div><img src="assets/img/match-bouquet.png" alt=""><span data-it="mina segnata">mina marcada</span></div>
+        <div><span class="qmark" style="font-family:var(--font-display);color:var(--gg-dark);font-weight:700">?</span><span data-it="in dubbio">em dúvida</span></div>
+        <div><img src="assets/img/icon-heart-broken.png" alt=""><span data-it="cuore spezzato">coração partido</span></div>
+      </div>
     </section>
 
     <section class="top10"><h3>Top 10</h3><ol id="topList"></ol></section>
   </main>
+
+  <div class="toast" id="toast"><img id="toastIcon" src="assets/img/match-bouquet.png" alt=""><span id="toastText"></span></div>
 
   <script>
     "use strict";
@@ -175,7 +253,7 @@
       if(btn) btn.disabled=true;
       try{
         await fetch(SCORE_API,{method:"POST",body:JSON.stringify({action:"score",jogo:GAME_KEY,nome:name,pontos:score})});
-        if(msgEl) msgEl.textContent=t("Salvo! 🏆","Salvato! 🏆").replace(" 🏆","");
+        if(msgEl) msgEl.textContent=t("Salvo!","Salvato!");
         loadTop10();
       }catch(e){
         if(btn) btn.disabled=false;
@@ -194,41 +272,53 @@
       }catch(e){ list.innerHTML=`<li><span class="name">${t("Placar indisponível.","Classifica non disponibile.")}</span></li>`; }
     }
 
-    /* ───────────────── corações flutuantes ───────────────── */
-    function setupFloatingHearts(){
-      const wrap=document.getElementById("floatHearts");
-      for(let i=0;i<7;i++){
+    /* ───────────────── decoração flutuante ───────────────── */
+    function setupFloatingDeco(){
+      const wrap=document.getElementById("floatDeco");
+      const srcs=["assets/img/accent-flower-bloom.png","assets/img/icon-sparkle.png","assets/img/accent-dots-trio.png","assets/img/icon-leaf-branch.png"];
+      for(let i=0;i<8;i++){
         const img=document.createElement("img");
-        img.src="assets/img/icon-heart-full.png"; img.alt="";
-        const size=14+Math.random()*16;
+        img.src=srcs[i%srcs.length]; img.alt="";
+        const size=16+Math.random()*20;
         img.style.width=size+"px"; img.style.height=size+"px";
         img.style.left=Math.random()*100+"%";
-        const duration=9+Math.random()*8;
+        const duration=11+Math.random()*9;
         img.style.animationDuration=duration+"s";
-        img.style.animationDelay=(Math.random()*duration)+"s";
+        img.style.animationDelay=(-Math.random()*duration)+"s";
         wrap.appendChild(img);
       }
     }
 
-    /* ───────────────── burst de corações partidos (derrota) ───────────────── */
-    function heartBreakBurst(){
+    /* ───────────────── toast ───────────────── */
+    const toastEl=document.getElementById("toast"), toastIcon=document.getElementById("toastIcon"), toastText=document.getElementById("toastText");
+    let toastTimer=null;
+    function showToast(text, icon){
+      toastText.textContent=text;
+      toastIcon.src=icon||"assets/img/match-bouquet.png";
+      toastEl.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer=setTimeout(()=>toastEl.classList.remove("show"),1900);
+    }
+
+    /* ───────────────── burst de corações partidos ───────────────── */
+    function burst(src, count){
       const rect=boardEl.getBoundingClientRect();
-      for(let i=0;i<12;i++){
+      for(let i=0;i<count;i++){
         const img=document.createElement("img");
-        img.src="assets/img/icon-heart-broken.png"; img.alt="";
+        img.src=src; img.alt="";
         img.style.position="fixed";
-        img.style.left=(rect.left+rect.width/2+(Math.random()-0.5)*70)+"px";
+        img.style.left=(rect.left+rect.width/2+(Math.random()-0.5)*80)+"px";
         img.style.top=(rect.top+rect.height/2)+"px";
-        const size=14+Math.random()*12;
+        const size=14+Math.random()*14;
         img.style.width=size+"px"; img.style.height=size+"px";
         img.style.zIndex=999; img.style.pointerEvents="none";
-        img.style.transition="transform .8s ease, opacity .8s ease";
+        img.style.transition="transform .9s cubic-bezier(.2,.7,.3,1), opacity .9s ease";
         document.body.appendChild(img);
         requestAnimationFrame(()=>{
-          img.style.transform=`translate(${(Math.random()-0.5)*150}px, ${-60-Math.random()*90}px) rotate(${(Math.random()-0.5)*90}deg)`;
+          img.style.transform=`translate(${(Math.random()-0.5)*180}px, ${-70-Math.random()*110}px) rotate(${(Math.random()-0.5)*120}deg)`;
           img.style.opacity="0";
         });
-        setTimeout(()=>img.remove(),850);
+        setTimeout(()=>img.remove(),950);
       }
     }
 
@@ -240,18 +330,18 @@
     };
     const DIFF_MULT = { easy:1, medium:1.5, hard:2.2 };
 
+    const MARK_NONE=0, MARK_FLAG=1, MARK_DOUBT=2;
+    const LONG_MS=400, RING_DELAY=105, MOVE_TOL=12;
+
     let level="medium";
     let rows, cols, mineCount;
     let grid=[];
-    let revealedCount=0;
-    let flagsPlaced=0;
-    let gameOver=false;
-    let gameWon=false;
-    let firstClick=true;
-    let timerInterval=null;
-    let seconds=0;
-    let flagMode=false;
-    let finalScore=0;
+    let revealedCount=0, flagsPlaced=0;
+    let gameOver=false, gameWon=false, firstClick=true;
+    let timerInterval=null, seconds=0, finalScore=0;
+    let everFlagged=false;
+    let suppressClickUntil=0;
+    let press=null;
 
     const boardEl=document.getElementById("board");
     const mineCountEl=document.getElementById("mineCount");
@@ -259,13 +349,13 @@
     const statusEl=document.getElementById("status");
     const resetBtn=document.getElementById("resetBtn");
     const resetIcon=document.getElementById("resetIcon");
-    const flagModeBtn=document.getElementById("flagModeBtn");
+    const coachEl=document.getElementById("coach");
     const diffBtns=document.querySelectorAll(".diff-btn");
 
     function cellPx(){
       const wrapW = boardEl.parentElement.clientWidth || 320;
-      const px = Math.floor((wrapW - (cols-1)*4) / cols);
-      return Math.max(20, Math.min(34, px));
+      const px = Math.floor((wrapW - (cols-1)*5 - 6) / cols);
+      return Math.max(20, Math.min(40, px));
     }
 
     function init(){
@@ -273,17 +363,20 @@
       rows=cfg.rows; cols=cfg.cols; mineCount=cfg.mines;
       grid=[]; revealedCount=0; flagsPlaced=0;
       gameOver=false; gameWon=false; firstClick=true;
+      cancelPress();
       stopTimer(); seconds=0;
       timerEl.textContent="0";
       mineCountEl.textContent=mineCount;
-      statusEl.textContent=" ";
+      statusEl.innerHTML="&nbsp;";
       statusEl.className="status";
       resetIcon.src="assets/img/icon-heart-full.png";
       boardEl.classList.remove("shake");
+      const extra=document.getElementById("cmExtra"); if(extra) extra.remove();
+      coachEl.style.opacity="1";
 
       for(let r=0;r<rows;r++){
         const row=[];
-        for(let c=0;c<cols;c++) row.push({mine:false,revealed:false,flagged:false,count:0});
+        for(let c=0;c<cols;c++) row.push({mine:false,revealed:false,mark:MARK_NONE,count:0});
         grid.push(row);
       }
       renderBoard();
@@ -296,32 +389,111 @@
       for(let r=0;r<rows;r++){
         for(let c=0;c<cols;c++){
           const btn=document.createElement("button");
+          btn.type="button";
           btn.className="cell";
           btn.style.width=size+"px"; btn.style.height=size+"px";
-          btn.style.fontSize=Math.max(11,Math.round(size*0.45))+"px";
+          btn.style.fontSize=Math.max(12,Math.round(size*0.55))+"px";
           btn.dataset.r=r; btn.dataset.c=c;
-          btn.addEventListener("click", onCellClick);
-          btn.addEventListener("contextmenu", onCellFlag);
-          btn.addEventListener("touchstart", onTouchStart, {passive:true});
-          btn.addEventListener("touchend", onTouchEnd);
           boardEl.appendChild(btn);
         }
       }
     }
 
-    let touchTimer=null, touchMoved=false;
-    function onTouchStart(e){
-      touchMoved=false;
-      const target=e.currentTarget;
-      touchTimer=setTimeout(()=>{
-        if(!touchMoved){
-          const r=+target.dataset.r, c=+target.dataset.c;
-          toggleFlag(r,c);
-          if(window.GS) GS.hTap();
-        }
-      },450);
+    function cellBtn(r,c){ return boardEl.children[r*cols+c]; }
+    function cellFromEvent(e){
+      const btn=e.target.closest(".cell");
+      if(!btn || btn.parentElement!==boardEl) return null;
+      return {btn, r:+btn.dataset.r, c:+btn.dataset.c};
     }
-    function onTouchEnd(){ clearTimeout(touchTimer); }
+
+    /* ───────── long press (toque + mouse) ───────── */
+    function startPress(r,c,btn,x,y){
+      cancelPress();
+      if(gameOver||gameWon) return;
+      if(grid[r][c].revealed) return;
+      press={r,c,btn,x,y,fired:false,ringT:null,longT:null};
+      press.ringT=setTimeout(()=>{ if(press) press.btn.classList.add("pressing"); }, RING_DELAY);
+      press.longT=setTimeout(()=>{
+        if(!press) return;
+        const p=press;
+        p.fired=true;
+        p.btn.classList.remove("pressing");
+        cycleMark(p.r,p.c);
+        const b=cellBtn(p.r,p.c);
+        b.classList.add("bump");
+        setTimeout(()=>b.classList.remove("bump"),340);
+      }, LONG_MS);
+    }
+    function movePress(x,y){
+      if(!press || press.fired) return; /* já marcou: mantém o press vivo p/ suprimir o clique */
+      if(Math.abs(x-press.x)>MOVE_TOL || Math.abs(y-press.y)>MOVE_TOL) cancelPress();
+    }
+    function cancelPress(){
+      if(!press) return;
+      clearTimeout(press.ringT); clearTimeout(press.longT);
+      press.btn.classList.remove("pressing");
+      press=null;
+    }
+    function endPress(){
+      if(!press) return false;
+      const fired=press.fired;
+      cancelPress();
+      if(fired) suppressClickUntil=Date.now()+700;
+      return fired;
+    }
+
+    boardEl.addEventListener("touchstart",(e)=>{
+      const hit=cellFromEvent(e); if(!hit) return;
+      const t0=e.touches[0];
+      startPress(hit.r,hit.c,hit.btn,t0.clientX,t0.clientY);
+    },{passive:true});
+    boardEl.addEventListener("touchmove",(e)=>{
+      const t0=e.touches[0]; if(t0) movePress(t0.clientX,t0.clientY);
+    },{passive:true});
+    boardEl.addEventListener("touchend",(e)=>{
+      if(endPress()) e.preventDefault();
+    },{passive:false});
+    boardEl.addEventListener("touchcancel",cancelPress,{passive:true});
+
+    boardEl.addEventListener("mousedown",(e)=>{
+      if(e.button!==0) return;
+      const hit=cellFromEvent(e); if(!hit) return;
+      startPress(hit.r,hit.c,hit.btn,e.clientX,e.clientY);
+    });
+    boardEl.addEventListener("mousemove",(e)=>movePress(e.clientX,e.clientY));
+    boardEl.addEventListener("mouseup",endPress);
+    boardEl.addEventListener("mouseleave",cancelPress);
+
+    boardEl.addEventListener("contextmenu",(e)=>{
+      e.preventDefault();
+      cancelPress();
+      const hit=cellFromEvent(e); if(!hit) return;
+      if(gameOver||gameWon) return;
+      cycleMark(hit.r,hit.c);
+      hit.btn.classList.add("bump");
+      setTimeout(()=>hit.btn.classList.remove("bump"),340);
+    });
+
+    boardEl.addEventListener("click",onCellClick);
+
+    /* ───────── marcação (buquê → dúvida → limpo) ───────── */
+    function cycleMark(r,c){
+      const cell=grid[r][c];
+      if(cell.revealed||gameOver||gameWon) return;
+      cell.mark=(cell.mark+1)%3;
+      updateFlagCount();
+      updateCellDisplay(r,c);
+      if(window.GS){ GS.hTap(); (cell.mark===MARK_FLAG ? GS.place() : GS.flip()); }
+      if(cell.mark===MARK_FLAG && !everFlagged){
+        everFlagged=true;
+        coachEl.style.opacity=".55";
+      }
+    }
+    function updateFlagCount(){
+      flagsPlaced=0;
+      for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) if(grid[r][c].mark===MARK_FLAG) flagsPlaced++;
+      mineCountEl.textContent=Math.max(0,mineCount-flagsPlaced);
+    }
 
     function placeMines(excludeR, excludeC){
       let placed=0;
@@ -334,103 +506,147 @@
       }
       for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) grid[r][c].count=countAdjacentMines(r,c);
     }
-
-    function countAdjacentMines(r,c){
-      let count=0;
+    function eachNeighbor(r,c,fn){
       for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
-        if(dr===0 && dc===0) continue;
+        if(dr===0&&dc===0) continue;
         const nr=r+dr, nc=c+dc;
-        if(nr>=0 && nr<rows && nc>=0 && nc<cols && grid[nr][nc].mine) count++;
+        if(nr>=0&&nr<rows&&nc>=0&&nc<cols) fn(nr,nc);
       }
-      return count;
+    }
+    function countAdjacentMines(r,c){
+      let n=0; eachNeighbor(r,c,(nr,nc)=>{ if(grid[nr][nc].mine) n++; }); return n;
     }
 
     function onCellClick(e){
-      if(gameOver || gameWon) return;
-      const r=+e.currentTarget.dataset.r, c=+e.currentTarget.dataset.c;
-      if(grid[r][c].flagged) return;
+      const hit=cellFromEvent(e); if(!hit) return;
+      if(gameOver||gameWon) return;
+      if(Date.now()<suppressClickUntil) return;
+      const {r,c,btn}=hit;
+      const cell=grid[r][c];
 
-      if(flagMode){ toggleFlag(r,c); if(window.GS) GS.hTap(); return; }
+      if(cell.revealed){ tryChord(r,c,btn); return; }
+
+      if(cell.mark===MARK_FLAG){
+        nudge(btn);
+        showToast(t("Segure para desmarcar o buquê","Tieni premuto per togliere il bouquet"),"assets/img/match-bouquet.png");
+        if(window.GS) GS.hTap();
+        return;
+      }
 
       if(firstClick){ placeMines(r,c); firstClick=false; startTimer(); }
 
-      const wasMine=grid[r][c].mine;
+      const wasMine=cell.mine;
       revealCell(r,c);
       if(window.GS) (wasMine ? GS.bad() : GS.pop());
-      if(wasMine) heartBreakBurst();
+      if(wasMine) burst("assets/img/icon-heart-broken.png",14);
       checkWin();
     }
 
-    function onCellFlag(e){
-      e.preventDefault();
-      if(gameOver || gameWon) return;
-      const r=+e.currentTarget.dataset.r, c=+e.currentTarget.dataset.c;
-      toggleFlag(r,c);
+    function nudge(btn){
+      btn.classList.remove("nudge");
+      void btn.offsetWidth;
+      btn.classList.add("nudge");
+      setTimeout(()=>btn.classList.remove("nudge"),340);
     }
 
-    function toggleFlag(r,c){
-      if(gameOver || gameWon) return;
+    /* ───────── chord: tocar num número com os buquês certos ───────── */
+    function tryChord(r,c,btn){
       const cell=grid[r][c];
-      if(cell.revealed) return;
-      cell.flagged=!cell.flagged;
-      flagsPlaced+=cell.flagged?1:-1;
-      mineCountEl.textContent=mineCount-flagsPlaced;
-      updateCellDisplay(r,c);
+      if(!cell.revealed||cell.count===0) return;
+      let flags=0; const unknown=[];
+      eachNeighbor(r,c,(nr,nc)=>{
+        const n=grid[nr][nc];
+        if(n.mark===MARK_FLAG) flags++;
+        else if(!n.revealed) unknown.push([nr,nc]);
+      });
+      if(!unknown.length) return;
+      if(flags!==cell.count){
+        nudge(btn);
+        showToast(t(`Marque ${cell.count} buquê(s) ao redor para abrir de uma vez`,`Segna ${cell.count} bouquet intorno per aprire tutto`),"assets/img/match-bouquet.png");
+        if(window.GS) GS.hTap();
+        return;
+      }
+      let hitMine=false;
+      unknown.forEach(([nr,nc])=>{ if(grid[nr][nc].mine) hitMine=true; });
+      unknown.forEach(([nr,nc])=>{ if(!gameOver) revealCell(nr,nc); });
+      if(window.GS) (hitMine ? GS.bad() : GS.good());
+      if(hitMine) burst("assets/img/icon-heart-broken.png",14);
+      checkWin();
     }
 
     function revealCell(r,c){
       const cell=grid[r][c];
-      if(cell.revealed || cell.flagged) return;
-      cell.revealed=true; revealedCount++;
+      if(cell.revealed || cell.mark===MARK_FLAG) return;
+      cell.revealed=true; cell.mark=MARK_NONE; revealedCount++;
       updateCellDisplay(r,c);
 
-      if(cell.mine){ endGame(false); return; }
+      if(cell.mine){ cellBtn(r,c).classList.add("mine-hit"); endGame(false); return; }
 
       if(cell.count===0){
-        for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
-          if(dr===0 && dc===0) continue;
-          const nr=r+dr, nc=c+dc;
-          if(nr>=0 && nr<rows && nc>=0 && nc<cols && !grid[nr][nc].revealed) revealCell(nr,nc);
-        }
+        eachNeighbor(r,c,(nr,nc)=>{ if(!grid[nr][nc].revealed) revealCell(nr,nc); });
       }
     }
 
     function updateCellDisplay(r,c){
       const cell=grid[r][c];
-      const idx=r*cols+c;
-      const btn=boardEl.children[idx];
-      const wasSize = btn.style.width;
+      const btn=cellBtn(r,c);
+      const w=btn.style.width, h=btn.style.height, fs=btn.style.fontSize;
       btn.className="cell";
-      btn.style.width=wasSize; btn.style.height=wasSize;
+      btn.style.width=w; btn.style.height=h; btn.style.fontSize=fs;
       btn.innerHTML="";
 
       if(cell.revealed){
         btn.classList.add("revealed");
         if(cell.mine){
           btn.classList.add("mine");
-          const img=document.createElement("img");
-          img.src="assets/img/icon-heart-broken.png"; img.alt=""; img.className="icon-img";
-          btn.appendChild(img);
+          btn.appendChild(iconImg("assets/img/icon-heart-broken.png"));
         } else if(cell.count>0){
           btn.textContent=cell.count;
-          btn.classList.add("n"+cell.count);
+          btn.classList.add("n"+cell.count,"chordable");
+        } else {
+          btn.classList.add("n0");
         }
-      } else if(cell.flagged){
-        const img=document.createElement("img");
-        img.src="assets/img/match-bouquet.png"; img.alt=""; img.className="icon-img";
-        btn.appendChild(img);
+      } else if(cell.mark===MARK_FLAG){
+        btn.appendChild(iconImg("assets/img/match-bouquet.png"));
+      } else if(cell.mark===MARK_DOUBT){
+        const s=document.createElement("span");
+        s.className="qmark"; s.textContent="?";
+        btn.appendChild(s);
       }
+    }
+    function iconImg(src){
+      const img=document.createElement("img");
+      img.src=src; img.alt=""; img.className="icon-img";
+      return img;
     }
 
     function revealAllMines(){
       for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
-        if(grid[r][c].mine){ grid[r][c].revealed=true; updateCellDisplay(r,c); }
+        const cell=grid[r][c];
+        if(cell.mine && !cell.revealed){
+          cell.revealed=true; cell.mark=MARK_NONE; updateCellDisplay(r,c);
+        }
+      }
+    }
+    /* na vitória, todas as minas viram buquês */
+    function bloomAllMines(){
+      let d=0;
+      for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+        if(!grid[r][c].mine) continue;
+        const btn=cellBtn(r,c);
+        setTimeout(()=>{
+          btn.className="cell revealed saved";
+          btn.innerHTML="";
+          btn.appendChild(iconImg("assets/img/match-bouquet.png"));
+          btn.classList.add("bump");
+        }, d);
+        d+=45;
       }
     }
 
     function checkWin(){
-      const totalCells=rows*cols;
-      if(revealedCount===totalCells-mineCount) endGame(true);
+      if(gameOver) return;
+      if(revealedCount===rows*cols-mineCount) endGame(true);
     }
 
     function computeScore(won){
@@ -445,20 +661,26 @@
 
     function endGame(won){
       gameOver=!won; gameWon=won;
+      cancelPress();
       stopTimer();
       finalScore=computeScore(won);
+      resetBtn.classList.add("celebrate");
+      setTimeout(()=>resetBtn.classList.remove("celebrate"),600);
+
       if(won){
         statusEl.textContent=t("Vocês vão casar!","Vi sposerete!");
         statusEl.className="status win";
         resetIcon.src="assets/img/icon-medal-gold.png";
-        if(window.confettiBurst) confettiBurst({count:50,hearts:true});
+        bloomAllMines();
+        setTimeout(()=>burst("assets/img/match-bouquet.png",12),200);
+        if(window.confettiBurst) confettiBurst({count:60,hearts:true});
         if(window.GS){ GS.win(); GS.hWin(); }
       } else {
-        statusEl.textContent=t("Ihh, achou um coração partido!","Ahi, hai trovato un cuore spezzato!");
+        statusEl.textContent=t("Ihh, um coração partido!","Ahi, un cuore spezzato!");
         statusEl.className="status lose";
         resetIcon.src="assets/img/icon-heart-broken.png";
         boardEl.classList.add("shake");
-        setTimeout(()=>boardEl.classList.remove("shake"),400);
+        setTimeout(()=>boardEl.classList.remove("shake"),450);
         revealAllMines();
         if(window.GS){ GS.lose(); GS.hLose(); }
       }
@@ -473,12 +695,18 @@
         extra.id="cmExtra";
         statusEl.insertAdjacentElement("afterend", extra);
       }
+      const opened=revealedCount, total=rows*cols-mineCount;
       extra.innerHTML=`
+        <div class="endstats">
+          <div><strong>${finalScore}</strong><span>${t("pontos","punti")}</span></div>
+          <div><strong>${seconds}s</strong><span>${t("tempo","tempo")}</span></div>
+          <div><strong>${opened}/${total}</strong><span>${t("casinhas","caselle")}</span></div>
+        </div>
         <div class="btn-row">
           <button class="game-btn game-btn--main" id="cmPlayAgain">${t("Jogar de novo","Gioca di nuovo")}</button>
+          <a class="game-btn" href="jogos.html">${t("Outros jogos","Altri giochi")}</a>
         </div>
         <div class="save-box">
-          <p style="font-size:.78rem;font-weight:700;color:var(--cm-pink-deep);margin-bottom:.5rem;text-align:center;">${t("Pontuação","Punteggio")}: ${finalScore} pts</p>
           <div class="save-box__row">
             <input class="save-input" id="cmName" placeholder="${t("Seu nome","Il tuo nome")}" maxlength="22"/>
             <button class="game-btn" id="cmSaveBtn">${t("Salvar","Salva")}</button>
@@ -493,6 +721,7 @@
     }
 
     function startTimer(){
+      stopTimer();
       timerInterval=setInterval(()=>{ seconds++; timerEl.textContent=seconds; },1000);
     }
     function stopTimer(){ clearInterval(timerInterval); timerInterval=null; }
@@ -508,25 +737,20 @@
       });
     });
 
-    flagModeBtn.addEventListener("click", ()=>{
-      flagMode=!flagMode;
-      flagModeBtn.classList.toggle("active", flagMode);
-    });
-
+    let resizeT=null;
     window.addEventListener("resize", ()=>{
-      if(!gameOver && !gameWon) renderRevealedAfterResize();
+      clearTimeout(resizeT);
+      resizeT=setTimeout(()=>{
+        const size=cellPx();
+        boardEl.style.gridTemplateColumns=`repeat(${cols}, ${size}px)`;
+        Array.from(boardEl.children).forEach(btn=>{
+          btn.style.width=size+"px"; btn.style.height=size+"px";
+          btn.style.fontSize=Math.max(12,Math.round(size*0.55))+"px";
+        });
+      },120);
     });
-    function renderRevealedAfterResize(){
-      // Re-render preserving state (simple approach: redraw sizes only)
-      const size=cellPx();
-      boardEl.style.gridTemplateColumns=`repeat(${cols}, ${size}px)`;
-      Array.from(boardEl.children).forEach(btn=>{
-        btn.style.width=size+"px"; btn.style.height=size+"px";
-        btn.style.fontSize=Math.max(11,Math.round(size*0.45))+"px";
-      });
-    }
 
-    setupFloatingHearts();
+    setupFloatingDeco();
     init();
     loadTop10();
   </script>
