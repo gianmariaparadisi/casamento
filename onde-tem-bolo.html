@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Onde Tem Bolo? — Tiago e Gian</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/css/style.css"/>
+<style>
+  :root{
+    --game-ink:#2A2820;--game-muted:#6C6258;--game-line:#D8CDBC;
+    --game-cream:#FBF7EF;--game-beige:#F2E7D7;--game-gold:#C8A050;--game-wine:#8E2738;
+  }
+  *{box-sizing:border-box}
+  body.game-page{
+    min-height:100svh;
+    background:
+      radial-gradient(circle at 12% 0%,rgba(255,255,255,.92),transparent 30rem),
+      radial-gradient(circle at 84% 16%,rgba(246,214,151,.36),transparent 28rem),
+      linear-gradient(180deg,#FBF7EF 0%,#F2E7D7 52%,#EFE1D0 100%);
+    color:var(--game-ink);
+  }
+  .game-nav{position:sticky;top:0;z-index:30;background:rgba(251,247,239,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(216,205,188,.75);}
+  .game-nav__inner{width:90%;max-width:960px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:14px 0;gap:1rem;}
+  .game-brand{font-family:var(--font-display,'Cormorant Garamond',serif);letter-spacing:.14em;text-transform:uppercase;font-size:.86rem;color:var(--game-muted);}
+  .game-back{font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:#766553;text-decoration:underline;text-underline-offset:4px;}
+  .game-shell{width:92%;max-width:520px;margin:0 auto;padding:26px 0 70px;}
+  .game-kicker{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:#A47845;text-align:center;margin-bottom:.45rem;}
+  .game-title{font-family:var(--font-display,'Cormorant Garamond',serif);font-size:clamp(2.2rem,8vw,3.6rem);font-weight:300;line-height:.95;text-align:center;margin-bottom:.5rem;}
+  .game-sub{max-width:430px;margin:0 auto .9rem;text-align:center;color:var(--game-muted);font-size:.88rem;line-height:1.6;}
+
+  .hud{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin:.7rem auto .6rem;}
+  .hud__pill{background:rgba(255,255,255,.68);border:1px solid rgba(216,205,188,.85);border-radius:999px;padding:.36rem .72rem;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:#665B4D;display:flex;align-items:center;gap:.32rem;}
+  .hud__pill img{width:1.35rem;height:1.35rem;object-fit:contain;}
+  .hud__pill strong{color:var(--game-ink);font-weight:700;font-size:.86rem;}
+
+  .game-panel{position:relative;border:1px solid rgba(216,205,188,.95);background:#F6EEDF;border-radius:22px;box-shadow:0 18px 70px rgba(82,57,34,.16);overflow:hidden;}
+  #board{display:block;width:100%;height:auto;touch-action:none;-webkit-tap-highlight-color:transparent;}
+
+  /* medalha de progresso no topo do tabuleiro */
+  .bolo-flag{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:.35rem;background:rgba(251,247,239,.86);border:1px solid rgba(216,205,188,.9);border-radius:999px;padding:.28rem .7rem;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#7B5B32;backdrop-filter:blur(6px);pointer-events:none;}
+  .bolo-flag img{width:1.1rem;height:1.1rem;object-fit:contain}
+
+  .game-overlay{position:absolute;inset:0;z-index:10;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,247,239,.93);text-align:center;padding:1.5rem;backdrop-filter:blur(7px);}
+  .game-overlay.show{display:flex;}
+  .go-icon img{width:5rem;height:5rem;object-fit:contain;display:block;margin:0 auto .6rem;filter:drop-shadow(0 6px 12px rgba(82,57,34,.2));}
+  .go-title{font-family:var(--font-display,'Cormorant Garamond',serif);font-size:2rem;font-weight:300;margin-bottom:.35rem;}
+  .go-sub{font-size:.88rem;color:var(--game-muted);margin-bottom:1rem;line-height:1.55;max-width:22rem;}
+  .go-stats{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1rem;}
+  .go-stat{background:rgba(255,255,255,.75);border:1px solid rgba(216,205,188,.9);border-radius:14px;padding:.5rem .8rem;min-width:5.2rem;}
+  .go-stat b{display:block;font-family:var(--font-display,'Cormorant Garamond',serif);font-size:1.5rem;font-weight:400;color:#7B4B22;line-height:1;}
+  .go-stat span{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--game-muted);}
+  .go-btns{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;}
+
+  .game-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid rgba(180,137,70,.35);background:#fff;color:#5A4C3D;padding:.7rem 1.25rem;font-size:.73rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 8px 24px rgba(110,80,45,.09);cursor:pointer;transition:all .15s;gap:.35rem;font-family:inherit;}
+  .game-btn:hover{transform:translateY(-1px);background:#FFF9EF;}
+  .game-btn--main{background:linear-gradient(135deg,#D6B167,#B98538);color:#fff;border-color:transparent;}
+  .game-btn--main:hover{background:linear-gradient(135deg,#E0BB71,#C08E42);}
+
+  .dpad{display:grid;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(3,58px);gap:6px;margin:1rem auto 0;justify-content:center;}
+  .dpad button{width:58px;height:58px;border-radius:14px;background:rgba(255,255,255,.75);border:1.5px solid rgba(216,205,188,.9);font-size:1.25rem;display:flex;align-items:center;justify-content:center;color:#6C6258;box-shadow:0 3px 10px rgba(82,57,34,.08);-webkit-tap-highlight-color:transparent;cursor:pointer;}
+  .dpad button:active{background:rgba(235,240,230,.95);transform:scale(.94);}
+  .dpad .spacer{opacity:.14;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#A47845}
+  .hint{text-align:center;font-size:.75rem;color:var(--game-muted);margin-top:.7rem;line-height:1.55}
+
+  .save-box{margin-top:.9rem;background:rgba(255,255,255,.62);border:1px solid rgba(216,205,188,.8);border-radius:14px;padding:.8rem;}
+  .save-box__title{font-family:var(--font-display,'Cormorant Garamond',serif);font-size:1.1rem;font-weight:400;text-align:center;margin-bottom:.5rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+  .save-box__title img{width:1.7rem;height:1.7rem;object-fit:contain}
+  .save-box__row{display:flex;gap:.45rem;}
+  .save-input{flex:1;min-width:0;border:1px solid rgba(216,205,188,.9);border-radius:999px;background:#fff;padding:.65rem .88rem;font:inherit;font-size:.88rem;outline:none;}
+  .save-input:focus{border-color:var(--game-gold)}
+  .save-msg{font-size:.73rem;color:var(--game-muted);margin-top:.34rem;min-height:1em;text-align:center}
+
+  .top10{margin-top:1.1rem;background:rgba(255,255,255,.42);border:1px solid rgba(216,205,188,.75);border-radius:14px;padding:.85rem;}
+  .top10 h3{font-family:var(--font-display,'Cormorant Garamond',serif);font-size:1.2rem;font-weight:400;margin-bottom:.5rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:.4rem;}
+  .top10 h3 img{width:1.8rem;height:1.8rem;object-fit:contain;}
+  .top10 ol{list-style:none;margin:0;padding:0;display:grid;gap:.28rem;}
+  .top10 li{display:flex;align-items:center;gap:.55rem;background:rgba(255,255,255,.7);border:1px solid rgba(216,205,188,.6);border-radius:10px;padding:.42rem .6rem;font-size:.83rem;}
+  .top10 .pos{font-family:var(--font-display,'Cormorant Garamond',serif);font-size:.95rem;width:1.5rem;text-align:center;color:#A47845;display:flex;align-items:center;justify-content:center}
+  .top10 .pos img{width:20px;height:20px;object-fit:contain;display:block;}
+  .top10 .name{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .top10 .pts{font-weight:700;color:#7B4B22;}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:rgba(43,40,32,.93);color:#FBF7EF;border-radius:999px;padding:.6rem 1.1rem;font-size:.82rem;display:flex;align-items:center;gap:.5rem;z-index:60;transition:all .25s;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast img{width:1.4rem;height:1.4rem;object-fit:contain}
+
+  @media(min-width:700px){.dpad{display:none}}
+</style>
+</head>
+<body class="game-page">
+
+<nav class="game-nav"><div class="game-nav__inner">
+  <a class="game-back" href="jogos.html" data-it="← Torna ai giochi">← Voltar aos jogos</a>
+  <div class="game-brand">Tiago &amp; Gian</div>
+</div></nav>
+
+<main class="game-shell">
+  <div style="text-align:center;margin-bottom:.4rem">
+    <img src="assets/img/cake-3tier.png" alt="" style="width:4rem;height:4rem;object-fit:contain;filter:drop-shadow(0 5px 10px rgba(82,57,34,.2))">
+  </div>
+  <p class="game-kicker" data-it="Missione della festa">Missão da festa</p>
+  <h1 class="game-title">Onde Tem<br><em>Bolo?</em></h1>
+  <p class="game-sub" data-it="Attraversa la pista da ballo, il buffet e il fiume di champagne. Un bolo ogni 20 file. Non fermarti: la festa avanza.">
+    Atravesse a pista de dança, o buffet e o rio de champagne. Um bolo a cada 20 faixas. Não pare: a festa avança sozinha.
+  </p>
+
+  <div class="hud">
+    <div class="hud__pill"><img src="assets/img/icon-route.png" alt=""> <span data-it="File">Faixas</span> <strong id="hudRows">0</strong></div>
+    <div class="hud__pill"><img src="assets/img/sweet-macaron-01.png" alt=""> <strong id="hudSweets">0</strong></div>
+    <div class="hud__pill"><img src="assets/img/cake-3tier.png" alt=""> <strong id="hudCakes">0</strong></div>
+    <div class="hud__pill"><img src="assets/img/icon-medal-gold.png" alt=""> <span data-it="Record">Recorde</span> <strong id="hudBest">0</strong></div>
+  </div>
+
+  <section class="game-panel">
+    <canvas id="board" tabindex="0" aria-label="Onde tem bolo"></canvas>
+    <div class="bolo-flag" id="boloFlag"><img src="assets/img/cake-3tier.png" alt=""><span id="boloFlagText">Próximo bolo em 20</span></div>
+
+    <div class="game-overlay show" id="overlay">
+      <div class="go-icon"><img id="goIcon" src="assets/img/cake-3tier.png" alt=""></div>
+      <p class="go-title" id="goTitle">Onde Tem Bolo?</p>
+      <p class="go-sub" id="goSub">Toque na tela ou use as setas para pular. Chegue no bolo antes que a festa te alcance.</p>
+      <div class="go-stats" id="goStats" style="display:none">
+        <div class="go-stat"><b id="stRows">0</b><span data-it="File">Faixas</span></div>
+        <div class="go-stat"><b id="stSweets">0</b><span data-it="Dolcetti">Docinhos</span></div>
+        <div class="go-stat"><b id="stPts">0</b><span data-it="Punti">Pontos</span></div>
+      </div>
+      <div class="go-btns" id="goBtns">
+        <button class="game-btn game-btn--main" id="btnStart" data-it="Inizia">Começar</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="dpad">
+    <div></div><button data-dir="up" aria-label="Frente">↑</button><div></div>
+    <button data-dir="left" aria-label="Esquerda">←</button>
+    <div class="spacer">·</div>
+    <button data-dir="right" aria-label="Direita">→</button>
+    <div></div><button data-dir="down" aria-label="Trás">↓</button><div></div>
+  </div>
+
+  <p class="hint" data-it="Frecce o WASD nel computer. Sul telefono: tocca avanti o scorri. Spazio per ricominciare.">
+    Setas ou WASD no computador. No celular: toque à frente ou arraste. Espaço para recomeçar.
+  </p>
+
+  <div id="postgame" style="display:none">
+    <div class="save-box">
+      <p class="save-box__title"><img src="assets/img/icon-medal-gold.png" alt=""><span data-it="Salva il tuo record">Salvar seu recorde</span></p>
+      <div class="save-box__row">
+        <input type="text" id="playerName" class="save-input" placeholder="Seu nome" data-it-placeholder="Il tuo nome" maxlength="24" autocomplete="name"/>
+        <button class="game-btn game-btn--main" id="btnSave" data-it="Salva">Salvar</button>
+      </div>
+      <p class="save-msg" id="saveMsg"></p>
+    </div>
+  </div>
+
+  <section class="top10">
+    <h3><img src="assets/img/icon-trophy.png" alt="">Top 10</h3>
+    <ol id="topList"></ol>
+  </section>
+</main>
+
+<div class="toast" id="toast"><img id="toastIcon" src="assets/img/cake-3tier.png" alt=""><span id="toastText"></span></div>
+
+<script src="assets/js/game-sounds.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   ONDE TEM BOLO? — travessia 2.5D falso-isométrica
+   Você atravessa a festa faixa a faixa até o bolo.
+   Canvas 2D puro, projeção oblíqua, sprites em billboard.
+══════════════════════════════════════════════════════════════════ */
+"use strict";
+
+/* ─────────────── placar (padrão do site) ─────────────── */
+const SCORE_API = (typeof API_URL !== "undefined") ? API_URL
+  : "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
+const GAME_KEY = "onde-tem-bolo";
+const BEST_KEY = "ondeTemBolo.best";
+
+function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+function t(pt,it){ return (window.I18N && window.I18N.lang === "it") ? it : pt; }
+function S(){ return window.GS || {}; }
+
+/* ─────────────── assets ─────────────── */
+const IMG = {};
+/* Só entram PNGs que funcionam nesta perspectiva: comida em vista frontal,
+   sem moldura e sem sombra embutida. Todo o resto é desenhado no canvas. */
+const SRC = {
+  cake:  "assets/img/cake-3tier.png",
+  sweet: "assets/img/sweet-macaron-01.png",
+  face:  "assets/img/tiagoface01.png"
+};
+let assetsReady = false;
+
+/* ─────────────── paleta das figurinhas ─────────────── */
+const SKIN = ["#F2D3B3","#E5B990","#C98F63","#9C6440","#7A4A2E"];
+const HAIR = ["#2E2118","#4A3122","#6B4423","#8C6239","#B9843F","#D9D2C6","#EDE7DE"];
+const DRESS = [
+  { body:"#C4788C", trim:"#E3A9B8" }, { body:"#7E9B5C", trim:"#A8C083" },
+  { body:"#C99A4A", trim:"#E4BE7A" }, { body:"#8E7BA8", trim:"#B4A4C9" },
+  { body:"#4E7C8A", trim:"#84AAB4" }, { body:"#B85C4A", trim:"#D98D78" }
+];
+const SUIT = [
+  { body:"#33405A", trim:"#8E2738" }, { body:"#3E4A3A", trim:"#C8A050" },
+  { body:"#4A3F55", trim:"#C4788C" }, { body:"#2E3648", trim:"#7E9B5C" },
+  { body:"#5A4636", trim:"#E3A9B8" }
+];
+
+/* hash inteiro: multiplicar o id por um fator qualquer daria períodos curtos
+   (n*5 % 5 é sempre 0), então embaralha os bits antes de fatiar. */
+function hash32(n){
+  n = (n|0) ^ 0x9E3779B9;
+  n = Math.imul(n ^ (n >>> 15), 0x85EBCA6B);
+  n = Math.imul(n ^ (n >>> 13), 0xC2B2AE35);
+  return (n ^ (n >>> 16)) >>> 0;
+}
+
+/* gera o elenco de convidados de forma determinística a partir de um id */
+function guestLook(id){
+  const h = hash32(id);
+  const fem = ((h >>> 3) & 1) === 0;
+  const pal = fem ? DRESS[(h >>> 5) % DRESS.length] : SUIT[(h >>> 9) % SUIT.length];
+  return {
+    fem,
+    body: pal.body, trim: pal.trim,
+    skin: SKIN[(h >>> 13) % SKIN.length],
+    hair: HAIR[(h >>> 17) % HAIR.length],
+    tall: 0.88 + ((h >>> 21) % 6) * 0.05
+  };
+}
+
+function preload(done){
+  const keys = Object.keys(SRC); let left = keys.length;
+  if(!left){ done(); return; }
+  keys.forEach(k=>{
+    const im = new Image();
+    im.onload = im.onerror = ()=>{ if(--left === 0){ assetsReady = true; done(); } };
+    im.src = SRC[k];
+    IMG[k] = im;
+  });
+}
+function ok(k){ const i = IMG[k]; return i && i.complete && i.naturalWidth > 0; }
+
+/* ─────────────── constantes de mundo ─────────────── */
+const X_MIN = -6, X_MAX = 6;          // colunas jogáveis
+const VIEW_COLS = 9;                  // colunas visíveis
+const BOTTOM_ROWS = 2.5;              // faixas mostradas abaixo da linha da câmera
+const LEAD = 3.5;                     // distância do jogador à linha da câmera
+const CAKE_EVERY = 20;                // bolo a cada N faixas
+const HOP_MS = 165;
+
+const TYPE = { GRAMA:"grama", PISTA:"pista", BUFFET:"buffet", CHAMPA:"champagne", TAPETE:"tapete" };
+
+/* elevação de cada tipo, em unidades de TW */
+const ELEV = { grama:.155, tapete:.175, pista:.085, buffet:.095, champagne:-.075 };
+
+/* paletas */
+const PAL = {
+  grama:   { top:"#AFC98C", top2:"#A4BF80", side:"#6E8451" },
+  tapete:  { top:"#AC6473", top2:"#A35C6B", side:"#6E343F" },
+  pista:   { top:"#F6EFE0", top2:"#F1E8D6", side:"#B09468" },
+  buffet:  { top:"#B98C55", top2:"#B0844E", side:"#7A5B31" },
+  champagne:{ top:"#EFD174", top2:"#E9C963", side:"#9A7A28" }
+};
+
+/* ─────────────── canvas ─────────────── */
+const cv = document.getElementById("board");
+const ctx = cv.getContext("2d");
+let W = 0, H = 0, DPR = 1, TW = 60, TD = 34;
+
+function resize(){
+  const cssW = Math.max(260, cv.parentElement.clientWidth);
+  const cssH = Math.round(Math.min(Math.max(cssW / 0.74, 380), 660));
+  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+  cv.width  = Math.round(cssW * DPR);
+  cv.height = Math.round(cssH * DPR);
+  cv.style.height = cssH + "px";
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  W = cssW; H = cssH;
+  TW = W / VIEW_COLS;
+  TD = TW * 0.74;
+}
+window.addEventListener("resize", ()=>{ resize(); draw(); });
+
+/* projeção oblíqua: cisalhamento ancorado na linha do jogador */
+function SH(){ return -TW * 0.17; }
+function originX(){ return W / 2; }
+function originY(){ return H - BOTTOM_ROWS * TD; }
+function sy(z){ return originY() - (z - cam.z) * TD; }
+function sx(x, z){ return originX() + (x - cam.x) * TW + (z - cam.z - LEAD) * SH(); }
+
+/* ─────────────── estado ─────────────── */
+const cam = { x:0, z:0, push:0 };
+let rows = new Map();
+let player, state, tNow, tPrev, score, sweets, cakes, best, particles, floaters, shake;
+
+function loadBest(){ try{ return parseInt(localStorage.getItem(BEST_KEY)||"0",10)||0; }catch(e){ return 0; } }
+function saveBest(v){ try{ localStorage.setItem(BEST_KEY, String(v)); }catch(e){} }
+
+/* ─────────────── geração de faixas ─────────────── */
+function rnd(a,b){ return a + Math.random()*(b-a); }
+function pick(arr){ return arr[(Math.random()*arr.length)|0]; }
+
+function diffAt(z){ return Math.min(1 + z/320, 1.65); }
+
+function makeRow(z){
+  const prev = rows.get(z-1), prev2 = rows.get(z-2), prev3 = rows.get(z-3);
+  const d = diffAt(z);
+  const row = { z, type:TYPE.GRAMA, statics:[], deco:[], movers:null, cake:false, sweet:null };
+
+  /* faixa do bolo */
+  if(z > 0 && z % CAKE_EVERY === 0){
+    row.type = TYPE.GRAMA; row.cake = true;
+    row.deco = decoFor(TYPE.GRAMA, 2);
+    return row;
+  }
+  /* início tranquilo */
+  if(z <= 4){ row.type = TYPE.GRAMA; row.deco = decoFor(TYPE.GRAMA, 3); return row; }
+  /* nunca deixar o bolo inacessível */
+  if(z % CAKE_EVERY === CAKE_EVERY - 1){ /* faixa anterior ao bolo pode ser qualquer coisa menos rio */ }
+
+  const hazard = r => r && (r.type===TYPE.PISTA || r.type===TYPE.BUFFET || r.type===TYPE.CHAMPA);
+  const river  = r => r && r.type===TYPE.CHAMPA;
+  /* corredores secos nunca passam de 2 seguidos; rio pode ir até 3 */
+  const dryRun    = (hazard(prev) && !river(prev) ? 1:0) + (hazard(prev2) && !river(prev2) ? 1:0);
+  const riverRun  = (river(prev)?1:0) + (river(prev2)?1:0) + (river(prev3)?1:0);
+  const forceSafe = (dryRun >= 2) || (hazard(prev) && hazard(prev2) && hazard(prev3));
+
+  if(forceSafe){
+    row.type = Math.random() < .3 ? TYPE.TAPETE : TYPE.GRAMA;
+  }else{
+    const r = Math.random();
+    if(riverRun >= 3)            row.type = r < .55 ? TYPE.GRAMA : (r < .8 ? TYPE.PISTA : TYPE.TAPETE);
+    else if(r < .28)             row.type = TYPE.GRAMA;
+    else if(r < .52)             row.type = TYPE.PISTA;
+    else if(r < .69)             row.type = TYPE.BUFFET;
+    else if(r < .85)             row.type = TYPE.CHAMPA;
+    else                         row.type = TYPE.TAPETE;
+  }
+
+  if(row.type === TYPE.GRAMA){
+    const n = (Math.random()*3.2)|0;                       // 0..3 bloqueios
+    const used = new Set();
+    for(let i=0;i<n;i++){
+      const c = (Math.random()*(X_MAX-X_MIN+1)|0) + X_MIN;
+      if(used.has(c)) continue;
+      used.add(c);
+      row.statics.push({ x:c, kind: pick(["chair","bush","vase","chair"]) });
+    }
+    row.deco = decoFor(TYPE.GRAMA, 2);
+    if(Math.random() < .22) row.sweet = freeCol(row);
+  }
+  else if(row.type === TYPE.TAPETE){
+    row.deco = decoFor(TYPE.TAPETE, 3);
+    if(Math.random() < .3) row.sweet = freeCol(row);
+  }
+  else if(row.type === TYPE.PISTA){
+    row.movers = {
+      dir: Math.random()<.5 ? -1 : 1,
+      speed: rnd(0.85, 1.85) * d,
+      gap:   rnd(4.2, 6.4),
+      w:     0.66,
+      phase: Math.random()*8,
+      kind:  "guest"
+    };
+  }
+  else if(row.type === TYPE.BUFFET){
+    row.movers = {
+      dir: Math.random()<.5 ? -1 : 1,
+      speed: rnd(1.9, 3.1) * d,
+      gap:   rnd(4.6, 6.6),
+      w:     0.88,
+      phase: Math.random()*8,
+      kind:  "tray"
+    };
+  }
+  else if(row.type === TYPE.CHAMPA){
+    const w = rnd(1.75, 2.8);
+    row.movers = {
+      dir: (prev && prev.type===TYPE.CHAMPA) ? -prev.movers.dir : (Math.random()<.5?-1:1),
+      speed: rnd(.7, 1.4) * Math.min(d, 1.35),
+      gap:   w + rnd(1.1, 2.0),
+      w:     w,
+      phase: Math.random()*8,
+      kind:  "float"
+    };
+  }
+  return row;
+}
+
+function freeCol(row){
+  for(let tries=0;tries<12;tries++){
+    const c = (Math.random()*(X_MAX-X_MIN+1)|0) + X_MIN;
+    if(!row.statics.some(s=>s.x===c)) return c;
+  }
+  return null;
+}
+
+function decoFor(type, n){
+  const out = [];
+  for(let i=0;i<n;i++){
+    out.push({
+      x: rnd(X_MIN-7, X_MAX+7),
+      o: rnd(-.3,.3),
+      s: rnd(.28,.52)
+    });
+  }
+  return out.filter(d => d.x < X_MIN-0.6 || d.x > X_MAX+0.6);
+}
+
+function rowAt(z){
+  if(z < 0) return { z, type:TYPE.GRAMA, statics:[], deco:[], movers:null, cake:false, sweet:null };
+  let r = rows.get(z);
+  if(!r){ r = makeRow(z); rows.set(z, r); }
+  return r;
+}
+function ensureRows(upTo){ for(let z=0; z<=upTo; z++) rowAt(z); }
+
+/* ─────────────── movers analíticos ─────────────── */
+/* posições x dos objetos da faixa no tempo tt (segundos) */
+function moverPositions(row, tt){
+  const m = row.movers; if(!m) return [];
+  const span = X_MAX + 9;
+  const raw = m.phase + m.dir * m.speed * tt;
+  const wraps = Math.floor(raw / m.gap);
+  const base = raw - wraps * m.gap;          // sempre em [0, gap)
+  const out = [];
+  const kMin = Math.ceil((-span - base) / m.gap);
+  const kMax = Math.floor((span - base) / m.gap);
+  for(let k=kMin;k<=kMax;k++) out.push({ x: base + k*m.gap, id: k + wraps });
+  return out;
+}
+function platformUnder(row, px, tt){
+  const m = row.movers; if(!m) return null;
+  const list = moverPositions(row, tt);
+  for(const p of list) if(Math.abs(px - p.x) <= m.w/2 + 0.22) return p;
+  return null;
+}
+function hitBy(row, px, tt){
+  const m = row.movers; if(!m) return false;
+  const list = moverPositions(row, tt);
+  for(const p of list) if(Math.abs(px - p.x) < m.w/2 + 0.28) return true;
+  return false;
+}
+
+/* ─────────────── jogo ─────────────── */
+function reset(){
+  rows = new Map();
+  ensureRows(30);
+  player = { x:0, z:0, fx:0, fz:0, tx:0, tz:0, hop:0, hopping:false, dir:"up", bump:0, alive:true, ride:null };
+  cam.x = 0; cam.z = -0.4; cam.push = 0;
+  score = 0; sweets = 0; cakes = 0;
+  particles = []; floaters = []; shake = 0;
+  tNow = 0; tPrev = performance.now();
+  state = "ready";
+  updateHUD();
+}
+
+function start(){
+  reset();
+  state = "playing";
+  hideOverlay();
+  document.getElementById("postgame").style.display = "none";
+  cv.focus({ preventScroll:true });
+}
+
+function updateHUD(){
+  document.getElementById("hudRows").textContent   = score;
+  document.getElementById("hudSweets").textContent = sweets;
+  document.getElementById("hudCakes").textContent  = cakes;
+  document.getElementById("hudBest").textContent   = best;
+  const nxt = CAKE_EVERY - (score % CAKE_EVERY);
+  document.getElementById("boloFlagText").textContent =
+    t("Próximo bolo em " + nxt, "Prossima torta tra " + nxt);
+}
+
+function totalPoints(){ return score + sweets*5 + cakes*25; }
+
+/* ─────────────── input ─────────────── */
+let queued = null;
+
+function tryMove(dir){
+  if(state === "ready"){ start(); }
+  if(state !== "playing") return;
+  if(player.hopping){ queued = dir; return; }
+  doMove(dir);
+}
+
+function doMove(dir){
+  let nx = Math.round(player.x), nz = player.z;
+  if(dir === "up") nz += 1;
+  else if(dir === "down") nz -= 1;
+  else if(dir === "left") nx -= 1;
+  else if(dir === "right") nx += 1;
+
+  player.dir = dir;
+
+  if(nz < 0){ player.bump = 1; return; }
+  if(nx < X_MIN || nx > X_MAX){ player.bump = 1; S().hTap && S().hTap(); return; }
+
+  const target = rowAt(nz);
+  if(target.statics.some(s => s.x === nx)){
+    player.bump = 1;
+    S().pop && S().pop();
+    return;
+  }
+
+  player.fx = player.x; player.fz = player.z;
+  player.tx = nx;       player.tz = nz;
+  player.hop = 0; player.hopping = true; player.ride = null;
+  S().move && S().move(); S().hMove && S().hMove();
+}
+
+function landed(){
+  player.x = player.tx; player.z = player.tz;
+  player.hopping = false;
+
+  const row = rowAt(player.z);
+
+  /* docinho */
+  if(row.sweet !== null && row.sweet === Math.round(player.x)){
+    row.sweet = null; sweets++;
+    burst(player.x, player.z, "#E8A0B0", 12);
+    addFloater(player.x, player.z, "+5");
+    S().eat && S().eat(); S().hGood && S().hGood();
+  }
+  /* bolo */
+  if(row.cake && !row.cakeTaken){
+    row.cakeTaken = true; cakes++;
+    burst(player.x, player.z, "#F2C879", 26);
+    addFloater(player.x, player.z, t("BOLO! +25","TORTA! +25"));
+    showToast(t("Bolo nº "+cakes+" conquistado!","Torta nº "+cakes+" conquistata!"), SRC.cake);
+    S().win && S().win(); S().hWin && S().hWin();
+    shake = 8;
+  }
+  if(player.z > score){
+    score = player.z;
+    if(score > best){ best = score; saveBest(best); }
+  }
+  updateHUD();
+
+  if(queued){ const q = queued; queued = null; doMove(q); }
+}
+
+function die(reason){
+  if(state !== "playing") return;
+  state = "over";
+  player.alive = false;
+  shake = 14;
+  S().lose && S().lose(); S().hLose && S().hLose();
+  burst(player.x, player.z, "#C97F6A", 22);
+  setTimeout(()=>showGameOver(reason), 520);
+}
+
+/* ─────────────── loop ─────────────── */
+function step(dt){
+  if(state === "playing"){
+    tNow += dt;
+    /* pressão da festa */
+    cam.push = Math.min(0.42 + score * 0.0075, 1.55);
+  }
+
+  /* pulo */
+  if(player.hopping){
+    player.hop += dt * 1000 / HOP_MS;
+    if(player.hop >= 1){ player.hop = 1; landed(); }
+    else{
+      const e = player.hop;
+      player.x = player.fx + (player.tx - player.fx) * e;
+      player.z = player.fz + (player.tz - player.fz) * e;
+    }
+  }
+  if(player.bump > 0) player.bump = Math.max(0, player.bump - dt*6);
+
+  /* carona no rio de champagne */
+  if(state === "playing" && !player.hopping){
+    const row = rowAt(player.z);
+    if(row.type === TYPE.CHAMPA){
+      const p = platformUnder(row, player.x, tNow);
+      if(p){
+        player.x += row.movers.dir * row.movers.speed * dt;
+        if(player.x < X_MIN - 0.75 || player.x > X_MAX + 0.75) die("correnteza");
+      }else{
+        die("champagne");
+      }
+    }
+  }
+
+  /* atropelamento (vale também no meio do pulo) */
+  if(state === "playing"){
+    const zr = player.hopping ? (player.hop > .5 ? player.tz : player.fz) : player.z;
+    const row = rowAt(zr);
+    if((row.type === TYPE.PISTA || row.type === TYPE.BUFFET) && hitBy(row, player.x, tNow)){
+      die(row.type === TYPE.PISTA ? "danca" : "garcom");
+    }
+  }
+
+  /* câmera: segue o jogador e nunca recua enquanto a festa avança */
+  const targetZ = player.z - LEAD;
+  let nextZ = cam.z + (targetZ - cam.z) * Math.min(1, dt*7);
+  if(state === "playing" && score > 0) nextZ = Math.max(nextZ, cam.z + cam.push * dt);
+  cam.z = nextZ;
+  const targetX = Math.max(-2.2, Math.min(2.2, player.x));
+  cam.x += (targetX - cam.x) * Math.min(1, dt*7);
+
+  if(state === "playing" && player.z < cam.z - 0.35) die("festa");
+
+  ensureRows(Math.ceil(cam.z) + Math.ceil(H/TD) + 4);
+
+  /* partículas */
+  for(let i=particles.length-1;i>=0;i--){
+    const p = particles[i];
+    p.life -= dt; p.x += p.vx*dt; p.y += p.vy*dt; p.vy += 620*dt; p.r += p.vr*dt;
+    if(p.life <= 0) particles.splice(i,1);
+  }
+  for(let i=floaters.length-1;i>=0;i--){
+    const f = floaters[i]; f.life -= dt; if(f.life <= 0) floaters.splice(i,1);
+  }
+  if(shake > 0) shake = Math.max(0, shake - dt*40);
+}
+
+function loop(now){
+  const dt = Math.min((now - tPrev)/1000, 0.05);
+  tPrev = now;
+  step(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+/* ─────────────── partículas ─────────────── */
+function burst(wx, wz, color, n){
+  const px = sx(wx, wz), py = sy(wz);
+  for(let i=0;i<n;i++){
+    const a = Math.random()*Math.PI*2, sp = rnd(60,240);
+    particles.push({ x:px, y:py, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-140, r:Math.random()*6, vr:rnd(-6,6), life:rnd(.5,1), col:color, sz:rnd(3,7) });
+  }
+}
+function addFloater(wx, wz, text){
+  floaters.push({ x:sx(wx,wz), y:sy(wz)-TW*0.9, text, life:1.1, max:1.1 });
+}
+
+/* ─────────────── desenho ─────────────── */
+function drawSprite(key, wx, wz, widthTiles, opts){
+  opts = opts || {};
+  const bx = sx(wx, wz);
+  const by = sy(wz) + TD*0.12 - (opts.elev||0)*TW - (opts.lift||0);
+  const w = widthTiles * TW;
+  let h = w;
+  if(ok(key)){ h = w * (IMG[key].naturalHeight / IMG[key].naturalWidth); }
+
+  if(opts.shadow !== false){
+    ctx.save();
+    ctx.globalAlpha = .16; ctx.fillStyle = "#4A3A22";
+    ctx.beginPath(); ctx.ellipse(bx, by, w*0.42, w*0.15, 0, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  if(ok(key)){
+    ctx.save();
+    if(opts.flip){ ctx.translate(bx,0); ctx.scale(-1,1); ctx.translate(-bx,0); }
+    ctx.drawImage(IMG[key], bx - w/2, by - h, w, h);
+    ctx.restore();
+  }else{
+    ctx.fillStyle = opts.fallback || "#C7B18A";
+    roundRect(bx - w/2, by - w*0.9, w, w*0.9, w*0.18); ctx.fill();
+  }
+}
+
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function drawRowFloor(row){
+  const z = row.z;
+  const pal = PAL[row.type] || PAL.grama;
+  const e = (ELEV[row.type]||0) * TW;
+  const L = X_MIN - 12, R = X_MAX + 12;
+
+  /* a faixa é uma laje: parte do TD vira topo, o resto é a face frontal visível.
+     O rio é rebaixado, então quase toda a faixa fica visível como água. */
+  const FACE = TD * (row.type === TYPE.CHAMPA ? 0.12 : 0.30);
+  const front = rowAt(z-1);
+  const eF = (ELEV[front.type]||0) * TW;
+
+  const yB = sy(z + .5) - e;                       // borda de trás do topo
+  const yF = sy(z - .5) - e - FACE;                // borda da frente do topo
+  const yBase = sy(z - .5) - eF;                   // onde encosta na faixa da frente
+  const xBL = sx(L, z+.5), xBR = sx(R, z+.5);
+  const xFL = sx(L, z-.5), xFR = sx(R, z-.5);
+
+  /* face frontal (extrusão) — o que dá a leitura 3D */
+  ctx.fillStyle = pal.side;
+  ctx.beginPath();
+  ctx.moveTo(xFL, yF); ctx.lineTo(xFR, yF);
+  ctx.lineTo(xFR, yBase); ctx.lineTo(xFL, yBase);
+  ctx.closePath(); ctx.fill();
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(xFL, yF); ctx.lineTo(xFR, yF); ctx.lineTo(xFR, yBase); ctx.lineTo(xFL, yBase);
+  ctx.closePath(); ctx.clip();
+  const sg = ctx.createLinearGradient(0, yF, 0, yBase);
+  sg.addColorStop(0, "rgba(255,255,255,.14)"); sg.addColorStop(1, "rgba(0,0,0,.22)");
+  ctx.fillStyle = sg; ctx.fillRect(0, yF - 2, W, (yBase - yF) + 4);
+  ctx.restore();
+
+  /* topo */
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(xBL, yB); ctx.lineTo(xBR, yB);
+  ctx.lineTo(xFR, yF); ctx.lineTo(xFL, yF);
+  ctx.closePath();
+  ctx.fillStyle = (z % 2 === 0) ? pal.top : pal.top2;
+  ctx.fill();
+  ctx.clip();
+
+  /* texturas por tipo */
+  if(row.type === TYPE.PISTA){
+    for(let c=Math.floor(cam.x)-7; c<=Math.ceil(cam.x)+7; c++){
+      if((c + z) % 2 !== 0) continue;
+      const a = sx(c-.5, z+.5), b = sx(c+.5, z+.5), a2 = sx(c-.5, z-.5), b2 = sx(c+.5, z-.5);
+      ctx.fillStyle = "rgba(186,146,72,.46)";
+      ctx.beginPath(); ctx.moveTo(a,yB); ctx.lineTo(b,yB); ctx.lineTo(b2,yF); ctx.lineTo(a2,yF); ctx.closePath(); ctx.fill();
+    }
+  }
+  else if(row.type === TYPE.CHAMPA){
+    /* sombra das margens: dá a sensação de canal fundo */
+    const bank = ctx.createLinearGradient(0, yB, 0, yF);
+    bank.addColorStop(0, "rgba(120,88,22,.42)");
+    bank.addColorStop(.30, "rgba(120,88,22,0)");
+    bank.addColorStop(.70, "rgba(120,88,22,0)");
+    bank.addColorStop(1, "rgba(120,88,22,.30)");
+    ctx.fillStyle = bank; ctx.fillRect(0, yB - 4, W, (yF-yB) + 8);
+    /* ondas */
+    ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineWidth = Math.max(1.5, TD*0.07);
+    for(let i=0;i<3;i++){
+      const yy = yF - (yF-yB)*(i+.6)/3.4;
+      ctx.beginPath();
+      for(let px=-10; px<=W+10; px+=6){
+        const yv = yy + Math.sin((px/TW)*1.5 + tNow*2.1 + i*2 + z)*TD*0.07;
+        px === -10 ? ctx.moveTo(px,yv) : ctx.lineTo(px,yv);
+      }
+      ctx.stroke();
+    }
+    /* bolhas subindo */
+    ctx.fillStyle = "rgba(255,255,255,.85)";
+    for(let i=0;i<9;i++){
+      const bx = originX() + Math.sin(z*2.7 + i*2.1)*W*0.44;
+      const span = Math.max(1, yF-yB);
+      const by2 = yF - ((tNow*26 + i*37 + z*53) % span);
+      ctx.beginPath(); ctx.arc(bx, by2, 1.4 + (i%3)*0.8, 0, Math.PI*2); ctx.fill();
+    }
+  }
+  else if(row.type === TYPE.BUFFET){
+    ctx.strokeStyle = "rgba(150,120,80,.25)"; ctx.lineWidth = 1;
+    for(let c=Math.floor(cam.x)-8; c<=Math.ceil(cam.x)+8; c++){
+      ctx.beginPath(); ctx.moveTo(sx(c+.5, z+.5), yB); ctx.lineTo(sx(c+.5, z-.5), yF); ctx.stroke();
+    }
+  }
+  else if(row.type === TYPE.TAPETE){
+    ctx.strokeStyle = "rgba(240,215,150,.75)"; ctx.lineWidth = 2.5;
+    [-3.6, 3.6].forEach(c=>{
+      ctx.beginPath(); ctx.moveTo(sx(c, z+.5), yB); ctx.lineTo(sx(c, z-.5), yF); ctx.stroke();
+    });
+  }
+  else if(row.type === TYPE.GRAMA){
+    ctx.fillStyle = "rgba(120,140,95,.24)";
+    for(let i=0;i<10;i++){
+      const gx = originX() + Math.sin(z*3.1 + i*1.9)*W*0.52;
+      const gy = yF - ((i*7 + z*11) % Math.max(1,(yF-yB)));
+      ctx.fillRect(gx, gy, 2, 3.5);
+    }
+  }
+  ctx.restore();
+
+}
+
+/* ═══════════ figurinhas desenhadas no canvas ═══════════
+   A biblioteca de PNG do site é arte decorativa (molduras ovais, ícones
+   chapados, mesa em vista de cima) e não assenta nesta perspectiva.
+   Estas primitivas dão volume de verdade e usam a paleta do site. */
+
+function shadowAt(bx, by, rx){
+  ctx.save();
+  ctx.globalAlpha = .17; ctx.fillStyle = "#4A3A22";
+  ctx.beginPath(); ctx.ellipse(bx, by, rx, rx*0.36, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+/* cilindro deitado no chão: topo elíptico + parede lateral */
+function isoDisc(cx, cy, rx, ry, h, top, side, edge){
+  ctx.fillStyle = side;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI);
+  ctx.lineTo(cx - rx, cy - h);
+  ctx.ellipse(cx, cy - h, rx, ry, 0, Math.PI, 0, true);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = top;
+  ctx.beginPath(); ctx.ellipse(cx, cy - h, rx, ry, 0, 0, Math.PI*2); ctx.fill();
+  if(edge){
+    ctx.strokeStyle = edge; ctx.lineWidth = Math.max(1, rx*0.055);
+    ctx.beginPath(); ctx.ellipse(cx, cy - h, rx*0.78, ry*0.78, 0, 0, Math.PI*2); ctx.stroke();
+  }
+}
+
+/* convidado / garçom / noivo — todos saem daqui */
+function drawFigure(bx, by, u, look, o){
+  o = o || {};
+  const skin = look.skin, hair = look.hair;
+  const bodyH = u * 0.74 * (look.tall || 1);
+  const bodyW = u * 0.78;
+  const legTop = by - u*0.30;
+
+  shadowAt(bx, by, u*0.42);
+
+  /* pernas com passo alternado */
+  const step = o.step || 0;
+  ctx.fillStyle = look.fem ? skin : "#2B3648";
+  roundRect(bx - u*0.26, legTop - Math.max(0,step)*u*0.05, u*0.2, u*0.32, u*0.07); ctx.fill();
+  roundRect(bx + u*0.06, legTop - Math.max(0,-step)*u*0.05, u*0.2, u*0.32, u*0.07); ctx.fill();
+
+  /* corpo: vestido em trapézio, terno em retângulo */
+  ctx.fillStyle = look.body;
+  if(look.fem){
+    ctx.beginPath();
+    ctx.moveTo(bx - bodyW*0.30, legTop - bodyH);
+    ctx.lineTo(bx + bodyW*0.30, legTop - bodyH);
+    ctx.lineTo(bx + bodyW*0.60, legTop + u*0.02);
+    ctx.lineTo(bx - bodyW*0.60, legTop + u*0.02);
+    ctx.closePath(); ctx.fill();
+  }else{
+    roundRect(bx - bodyW/2, legTop - bodyH, bodyW, bodyH, u*0.16); ctx.fill();
+  }
+
+  /* braços */
+  ctx.fillStyle = skin;
+  roundRect(bx - bodyW*0.62, legTop - bodyH*0.82, u*0.15, bodyH*0.58, u*0.075); ctx.fill();
+  if(!o.tray){ roundRect(bx + bodyW*0.47, legTop - bodyH*0.82, u*0.15, bodyH*0.58, u*0.075); ctx.fill(); }
+
+  /* detalhe: gravata ou decote */
+  ctx.fillStyle = look.trim;
+  if(look.fem){
+    ctx.beginPath(); ctx.arc(bx, legTop - bodyH*0.96, u*0.09, 0, Math.PI*2); ctx.fill();
+  }else{
+    ctx.fillStyle = "#FBF7EF";
+    ctx.beginPath();
+    ctx.moveTo(bx - bodyW*0.15, legTop - bodyH);
+    ctx.lineTo(bx + bodyW*0.15, legTop - bodyH);
+    ctx.lineTo(bx, legTop - bodyH*0.55);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = look.trim;
+    const ty = legTop - bodyH*0.90;
+    ctx.beginPath();
+    ctx.moveTo(bx - u*0.15, ty - u*0.06); ctx.lineTo(bx - u*0.025, ty);
+    ctx.lineTo(bx - u*0.15, ty + u*0.06); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(bx + u*0.15, ty - u*0.06); ctx.lineTo(bx + u*0.025, ty);
+    ctx.lineTo(bx + u*0.15, ty + u*0.06); ctx.closePath(); ctx.fill();
+  }
+
+  /* cabeça */
+  const hr = u*0.33, hy = legTop - bodyH - hr*0.78;
+  ctx.fillStyle = skin;
+  ctx.beginPath(); ctx.arc(bx, hy, hr, 0, Math.PI*2); ctx.fill();
+
+  if(o.face && ok("face")){
+    ctx.save();
+    ctx.beginPath(); ctx.arc(bx, hy, hr, 0, Math.PI*2); ctx.clip();
+    const fw = hr*2.35, fh = fw * (IMG.face.naturalHeight/IMG.face.naturalWidth);
+    ctx.drawImage(IMG.face, bx - fw/2, hy - fh*0.52, fw, fh);
+    ctx.restore();
+    ctx.lineWidth = Math.max(1.5, u*0.045); ctx.strokeStyle = "#FBF7EF";
+    ctx.beginPath(); ctx.arc(bx, hy, hr, 0, Math.PI*2); ctx.stroke();
+  }else{
+    /* cabelo */
+    ctx.fillStyle = hair;
+    ctx.beginPath();
+    ctx.arc(bx, hy, hr*1.02, Math.PI*1.04, Math.PI*(look.fem ? 2.10 : 1.96));
+    ctx.closePath(); ctx.fill();
+    if(look.fem){
+      ctx.beginPath(); ctx.arc(bx - hr*0.86, hy + hr*0.16, hr*0.36, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(bx + hr*0.86, hy + hr*0.16, hr*0.36, 0, Math.PI*2); ctx.fill();
+    }
+    /* olhos */
+    ctx.fillStyle = "#3B2E22";
+    ctx.beginPath(); ctx.arc(bx - hr*0.32, hy + hr*0.12, hr*0.11, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(bx + hr*0.32, hy + hr*0.12, hr*0.11, 0, Math.PI*2); ctx.fill();
+    /* sorriso */
+    ctx.strokeStyle = "#A8624F"; ctx.lineWidth = Math.max(1, hr*0.09); ctx.lineCap = "round";
+    ctx.beginPath(); ctx.arc(bx, hy + hr*0.24, hr*0.28, Math.PI*0.18, Math.PI*0.82); ctx.stroke();
+  }
+
+  /* flor na lapela — marca o noivo na multidão */
+  if(o.groom){
+    ctx.fillStyle = "#D98D9E";
+    ctx.beginPath(); ctx.arc(bx - bodyW*0.30, legTop - bodyH*0.80, u*0.065, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#7E9B5C";
+    ctx.beginPath(); ctx.arc(bx - bodyW*0.24, legTop - bodyH*0.72, u*0.038, 0, Math.PI*2); ctx.fill();
+  }
+
+  /* bandeja do garçom, erguida numa das mãos */
+  if(o.tray){
+    const tx = bx + bodyW*0.62, ty = legTop - bodyH*1.02;
+    ctx.fillStyle = skin;
+    roundRect(bx + bodyW*0.40, ty, u*0.14, bodyH*0.42, u*0.07); ctx.fill();
+    isoDisc(tx, ty + u*0.02, u*0.42, u*0.15, u*0.05, "#EFE3CB", "#B49B72", "#D8C6A2");
+    /* taças na bandeja */
+    for(let i=-1;i<=1;i++){
+      const gx = tx + i*u*0.22, gy = ty - u*0.04;
+      ctx.fillStyle = "#F7E08E";
+      ctx.beginPath();
+      ctx.moveTo(gx - u*0.055, gy - u*0.24);
+      ctx.lineTo(gx + u*0.055, gy - u*0.24);
+      ctx.lineTo(gx, gy - u*0.07);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = "#FBF7EF"; ctx.lineWidth = Math.max(1, u*0.028);
+      ctx.beginPath(); ctx.moveTo(gx, gy - u*0.07); ctx.lineTo(gx, gy); ctx.stroke();
+    }
+  }
+}
+
+/* mesa comprida de banquete boiando no rio de champagne.
+   Uma mesa redonda com 2+ tiles de largura sempre leria como um prato;
+   a mesa retangular com toalha e pregas assenta bem nessa proporção. */
+function drawFloatTable(bx, by, wpx, id){
+  const bob = Math.sin(tNow*1.9 + id) * TD*0.05;
+  const cy = by + bob;
+  const hw = wpx*0.46;                 // meia largura
+  const topH = TD*0.32;                // altura do tampo acima da água
+  const depth = TD*0.26;               // "profundidade" aparente do tampo
+
+  /* espuma na linha d'água */
+  ctx.save();
+  ctx.globalAlpha = .6; ctx.strokeStyle = "#FFFDF4";
+  ctx.lineWidth = Math.max(1.6, TD*0.11);
+  ctx.beginPath(); ctx.ellipse(bx, cy + TD*0.10, hw*0.98, TD*0.17, 0, 0, Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  /* toalha caindo até a água */
+  ctx.fillStyle = "#EFE1C0";
+  ctx.beginPath();
+  ctx.moveTo(bx - hw, cy - topH);
+  ctx.lineTo(bx + hw, cy - topH);
+  ctx.lineTo(bx + hw*0.93, cy + TD*0.11);
+  ctx.lineTo(bx - hw*0.93, cy + TD*0.11);
+  ctx.closePath(); ctx.fill();
+  /* pregas */
+  ctx.strokeStyle = "rgba(150,120,64,.24)"; ctx.lineWidth = Math.max(1, TD*0.035);
+  for(let i=-3;i<=3;i++){
+    const px = bx + i*hw*0.26;
+    ctx.beginPath(); ctx.moveTo(px, cy - topH*0.9); ctx.lineTo(px*0.985 + bx*0.015, cy + TD*0.08); ctx.stroke();
+  }
+  /* sombra na barra da toalha */
+  const cg = ctx.createLinearGradient(0, cy - topH*0.4, 0, cy + TD*0.11);
+  cg.addColorStop(0,"rgba(120,92,42,0)"); cg.addColorStop(1,"rgba(120,92,42,.3)");
+  ctx.fillStyle = cg; ctx.fillRect(bx - hw, cy - topH*0.4, hw*2, topH*0.4 + TD*0.11);
+
+  /* tampo em quadrilátero oblíquo */
+  ctx.fillStyle = "#FBF4E4";
+  ctx.beginPath();
+  ctx.moveTo(bx - hw,          cy - topH);
+  ctx.lineTo(bx - hw + depth*0.5, cy - topH - depth);
+  ctx.lineTo(bx + hw + depth*0.5, cy - topH - depth);
+  ctx.lineTo(bx + hw,          cy - topH);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = "#DCC79C"; ctx.lineWidth = Math.max(1, TD*0.04);
+  ctx.stroke();
+
+  /* louça e arranjos em cima */
+  const ty = cy - topH - depth*0.5;
+  const n = Math.max(2, Math.round(wpx/(TW*0.85)));
+  for(let i=0;i<n;i++){
+    const px = bx - hw + (hw*2)*((i+0.5)/n) + depth*0.25;
+    if(i % 2 === 0){
+      /* arranjo de flores */
+      ctx.fillStyle = "#6E8A4C";
+      ctx.beginPath(); ctx.ellipse(px, ty - TD*0.11, TD*0.11, TD*0.09, 0, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = "#D98D9E";
+      ctx.beginPath(); ctx.arc(px - TD*0.05, ty - TD*0.16, TD*0.045, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(px + TD*0.05, ty - TD*0.15, TD*0.045, 0, Math.PI*2); ctx.fill();
+    }else{
+      /* taça */
+      ctx.fillStyle = "#F7E08E";
+      ctx.beginPath();
+      ctx.moveTo(px - TD*0.06, ty - TD*0.24);
+      ctx.lineTo(px + TD*0.06, ty - TD*0.24);
+      ctx.lineTo(px, ty - TD*0.08);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = "#E8DCC0"; ctx.lineWidth = Math.max(1, TD*0.028);
+      ctx.beginPath(); ctx.moveTo(px, ty - TD*0.08); ctx.lineTo(px, ty - TD*0.01); ctx.stroke();
+    }
+  }
+}
+
+/* bloqueios do jardim */
+function drawBlocker(kind, bx, by, u){
+  shadowAt(bx, by, u*0.36);
+  if(kind === "chair"){
+    /* pernas */
+    ctx.fillStyle = "#8F6C3E";
+    [-0.20, 0.20].forEach(dx=>ctx.fillRect(bx + dx*u - u*0.035, by - u*0.26, u*0.07, u*0.26));
+    /* assento */
+    isoDisc(bx, by - u*0.26, u*0.27, u*0.10, u*0.06, "#D8BE8E", "#A8814C");
+    /* encosto vazado */
+    ctx.fillStyle = "#A8814C";
+    ctx.fillRect(bx - u*0.24, by - u*0.74, u*0.05, u*0.44);
+    ctx.fillRect(bx + u*0.19, by - u*0.74, u*0.05, u*0.44);
+    ctx.fillRect(bx - u*0.24, by - u*0.78, u*0.48, u*0.07);
+    ctx.fillStyle = "#C39C60";
+    ctx.fillRect(bx - u*0.10, by - u*0.70, u*0.20, u*0.30);
+    /* laço de cerimônia */
+    ctx.fillStyle = "#C4788C";
+    ctx.beginPath(); ctx.arc(bx, by - u*0.55, u*0.06, 0, Math.PI*2); ctx.fill();
+  }
+  else if(kind === "bush"){
+    ctx.fillStyle = "#5C7444";
+    ctx.beginPath(); ctx.ellipse(bx, by - u*0.06, u*0.34, u*0.14, 0, 0, Math.PI*2); ctx.fill();
+    [[0,-0.34,0.30],[-0.24,-0.20,0.22],[0.24,-0.20,0.22]].forEach(([dx,dy,r],i)=>{
+      ctx.fillStyle = i === 0 ? "#7E9B5C" : "#6E8A4C";
+      ctx.beginPath(); ctx.arc(bx + dx*u, by + dy*u, r*u, 0, Math.PI*2); ctx.fill();
+    });
+    ctx.fillStyle = "#D98D9E";
+    ctx.beginPath(); ctx.arc(bx + u*0.13, by - u*0.42, u*0.07, 0, Math.PI*2); ctx.fill();
+  }
+  else if(kind === "vase"){
+    ctx.fillStyle = "#B8895A";
+    ctx.beginPath();
+    ctx.moveTo(bx - u*0.17, by - u*0.02); ctx.lineTo(bx + u*0.17, by - u*0.02);
+    ctx.lineTo(bx + u*0.12, by - u*0.34); ctx.lineTo(bx - u*0.12, by - u*0.34);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#7E9B5C";
+    ctx.beginPath(); ctx.ellipse(bx, by - u*0.42, u*0.20, u*0.15, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#E0A2B0";
+    [[-0.11,-0.50],[0.11,-0.50],[0,-0.58]].forEach(([dx,dy])=>{
+      ctx.beginPath(); ctx.arc(bx + dx*u, by + dy*u, u*0.075, 0, Math.PI*2); ctx.fill();
+    });
+  }
+  else{ /* colunata / pedestal */
+    isoDisc(bx, by, u*0.24, u*0.09, u*0.05, "#D8C6A2", "#A98C63");
+    ctx.fillStyle = "#C9B48C";
+    ctx.fillRect(bx - u*0.08, by - u*0.44, u*0.16, u*0.40);
+    isoDisc(bx, by - u*0.44, u*0.22, u*0.085, u*0.06, "#EFE3CB", "#B49B72", "#D8C6A2");
+  }
+}
+
+function drawRowObjects(row){
+  const z = row.z, e = (ELEV[row.type]||0);
+  const baseY = zz => sy(zz) + TD*0.12 - e*TW;
+
+  /* arbustos decorativos fora do tabuleiro */
+  row.deco.forEach(d=>{
+    drawBlocker("bush", sx(d.x, z + d.o), baseY(z + d.o), TW*d.s*1.5);
+  });
+
+  /* bloqueios */
+  row.statics.forEach(s=>{
+    drawBlocker(s.kind, sx(s.x, z), baseY(z), TW*0.78);
+  });
+
+  /* docinho */
+  if(row.sweet !== null && row.sweet !== undefined){
+    const bob = Math.sin(tNow*3 + z)*TW*0.05;
+    drawSprite("sweet", row.sweet, z, 0.34, { elev:e, lift: TW*0.17 + bob, shadow:false });
+    ctx.save();
+    ctx.globalAlpha = .2; ctx.fillStyle = "#8B6A3A";
+    ctx.beginPath(); ctx.ellipse(sx(row.sweet,z), sy(z)+TD*0.12 - e*TW, TW*0.14, TW*0.05, 0, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  /* bolo da faixa */
+  if(row.cake){
+    const cx = 0;
+    if(!row.cakeTaken){
+      ctx.save(); ctx.globalAlpha = .25 + Math.sin(tNow*3)*0.12;
+      ctx.fillStyle = "#F2C879";
+      ctx.beginPath(); ctx.ellipse(sx(cx,z), sy(z)+TD*0.12, TW*0.85, TW*0.3, 0, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+    drawSprite("cake", cx, z, 0.86, { elev:e, lift: row.cakeTaken ? 0 : Math.sin(tNow*2.4)*TW*0.03 });
+    ctx.save();
+    ctx.font = `600 ${Math.round(TW*0.2)}px Inter, sans-serif`;
+    ctx.textAlign = "center"; ctx.fillStyle = "#8A6534";
+    ctx.fillText("#" + (z/CAKE_EVERY), sx(cx,z), sy(z)+TD*0.12 + TW*0.22);
+    ctx.restore();
+  }
+
+  /* movers */
+  if(row.movers){
+    const m = row.movers;
+    const list = moverPositions(row, tNow);
+    list.forEach(p=>{
+      if(p.x < cam.x - VIEW_COLS || p.x > cam.x + VIEW_COLS) return;
+      const bx = sx(p.x, z);
+      if(m.kind === "float"){
+        drawFloatTable(bx, sy(z) + TD*0.02, m.w * TW, p.id);
+      }
+      else if(m.kind === "guest"){
+        /* convidado dançando: pula no ritmo e troca o passo */
+        const bob = Math.abs(Math.sin(tNow*5.2 + p.id*1.7)) * TW*0.07;
+        drawFigure(bx, baseY(z) - bob, TW*0.62, guestLook(p.id),
+                   { step: Math.sin(tNow*5.2 + p.id*1.7) });
+      }
+      else{
+        /* garçom correndo com a bandeja */
+        const bob = Math.abs(Math.sin(tNow*9 + p.id)) * TW*0.035;
+        const hw = hash32(p.id * 31 + 7);
+        const look = { fem:false, body:"#2E3038", trim:"#C8A050",
+                       skin: SKIN[(hw >>> 5) % SKIN.length],
+                       hair: HAIR[(hw >>> 11) % HAIR.length], tall:1 };
+        drawFigure(bx, baseY(z) - bob, TW*0.60, look,
+                   { tray:true, step: Math.sin(tNow*9 + p.id) });
+      }
+    });
+  }
+}
+
+/* jogador: chibi desenhado no canvas, com rosto real */
+function drawPlayer(){
+  if(!player.alive && state === "over" && shake < 3) return;
+  const z = player.z, x = player.x;
+  const row = rowAt(Math.round(z));
+  const e = (ELEV[row.type]||0)*TW;
+
+  let lift = 0, squash = 1;
+  if(player.hopping){
+    lift = Math.sin(player.hop * Math.PI) * TW * 0.55;
+    squash = 1 + Math.sin(player.hop * Math.PI) * 0.1;
+  }
+  if(player.bump > 0) lift = Math.sin(player.bump * Math.PI) * TW * 0.1;
+
+  const bx = sx(x, z);
+  const by = sy(z) + TD*0.12 - e - lift;
+  const u  = TW * 0.66 * squash;
+
+  /* o noivo: mesma linguagem dos convidados, mas de terno claro com
+     gravata borboleta escura, para ser achado na multidão num relance.
+     Trocar face:false por face:true usa a foto real como cabeça. */
+  drawFigure(bx, by, u, { fem:false, body:"#EDE3D0", trim:"#8E2738",
+                          skin:"#F0D5BC", hair:"#3A2A1C", tall:1.04 },
+             { face:false, groom:true, step: player.hopping ? 0 : Math.sin(tNow*2)*0.3 });
+
+  /* seta de direção sutil quando parado */
+  if(state === "playing" && !player.hopping && tNow < 4){
+    ctx.save();
+    ctx.globalAlpha = .35 + Math.sin(tNow*4)*.25;
+    ctx.fillStyle = "#8A6534";
+    const ay = sy(z+1) + TD*0.1;
+    ctx.beginPath();
+    ctx.moveTo(sx(x, z+1), ay - TD*0.35);
+    ctx.lineTo(sx(x, z+1) - TW*0.16, ay);
+    ctx.lineTo(sx(x, z+1) + TW*0.16, ay);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+}
+
+function draw(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  const sk = shake > 0 ? shake : 0;
+  if(sk) ctx.translate(rnd(-sk,sk)*0.35, rnd(-sk,sk)*0.35);
+
+  /* céu / fundo */
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,"#F7E9D2"); g.addColorStop(.45,"#F2E0C6"); g.addColorStop(1,"#EBD9BE");
+  ctx.fillStyle = g; ctx.fillRect(-24,-24,W+48,H+48);
+
+  /* horizonte decorativo */
+  ctx.save();
+  ctx.globalAlpha = .25; ctx.fillStyle = "#B9A57F";
+  ctx.beginPath(); ctx.ellipse(W*0.5, sy(cam.z + H/TD) + TD, W*0.9, TD*2.4, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  const zTop = Math.ceil(cam.z + H/TD) + 2;
+  const zBot = Math.floor(cam.z) - 3;
+  const pz = Math.round(player.z);
+
+  /* faixas: do fundo para a frente */
+  for(let z=zTop; z>=zBot; z--){
+    const row = rowAt(z);
+    drawRowFloor(row);
+    drawRowObjects(row);
+    if(pz === z) drawPlayer();
+  }
+  /* garante o jogador desenhado se estiver fora do range */
+  if(pz > zTop || pz < zBot) drawPlayer();
+
+  /* névoa nas bordas */
+  const fg = ctx.createLinearGradient(0,0,0,TD*2.6);
+  fg.addColorStop(0,"rgba(247,233,210,.95)"); fg.addColorStop(1,"rgba(247,233,210,0)");
+  ctx.fillStyle = fg; ctx.fillRect(0,0,W,TD*2.6);
+
+  /* linha da festa (limite de trás) */
+  if(state === "playing" && score > 0){
+    const ly = sy(cam.z - 0.35);
+    if(ly < H + 30 && ly > -30){
+      ctx.save();
+      ctx.globalAlpha = .55 + Math.sin(tNow*5)*.2;
+      const lg = ctx.createLinearGradient(0, ly-TD*1.2, 0, ly+TD*0.4);
+      lg.addColorStop(0,"rgba(190,90,110,0)"); lg.addColorStop(1,"rgba(190,90,110,.55)");
+      ctx.fillStyle = lg; ctx.fillRect(0, ly-TD*1.2, W, TD*1.6);
+      ctx.restore();
+    }
+  }
+
+  /* partículas */
+  particles.forEach(p=>{
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, Math.min(1, p.life));
+    ctx.translate(p.x, p.y); ctx.rotate(p.r);
+    ctx.fillStyle = p.col;
+    ctx.fillRect(-p.sz/2, -p.sz/2, p.sz, p.sz*0.7);
+    ctx.restore();
+  });
+
+  /* números flutuantes */
+  floaters.forEach(f=>{
+    const k = 1 - f.life/f.max;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, f.life*1.6);
+    ctx.font = `700 ${Math.round(TW*0.3)}px Inter, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.lineWidth = Math.max(4, TW*0.09); ctx.strokeStyle = "rgba(251,247,239,.95)"; ctx.lineJoin="round";
+    ctx.strokeText(f.text, f.x, f.y - k*TW*0.7);
+    ctx.fillStyle = "#8A5A22";
+    ctx.fillText(f.text, f.x, f.y - k*TW*0.7);
+    ctx.restore();
+  });
+}
+
+/* ─────────────── overlay ─────────────── */
+const overlay = document.getElementById("overlay");
+function hideOverlay(){ overlay.classList.remove("show"); }
+function showOverlay(icon, title, sub, showStats){
+  document.getElementById("goIcon").src = icon;
+  document.getElementById("goTitle").textContent = title;
+  document.getElementById("goSub").textContent = sub;
+  document.getElementById("goStats").style.display = showStats ? "flex" : "none";
+  overlay.classList.add("show");
+}
+
+const DEATHS = {
+  danca:     ["Puxado para dançar", "Tirato a ballare", "assets/img/icon-music.png"],
+  garcom:    ["Trombou com o garçom", "Scontro con il cameriere", "assets/img/icon-toast-glasses.png"],
+  champagne: ["Caiu no champagne", "Caduto nello champagne", "assets/img/match-champagne.png"],
+  correnteza:["Levado pela correnteza", "Portato via dalla corrente", "assets/img/match-champagne.png"],
+  festa:     ["A festa te alcançou", "La festa ti ha raggiunto", "assets/img/icon-confetti-burst.png"]
+};
+
+function showGameOver(reason){
+  const d = DEATHS[reason] || DEATHS.festa;
+  document.getElementById("stRows").textContent   = score;
+  document.getElementById("stSweets").textContent = sweets;
+  document.getElementById("stPts").textContent    = totalPoints();
+  showOverlay(d[2], t(d[0], d[1]),
+    t(`Você atravessou ${score} faixas e comeu ${cakes} bolo${cakes===1?"":"s"}.`,
+      `Hai attraversato ${score} file e mangiato ${cakes} torta/e.`), true);
+  document.getElementById("goBtns").innerHTML =
+    `<button class="game-btn game-btn--main" id="btnAgain">${t("Jogar de novo","Gioca ancora")}</button>`;
+  document.getElementById("btnAgain").onclick = start;
+  document.getElementById("postgame").style.display = "block";
+  document.getElementById("saveMsg").textContent = "";
+  document.getElementById("btnSave").disabled = false;
+}
+
+/* ─────────────── toast ─────────────── */
+const toastEl = document.getElementById("toast");
+let toastTimer = null;
+function showToast(text, icon){
+  document.getElementById("toastText").textContent = text;
+  if(icon) document.getElementById("toastIcon").src = icon;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toastEl.classList.remove("show"), 1900);
+}
+
+/* ─────────────── placar remoto ─────────────── */
+async function saveScore(){
+  const input = document.getElementById("playerName");
+  const msg = document.getElementById("saveMsg");
+  const btn = document.getElementById("btnSave");
+  const name = (input.value||"").trim().slice(0,24);
+  if(!name){ msg.textContent = t("Coloque seu nome para salvar.","Inserisci il tuo nome per salvare."); return; }
+  msg.textContent = t("Salvando…","Salvataggio…");
+  btn.disabled = true;
+  try{
+    await fetch(SCORE_API, { method:"POST", body: JSON.stringify({ action:"score", jogo:GAME_KEY, nome:name, pontos: totalPoints() }) });
+    msg.textContent = t("Salvo!","Salvato!");
+    loadTop10();
+  }catch(e){
+    btn.disabled = false;
+    msg.textContent = t("Não conseguimos salvar agora.","Non siamo riusciti a salvare ora.");
+  }
+}
+
+async function loadTop10(){
+  const list = document.getElementById("topList");
+  const medals = ["assets/img/icon-medal-gold.png","assets/img/icon-medal-silver.png","assets/img/icon-medal-bronze.png"];
+  list.innerHTML = `<li><span class="name">${t("Carregando…","Caricamento…")}</span></li>`;
+  try{
+    const r = await fetch(`${SCORE_API}?action=top10&jogo=${GAME_KEY}`);
+    const d = await r.json();
+    const arr = d.lista || [];
+    if(!arr.length){ list.innerHTML = `<li><span class="name">${t("Seja o primeiro a achar o bolo!","Sii il primo a trovare la torta!")}</span></li>`; return; }
+    list.innerHTML = arr.map((it,i)=>`<li>
+      <span class="pos">${medals[i] ? `<img src="${medals[i]}" alt="${i+1}">` : (i+1)}</span>
+      <span class="name">${esc(it.nome)}</span>
+      <span class="pts">${it.pontos} pts</span></li>`).join("");
+  }catch(e){
+    list.innerHTML = `<li><span class="name">${t("Placar indisponível.","Classifica non disponibile.")}</span></li>`;
+  }
+}
+
+/* ─────────────── controles ─────────────── */
+const KEYMAP = {
+  ArrowUp:"up", ArrowDown:"down", ArrowLeft:"left", ArrowRight:"right",
+  w:"up", s:"down", a:"left", d:"right", W:"up", S:"down", A:"left", D:"right"
+};
+window.addEventListener("keydown", e=>{
+  if(e.key === " " || e.code === "Space"){
+    e.preventDefault();
+    if(state !== "playing") start();
+    return;
+  }
+  const dir = KEYMAP[e.key];
+  if(dir){ e.preventDefault(); tryMove(dir); }
+});
+
+document.querySelectorAll(".dpad button").forEach(b=>{
+  const fire = ev=>{ ev.preventDefault(); tryMove(b.dataset.dir); };
+  b.addEventListener("touchstart", fire, { passive:false });
+  b.addEventListener("mousedown", fire);
+});
+
+/* toque/arraste no tabuleiro */
+let tStart = null;
+cv.addEventListener("touchstart", e=>{
+  const tt = e.changedTouches[0];
+  tStart = { x:tt.clientX, y:tt.clientY, t:Date.now() };
+}, { passive:true });
+cv.addEventListener("touchend", e=>{
+  if(!tStart) return;
+  const tt = e.changedTouches[0];
+  const dx = tt.clientX - tStart.x, dy = tt.clientY - tStart.y;
+  const dist = Math.hypot(dx, dy);
+  if(dist < 24){
+    /* toque: metade de cima = frente, laterais = lados, base = trás */
+    const r = cv.getBoundingClientRect();
+    const rx = (tt.clientX - r.left) / r.width, ry = (tt.clientY - r.top) / r.height;
+    if(ry < 0.55 && rx > 0.28 && rx < 0.72) tryMove("up");
+    else if(ry > 0.82 && rx > 0.28 && rx < 0.72) tryMove("down");
+    else if(rx <= 0.35) tryMove("left");
+    else if(rx >= 0.65) tryMove("right");
+    else tryMove("up");
+  }else{
+    if(Math.abs(dx) > Math.abs(dy)) tryMove(dx > 0 ? "right" : "left");
+    else tryMove(dy < 0 ? "up" : "down");
+  }
+  tStart = null;
+}, { passive:true });
+cv.addEventListener("touchmove", e=>{ e.preventDefault(); }, { passive:false });
+cv.addEventListener("click", e=>{
+  if(state === "ready"){ start(); return; }
+  if(state !== "playing") return;
+  const r = cv.getBoundingClientRect();
+  const rx = (e.clientX - r.left) / r.width, ry = (e.clientY - r.top) / r.height;
+  if(ry > 0.82 && rx > 0.28 && rx < 0.72) tryMove("down");
+  else if(rx <= 0.33) tryMove("left");
+  else if(rx >= 0.67) tryMove("right");
+  else tryMove("up");
+});
+
+document.getElementById("btnStart").onclick = start;
+document.getElementById("btnSave").onclick = saveScore;
+
+/* ─────────────── boot ─────────────── */
+best = loadBest();
+resize();
+reset();
+showOverlay(SRC.cake, t("Onde Tem Bolo?","Dov'è la Torta?"),
+  t("Toque na tela ou use as setas para pular. Um bolo a cada 20 faixas — e a festa vem vindo por trás.",
+    "Tocca lo schermo o usa le frecce per saltare. Una torta ogni 20 file — e la festa ti insegue."), false);
+preload(()=>{ draw(); });
+loadTop10();
+requestAnimationFrame(now=>{ tPrev = now; requestAnimationFrame(loop); });
+</script>
+</body>
+</html>

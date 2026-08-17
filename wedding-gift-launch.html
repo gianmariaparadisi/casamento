@@ -52,15 +52,27 @@
         </div>
         <div class="wgl-hud__row wgl-hud__row--bottom">
           <div class="wgl-pill wgl-pill--lives" id="hud-lives-wrap">
-            <span class="wgl-heart" data-i="0">♥</span><span class="wgl-heart" data-i="1">♥</span><span class="wgl-heart" data-i="2">♥</span>
+            <img class="wgl-heart" src="assets/img/icon-heart-full.png" alt="" data-i="0"/>
+            <img class="wgl-heart" src="assets/img/icon-heart-full.png" alt="" data-i="1"/>
+            <img class="wgl-heart" src="assets/img/icon-heart-full.png" alt="" data-i="2"/>
+            <img class="wgl-heart" src="assets/img/icon-heart-full.png" alt="" data-i="3"/>
+            <img class="wgl-heart" src="assets/img/icon-heart-full.png" alt="" data-i="4"/>
+          </div>
+          <div class="wgl-pill wgl-pill--chaos" id="hud-chaos">
+            <span class="wgl-pill__label">Caos</span>
+            <span class="wgl-chaos-bar"><span class="wgl-chaos-bar__fill" id="hud-chaos-fill"></span></span>
           </div>
           <div class="wgl-pill wgl-pill--throws">
             <span class="wgl-pill__label">Arremessos</span>
-            <strong id="hud-throws">3</strong>
+            <strong id="hud-throws">4</strong>
           </div>
           <div class="wgl-pill wgl-pill--gifts">
             <span class="wgl-pill__label">Presentes</span>
             <strong id="hud-gifts">0</strong>
+          </div>
+          <div class="wgl-pill wgl-pill--stars" id="hud-stars-wrap" hidden>
+            <span class="wgl-pill__label">Estrelas</span>
+            <strong id="hud-stars">0/0</strong>
           </div>
         </div>
       </div>
@@ -74,26 +86,26 @@
         <div class="wgl-overlay__card wgl-overlay__card--wide">
           <p class="wgl-kicker">Tiago &amp; Gian · 12·12·2026</p>
           <h1 class="wgl-title">Mira do<br/><em>Casamento</em></h1>
-          <p class="wgl-sub">Arremesse as cabecinhas dos noivos no estilingue e destrua os presentes empacotados antes que os arremessos acabem!</p>
+          <p class="wgl-sub">Arremesse as cabecinhas dos noivos no estilingue e derrube tudo: TNT, foguetes, champanhe e balões esperam por você. Quanto mais caos, mais pontos.</p>
 
           <div class="wgl-howto">
             <div class="wgl-howto__step">
-              <span class="wgl-howto__icon">👆</span>
+              <img class="wgl-howto__icon" src="assets/img/icon-pin.png" alt=""/>
               <span>Arraste pra trás no estilingue</span>
             </div>
             <div class="wgl-howto__step">
-              <span class="wgl-howto__icon">🎯</span>
-              <span>Mire nos presentes</span>
+              <img class="wgl-howto__icon" src="assets/img/icon-collision-burst.png" alt=""/>
+              <span>Acerte TNT e foguetes pra explodir tudo junto</span>
             </div>
             <div class="wgl-howto__step">
-              <span class="wgl-howto__icon">✨</span>
-              <span>Solte e arrase!</span>
+              <img class="wgl-howto__icon" src="assets/img/icon-sparkle.png" alt=""/>
+              <span>Encha o medidor de caos e ganhe um tiro explosivo</span>
             </div>
           </div>
 
           <button class="wgl-btn wgl-btn--main" id="btn-play">Jogar</button>
           <p class="wgl-best-line">Recorde atual: <strong id="start-best">0</strong> pontos</p>
-          <p class="wgl-rotate-note" id="start-rotate-note">Dica: jogue com o celular deitado 📱↔️</p>
+          <p class="wgl-rotate-note" id="start-rotate-note">Dica: jogue com o celular deitado</p>
         </div>
       </div>
 
@@ -101,10 +113,11 @@
       <div class="wgl-overlay wgl-overlay--complete" id="ov-complete" hidden>
         <div class="wgl-overlay__card">
           <p class="wgl-kicker" id="complete-kicker">Fase 1 completa!</p>
-          <h2 class="wgl-title wgl-title--sm">Uau! 🎉</h2>
+          <h2 class="wgl-title wgl-title--sm">Que estrago lindo!</h2>
           <div class="wgl-score-breakdown" id="complete-breakdown"><!-- preenchido via JS --></div>
           <div class="wgl-total-line">Total da fase: <strong id="complete-total">0</strong></div>
           <button class="wgl-btn wgl-btn--main" id="btn-continue">Continuar</button>
+          <p class="wgl-next-line" id="complete-next"></p>
         </div>
       </div>
 
@@ -112,8 +125,8 @@
       <div class="wgl-overlay wgl-overlay--fail" id="ov-fail" hidden>
         <div class="wgl-overlay__card">
           <p class="wgl-kicker">Quase!</p>
-          <h2 class="wgl-title wgl-title--sm">Mais uma vez ✨</h2>
-          <p class="wgl-sub">Ainda sobraram presentes na fase. Suas vidas:</p>
+          <h2 class="wgl-title wgl-title--sm">Mais uma vez</h2>
+          <p class="wgl-sub">Ainda sobraram presentes na fase. Seus pontos continuam guardados. Suas vidas:</p>
           <div class="wgl-lives-display" id="fail-lives"></div>
           <button class="wgl-btn wgl-btn--main" id="btn-retry">Tentar de novo</button>
         </div>
@@ -123,7 +136,7 @@
       <div class="wgl-overlay wgl-overlay--pause" id="ov-pause" hidden>
         <div class="wgl-overlay__card">
           <p class="wgl-kicker">Pausado</p>
-          <h2 class="wgl-title wgl-title--sm">Respira um pouco 🌿</h2>
+          <h2 class="wgl-title wgl-title--sm">Respira um pouco</h2>
           <button class="wgl-btn wgl-btn--main" id="btn-resume">Continuar jogando</button>
           <button class="wgl-btn wgl-btn--ghost" id="btn-restart-run">Reiniciar partida</button>
         </div>
@@ -138,8 +151,10 @@
             <span class="wgl-final-score__label">Pontuação final</span>
             <strong id="final-score">0</strong>
           </div>
-          <p class="wgl-best-line" id="final-newbest" hidden>🏆 Novo recorde!</p>
+          <p class="wgl-best-line wgl-best-line--record" id="final-newbest" hidden><img src="assets/img/icon-trophy.png" alt=""/> Novo recorde!</p>
           <div class="wgl-final-stats" id="final-stats"><!-- preenchido via JS --></div>
+          <button class="wgl-btn wgl-btn--main" id="btn-endless" hidden>Continuar no Caos Infinito</button>
+          <p class="wgl-next-line" id="endless-note" hidden>As fases não acabam mais — e ficam cada vez maiores.</p>
           <button class="wgl-btn wgl-btn--main" id="btn-playagain">Jogar de novo</button>
         </div>
       </div>

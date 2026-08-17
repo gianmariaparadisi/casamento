@@ -211,12 +211,22 @@
           <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
         </a>
 
+        <!-- Onde Tem Bolo? — destaque a partir de 24/10/2026 -->
+        <a href="onde-tem-bolo.html" id="card-ondetembolo-featured" class="jogo-card reveal" style="display:none;text-decoration:none;color:inherit;position:relative;background:linear-gradient(135deg,rgba(224,242,210,.95),rgba(196,228,176,.78));border-color:rgba(122,155,110,.55);">
+          <span id="ondetembolo-badge" style="position:absolute;top:-11px;right:50%;transform:translateX(50%);background:var(--sage);color:#fff;font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.32rem .7rem;border-radius:999px;box-shadow:0 3px 8px rgba(82,57,34,.25);white-space:nowrap" data-it="Nuovo gioco!">Jogo novo!</span>
+          <span class="jogo-card__icon"><img src="assets/img/cake-3tier.png" alt="" loading="lazy"></span>
+          <h2 class="jogo-card__title" data-it="Dov'è la Torta?">Onde Tem Bolo?</h2>
+          <p class="jogo-card__desc" data-it="Attraversa la pista da ballo, il buffet e il fiume di champagne. Una torta ogni 20 file — e la festa ti insegue.">Atravesse a pista de dança, o buffet e o rio de champagne. Um bolo a cada 20 faixas — e a festa vem vindo por trás.</p>
+          <p class="jogo-card__record" id="record-ondetembolo-preview" data-it="Caricamento…">Carregando…</p>
+          <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
+        </a>
+
         <!-- Pizza de Memória — destaque a partir de 29/08/2026 -->
         <a href="pizza-memory.html" id="card-pizza-featured" class="jogo-card reveal" style="display:none;text-decoration:none;color:inherit;position:relative;background:linear-gradient(135deg,rgba(224,242,210,.95),rgba(196,228,176,.78));border-color:rgba(122,155,110,.55);">
           <span id="pizza-badge" style="position:absolute;top:-11px;right:50%;transform:translateX(50%);background:var(--sage);color:#fff;font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.32rem .7rem;border-radius:999px;box-shadow:0 3px 8px rgba(82,57,34,.25);white-space:nowrap" data-it="Nuovo gioco!">Jogo novo!</span>
           <span class="jogo-card__icon"><img src="assets/img/pizza/pizza-base.png" alt="" loading="lazy"></span>
           <h2 class="jogo-card__title" data-it="Pizza a Memoria">Pizza de Memória</h2>
-          <p class="jogo-card__desc" data-it="Memorizza la pizza, rifalla uguale e servi il cliente. 50 livelli e ingredienti da sbloccare.">Memorize a pizza, monte de novo e sirva o cliente. 50 níveis e ingredientes para desbloquear.</p>
+          <p class="jogo-card__desc" data-it="La teglia ti dà le quantità giuste: devi solo ricordare DOVE va ogni cosa. Poi arriva il caos.">A bandeja já te dá as quantidades certas — você só precisa lembrar ONDE vai cada coisa. Aí começa o caos.</p>
           <span class="btn btn--primary btn--sm" data-it="Gioca">Jogar</span>
         </a>
 
@@ -546,7 +556,8 @@
   //   15/08/2026 — Campo Minado do Casamento
   //   29/08/2026 — Pizza de Memória
   //   12/09/2026 — Mira do Casamento
-  //   02/10/2026 — Até que a Morte nos Separe (sem próximo lançamento definido)
+  //   02/10/2026 — Até que a Morte nos Separe
+  //   24/10/2026 — Onde Tem Bolo? (sem próximo lançamento definido)
   (function(){
     const DAY = 24 * 60 * 60 * 1000;
     const COUNTDOWN_DAYS = 10;
@@ -559,6 +570,7 @@
       { id: 'card-pizza-featured',     badgeId: 'pizza-badge',        date: new Date(2026, 7, 29) }, // 29/08/2026
       { id: 'card-mira-featured',      badgeId: 'mira-badge',         date: new Date(2026, 8, 12) }, // 12/09/2026
       { id: 'card-morte-featured',     badgeId: 'morte-badge',        date: new Date(2026, 9, 2)  }, // 02/10/2026
+      { id: 'card-ondetembolo-featured',badgeId:'ondetembolo-badge',  date: new Date(2026, 9, 24) }, // 24/10/2026
     ];
 
     const now = new Date();

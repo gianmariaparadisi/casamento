@@ -4,17 +4,22 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
 <title>Pizza de Memória — Tiago &amp; Gian</title>
-<meta name="description" content="Memorize a pizza, monte de novo e sirva o cliente! Um arcade de memória visual com 50 níveis, ingredientes desbloqueáveis e high score."/>
+<meta name="description" content="A bandeja diz QUANTOS. Você só precisa lembrar ONDE. Um arcade de memória numa pizzaria que vai virando um caos delicioso."/>
 
 <!-- Open Graph -->
 <meta property="og:type" content="website"/>
 <meta property="og:title" content="Pizza de Memória — Tiago &amp; Gian"/>
-<meta property="og:description" content="Memorize. Monte. Sirva. 50 níveis de memória visual numa pizzaria cozy."/>
+<meta property="og:description" content="Memorize. Monte. Sirva. Até a cozinha virar um caos."/>
+<meta property="og:image" content="assets/img/pizza/pizza-base.png"/>
 
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="assets/css/pizza-memory.css"/>
+
+<link rel="preload" as="image" href="assets/img/pizza/pizza-base.png"/>
+<link rel="preload" as="image" href="assets/img/pizza/pizza-board.png"/>
+<link rel="preload" as="image" href="assets/img/pizza/cloche-cover.png"/>
 </head>
 <body class="pz-body">
 
@@ -27,9 +32,15 @@
 
     <div class="pz-stage" id="pz-stage">
 
-      <!-- ═══ ZONA SUPERIOR — cliente + pedido + HUD ═══ -->
+      <!-- ═══ Camadas de ambiente / caos (puramente visuais) ═══ -->
+      <div class="pz-chaos-tint" id="chaos-tint" aria-hidden="true"></div>
+      <div class="pz-flyers" id="pz-flyers" aria-hidden="true"></div>
+      <div class="pz-speedlines" id="pz-speedlines" aria-hidden="true"></div>
+
+      <!-- ═══ ZONA SUPERIOR — cliente + HUD ═══ -->
       <div class="pz-counter" id="pz-counter">
-        <div class="pz-counter__wall"></div>
+        <div class="pz-counter__wall" aria-hidden="true"></div>
+
         <div class="pz-hud" id="pz-hud" hidden>
           <div class="pz-hud__row">
             <div class="pz-pill pz-pill--score">
@@ -40,61 +51,91 @@
               <span class="pz-pill__label">Recorde</span>
               <strong id="hud-best">0</strong>
             </div>
-            <button class="pz-icon-btn" id="btn-sound" aria-label="Som" title="Som">
-              <span class="pz-icon-sound" id="icon-sound"></span>
+            <div class="pz-pill pz-pill--lives" id="hud-lives-wrap"></div>
+            <button class="pz-icon-btn" id="btn-sound" aria-label="Ligar/desligar som" title="Som">
+              <img id="icon-sound" src="assets/img/pizza/icon-sound-on.png" alt=""/>
             </button>
           </div>
+
           <div class="pz-hud__row pz-hud__row--bottom">
-            <div class="pz-pill pz-pill--lives" id="hud-lives-wrap"><!-- corações via JS, quantidade pode crescer com vida bônus --></div>
+            <div class="pz-chaosmeter" id="chaos-meter">
+              <div class="pz-chaosmeter__head">
+                <span class="pz-chaosmeter__label" id="chaos-label">Abrindo a pizzaria</span>
+                <span class="pz-chaosmeter__count" id="pizza-count">Pizza 1</span>
+              </div>
+              <div class="pz-chaosmeter__bar"><div class="pz-chaosmeter__fill" id="chaos-fill"></div></div>
+            </div>
+            <div class="pz-combo" id="hud-combo" hidden>
+              <span class="pz-combo__x" id="combo-mult">x2</span>
+              <span class="pz-combo__label" id="combo-label">Combo</span>
+            </div>
+          </div>
+
+          <div class="pz-hud__row pz-hud__row--timer">
             <div class="pz-pill pz-pill--state" id="hud-state">
               <strong id="hud-state-text">Memorize!</strong>
             </div>
             <div class="pz-pill pz-pill--timer" id="hud-timer-wrap">
               <div class="pz-timer-bar"><div class="pz-timer-bar__fill" id="hud-timer-fill"></div></div>
             </div>
-            <button class="pz-btn pz-btn--pw pz-btn--extratime" id="btn-extratime" hidden title="Adiciona alguns segundos de memorização">+2s</button>
+            <button class="pz-btn pz-btn--pw pz-btn--extratime" id="btn-extratime" hidden title="Ganha segundos a mais pra memorizar">
+              <img src="assets/img/pizza/icon-powerup-extratime.png" alt=""/>
+              <span>+3s</span>
+              <span class="pz-btn__badge" id="badge-extratime">0</span>
+            </button>
           </div>
         </div>
 
-        <div class="pz-variant-badge" id="variant-badge" hidden><span id="variant-badge-text"></span></div>
+        <div class="pz-variant-badge" id="variant-badge" hidden>
+          <img id="variant-badge-img" src="" alt=""/>
+          <span id="variant-badge-text"></span>
+        </div>
 
         <div class="pz-customer" id="pz-customer">
           <div class="pz-customer__avatar" id="customer-avatar">
-            <div class="pz-customer__face">
-              <span class="pz-customer__eye pz-customer__eye--l"></span>
-              <span class="pz-customer__eye pz-customer__eye--r"></span>
-              <span class="pz-customer__mouth" id="customer-mouth"></span>
-            </div>
+            <img id="customer-img" src="assets/img/pizza/customer-waiting.png" alt="Cliente"/>
           </div>
           <div class="pz-speech" id="customer-speech">
             <p id="customer-msg">Bem-vindo à pizzaria!</p>
           </div>
+          <div class="pz-queue" id="pz-queue" aria-hidden="true"></div>
         </div>
       </div>
 
       <!-- ═══ ZONA CENTRAL — bancada com pizzas ═══ -->
       <div class="pz-bench" id="pz-bench">
-        <div class="pz-bench__grid"></div>
-        <div class="pz-pizzas" id="pz-pizzas"><!-- pizzas montadas via JS --></div>
+        <div class="pz-bench__grid" aria-hidden="true"></div>
+        <div class="pz-pizzas" id="pz-pizzas"></div>
+        <div class="pz-popups" id="pz-popups" aria-hidden="true"></div>
       </div>
 
-      <!-- ═══ ZONA INFERIOR — caixas de ingredientes + ações ═══ -->
+      <!-- ═══ ZONA INFERIOR — bandeja de ingredientes + ações ═══ -->
       <div class="pz-ingredients" id="pz-ingredients">
-        <div class="pz-ingredients__row" id="ingredient-boxes"><!-- caixas via JS --></div>
+        <div class="pz-tray__head">
+          <span class="pz-tray__title">Sua bandeja</span>
+          <span class="pz-tray__hint" id="tray-hint">o número diz quantos faltam</span>
+        </div>
+        <div class="pz-ingredients__row" id="ingredient-boxes"></div>
+
         <div class="pz-actions is-waiting" id="pz-actions">
-          <button class="pz-btn pz-btn--pw" id="btn-peek" title="Dá uma espiadinha rápida na pizza-modelo">
-            Espiadinha <span class="pz-btn__badge" id="badge-peek">0</span>
+          <button class="pz-btn pz-btn--pw" id="btn-peek" title="Espia a pizza-modelo de novo por um instante">
+            <img src="assets/img/pizza/icon-powerup-peek.png" alt=""/>
+            <span>Espiadinha</span>
+            <span class="pz-btn__badge" id="badge-peek">0</span>
           </button>
-          <button class="pz-btn pz-btn--pw" id="btn-coringa" title="O próximo ingrediente colocado sempre conta como certo">
-            Coringa <span class="pz-btn__badge" id="badge-coringa">0</span>
+          <button class="pz-btn pz-btn--pw" id="btn-coringa" title="Coloca um ingrediente no lugar exato, de graça">
+            <img src="assets/img/pizza/icon-powerup-coringa.png" alt=""/>
+            <span>Coringa</span>
+            <span class="pz-btn__badge" id="badge-coringa">0</span>
           </button>
           <button class="pz-btn pz-btn--ghost" id="btn-undo">Desfazer</button>
-          <button class="pz-btn pz-btn--ghost" id="btn-clear">Limpar</button>
-          <button class="pz-btn pz-btn--main" id="btn-serve">Servir</button>
+          <button class="pz-btn pz-btn--main pz-btn--serve" id="btn-serve">
+            <span id="serve-label">Servir</span>
+          </button>
         </div>
       </div>
 
-      <!-- ═══ Ghost de arrastar (drag) ═══ -->
+      <!-- Ghost de arrastar -->
       <div class="pz-drag-ghost" id="pz-drag-ghost" hidden></div>
 
       <!-- ═══ OVERLAYS ═══ -->
@@ -105,24 +146,23 @@
           <p class="pz-kicker">Tiago &amp; Gian · Pizzaria</p>
           <h1 class="pz-title">Pizza de<br/><em>Memória</em></h1>
           <p class="pz-sub">Memorize. Monte. Sirva.</p>
-          <p class="pz-instr">Veja a pizza por alguns segundos e recrie de memória, colocando os ingredientes certos nos lugares certos.</p>
 
           <div class="pz-howto">
             <div class="pz-howto__step">
               <span class="pz-howto__num">1</span>
-              <span>Memorize a pizza-modelo</span>
+              <span>Olhe a pizza-modelo e guarde <strong>onde</strong> está cada coisa</span>
             </div>
             <div class="pz-howto__step">
               <span class="pz-howto__num">2</span>
-              <span>Escolha o ingrediente e toque na pizza</span>
+              <span>A bandeja já te dá a quantidade certa — é só tocar no lugar</span>
             </div>
             <div class="pz-howto__step">
               <span class="pz-howto__num">3</span>
-              <span>Sirva antes que o cliente perca a paciência!</span>
+              <span>Sirva. E aguente o rush, porque a cozinha vira um caos</span>
             </div>
           </div>
 
-          <button class="pz-btn pz-btn--main pz-btn--lg" id="btn-play">Jogar</button>
+          <button class="pz-btn pz-btn--main pz-btn--lg" id="btn-play">Abrir a pizzaria</button>
           <p class="pz-best-line">Recorde atual: <strong id="start-best">0</strong> pontos</p>
         </div>
       </div>
@@ -133,69 +173,63 @@
           <p class="pz-kicker" id="result-kicker">Pizza servida!</p>
           <h2 class="pz-title pz-title--sm" id="result-title">Boa!</h2>
           <div class="pz-score-ring" id="result-ring">
-            <svg viewBox="0 0 120 120" class="pz-score-ring__svg">
+            <svg viewBox="0 0 120 120" class="pz-score-ring__svg" aria-hidden="true">
               <circle cx="60" cy="60" r="52" class="pz-score-ring__track"/>
               <circle cx="60" cy="60" r="52" class="pz-score-ring__fill" id="result-ring-fill"/>
             </svg>
             <div class="pz-score-ring__num"><strong id="result-note">0</strong><span>/100</span></div>
           </div>
-          <div class="pz-score-breakdown" id="result-breakdown"><!-- via JS --></div>
+          <div class="pz-score-breakdown" id="result-breakdown"></div>
           <div class="pz-total-line">Pontos ganhos: <strong id="result-points">0</strong></div>
-          <button class="pz-btn pz-btn--main" id="btn-next">Próxima pizza</button>
+          <button class="pz-btn pz-btn--main" id="btn-next">Próximo pedido</button>
         </div>
       </div>
 
       <!-- Cliente bravo -->
       <div class="pz-overlay pz-overlay--angry" id="ov-angry" hidden>
         <div class="pz-overlay__card">
-          <p class="pz-kicker">Cliente bravo!</p>
+          <img class="pz-overlay__face" src="assets/img/pizza/customer-angry.png" alt=""/>
+          <p class="pz-kicker">Cliente bravo</p>
           <h2 class="pz-title pz-title--sm" id="angry-title">Isso não era o que eu pedi.</h2>
-          <p class="pz-sub">Você perdeu uma vida.</p>
+          <p class="pz-sub" id="angry-sub">Você perdeu uma vida.</p>
           <div class="pz-lives-display" id="angry-lives"></div>
           <button class="pz-btn pz-btn--main" id="btn-retry">Tentar de novo</button>
         </div>
       </div>
 
-      <!-- Desbloqueio de ingrediente -->
+      <!-- Toast de desbloqueio -->
       <div class="pz-toast pz-toast--unlock" id="toast-unlock" hidden>
-        <div class="pz-toast__box" id="toast-unlock-box"></div>
+        <img class="pz-toast__box" id="toast-unlock-box" src="" alt=""/>
         <div class="pz-toast__text">
-          <strong>Novo ingrediente desbloqueado!</strong>
+          <strong>Ingrediente novo na casa!</strong>
           <span id="toast-unlock-name"></span>
         </div>
+      </div>
+
+      <!-- Toast de turno / caos -->
+      <div class="pz-shift-toast" id="toast-shift" hidden>
+        <span class="pz-shift-toast__kicker">Novo turno</span>
+        <strong id="toast-shift-name"></strong>
+        <span class="pz-shift-toast__desc" id="toast-shift-desc"></span>
       </div>
 
       <!-- Game Over -->
       <div class="pz-overlay pz-overlay--gameover" id="ov-gameover" hidden>
         <div class="pz-overlay__card">
-          <p class="pz-kicker">Fim de jogo</p>
+          <img class="pz-overlay__face" src="assets/img/pizza/customer-neutral.png" alt=""/>
+          <p class="pz-kicker">Fim de expediente</p>
           <h2 class="pz-title pz-title--sm">A cozinha fechou por hoje</h2>
           <div class="pz-final-score">
             <span class="pz-final-score__label">Pontuação final</span>
             <strong id="gameover-score">0</strong>
           </div>
-          <p class="pz-best-line" id="gameover-newbest" hidden>Novo recorde!</p>
-          <p class="pz-best-line">Recorde: <strong id="gameover-best">0</strong></p>
+          <p class="pz-newbest" id="gameover-newbest" hidden>Novo recorde!</p>
+          <div class="pz-final-stats" id="gameover-stats"></div>
           <button class="pz-btn pz-btn--main" id="btn-playagain">Jogar de novo</button>
         </div>
       </div>
 
-      <!-- Vitória final -->
-      <div class="pz-overlay pz-overlay--victory" id="ov-victory" hidden>
-        <div class="pz-overlay__card pz-overlay__card--wide">
-          <p class="pz-kicker">Pizzaria fechada com chave de ouro</p>
-          <h2 class="pz-title" id="victory-title">Você é o mestre da pizza!</h2>
-          <div class="pz-final-score">
-            <span class="pz-final-score__label">Pontuação final</span>
-            <strong id="victory-score">0</strong>
-          </div>
-          <p class="pz-best-line" id="victory-newbest" hidden>Novo recorde!</p>
-          <div class="pz-final-stats" id="victory-stats"><!-- via JS --></div>
-          <button class="pz-btn pz-btn--main" id="btn-playagain2">Jogar de novo</button>
-        </div>
-      </div>
-
-      <div class="pz-confetti-layer" id="confetti-layer"></div>
+      <div class="pz-confetti-layer" id="confetti-layer" aria-hidden="true"></div>
 
     </div>
   </div>
