@@ -1,164 +1,196 @@
 /* ═══════════════════════════════════════════════════════════
    PIZZA DE MEMÓRIA — pizza-memory.js
    Arcade de memória visual · vanilla JS · sem dependências
-   Estrutura: CONFIG, INGREDIENTS, LEVELS, PATTERNS, gameState,
-   ciclo de fases, scoring, HUD, som/vibração, high score.
+
+   Ideia central: a BANDEJA já entrega a quantidade exata de cada
+   ingrediente. O jogador não precisa decorar QUANTOS — só ONDE.
+   Por isso a pontuação é 100% posicional, com tolerância bem
+   generosa: a graça é o caos crescente, não a dificuldade.
 ═══════════════════════════════════════════════════════════ */
 "use strict";
+
+const IMG = "assets/img/pizza/";
 
 /* ══════════════════════════════════════════════════════════
    CONFIG
 ══════════════════════════════════════════════════════════ */
 const CONFIG = {
-  TOTAL_LEVELS: 50,
-  DUAL_PIZZA_LEVELS: [10, 20, 30, 40, 50], // só nesses níveis aparecem 2 pizzas
-  UNLOCK_EVERY: 5, // novo ingrediente a cada N níveis
-  START_LIVES: 3,
-  MAX_R: 0.86,          // raio normalizado máximo (0..1) dentro da pizza
-  RADIUS_PCT: 40,       // conversão de coordenada normalizada -> % de posição
-  CLOSE_DIST: 0.11,     // distância normalizada considerada "perto o suficiente" (mais rígido)
-  FAR_DIST: 0.4,        // distância normalizada considerada "longe demais" (mais rígido)
-  HIGH_SCORE_KEY: "pizzaMemoriaHighScore",
-  SOUND_KEY: "pizzaMemoriaSom",
+  START_LIVES: 5,
+  MAX_LIVES: 6,
+
+  MAX_R: 0.82,          // raio normalizado máximo dentro da pizza
+  RADIUS_PCT: 37,       // coordenada normalizada -> % de posição no container
+
+  // ── Tolerância de posição (bem folgada de propósito) ──
+  CLOSE_DIST: 0.14,     // até aqui = 100 pontos de posição
+  FAR_DIST:   0.62,     // a partir daqui = 0
+  FALLOFF:    1.0,      // queda linear entre os dois
+  SCORE_BOOST_MUL: 1.06,
+  SCORE_BOOST_ADD: 4,
+
+  PASS_NOTE: 40,        // abaixo disso o cliente fica bravo
+  GREAT_NOTE: 78,
+  PERFECT_NOTE: 92,
 
   // ── Power-ups ──
-  POWERUP_START_CHARGES: { peek: 3, coringa: 3, extraTime: 3 },
-  POWERUP_REPLENISH_EVERY: 10, // a cada 10 níveis, ganha +1 carga de cada
-  POWERUP_REPLENISH_AMOUNT: 1,
-  PEEK_DURATION_MS: 1500,
-  EXTRA_TIME_SECONDS: 2,
+  POWERUP_START: { peek: 3, coringa: 2, extraTime: 3 },
+  POWERUP_REPLENISH_EVERY: 6,
+  PEEK_DURATION_MS: 1600,
+  EXTRA_TIME_SECONDS: 3,
 
-  // ── Vida bônus ──
-  EXCELENTE_STREAK_FOR_LIFE: 3, // 3 notas excelentes seguidas = vida extra
-  MAX_LIVES: 5,
+  GREAT_STREAK_FOR_LIFE: 3,
 
-  // ── Níveis especiais ──
-  VARIANT_MOD: 5, // a cada 5 níveis (que não caem num nível de pizza dupla) vira especial
+  HIGH_SCORE_KEY: "pizzaMemoriaHighScore",
+  SOUND_KEY: "pizzaMemoriaSom",
 };
 
 /* ══════════════════════════════════════════════════════════
-   INGREDIENTS — ordem também define ordem de desbloqueio
+   INGREDIENTES — a ordem define a ordem de entrada no jogo
 ══════════════════════════════════════════════════════════ */
 const INGREDIENTS = [
-  { id: "queijo",     nome: "Queijo",      cls: "queijo" },
-  { id: "pepperoni",  nome: "Pepperoni",   cls: "pepperoni" },
-  { id: "azeitona",   nome: "Azeitona",    cls: "azeitona" },
-  { id: "cogumelo",   nome: "Cogumelo",    cls: "cogumelo" },
-  { id: "manjericao", nome: "Manjericão",  cls: "manjericao" },
-  { id: "cebola",     nome: "Cebola roxa", cls: "cebola" },
-  { id: "tomate",     nome: "Tomate",      cls: "tomate" },
-  { id: "pimentao",   nome: "Pimentão",    cls: "pimentao" },
-  { id: "milho",      nome: "Milho",       cls: "milho" },
-  { id: "abacaxi",    nome: "Abacaxi",     cls: "abacaxi" },
+  { id: "queijo",     nome: "Queijo",     cls: "queijo",     img: "ingredient-queijo.png" },
+  { id: "pepperoni",  nome: "Pepperoni",  cls: "pepperoni",  img: "ingredient-pepperoni.png" },
+  { id: "azeitona",   nome: "Azeitona",   cls: "azeitona",   img: "ingredient-azeitona.png" },
+  { id: "manjericao", nome: "Manjericão", cls: "manjericao", img: "ingredient-manjericao.png" },
+  { id: "cogumelo",   nome: "Cogumelo",   cls: "cogumelo",   img: "ingredient-cogumelo.png" },
+  { id: "tomate",     nome: "Tomate",     cls: "tomate",     img: "ingredient-tomate.png" },
+  { id: "cebola",     nome: "Cebola",     cls: "cebola",     img: "ingredient-cebola-roxa.png" },
+  { id: "pimentao",   nome: "Pimentão",   cls: "pimentao",   img: "ingredient-pimentao.png" },
+  { id: "milho",      nome: "Milho",      cls: "milho",      img: "ingredient-milho.png" },
+  { id: "abacaxi",    nome: "Abacaxi",    cls: "abacaxi",    img: "ingredient-abacaxi.png" },
 ];
 const ING_BY_ID = Object.fromEntries(INGREDIENTS.map(i => [i.id, i]));
 
-function ingredientCountForLevel(level) {
-  // +1 ingrediente a cada 5 níveis, começando com 2, até os 10 disponíveis
-  const count = 2 + Math.floor(level / CONFIG.UNLOCK_EVERY);
-  return Math.max(2, Math.min(INGREDIENTS.length, count));
+/* ══════════════════════════════════════════════════════════
+   TURNOS DE CAOS — o jogo não fica mais difícil de propósito,
+   fica mais BARULHENTO. A dificuldade sobe devagar; o caos sobe
+   rápido, porque é ele que dá a sensação de progressão.
+══════════════════════════════════════════════════════════ */
+const SHIFTS = [
+  { from: 1,  chaos: 0, name: "Abrindo a pizzaria",  desc: "Forno quente, salão vazio." },
+  { from: 4,  chaos: 1, name: "Chegou movimento",    desc: "A fila começou a formar." },
+  { from: 8,  chaos: 2, name: "Hora do rush",        desc: "Todo mundo quer pizza. Agora." },
+  { from: 13, chaos: 3, name: "Cozinha em chamas",   desc: "O forno não tá dando conta!" },
+  { from: 19, chaos: 4, name: "Caos total",          desc: "Ninguém entende mais nada." },
+  { from: 26, chaos: 5, name: "Pizzaria possuída",   desc: "A bancada ganhou vida própria." },
+  { from: 34, chaos: 5, name: "Lenda da pizzaria",   desc: "Isso já não é mais um trabalho." },
+  { from: 44, chaos: 5, name: "Além do caos",        desc: "As leis da física pediram demissão." },
+];
+function getShift(round) {
+  let s = SHIFTS[0];
+  for (const sh of SHIFTS) if (round >= sh.from) s = sh;
+  return s;
 }
 
 /* ══════════════════════════════════════════════════════════
-   LEVELS — toppings por pizza / número de pizzas (calculado)
-   Duas pizzas só nos níveis marcos (10, 20, 30, 40, 50).
-   A quantidade de toppings cresce progressivamente com o nível;
-   nos níveis de 2 pizzas, reduz um pouco por pizza para não poluir.
+   CONFIGURAÇÃO DE CADA RODADA
 ══════════════════════════════════════════════════════════ */
-function getLevelConfig(level) {
-  const isDual = CONFIG.DUAL_PIZZA_LEVELS.includes(level);
-  const raw = Math.min(14, 4 + Math.floor((level - 1) / 3));
-  const toppings = isDual ? Math.max(4, raw - 2) : raw;
-  return { toppings, pizzas: isDual ? 2 : 1 };
+function poolSizeForRound(round) {
+  return Math.max(2, Math.min(INGREDIENTS.length, 2 + Math.floor((round - 1) / 2)));
 }
 
-function memorizeTimeForLevel(level) {
-  const t = 5 - (level - 1) * (1.5 / (CONFIG.TOTAL_LEVELS - 1));
-  return Math.max(3.5, +t.toFixed(2));
+function isDualRound(round) {
+  return round >= 8 && round % 8 === 0;
 }
 
-function buildBudgetSeconds(toppingsCount) {
-  return toppingsCount * 3.5 + 12;
+function getRoundConfig(round) {
+  const dual = isDualRound(round);
+  const raw = Math.min(12, 3 + Math.floor((round - 1) / 2.2));
+  const toppings = dual ? Math.max(3, raw - 3) : raw;
+  return { toppings, pizzas: dual ? 2 : 1 };
+}
+
+// Tempo de memorização: cresce com o número de toppings (justo) e
+// encolhe devagar com o caos (nunca abaixo de 2.8s).
+function memorizeTimeFor(round, toppings) {
+  const chaos = getShift(round).chaos;
+  const chaosFactor = 1 - chaos * 0.056; // 1.00 → 0.72
+  return Math.max(2.8, +(( 2.6 + toppings * 0.55) * chaosFactor).toFixed(2));
+}
+
+// Paciência do cliente na montagem — folgada, serve mais como bônus
+// de velocidade do que como ameaça real.
+function buildBudgetFor(round, totalToppings) {
+  const chaos = getShift(round).chaos;
+  return Math.max(12, (12 + totalToppings * 4) * (1 - chaos * 0.05));
 }
 
 /* ══════════════════════════════════════════════════════════
-   NÍVEIS ESPECIAIS — variedade no meio do jogo, sem revelar o
-   número do nível. Nunca cai num nível de pizza dupla (marco).
+   NÍVEIS ESPECIAIS
 ══════════════════════════════════════════════════════════ */
-const VARIANT_CYCLE = ["relampago", "neblina", "exigente", "surpresa"];
-const VARIANT_LABELS = {
-  relampago: "Pedido relâmpago",
-  neblina: "Pizza com neblina",
-  exigente: "Cliente exigente",
-  surpresa: "Fique de olho na pizza...",
+const VARIANTS = {
+  relampago: { label: "Pedido relâmpago", img: "badge-relampago.png", bonus: 1.0, desc: "Memorize rápido!" },
+  giratoria: { label: "Pizza giratória",  img: "badge-surpresa.png",  bonus: 0.5, desc: "Ela não para quieta." },
+  neblina:   { label: "Névoa na cozinha", img: "badge-neblina.png",   bonus: 0.6, desc: "Uma parte fica escondida." },
+  surpresa:  { label: "Sabotagem",        img: "badge-surpresa.png",  bonus: 0.4, desc: "Tem algo que não devia estar aí." },
+  exigente:  { label: "Cliente exigente", img: "badge-exigente.png",  bonus: 0.8, desc: "Ele repara em tudo." },
 };
-function getLevelVariant(level) {
-  if (level % CONFIG.VARIANT_MOD !== CONFIG.VARIANT_MOD - 1) return null; // níveis 4,9,14,19...
-  if (CONFIG.DUAL_PIZZA_LEVELS.includes(level)) return null;
-  const idx = Math.floor(level / CONFIG.VARIANT_MOD) % VARIANT_CYCLE.length;
-  return VARIANT_CYCLE[idx];
+const VARIANT_UNLOCK = [
+  { chaos: 1, ids: ["relampago", "giratoria"] },
+  { chaos: 2, ids: ["neblina", "surpresa"] },
+  { chaos: 3, ids: ["exigente"] },
+];
+
+function pickVariant(round, lastVariant) {
+  if (round < 5 || round % 4 !== 1) return null;
+  if (isDualRound(round)) return null;
+  const chaos = getShift(round).chaos;
+  const pool = [];
+  VARIANT_UNLOCK.forEach(u => { if (chaos >= u.chaos) pool.push(...u.ids); });
+  if (pool.length === 0) return null;
+  const filtered = pool.filter(v => v !== lastVariant);
+  const use = filtered.length ? filtered : pool;
+  return use[Math.floor(Math.random() * use.length)];
 }
 
 /* ══════════════════════════════════════════════════════════
-   PATTERNS — 10 padrões plausíveis de distribuição
-   Cada função devolve um candidato {x,y} (normalizado -1..1)
-   para o i-ésimo topping de um total de `count`.
+   PADRÕES DE DISTRIBUIÇÃO DOS TOPPINGS
 ══════════════════════════════════════════════════════════ */
 function rand(min, max) { return min + Math.random() * (max - min); }
 
 const PATTERNS = {
-  // 1. Círculo externo — toppings distribuídos perto da borda
   circuloExterno(i, count) {
     const ang = (i / count) * Math.PI * 2 + rand(-0.15, 0.15);
-    const r = rand(0.6, 0.8);
+    const r = rand(0.58, 0.78);
     return { x: Math.cos(ang) * r, y: Math.sin(ang) * r };
   },
-  // 2. Centro + borda — metade no centro, metade na borda
-  centroBorda(i, count) {
+  centroBorda(i) {
     const ang = rand(0, Math.PI * 2);
-    const r = i % 2 === 0 ? rand(0, 0.25) : rand(0.62, 0.82);
+    const r = i % 2 === 0 ? rand(0, 0.25) : rand(0.6, 0.8);
     return { x: Math.cos(ang) * r, y: Math.sin(ang) * r };
   },
-  // 3. Metade / metade — todos de um lado (esquerdo ou direito)
   metadeMetade(i, count, ctx) {
-    ctx.side = ctx.side || (Math.random() < 0.5 ? -1 : 1);
-    ctx.axis = ctx.axis || (Math.random() < 0.5 ? "x" : "y");
+    if (ctx.side === undefined) ctx.side = Math.random() < 0.5 ? -1 : 1;
+    if (ctx.axis === undefined) ctx.axis = Math.random() < 0.5 ? "x" : "y";
     const ang = rand(0, Math.PI * 2);
-    const r = rand(0.15, 0.78);
+    const r = rand(0.15, 0.76);
     let x = Math.cos(ang) * r, y = Math.sin(ang) * r;
     if (ctx.axis === "x") x = Math.abs(x) * ctx.side;
     else y = Math.abs(y) * ctx.side;
     return { x, y };
   },
-  // 4. Quadrantes — cada topping cai num dos 4 quadrantes, ciclando
-  quadrantes(i, count) {
+  quadrantes(i) {
     const q = i % 4;
     const sx = q === 0 || q === 3 ? -1 : 1;
     const sy = q < 2 ? -1 : 1;
-    return { x: sx * rand(0.2, 0.7), y: sy * rand(0.2, 0.7) };
+    return { x: sx * rand(0.2, 0.68), y: sy * rand(0.2, 0.68) };
   },
-  // 5. Diagonal — ao longo de uma diagonal com leve espalhamento
   diagonal(i, count, ctx) {
-    ctx.sign = ctx.sign || (Math.random() < 0.5 ? 1 : -1);
-    const t = count <= 1 ? 0 : (i / (count - 1)) * 2 - 1; // -1..1
-    const base = t * 0.75;
-    const jitter = rand(-0.12, 0.12);
-    return { x: base + jitter, y: ctx.sign * base + jitter };
+    if (ctx.sign === undefined) ctx.sign = Math.random() < 0.5 ? 1 : -1;
+    const t = count <= 1 ? 0 : (i / (count - 1)) * 2 - 1;
+    const base = t * 0.7;
+    return { x: base + rand(-0.12, 0.12), y: ctx.sign * base + rand(-0.12, 0.12) };
   },
-  // 6. Espiral leve
   espiral(i, count) {
-    const goldenAngle = 2.399963;
-    const ang = i * goldenAngle;
-    const r = Math.sqrt((i + 0.5) / count) * 0.78;
+    const ang = i * 2.399963;
+    const r = Math.sqrt((i + 0.5) / count) * 0.76;
     return { x: Math.cos(ang) * r, y: Math.sin(ang) * r };
   },
-  // 7. Distribuição balanceada — uniforme dentro do disco
   balanceada() {
     const ang = rand(0, Math.PI * 2);
-    const r = Math.sqrt(Math.random()) * 0.78;
+    const r = Math.sqrt(Math.random()) * 0.76;
     return { x: Math.cos(ang) * r, y: Math.sin(ang) * r };
   },
-  // 8. Agrupamentos pequenos — 2 ou 3 clusters
   agrupamentos(i, count, ctx) {
     if (!ctx.clusters) {
       const n = Math.random() < 0.5 ? 2 : 3;
@@ -171,17 +203,15 @@ const PATTERNS = {
     const c = ctx.clusters[i % ctx.clusters.length];
     return { x: c.x + rand(-0.14, 0.14), y: c.y + rand(-0.14, 0.14) };
   },
-  // 9. Pizza mais cheia no centro — densidade maior perto do meio
   cheiaCentro() {
     const ang = rand(0, Math.PI * 2);
-    const r = Math.pow(Math.random(), 1.6) * 0.72;
+    const r = Math.pow(Math.random(), 1.6) * 0.7;
     return { x: Math.cos(ang) * r, y: Math.sin(ang) * r };
   },
-  // 10. Ingrediente principal + secundários espalhados
-  principalSecundarios(i, count) {
+  principalSecundarios(i) {
     if (i === 0) return { x: 0, y: 0 };
     const ang = rand(0, Math.PI * 2);
-    const r = rand(0.35, 0.8);
+    const r = rand(0.34, 0.78);
     return { x: Math.cos(ang) * r, y: Math.sin(ang) * r };
   },
 };
@@ -191,10 +221,9 @@ const PATTERN_NAMES = Object.keys(PATTERNS);
    GERAÇÃO DA PIZZA-MODELO
 ══════════════════════════════════════════════════════════ */
 function minDistForCount(count) {
-  return Math.max(0.14, 0.34 - count * 0.012);
+  return Math.max(0.17, 0.36 - count * 0.012);
 }
 
-// Gera `count` posições dentro do disco, respeitando distância mínima
 function generatePositions(patternName, count) {
   const gen = PATTERNS[patternName];
   const minDist = minDistForCount(count);
@@ -202,15 +231,14 @@ function generatePositions(patternName, count) {
   const points = [];
   for (let i = 0; i < count; i++) {
     let best = null, bestScore = -1;
-    for (let tries = 0; tries < 24; tries++) {
+    for (let tries = 0; tries < 30; tries++) {
       const p = gen(i, count, ctx);
-      // garante que o ponto fica dentro do raio máximo
       const d0 = Math.hypot(p.x, p.y);
       if (d0 > CONFIG.MAX_R) {
         const k = CONFIG.MAX_R / (d0 || 1);
         p.x *= k; p.y *= k;
       }
-      const nearest = points.reduce((min, q) => Math.min(min, Math.hypot(p.x - q.x, p.y - q.y)), Infinity);
+      const nearest = points.reduce((m, q) => Math.min(m, Math.hypot(p.x - q.x, p.y - q.y)), Infinity);
       if (nearest >= minDist) { best = p; break; }
       if (nearest > bestScore) { bestScore = nearest; best = p; }
     }
@@ -219,23 +247,18 @@ function generatePositions(patternName, count) {
   return points;
 }
 
-// Escolhe tipos de ingrediente para os toppings: 1 ingrediente principal
-// (mais frequente) + variação entre os demais desbloqueados
-function assignIngredientTypes(count, unlockedIds) {
-  const pool = unlockedIds.slice();
+// Distribui tipos: 1 ingrediente "principal" + variação, sempre com
+// pelo menos 2 tipos distintos quando o pool permite.
+function assignIngredientTypes(count, pool) {
   const main = pool[Math.floor(Math.random() * pool.length)];
   const types = [];
-  const mainShare = Math.max(1, Math.round(count * rand(0.35, 0.5)));
+  const mainShare = Math.max(1, Math.round(count * rand(0.32, 0.48)));
   for (let i = 0; i < mainShare; i++) types.push(main);
-  while (types.length < count) {
-    const t = pool[Math.floor(Math.random() * pool.length)];
-    types.push(t);
-  }
-  // garante ao menos 2 tipos distintos quando possível
+  while (types.length < count) types.push(pool[Math.floor(Math.random() * pool.length)]);
+  types.length = count;
   if (pool.length > 1 && new Set(types).size === 1) {
     types[types.length - 1] = pool.find(p => p !== main) || main;
   }
-  // embaralha para não ficar previsível (principal sempre nas primeiras posições)
   for (let i = types.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [types[i], types[j]] = [types[j], types[i]];
@@ -243,57 +266,59 @@ function assignIngredientTypes(count, unlockedIds) {
   return types;
 }
 
-function generateTargetPizza(toppingsCount, unlockedIds, avoidPattern) {
+function generateTargetPizza(count, pool, avoidPattern) {
   let pattern;
   do { pattern = PATTERN_NAMES[Math.floor(Math.random() * PATTERN_NAMES.length)]; }
   while (pattern === avoidPattern && PATTERN_NAMES.length > 1);
 
-  const positions = generatePositions(pattern, toppingsCount);
-  const types = assignIngredientTypes(toppingsCount, unlockedIds);
+  const positions = generatePositions(pattern, count);
+  const types = assignIngredientTypes(count, pool);
   const toppings = positions.map((p, i) => ({
     type: types[i],
     x: +p.x.toFixed(3),
     y: +p.y.toFixed(3),
-    rot: Math.round(rand(-15, 15)),
-    scale: +rand(0.92, 1.08).toFixed(2),
+    rot: Math.round(rand(-18, 18)),
+    scale: +rand(0.93, 1.07).toFixed(2),
   }));
   return { pattern, toppings };
 }
 
 /* ══════════════════════════════════════════════════════════
-   ESTADO DO JOGO
+   ESTADO
 ══════════════════════════════════════════════════════════ */
 const gameState = {
-  level: 1,
+  round: 1,
   score: 0,
   lives: CONFIG.START_LIVES,
   highScore: 0,
-  unlockedCount: 2,
-  phase: "start", // start | unlocking | memorize | build | result | angry | gameover | victory
+  seenIngredients: new Set(),
+  phase: "start",
   pattern: null,
-  pizzas: [],       // [{target:[], player:[], boardEl, pizzaEl, toppingsEl, cloche}]
+  pizzas: [],
   activePizza: 0,
   selectedIngredient: null,
-  usedUndoOrClear: false,
-  undoStack: [],    // {pizzaIndex, toppingId}
-  buildStartTime: 0,
-  memorizeTimer: null,
-  memorizeDeadline: 0,
+  tray: {},              // { tipo: quantidade restante }
+  trayTotal: 0,          // total original da rodada
+  undoStack: [],
+  usedUndo: false,
+  buildStart: 0,
+  buildBudget: 0,
+  timer: null,
+  deadline: 0,
+  duration: 0,
+  timerMode: null,       // "memorize" | "build"
   soundOn: true,
-  stats: { perfeitas: 0, completas: 0, ingredientUsage: {} },
   audioCtx: null,
-
-  // ── Power-ups (cargas por partida) ──
-  powerups: { peek: 0, coringa: 0, extraTime: 0 },
-  coringaArmed: false,
   peeking: false,
-  usedExtraTimeThisLevel: false,
-
-  // ── Vida bônus ──
-  excelenteStreak: 0,
-
-  // ── Nível especial ──
-  levelVariant: null, // "relampago" | "neblina" | "exigente" | "surpresa" | null
+  usedExtraTime: false,
+  powerups: { peek: 0, coringa: 0, extraTime: 0 },
+  combo: 0,
+  greatStreak: 0,
+  variant: null,
+  lastVariant: null,
+  shift: SHIFTS[0],
+  flyerTimer: null,
+  stats: { servidas: 0, perfeitas: 0, otimas: 0, usage: {}, bestRound: 1 },
 };
 
 function loadHighScore() {
@@ -310,13 +335,14 @@ function saveHighScoreIfNeeded() {
 }
 
 /* ══════════════════════════════════════════════════════════
-   SOM (Web Audio API sintetizado) + VIBRAÇÃO
+   SOM + VIBRAÇÃO
 ══════════════════════════════════════════════════════════ */
 function getAudioCtx() {
   if (!gameState.audioCtx) {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (AC) gameState.audioCtx = new AC();
   }
+  if (gameState.audioCtx && gameState.audioCtx.state === "suspended") gameState.audioCtx.resume();
   return gameState.audioCtx;
 }
 
@@ -328,7 +354,7 @@ function tone(freq, dur, type, gainStart, delay) {
   const gain = ctx.createGain();
   osc.type = type || "sine";
   osc.frequency.setValueAtTime(freq, t0);
-  gain.gain.setValueAtTime(gainStart != null ? gainStart : 0.18, t0);
+  gain.gain.setValueAtTime(gainStart != null ? gainStart : 0.16, t0);
   gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
   osc.connect(gain).connect(ctx.destination);
   osc.start(t0);
@@ -336,55 +362,66 @@ function tone(freq, dur, type, gainStart, delay) {
 }
 
 const SOUND_RECIPES = {
-  select:      () => tone(520, 0.08, "sine"),
-  place:       () => tone(700, 0.09, "triangle"),
-  remove:      () => tone(320, 0.09, "triangle"),
-  serve:       () => { tone(440, 0.12, "sine"); tone(660, 0.14, "sine", 0.15, 0.08); },
-  excelente:   () => { [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.16, "sine", 0.18, i * 0.09)); },
-  bravo:       () => { tone(180, 0.3, "sawtooth", 0.16); tone(140, 0.35, "sawtooth", 0.14, 0.1); },
-  desbloqueio: () => { tone(660, 0.1, "square", 0.12); tone(880, 0.14, "square", 0.12, 0.1); },
-  gameover:    () => { [300, 260, 220, 180].forEach((f, i) => tone(f, 0.22, "sawtooth", 0.15, i * 0.14)); },
-  vitoria:     () => { [523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, 0.2, "sine", 0.18, i * 0.11)); },
+  select:   () => tone(560, 0.07, "sine", 0.12),
+  place:    () => { tone(720, 0.07, "triangle", 0.15); tone(1080, 0.05, "sine", 0.07, 0.03); },
+  remove:   () => tone(300, 0.09, "triangle", 0.13),
+  serve:    () => { tone(440, 0.12, "sine"); tone(660, 0.14, "sine", 0.14, 0.08); tone(880, 0.16, "sine", 0.1, 0.16); },
+  otima:    () => [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.16, "sine", 0.16, i * 0.08)),
+  perfeita: () => [523, 659, 784, 1046, 1318, 1568].forEach((f, i) => tone(f, 0.18, "sine", 0.16, i * 0.07)),
+  bravo:    () => { tone(180, 0.3, "sawtooth", 0.14); tone(135, 0.36, "sawtooth", 0.12, 0.1); },
+  magico:   () => [880, 1174, 1568].forEach((f, i) => tone(f, 0.13, "triangle", 0.13, i * 0.05)),
+  novo:     () => { tone(660, 0.1, "square", 0.1); tone(990, 0.14, "square", 0.1, 0.09); },
+  turno:    () => { tone(220, 0.2, "sawtooth", 0.1); tone(330, 0.24, "square", 0.09, 0.1); tone(440, 0.3, "sine", 0.12, 0.2); },
+  combo:    () => { tone(784, 0.1, "square", 0.1); tone(1046, 0.12, "square", 0.1, 0.07); },
+  vida:     () => [659, 880, 1174].forEach((f, i) => tone(f, 0.16, "sine", 0.15, i * 0.09)),
+  gameover: () => [330, 280, 235, 175].forEach((f, i) => tone(f, 0.26, "sawtooth", 0.14, i * 0.15)),
+  tick:     () => tone(1100, 0.04, "square", 0.05),
 };
-
-function playSound(name) {
-  const fn = SOUND_RECIPES[name];
-  if (fn) fn();
-}
-
-function vibrate(pattern) {
-  if (navigator.vibrate) navigator.vibrate(pattern);
-}
+function playSound(name) { const fn = SOUND_RECIPES[name]; if (fn) fn(); }
+function vibrate(p) { if (navigator.vibrate) { try { navigator.vibrate(p); } catch (e) {} } }
 
 /* ══════════════════════════════════════════════════════════
-   REFERÊNCIAS DOM
+   DOM
 ══════════════════════════════════════════════════════════ */
 const $ = (id) => document.getElementById(id);
 const dom = {
   stage: $("pz-stage"),
+  flyers: $("pz-flyers"),
   hud: $("pz-hud"),
   hudScore: $("hud-score"),
+  hudScorePill: null,
   hudBest: $("hud-best"),
   hudStateText: $("hud-state-text"),
   hudLivesWrap: $("hud-lives-wrap"),
   hudTimerFill: $("hud-timer-fill"),
+  chaosLabel: $("chaos-label"),
+  chaosFill: $("chaos-fill"),
+  pizzaCount: $("pizza-count"),
+  combo: $("hud-combo"),
+  comboMult: $("combo-mult"),
+  comboLabel: $("combo-label"),
   btnSound: $("btn-sound"),
   iconSound: $("icon-sound"),
   customerAvatar: $("customer-avatar"),
-  customerMouth: $("customer-mouth"),
+  customerImg: $("customer-img"),
   customerMsg: $("customer-msg"),
+  queue: $("pz-queue"),
   pizzasWrap: $("pz-pizzas"),
+  popups: $("pz-popups"),
   ingredientBoxes: $("ingredient-boxes"),
+  trayHint: $("tray-hint"),
   actions: $("pz-actions"),
   btnUndo: $("btn-undo"),
-  btnClear: $("btn-clear"),
   btnServe: $("btn-serve"),
+  serveLabel: $("serve-label"),
   btnPeek: $("btn-peek"),
   badgePeek: $("badge-peek"),
   btnCoringa: $("btn-coringa"),
   badgeCoringa: $("badge-coringa"),
   btnExtratime: $("btn-extratime"),
+  badgeExtratime: $("badge-extratime"),
   variantBadge: $("variant-badge"),
+  variantBadgeImg: $("variant-badge-img"),
   variantBadgeText: $("variant-badge-text"),
   dragGhost: $("pz-drag-ghost"),
   ovStart: $("ov-start"),
@@ -400,75 +437,113 @@ const dom = {
   btnNext: $("btn-next"),
   ovAngry: $("ov-angry"),
   angryTitle: $("angry-title"),
+  angrySub: $("angry-sub"),
   angryLives: $("angry-lives"),
   btnRetry: $("btn-retry"),
   toastUnlock: $("toast-unlock"),
   toastUnlockBox: $("toast-unlock-box"),
   toastUnlockName: $("toast-unlock-name"),
+  toastShift: $("toast-shift"),
+  toastShiftName: $("toast-shift-name"),
+  toastShiftDesc: $("toast-shift-desc"),
   ovGameover: $("ov-gameover"),
   gameoverScore: $("gameover-score"),
-  gameoverBest: $("gameover-best"),
+  gameoverStats: $("gameover-stats"),
   gameoverNewbest: $("gameover-newbest"),
   btnPlayagain: $("btn-playagain"),
-  ovVictory: $("ov-victory"),
-  victoryScore: $("victory-score"),
-  victoryNewbest: $("victory-newbest"),
-  victoryStats: $("victory-stats"),
-  btnPlayagain2: $("btn-playagain2"),
   confettiLayer: $("confetti-layer"),
 };
+dom.hudScorePill = dom.hudScore ? dom.hudScore.closest(".pz-pill") : null;
 
 /* ══════════════════════════════════════════════════════════
-   RENDER — CAIXAS DE INGREDIENTES
+   BANDEJA (o coração da nova mecânica)
+   A bandeja mostra exatamente quantos de cada ingrediente
+   ainda faltam. Zero decoreba de quantidade.
 ══════════════════════════════════════════════════════════ */
-function renderIngredientBoxes() {
+function buildTrayFromTargets() {
+  const tray = {};
+  gameState.pizzas.forEach(pz => {
+    pz.target.forEach(t => { tray[t.type] = (tray[t.type] || 0) + 1; });
+  });
+  gameState.tray = tray;
+  gameState.trayTotal = Object.values(tray).reduce((a, b) => a + b, 0);
+}
+
+function trayRemaining() {
+  return Object.values(gameState.tray).reduce((a, b) => a + b, 0);
+}
+
+function renderTray() {
   dom.ingredientBoxes.innerHTML = "";
-  INGREDIENTS.forEach((ing, idx) => {
-    const locked = idx >= gameState.unlockedCount;
+  // ordem estável = ordem canônica dos ingredientes
+  INGREDIENTS.filter(ing => gameState.tray[ing.id] !== undefined).forEach((ing) => {
+    const left = gameState.tray[ing.id];
     const box = document.createElement("button");
     box.type = "button";
-    box.className = "pz-ibox" + (locked ? " is-locked" : "");
+    box.className = "pz-ibox" + (left <= 0 ? " is-empty" : "");
     box.dataset.ing = ing.id;
     box.innerHTML = `
-      <div class="pz-ibox__icon"><div class="pz-topping pz-topping--${ing.cls}" style="position:static;transform:none;width:100%;height:100%"><div class="pz-shape"></div></div></div>
-      <div class="pz-ibox__name">${ing.nome}</div>
-      ${locked ? '<div class="pz-ibox__lock"></div>' : ""}
+      <span class="pz-ibox__qty">${left}</span>
+      <span class="pz-ibox__icon" style="background-image:url('${IMG}${ing.img}')"></span>
+      <span class="pz-ibox__name">${ing.nome}</span>
     `;
-    if (!locked) {
-      box.addEventListener("pointerdown", (e) => startDrag(e, ing.id, box));
-    }
+    box.addEventListener("pointerdown", (e) => startDrag(e, ing.id));
     dom.ingredientBoxes.appendChild(box);
   });
-  syncSelectedBoxUI();
+  syncTrayUI();
 }
 
-function syncSelectedBoxUI() {
+// Atualiza só os números/estados, sem recriar o DOM (mantém animações)
+function syncTrayUI(tickedId) {
   dom.ingredientBoxes.querySelectorAll(".pz-ibox").forEach((b) => {
-    b.classList.toggle("is-selected", b.dataset.ing === gameState.selectedIngredient);
+    const id = b.dataset.ing;
+    const left = gameState.tray[id] || 0;
+    const qty = b.querySelector(".pz-ibox__qty");
+    if (qty && qty.textContent !== String(left)) {
+      qty.textContent = String(left);
+      if (id === tickedId) {
+        qty.classList.remove("is-ticking");
+        void qty.offsetWidth;
+        qty.classList.add("is-ticking");
+      }
+    }
+    b.classList.toggle("is-empty", left <= 0);
+    b.classList.toggle("is-selected", id === gameState.selectedIngredient && left > 0);
   });
+  updateServeButton();
 }
 
-// Trava visual + funcional das caixas de ingredientes fora da fase de montar:
-// o jogador não deve conseguir "escolher" nada enquanto ainda está memorizando
-// (ou entre fases), mesmo que só toque na caixa sem soltar.
+// Seleciona automaticamente o próximo ingrediente que ainda tem peça —
+// assim o jogador só precisa tocar nos lugares, sem ficar trocando à mão.
+function autoSelectNext(preferId) {
+  if (preferId && (gameState.tray[preferId] || 0) > 0) {
+    gameState.selectedIngredient = preferId;
+    return;
+  }
+  const next = INGREDIENTS.find(i => (gameState.tray[i.id] || 0) > 0);
+  gameState.selectedIngredient = next ? next.id : null;
+}
+
+function updateServeButton() {
+  const left = trayRemaining();
+  const ready = left === 0;
+  dom.serveLabel.textContent = ready ? "Servir!" : `Servir (faltam ${left})`;
+  dom.btnServe.classList.toggle("is-ready", ready && gameState.phase === "build");
+}
+
 function setIngredientsInteractive(active) {
   dom.ingredientBoxes.classList.toggle("is-waiting", !active);
   if (!active) {
     gameState.selectedIngredient = null;
-    syncSelectedBoxUI();
+    dom.ingredientBoxes.querySelectorAll(".pz-ibox").forEach(b => b.classList.remove("is-selected"));
   }
 }
-
-// Mesma ideia para a barra de ações (Espiadinha/Coringa/Desfazer/Limpar/Servir):
-// fica sempre visível e com o layout normal, só "esmaece" e trava o toque
-// fora da fase de montar — nunca esconde o bloco (isso é o que causava o
-// texto colado/desformatado ao aparecer e sumir).
 function setActionsInteractive(active) {
   dom.actions.classList.toggle("is-waiting", !active);
 }
 
 /* ══════════════════════════════════════════════════════════
-   RENDER — PIZZAS / BANCADA
+   PIZZAS / BANCADA
 ══════════════════════════════════════════════════════════ */
 function buildPizzasDom(count) {
   dom.pizzasWrap.innerHTML = "";
@@ -481,71 +556,60 @@ function buildPizzasDom(count) {
     board.innerHTML = `
       <div class="pz-board__wood"></div>
       <div class="pz-pizza is-empty">
-        <div class="pz-pizza__sauce"></div>
-        <div class="pz-pizza__cheese"></div>
         <div class="pz-pizza__toppings"></div>
         <div class="pz-fog"></div>
       </div>
-      <div class="pz-cloche pz-cloche--hidden"><div class="pz-cloche__handle"></div></div>
+      <div class="pz-cloche pz-cloche--hidden"></div>
     `;
     dom.pizzasWrap.appendChild(board);
     const pizzaEl = board.querySelector(".pz-pizza");
-    const toppingsEl = board.querySelector(".pz-pizza__toppings");
-    const cloche = board.querySelector(".pz-cloche");
-    const fogEl = board.querySelector(".pz-fog");
-
     pizzaEl.addEventListener("click", (e) => onPizzaClick(e, p));
-    board.addEventListener("click", () => setActivePizza(p));
-
-    gameState.pizzas.push({ target: [], player: [], boardEl: board, pizzaEl, toppingsEl, cloche, fogEl });
+    gameState.pizzas.push({
+      target: [], player: [], boardEl: board, pizzaEl,
+      toppingsEl: board.querySelector(".pz-pizza__toppings"),
+      cloche: board.querySelector(".pz-cloche"),
+      fogEl: board.querySelector(".pz-fog"),
+    });
   }
   setActivePizza(0);
 }
 
 function setActivePizza(idx) {
   gameState.activePizza = idx;
-  gameState.pizzas.forEach((pz, i) => pz.boardEl.classList.toggle("is-selected", i === idx && gameState.pizzas.length > 1));
+  const multi = gameState.pizzas.length > 1;
+  gameState.pizzas.forEach((pz, i) => pz.boardEl.classList.toggle("is-selected", multi && i === idx));
 }
 
-function toppingCoordsToPct(x, y) {
-  return {
-    left: 50 + x * CONFIG.RADIUS_PCT,
-    top: 50 + y * CONFIG.RADIUS_PCT,
-  };
+function toppingPct(x, y) {
+  return { left: 50 + x * CONFIG.RADIUS_PCT, top: 50 + y * CONFIG.RADIUS_PCT };
 }
 
-function createToppingEl(t, opts) {
-  opts = opts || {};
+function createToppingEl(t, extraClass) {
   const ing = ING_BY_ID[t.type];
   const el = document.createElement("div");
-  el.className = `pz-topping pz-topping--${ing.cls}` + (opts.placing ? " pz-topping--placing" : "") + (t.wildcard ? " pz-topping--wildcard" : "");
-  const pct = toppingCoordsToPct(t.x, t.y);
+  el.className = `pz-topping pz-topping--${ing.cls}` + (extraClass ? " " + extraClass : "");
+  const pct = toppingPct(t.x, t.y);
   el.style.left = pct.left + "%";
   el.style.top = pct.top + "%";
   el.style.transform = `translate(-50%,-50%) rotate(${t.rot || 0}deg) scale(${t.scale || 1})`;
-  el.innerHTML = '<div class="pz-shape"></div>';
-  if (t.id) el.dataset.toppingId = t.id;
+  if (t.id != null) el.dataset.toppingId = t.id;
   return el;
 }
 
-function renderTargetPizza(pizzaIndex) {
-  const pz = gameState.pizzas[pizzaIndex];
+function renderTargetPizza(i) {
+  const pz = gameState.pizzas[i];
   pz.toppingsEl.innerHTML = "";
   pz.pizzaEl.classList.remove("is-empty");
-  pz.target.forEach((t) => pz.toppingsEl.appendChild(createToppingEl(t)));
+  pz.target.forEach(t => pz.toppingsEl.appendChild(createToppingEl(t)));
 }
 
-function renderPlayerPizza(pizzaIndex) {
-  const pz = gameState.pizzas[pizzaIndex];
+function renderPlayerPizza(i) {
+  const pz = gameState.pizzas[i];
   pz.toppingsEl.innerHTML = "";
-  if (pz.player.length === 0) pz.pizzaEl.classList.add("is-empty");
-  else pz.pizzaEl.classList.remove("is-empty");
-  pz.player.forEach((t) => {
+  pz.pizzaEl.classList.toggle("is-empty", pz.player.length === 0);
+  pz.player.forEach(t => {
     const el = createToppingEl(t);
-    el.addEventListener("click", (e) => {
-      e.stopPropagation();
-      removeTopping(pizzaIndex, t.id);
-    });
+    el.addEventListener("click", (e) => { e.stopPropagation(); removeTopping(i, t.id); });
     pz.toppingsEl.appendChild(el);
   });
 }
@@ -553,32 +617,88 @@ function renderPlayerPizza(pizzaIndex) {
 /* ══════════════════════════════════════════════════════════
    HUD
 ══════════════════════════════════════════════════════════ */
-function updateHUD() {
-  // O nível atual não é exibido de propósito — o jogador não deve saber em que fase está.
-  dom.hudScore.textContent = String(gameState.score);
-  dom.hudBest.textContent = String(gameState.highScore);
-  // Renderizado dinamicamente (não fixo em 3) porque a vida bônus pode aumentar o total.
-  dom.hudLivesWrap.innerHTML = Array.from({ length: Math.max(0, gameState.lives) })
-    .map(() => '<span class="pz-life"></span>').join("");
+function updateHUD(bump) {
+  dom.hudScore.textContent = gameState.score.toLocaleString("pt-BR");
+  dom.hudBest.textContent = gameState.highScore.toLocaleString("pt-BR");
+  if (bump && dom.hudScorePill) {
+    dom.hudScorePill.classList.remove("is-bumping");
+    void dom.hudScorePill.offsetWidth;
+    dom.hudScorePill.classList.add("is-bumping");
+  }
+
+  const slots = Math.max(CONFIG.START_LIVES, gameState.lives);
+  const prev = dom.hudLivesWrap.children.length;
+  dom.hudLivesWrap.innerHTML = Array.from({ length: slots })
+    .map((_, i) => `<span class="pz-life${i < gameState.lives ? "" : " is-lost"}"></span>`).join("");
+  if (slots > prev && prev > 0) {
+    const last = dom.hudLivesWrap.lastElementChild;
+    if (last) last.classList.add("is-new");
+  }
+
+  dom.pizzaCount.textContent = `Pizza ${gameState.round}`;
+  dom.chaosLabel.textContent = gameState.shift.name;
+
+  // O medidor cresce de forma monotônica: 20% por patamar de caos + o
+  // progresso dentro do turno atual.
+  const sh = gameState.shift;
+  const idx = SHIFTS.indexOf(sh);
+  const next = SHIFTS[idx + 1];
+  const span = next ? next.from - sh.from : 10;
+  const within = Math.min(1, (gameState.round - sh.from) / span);
+  dom.chaosFill.style.width = Math.min(100, sh.chaos * 20 + within * 20) + "%";
+  dom.stage.dataset.chaos = String(sh.chaos);
+
+  // combo
+  const mult = comboMultiplier();
+  if (mult > 1) {
+    dom.combo.hidden = false;
+    dom.comboMult.textContent = "x" + (Number.isInteger(mult) ? mult : mult.toFixed(1));
+    dom.comboLabel.textContent = comboName();
+  } else {
+    dom.combo.hidden = true;
+  }
+
+  renderQueue();
 }
 
-function setHudState(text) {
-  dom.hudStateText.textContent = text;
+function renderQueue() {
+  const n = Math.min(4, gameState.shift.chaos);
+  if (dom.queue.children.length === n) return;
+  const faces = ["customer-waiting.png", "customer-neutral.png", "customer-angry.png", "customer-happy.png"];
+  dom.queue.innerHTML = Array.from({ length: n })
+    .map((_, i) => `<img src="${IMG}${faces[i % faces.length]}" alt=""/>`).join("");
 }
 
-function setTimerFill(fraction, low) {
-  dom.hudTimerFill.style.width = Math.max(0, Math.min(100, fraction * 100)) + "%";
-  dom.hudTimerFill.classList.toggle("is-low", !!low);
+function setHudState(text) { dom.hudStateText.textContent = text; }
+
+function setTimerFill(frac) {
+  const f = Math.max(0, Math.min(1, frac));
+  dom.hudTimerFill.style.width = (f * 100) + "%";
+  dom.hudTimerFill.classList.toggle("is-mid", f < 0.5 && f >= 0.22);
+  dom.hudTimerFill.classList.toggle("is-low", f < 0.22);
+}
+
+function applyVariantBadge() {
+  const v = gameState.variant;
+  if (!v) { dom.variantBadge.hidden = true; return; }
+  dom.variantBadgeImg.src = IMG + VARIANTS[v].img;
+  dom.variantBadgeText.textContent = VARIANTS[v].label;
+  dom.variantBadge.hidden = false;
 }
 
 /* ══════════════════════════════════════════════════════════
-   SELO DE NÍVEL ESPECIAL — mostra o "tipo" sem revelar o número
+   COMBO
 ══════════════════════════════════════════════════════════ */
-function applyVariantBadge() {
-  const v = gameState.levelVariant;
-  if (!v) { dom.variantBadge.hidden = true; return; }
-  dom.variantBadgeText.textContent = VARIANT_LABELS[v];
-  dom.variantBadge.hidden = false;
+function comboMultiplier() {
+  if (gameState.combo < 2) return 1;
+  return Math.min(4, 1 + (gameState.combo - 1) * 0.5);
+}
+function comboName() {
+  const c = gameState.combo;
+  if (c >= 8) return "Lendário";
+  if (c >= 6) return "Em chamas";
+  if (c >= 4) return "Fornada quente";
+  return "Combo";
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -588,29 +708,26 @@ function updatePowerupButtons() {
   const pw = gameState.powerups;
   dom.badgePeek.textContent = String(pw.peek);
   dom.badgeCoringa.textContent = String(pw.coringa);
+  dom.badgeExtratime.textContent = String(pw.extraTime);
   const inBuild = gameState.phase === "build";
   dom.btnPeek.disabled = !inBuild || pw.peek <= 0 || gameState.peeking;
-  dom.btnCoringa.disabled = !inBuild || pw.coringa <= 0;
-  dom.btnCoringa.classList.toggle("is-armed", gameState.coringaArmed);
-  dom.btnExtratime.hidden = !(gameState.phase === "memorize" && pw.extraTime > 0 && !gameState.usedExtraTimeThisLevel);
+  dom.btnCoringa.disabled = !inBuild || pw.coringa <= 0 || trayRemaining() === 0;
+  dom.btnExtratime.hidden = !(gameState.phase === "memorize" && pw.extraTime > 0 && !gameState.usedExtraTime);
 }
 
-// Espiadinha: revela a pizza-modelo de novo por alguns segundos durante a montagem
 function usePeek() {
-  if (gameState.phase !== "build" || gameState.peeking) return;
-  if (gameState.powerups.peek <= 0) return;
+  if (gameState.phase !== "build" || gameState.peeking || gameState.powerups.peek <= 0) return;
   gameState.powerups.peek--;
   gameState.peeking = true;
   updatePowerupButtons();
-  dom.btnUndo.disabled = true;
-  dom.btnClear.disabled = true;
-  dom.btnServe.disabled = true;
+  setActionsInteractive(false);
+  setIngredientsInteractive(false);
   playSound("select");
   vibrate(20);
+  setHudState("Espiando...");
 
   gameState.pizzas.forEach((pz, i) => {
-    pz.toppingsEl.innerHTML = "";
-    pz.target.forEach(t => pz.toppingsEl.appendChild(createToppingEl(t)));
+    renderTargetPizza(i);
     pz.pizzaEl.classList.add("is-peeking");
   });
 
@@ -620,74 +737,165 @@ function usePeek() {
       renderPlayerPizza(i);
     });
     gameState.peeking = false;
-    dom.btnUndo.disabled = false;
-    dom.btnClear.disabled = false;
-    dom.btnServe.disabled = false;
+    setActionsInteractive(true);
+    setIngredientsInteractive(true);
+    autoSelectNext(gameState.selectedIngredient);
+    syncTrayUI();
+    setHudState("Monte!");
     updatePowerupButtons();
   }, CONFIG.PEEK_DURATION_MS);
 }
 
-// Coringa: arma o próximo ingrediente colocado pra sempre contar como certo
+// Coringa: coloca UM ingrediente no lugar exato, de graça.
+// Gratificação instantânea > mecânica complicada.
 function useCoringa() {
-  if (gameState.phase !== "build") return;
-  if (gameState.powerups.coringa <= 0 && !gameState.coringaArmed) return;
-  gameState.coringaArmed = !gameState.coringaArmed;
+  if (gameState.phase !== "build" || gameState.powerups.coringa <= 0) return;
+  const spot = findBestCoringaSpot();
+  if (!spot) return;
+  gameState.powerups.coringa--;
+
+  const t = {
+    id: toppingIdCounter++, type: spot.target.type,
+    x: spot.target.x, y: spot.target.y,
+    rot: spot.target.rot, scale: spot.target.scale, magic: true,
+  };
+  const pz = gameState.pizzas[spot.pizzaIndex];
+  pz.player.push(t);
+  gameState.undoStack.push({ pizzaIndex: spot.pizzaIndex, toppingId: t.id, type: t.type });
+  gameState.tray[t.type] = Math.max(0, (gameState.tray[t.type] || 0) - 1);
+  gameState.stats.usage[t.type] = (gameState.stats.usage[t.type] || 0) + 1;
+
+  renderPlayerPizza(spot.pizzaIndex);
+  const el = pz.toppingsEl.querySelector(`[data-topping-id="${t.id}"]`);
+  if (el) el.classList.add("pz-topping--magic");
+  autoSelectNext(gameState.selectedIngredient);
+  syncTrayUI(t.type);
   updatePowerupButtons();
-  playSound("select");
+  playSound("magico");
+  vibrate([12, 25, 12]);
+  floatPopup("no ponto!", spot.pizzaIndex, spot.target, false);
 }
 
-// Tempo extra: adiciona alguns segundos à fase de memorizar (um uso por nível)
+// Escolhe um alvo cujo tipo ainda tem peça na bandeja e que ainda não
+// tem nenhum topping do jogador por perto.
+function findBestCoringaSpot() {
+  let best = null, bestD = -1;
+  gameState.pizzas.forEach((pz, pi) => {
+    pz.target.forEach(mt => {
+      if ((gameState.tray[mt.type] || 0) <= 0) return;
+      const nearest = pz.player.reduce((m, pt) =>
+        pt.type === mt.type ? Math.min(m, Math.hypot(mt.x - pt.x, mt.y - pt.y)) : m, Infinity);
+      const d = nearest === Infinity ? 99 : nearest;
+      if (d > bestD) { bestD = d; best = { pizzaIndex: pi, target: mt }; }
+    });
+  });
+  return best;
+}
+
 function useExtraTime() {
-  if (gameState.phase !== "memorize" || gameState.usedExtraTimeThisLevel) return;
+  if (gameState.phase !== "memorize" || gameState.usedExtraTime) return;
   if (gameState.powerups.extraTime <= 0) return;
   gameState.powerups.extraTime--;
-  gameState.usedExtraTimeThisLevel = true;
-  gameState.memorizeDeadline += CONFIG.EXTRA_TIME_SECONDS * 1000;
-  playSound("select");
+  gameState.usedExtraTime = true;
+  gameState.deadline += CONFIG.EXTRA_TIME_SECONDS * 1000;
+  gameState.duration += CONFIG.EXTRA_TIME_SECONDS;
+  playSound("novo");
   vibrate(20);
   updatePowerupButtons();
 }
 
 /* ══════════════════════════════════════════════════════════
-   CLIENTE — reações e mensagens
+   CLIENTE
 ══════════════════════════════════════════════════════════ */
 const CUSTOMER_MESSAGES = {
-  waiting: ["Bem-vindo à pizzaria!", "Cliente aguardando...", "Cliente confuso."],
-  memorize: ["Memorize a pizza!", "Presta atenção nos ingredientes!"],
-  build: ["Agora monta igual!", "Capricha na montagem!"],
-  excelente: ["Perfeita!", "Isso é arte.", "Mamma mia!", "Essa ficou linda."],
-  boa: ["Boa, passou!", "Ficou bem gostosa.", "A cozinha sobreviveu."],
-  neutra: ["Hmm... ficou bom.", "Quase...", "Podia caprichar mais."],
-  brava: ["Isso não era o que eu pedi.", "Cadê o pepperoni?", "Eu pedi outra coisa."],
+  memorize: ["Olha bem onde tá cada coisa!", "Guarda esse desenho aí.", "Foto mental, vai!", "Presta atenção nos lugares."],
+  build: ["Agora monta igual!", "Capricha, hein.", "Tô com fome...", "Manda ver."],
+  hurry: ["Tô esperando...", "Alguém aí?", "A fome não espera!", "Vai demorar muito?"],
+  perfeita: ["Isso é arte!", "Mamma mia!", "Idêntica!", "Chef, você é um gênio."],
+  otima: ["Perfeita!", "Que capricho!", "Essa ficou linda.", "Uau."],
+  boa: ["Boa, passou!", "Ficou gostosa.", "Serviu.", "A cozinha sobreviveu."],
+  neutra: ["Hmm... ficou bom.", "Quase...", "Podia caprichar mais.", "Vai dar pro gasto."],
+  brava: ["Isso não era o que eu pedi!", "Cadê o pepperoni?", "Eu pedi OUTRA coisa.", "Tá de brincadeira?"],
 };
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
+const CUSTOMER_FACES = {
+  waiting: "customer-waiting.png",
+  happy: "customer-happy.png",
+  great: "customer-great.png",
+  neutral: "customer-neutral.png",
+  angry: "customer-angry.png",
+};
+
 function setCustomerState(state, msg) {
-  dom.customerAvatar.className = "pz-customer__avatar" +
-    (state === "great" ? " is-great" : state === "happy" ? " is-happy" : state === "angry" ? " is-angry" : state === "neutral" ? " is-neutral" : "");
-  dom.customerMsg.textContent = msg;
+  dom.customerImg.src = IMG + (CUSTOMER_FACES[state] || CUSTOMER_FACES.waiting);
+  dom.customerAvatar.className = "pz-customer__avatar" + (state === "waiting" ? "" : " is-" + state);
+  if (msg != null) {
+    dom.customerMsg.textContent = msg;
+    dom.customerMsg.parentElement.style.animation = "none";
+    void dom.customerMsg.parentElement.offsetWidth;
+    dom.customerMsg.parentElement.style.animation = "";
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
-   CONFETE — feito das próprias formas dos ingredientes (sem PNG/SVG
-   externo disponível, reaproveita os desenhos CSS já usados na pizza)
+   PARTÍCULAS: confete, popups e "voadores" de caos
 ══════════════════════════════════════════════════════════ */
 function launchConfetti(amount) {
-  const layer = dom.confettiLayer;
   for (let i = 0; i < amount; i++) {
     const ing = INGREDIENTS[Math.floor(Math.random() * INGREDIENTS.length)];
-    const size = rand(14, 28);
+    const size = rand(16, 32);
     const piece = document.createElement("div");
-    piece.className = `pz-confetti-piece pz-topping--${ing.cls}`;
+    piece.className = "pz-confetti-piece";
+    piece.style.backgroundImage = `url('${IMG}${ing.img}')`;
     piece.style.left = rand(0, 100) + "%";
     piece.style.width = size + "px";
     piece.style.height = size + "px";
-    piece.style.animationDuration = rand(1.5, 3.2) + "s";
+    piece.style.animationDuration = rand(1.6, 3.4) + "s";
     piece.style.animationDelay = rand(0, 0.6) + "s";
-    piece.innerHTML = '<div class="pz-shape" style="width:100%;height:100%"></div>';
-    layer.appendChild(piece);
-    setTimeout(() => piece.remove(), 4200);
+    dom.confettiLayer.appendChild(piece);
+    setTimeout(() => piece.remove(), 4400);
   }
+}
+
+// Ingredientes atravessando a tela — puro tempero visual do caos
+function spawnFlyer() {
+  const ing = INGREDIENTS[Math.floor(Math.random() * INGREDIENTS.length)];
+  const el = document.createElement("div");
+  el.className = "pz-flyer";
+  el.style.backgroundImage = `url('${IMG}${ing.img}')`;
+  el.style.top = rand(8, 82) + "%";
+  const size = rand(24, 46);
+  el.style.width = size + "px";
+  el.style.height = size + "px";
+  el.style.animationDuration = rand(2.2, 4.2) + "s";
+  dom.flyers.appendChild(el);
+  setTimeout(() => el.remove(), 5000);
+}
+
+function restartFlyers() {
+  clearInterval(gameState.flyerTimer);
+  const chaos = gameState.shift.chaos;
+  if (chaos < 2) return;
+  const every = [0, 0, 4200, 2800, 1700, 1000][chaos];
+  gameState.flyerTimer = setInterval(spawnFlyer, every);
+}
+
+function floatPopup(text, pizzaIndex, coords, big) {
+  const pz = gameState.pizzas[pizzaIndex];
+  if (!pz) return;
+  const benchRect = dom.popups.getBoundingClientRect();
+  const pizzaRect = pz.pizzaEl.getBoundingClientRect();
+  const pct = coords ? toppingPct(coords.x, coords.y) : { left: 50, top: 40 };
+  const x = pizzaRect.left - benchRect.left + (pct.left / 100) * pizzaRect.width;
+  const y = pizzaRect.top - benchRect.top + (pct.top / 100) * pizzaRect.height;
+  const el = document.createElement("div");
+  el.className = "pz-popup" + (big ? " pz-popup--big" : "");
+  el.textContent = text;
+  el.style.left = x + "px";
+  el.style.top = y + "px";
+  dom.popups.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -695,255 +903,311 @@ function launchConfetti(amount) {
 ══════════════════════════════════════════════════════════ */
 let toppingIdCounter = 1;
 
+let initialized = false;
 function initGame() {
+  if (initialized) return; // nunca liga os eventos duas vezes
+  initialized = true;
   loadHighScore();
   gameState.soundOn = localStorage.getItem(CONFIG.SOUND_KEY) !== "off";
-  dom.btnSound.classList.toggle("is-muted", !gameState.soundOn);
-  dom.startBest.textContent = String(gameState.highScore);
+  dom.iconSound.src = IMG + (gameState.soundOn ? "icon-sound-on.png" : "icon-sound-off.png");
+  dom.startBest.textContent = gameState.highScore.toLocaleString("pt-BR");
   bindStaticEvents();
 }
 
 function bindStaticEvents() {
   dom.btnPlay.addEventListener("click", () => {
-    getAudioCtx(); // desbloqueia áudio no primeiro toque
+    getAudioCtx();
     dom.ovStart.hidden = true;
     resetRun();
   });
   dom.btnSound.addEventListener("click", () => {
     gameState.soundOn = !gameState.soundOn;
-    dom.btnSound.classList.toggle("is-muted", !gameState.soundOn);
+    dom.iconSound.src = IMG + (gameState.soundOn ? "icon-sound-on.png" : "icon-sound-off.png");
     localStorage.setItem(CONFIG.SOUND_KEY, gameState.soundOn ? "on" : "off");
+    if (gameState.soundOn) playSound("select");
   });
   dom.btnUndo.addEventListener("click", undoLast);
-  dom.btnClear.addEventListener("click", clearPizza);
-  dom.btnServe.addEventListener("click", servePizza);
+  dom.btnServe.addEventListener("click", () => servePizza(false));
   dom.btnPeek.addEventListener("click", usePeek);
   dom.btnCoringa.addEventListener("click", useCoringa);
   dom.btnExtratime.addEventListener("click", useExtraTime);
   dom.btnNext.addEventListener("click", () => {
     dom.ovResult.hidden = true;
-    advanceLevel();
+    startRound(gameState.round + 1);
   });
   dom.btnRetry.addEventListener("click", () => {
     dom.ovAngry.hidden = true;
-    startLevel(gameState.level);
+    startRound(gameState.round); // repete a mesma rodada, com pizza nova
   });
   dom.btnPlayagain.addEventListener("click", () => { dom.ovGameover.hidden = true; resetRun(); });
-  dom.btnPlayagain2.addEventListener("click", () => { dom.ovVictory.hidden = true; resetRun(); });
 
   window.addEventListener("pointermove", onDragMove);
   window.addEventListener("pointerup", onDragEnd);
+  window.addEventListener("pointercancel", onDragEnd);
 }
 
 function resetRun() {
-  gameState.level = 1;
+  clearInterval(gameState.timer);
+  clearInterval(gameState.flyerTimer);
+  gameState.round = 1;
   gameState.score = 0;
   gameState.lives = CONFIG.START_LIVES;
-  gameState.unlockedCount = 2;
-  gameState.stats = { perfeitas: 0, completas: 0, ingredientUsage: {} };
+  gameState.seenIngredients = new Set();
   gameState.pattern = null;
-  gameState.powerups = { ...CONFIG.POWERUP_START_CHARGES };
-  gameState.coringaArmed = false;
-  gameState.excelenteStreak = 0;
-  gameState.levelVariant = null;
+  gameState.powerups = { ...CONFIG.POWERUP_START };
+  gameState.combo = 0;
+  gameState.greatStreak = 0;
+  gameState.variant = null;
+  gameState.lastVariant = null;
+  gameState.shift = SHIFTS[0];
+  gameState.stats = { servidas: 0, perfeitas: 0, otimas: 0, usage: {}, bestRound: 1 };
   dom.hud.hidden = false;
+  dom.flyers.innerHTML = "";
   updateHUD();
   updatePowerupButtons();
-  startLevel(1);
+  startRound(1);
 }
 
-function startLevel(level) {
-  gameState.level = level;
+// Cada rodada recebe um "token". As sequências assíncronas (toast de
+// turno, toast de ingrediente novo) checam o token antes de continuar —
+// assim uma rodada antiga nunca sobrescreve a que já começou.
+let roundToken = 0;
+
+function startRound(round) {
+  clearInterval(gameState.timer);
+  const token = ++roundToken;
+  gameState.round = round;
+  gameState.stats.bestRound = Math.max(gameState.stats.bestRound, round);
   gameState.selectedIngredient = null;
-  gameState.usedUndoOrClear = false;
-  gameState.usedExtraTimeThisLevel = false;
-  gameState.coringaArmed = false;
+  gameState.usedUndo = false;
+  gameState.usedExtraTime = false;
   gameState.undoStack = [];
-  gameState.levelVariant = getLevelVariant(level);
+  gameState.peeking = false;
+
+  const prevShift = gameState.shift;
+  gameState.shift = getShift(round);
+  const shiftChanged = prevShift !== gameState.shift;
+
+  gameState.variant = pickVariant(round, gameState.lastVariant);
+  if (gameState.variant) gameState.lastVariant = gameState.variant;
+
+  if (round > 1 && round % CONFIG.POWERUP_REPLENISH_EVERY === 1) {
+    Object.keys(gameState.powerups).forEach(k => gameState.powerups[k]++);
+  }
+
   updateHUD();
   applyVariantBadge();
-
-  // A cada N níveis, repõe uma carga de cada power-up (mantém eles relevantes até o fim)
-  if (level > 1 && level % CONFIG.POWERUP_REPLENISH_EVERY === 0) {
-    Object.keys(gameState.powerups).forEach(k => { gameState.powerups[k] += CONFIG.POWERUP_REPLENISH_AMOUNT; });
-  }
   updatePowerupButtons();
+  restartFlyers();
 
-  const requiredCount = ingredientCountForLevel(level);
-  if (requiredCount > gameState.unlockedCount) {
-    const newIds = INGREDIENTS.slice(gameState.unlockedCount, requiredCount).map(i => i.id);
-    gameState.unlockedCount = requiredCount;
-    renderIngredientBoxes();
-    showUnlockSequence(newIds, () => beginLevelSetup(level));
+  const alive = () => token === roundToken;
+  const proceed = () => { if (alive()) setupRound(round); };
+
+  if (shiftChanged && round > 1) {
+    showShiftToast(gameState.shift, () => { if (alive()) maybeUnlockToast(round, proceed); });
   } else {
-    renderIngredientBoxes();
-    beginLevelSetup(level);
+    maybeUnlockToast(round, proceed);
   }
 }
 
-function showUnlockSequence(ids, done) {
-  if (ids.length === 0) return done();
+// Toast quando um ingrediente aparece pela primeira vez na bandeja
+function maybeUnlockToast(round, done) {
+  const pool = INGREDIENTS.slice(0, poolSizeForRound(round));
+  const fresh = pool.filter(i => !gameState.seenIngredients.has(i.id));
+  fresh.forEach(i => gameState.seenIngredients.add(i.id));
+  if (fresh.length === 0 || round === 1) return done();
+
   let i = 0;
-  function next() {
-    if (i >= ids.length) return done();
-    const id = ids[i++];
-    const ing = ING_BY_ID[id];
-    dom.toastUnlockBox.className = `pz-toast__box pz-topping--${ing.cls}`;
-    dom.toastUnlockBox.style.cssText = "position:static;transform:none;width:34px;height:34px;border-radius:50%;";
-    dom.toastUnlockBox.innerHTML = '<div class="pz-shape" style="width:100%;height:100%"></div>';
+  (function next() {
+    if (i >= fresh.length) return done();
+    const ing = fresh[i++];
+    dom.toastUnlockBox.src = IMG + ing.img;
     dom.toastUnlockName.textContent = ing.nome;
     dom.toastUnlock.hidden = false;
     requestAnimationFrame(() => dom.toastUnlock.classList.add("is-visible"));
-    const box = dom.ingredientBoxes.querySelector(`[data-ing="${id}"]`);
-    if (box) box.classList.add("is-unlocking", "is-highlight");
-    playSound("desbloqueio");
+    playSound("novo");
     vibrate(30);
     setTimeout(() => {
       dom.toastUnlock.classList.remove("is-visible");
-      setTimeout(() => {
-        dom.toastUnlock.hidden = true;
-        if (box) box.classList.remove("is-unlocking", "is-highlight");
-        next();
-      }, 300);
-    }, 1400);
-  }
-  next();
+      setTimeout(() => { dom.toastUnlock.hidden = true; next(); }, 300);
+    }, 1300);
+  })();
 }
 
-function beginLevelSetup(level) {
-  const cfg = getLevelConfig(level);
+function showShiftToast(shift, done) {
+  dom.toastShiftName.textContent = shift.name;
+  dom.toastShiftDesc.textContent = shift.desc;
+  dom.toastShift.hidden = false;
+  requestAnimationFrame(() => dom.toastShift.classList.add("is-visible"));
+  playSound("turno");
+  vibrate([40, 40, 70]);
+  dom.stage.classList.add("is-shaking");
+  setTimeout(() => dom.stage.classList.remove("is-shaking"), 400);
+  setTimeout(() => {
+    dom.toastShift.classList.remove("is-visible");
+    setTimeout(() => { dom.toastShift.hidden = true; done(); }, 350);
+  }, 1700);
+}
+
+function setupRound(round) {
+  const cfg = getRoundConfig(round);
+  const pool = INGREDIENTS.slice(0, poolSizeForRound(round)).map(i => i.id);
   buildPizzasDom(cfg.pizzas);
-  const target = generateTargetPizza(cfg.toppings, INGREDIENTS.slice(0, gameState.unlockedCount).map(i => i.id), gameState.pattern);
-  gameState.pattern = target.pattern;
 
-  // pizza 2 (quando existir) usa um padrão/ingredientes independentes
-  gameState.pizzas[0].target = target.toppings.map(t => ({ ...t, id: toppingIdCounter++ }));
+  const t1 = generateTargetPizza(cfg.toppings, pool, gameState.pattern);
+  gameState.pattern = t1.pattern;
+  gameState.pizzas[0].target = t1.toppings.map(t => ({ ...t, id: toppingIdCounter++ }));
+
   if (cfg.pizzas > 1) {
-    const target2 = generateTargetPizza(cfg.toppings, INGREDIENTS.slice(0, gameState.unlockedCount).map(i => i.id), target.pattern);
-    gameState.pizzas[1].target = target2.toppings.map(t => ({ ...t, id: toppingIdCounter++ }));
+    const t2 = generateTargetPizza(cfg.toppings, pool, t1.pattern);
+    gameState.pizzas[1].target = t2.toppings.map(t => ({ ...t, id: toppingIdCounter++ }));
   }
-  gameState.pizzas.forEach((pz) => { pz.player = []; });
+  gameState.pizzas.forEach(pz => { pz.player = []; });
 
-  // Nível especial "Pizza com neblina": cobre metade da pizza-modelo
-  // (lado sorteado) durante a memorização, testando lembrança parcial.
-  if (gameState.levelVariant === "neblina") {
+  buildTrayFromTargets();
+  renderTray();
+  setIngredientsInteractive(false);
+  setActionsInteractive(false);
+
+  // efeitos de nível especial que atuam na memorização
+  if (gameState.variant === "neblina") {
     const pz = gameState.pizzas[0];
     pz.fogEl.classList.add("is-active");
     pz.fogEl.style.transform = `rotate(${Math.round(rand(0, 360))}deg)`;
   }
+  if (gameState.variant === "giratoria") {
+    gameState.pizzas.forEach(pz => pz.boardEl.classList.add("is-spinning"));
+  }
 
-  setActionsInteractive(false);
-  showMemoryPhase();
+  showMemorizePhase();
 }
 
 /* ── FASE 1: MEMORIZAR ─────────────────────────────────── */
-function showMemoryPhase() {
+function showMemorizePhase() {
   gameState.phase = "memorize";
   setIngredientsInteractive(false);
   setHudState("Memorize!");
   setCustomerState("waiting", pick(CUSTOMER_MESSAGES.memorize));
-  gameState.pizzas.forEach((_, i) => {
+  gameState.pizzas.forEach((pz, i) => {
     renderTargetPizza(i);
-    gameState.pizzas[i].cloche.classList.add("pz-cloche--hidden");
+    pz.cloche.classList.add("pz-cloche--hidden");
   });
 
-  // Nível especial "Pedido relâmpago": memorização bem mais curta
-  const variantMultiplier = gameState.levelVariant === "relampago" ? 0.55 : 1;
-  const duration = Math.max(2, memorizeTimeForLevel(gameState.level) * variantMultiplier);
-  gameState.memorizeDeadline = performance.now() + duration * 1000;
-  clearInterval(gameState.memorizeTimer);
-  updatePowerupButtons(); // mostra o botão "+2s" se ainda houver carga
-  gameState.memorizeTimer = setInterval(() => {
-    const remain = gameState.memorizeDeadline - performance.now();
-    const frac = Math.max(0, remain / (duration * 1000));
-    setTimerFill(frac, frac < 0.25);
-    if (remain <= 0) {
-      clearInterval(gameState.memorizeTimer);
-      startBuildPhase();
+  const cfg = getRoundConfig(gameState.round);
+  let duration = memorizeTimeFor(gameState.round, cfg.toppings * cfg.pizzas);
+  if (gameState.variant === "relampago") duration = Math.max(2.2, duration * 0.6);
+
+  gameState.duration = duration;
+  gameState.deadline = performance.now() + duration * 1000;
+  gameState.timerMode = "memorize";
+  updatePowerupButtons();
+  runTimer();
+}
+
+function runTimer() {
+  clearInterval(gameState.timer);
+  let lastTick = 99;
+  gameState.timer = setInterval(() => {
+    const remain = gameState.deadline - performance.now();
+    setTimerFill(remain / (gameState.duration * 1000));
+
+    if (gameState.timerMode === "memorize") {
+      const secs = Math.ceil(remain / 1000);
+      if (secs <= 3 && secs !== lastTick && secs > 0) { lastTick = secs; playSound("tick"); }
+      if (remain <= 0) { clearInterval(gameState.timer); startBuildPhase(); }
+    } else {
+      const frac = remain / (gameState.duration * 1000);
+      if (frac < 0.3) dom.customerAvatar.classList.add("is-impatient");
+      if (frac < 0.28 && lastTick !== 1) { lastTick = 1; setCustomerState("neutral", pick(CUSTOMER_MESSAGES.hurry)); }
+      if (remain <= 0) { clearInterval(gameState.timer); servePizza(true); }
     }
-  }, 50);
+  }, 60);
 }
 
 /* ── FASE 2: MONTAR ────────────────────────────────────── */
-// A tampa aparece só como uma transição rápida (cobrindo a troca da
-// pizza-modelo pela pizza vazia) e depois é levantada — ela NUNCA fica
-// sobre a pizza durante a montagem, senão o jogador não consegue tocar
-// nos ingredientes já colocados nem colocar novos.
 function startBuildPhase() {
-  gameState.phase = "covering"; // trava temporária durante a transição da tampa
+  gameState.phase = "covering";
   setIngredientsInteractive(false);
-  setHudState("Monte!");
-  setCustomerState("waiting", pick(CUSTOMER_MESSAGES.build));
-  setTimerFill(1, false);
+  setHudState("Cobrindo...");
+  setTimerFill(1);
 
-  gameState.pizzas.forEach((pz) => {
-    pz.cloche.classList.remove("pz-cloche--hidden"); // tampa desce
-    pz.fogEl.classList.remove("is-active"); // neblina só existe na memorização
+  gameState.pizzas.forEach(pz => {
+    pz.cloche.classList.remove("pz-cloche--hidden");
+    pz.fogEl.classList.remove("is-active");
+    pz.boardEl.classList.remove("is-spinning");
   });
 
   setTimeout(() => {
     gameState.pizzas.forEach((pz, i) => {
       pz.player = [];
-      // Nível especial "Ingrediente surpresa": um topping errado já vem
-      // colocado na pizza vazia — o jogador precisa notar e remover.
-      if (i === 0 && gameState.levelVariant === "surpresa") {
-        pz.player.push(makeDecoyTopping(pz.target));
-      }
+      if (i === 0 && gameState.variant === "surpresa") pz.player.push(makeDecoyTopping(pz.target));
       renderPlayerPizza(i);
-      pz.cloche.classList.add("pz-cloche--hidden"); // tampa sobe e some
+      pz.cloche.classList.add("pz-cloche--hidden");
     });
     setActivePizza(0);
     setActionsInteractive(true);
-    gameState.buildStartTime = performance.now();
-    gameState.phase = "build";
     setIngredientsInteractive(true);
+    setHudState("Monte!");
+    setCustomerState("waiting", pick(CUSTOMER_MESSAGES.build));
+
+    gameState.phase = "build";
+    autoSelectNext();
+    syncTrayUI();
+
+    const cfg = getRoundConfig(gameState.round);
+    gameState.buildBudget = buildBudgetFor(gameState.round, cfg.toppings * cfg.pizzas);
+    gameState.buildStart = performance.now();
+    gameState.duration = gameState.buildBudget;
+    gameState.deadline = performance.now() + gameState.buildBudget * 1000;
+    gameState.timerMode = "build";
+    dom.customerAvatar.classList.remove("is-impatient");
+    runTimer();
     updatePowerupButtons();
-  }, 500);
+  }, 560);
 }
 
-// Cria um topping "decoy" (ingrediente errado) numa posição livre da pizza,
-// usado pelo nível especial "Ingrediente surpresa".
+// Topping intruso da variante "Sabotagem": um tipo que NÃO está na
+// bandeja, pra ficar óbvio que ele não deveria estar ali.
 function makeDecoyTopping(target) {
-  const wrongTypes = INGREDIENTS.slice(0, gameState.unlockedCount)
-    .map(i => i.id)
-    .filter(id => !target.some(t => t.type === id));
-  const type = wrongTypes.length > 0
-    ? wrongTypes[Math.floor(Math.random() * wrongTypes.length)]
-    : INGREDIENTS[Math.floor(Math.random() * gameState.unlockedCount)].id;
+  const inTarget = new Set(target.map(t => t.type));
+  const pool = INGREDIENTS.slice(0, poolSizeForRound(gameState.round))
+    .map(i => i.id).filter(id => !inTarget.has(id));
+  const type = pool.length ? pool[Math.floor(Math.random() * pool.length)]
+                           : INGREDIENTS[0].id;
   const minDist = minDistForCount(target.length + 1);
   let pos = { x: 0, y: 0 };
-  for (let tries = 0; tries < 20; tries++) {
+  for (let tries = 0; tries < 24; tries++) {
     const ang = rand(0, Math.PI * 2);
     const r = Math.sqrt(Math.random()) * CONFIG.MAX_R;
     const p = { x: Math.cos(ang) * r, y: Math.sin(ang) * r };
-    const nearest = target.reduce((min, t) => Math.min(min, Math.hypot(p.x - t.x, p.y - t.y)), Infinity);
-    if (nearest >= minDist) { pos = p; break; }
     pos = p;
+    const nearest = target.reduce((m, t) => Math.min(m, Math.hypot(p.x - t.x, p.y - t.y)), Infinity);
+    if (nearest >= minDist) break;
   }
-  return { id: toppingIdCounter++, type, x: +pos.x.toFixed(3), y: +pos.y.toFixed(3), rot: Math.round(rand(-12, 12)), scale: 1 };
+  return { id: toppingIdCounter++, type, x: +pos.x.toFixed(3), y: +pos.y.toFixed(3), rot: Math.round(rand(-14, 14)), scale: 1, decoy: true };
 }
 
-/* ── SELEÇÃO / COLOCAÇÃO DE INGREDIENTES ──────────────── */
+/* ── COLOCAR / TIRAR ───────────────────────────────────── */
 function selectIngredient(id) {
   if (gameState.phase !== "build" || gameState.peeking) return;
+  if ((gameState.tray[id] || 0) <= 0) return;
   gameState.selectedIngredient = gameState.selectedIngredient === id ? null : id;
-  syncSelectedBoxUI();
+  syncTrayUI();
   playSound("select");
 }
 
 function onPizzaClick(e, pizzaIndex) {
   if (gameState.phase !== "build" || gameState.peeking) return;
-  if (e.target.closest(".pz-topping")) return; // clique num topping já tratado no próprio elemento
+  if (e.target.closest(".pz-topping")) return;
   setActivePizza(pizzaIndex);
-  if (!gameState.selectedIngredient) return;
+  const type = gameState.selectedIngredient;
+  if (!type || (gameState.tray[type] || 0) <= 0) return;
 
   const pz = gameState.pizzas[pizzaIndex];
   const rect = pz.pizzaEl.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const nx = (e.clientX - cx) / (rect.width / 2);
-  const ny = (e.clientY - cy) / (rect.height / 2);
-  placeTopping(pizzaIndex, gameState.selectedIngredient, nx, ny);
+  const nx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+  const ny = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+  placeTopping(pizzaIndex, type, nx, ny);
 }
 
 function clampToDisk(x, y) {
@@ -954,97 +1218,102 @@ function clampToDisk(x, y) {
 }
 
 function placeTopping(pizzaIndex, type, nx, ny) {
+  if ((gameState.tray[type] || 0) <= 0) return;
   const { x, y } = clampToDisk(nx, ny);
-  const isWildcard = gameState.coringaArmed;
-  const t = { id: toppingIdCounter++, type, x: +x.toFixed(3), y: +y.toFixed(3), rot: Math.round(rand(-12, 12)), scale: 1, wildcard: isWildcard };
+  const t = { id: toppingIdCounter++, type, x: +x.toFixed(3), y: +y.toFixed(3), rot: Math.round(rand(-14, 14)), scale: 1 };
   gameState.pizzas[pizzaIndex].player.push(t);
-  gameState.undoStack.push({ pizzaIndex, toppingId: t.id });
-  gameState.stats.ingredientUsage[type] = (gameState.stats.ingredientUsage[type] || 0) + 1;
-  if (isWildcard) {
-    gameState.coringaArmed = false;
-    gameState.powerups.coringa--;
-    updatePowerupButtons();
-  }
+  gameState.undoStack.push({ pizzaIndex, toppingId: t.id, type });
+  gameState.tray[type] = gameState.tray[type] - 1;
+  gameState.stats.usage[type] = (gameState.stats.usage[type] || 0) + 1;
+
   renderPlayerPizza(pizzaIndex);
   const el = gameState.pizzas[pizzaIndex].toppingsEl.querySelector(`[data-topping-id="${t.id}"]`);
   if (el) el.classList.add("pz-topping--placing");
+
+  autoSelectNext(type);
+  syncTrayUI(type);
+  updatePowerupButtons();
   playSound("place");
-  vibrate(15);
+  vibrate(12);
+
+  if (trayRemaining() === 0) {
+    setHudState("Pode servir!");
+    setCustomerState("happy", "Tá pronta? Manda!");
+  }
 }
 
 function removeTopping(pizzaIndex, toppingId) {
   if (gameState.phase !== "build" || gameState.peeking) return;
   const pz = gameState.pizzas[pizzaIndex];
-  pz.player = pz.player.filter(t => t.id !== toppingId);
-  gameState.undoStack = gameState.undoStack.filter(u => !(u.pizzaIndex === pizzaIndex && u.toppingId === toppingId));
+  const t = pz.player.find(x => x.id === toppingId);
+  if (!t) return;
+  pz.player = pz.player.filter(x => x.id !== toppingId);
+  gameState.undoStack = gameState.undoStack.filter(u => u.toppingId !== toppingId);
+  // o intruso da "Sabotagem" não volta pra bandeja — ele nunca foi seu
+  if (!t.decoy) {
+    gameState.tray[t.type] = (gameState.tray[t.type] || 0) + 1;
+    gameState.stats.usage[t.type] = Math.max(0, (gameState.stats.usage[t.type] || 0) - 1);
+  } else {
+    floatPopup("intruso fora!", pizzaIndex, t, false);
+  }
   renderPlayerPizza(pizzaIndex);
+  autoSelectNext(t.decoy ? gameState.selectedIngredient : t.type);
+  syncTrayUI(t.decoy ? null : t.type);
+  updatePowerupButtons();
+  setHudState("Monte!");
   playSound("remove");
 }
 
 function undoLast() {
   if (gameState.phase !== "build" || gameState.peeking || gameState.undoStack.length === 0) return;
   const last = gameState.undoStack.pop();
-  const pz = gameState.pizzas[last.pizzaIndex];
-  pz.player = pz.player.filter(t => t.id !== last.toppingId);
-  gameState.usedUndoOrClear = true;
-  renderPlayerPizza(last.pizzaIndex);
-  playSound("remove");
+  gameState.usedUndo = true;
+  removeTopping(last.pizzaIndex, last.toppingId);
 }
 
-function clearPizza() {
-  if (gameState.phase !== "build" || gameState.peeking) return;
-  const pz = gameState.pizzas[gameState.activePizza];
-  if (pz.player.length === 0) return;
-  const ids = new Set(pz.player.map(t => t.id));
-  gameState.undoStack = gameState.undoStack.filter(u => !(u.pizzaIndex === gameState.activePizza && ids.has(u.toppingId)));
-  pz.player = [];
-  gameState.usedUndoOrClear = true;
-  renderPlayerPizza(gameState.activePizza);
-  playSound("remove");
-}
-
-/* ── ARRASTAR (drag) — pointer events, funciona em touch e mouse ──
-   Um toque curto sem movimento = seleciona o ingrediente (clique).
-   Um toque com movimento acima do limiar = arrasta até a pizza.   */
-const DRAG_THRESHOLD = 6; // px
+/* ── ARRASTAR ──────────────────────────────────────────── */
+const DRAG_THRESHOLD = 7;
 let dragState = null;
+
 function startDrag(e, ingId) {
   if (gameState.phase !== "build" || gameState.peeking) return;
+  if ((gameState.tray[ingId] || 0) <= 0) return;
   dragState = { ingId, startX: e.clientX, startY: e.clientY, moved: false };
 }
+
 function onDragMove(e) {
   if (!dragState) return;
   const dx = e.clientX - dragState.startX, dy = e.clientY - dragState.startY;
   if (!dragState.moved && Math.hypot(dx, dy) > DRAG_THRESHOLD) {
     dragState.moved = true;
-    const ghost = dom.dragGhost;
     const ing = ING_BY_ID[dragState.ingId];
-    ghost.className = `pz-drag-ghost pz-topping pz-topping--${ing.cls}`;
-    ghost.innerHTML = '<div class="pz-shape" style="width:100%;height:100%"></div>';
-    ghost.hidden = false;
+    dom.dragGhost.style.backgroundImage = `url('${IMG}${ing.img}')`;
+    dom.dragGhost.hidden = false;
+    gameState.selectedIngredient = dragState.ingId;
+    syncTrayUI();
   }
   if (dragState.moved) {
     dom.dragGhost.style.left = e.clientX + "px";
     dom.dragGhost.style.top = e.clientY + "px";
+    e.preventDefault();
   }
 }
+
 function onDragEnd(e) {
   if (!dragState) return;
   const { ingId, moved } = dragState;
   dragState = null;
   dom.dragGhost.hidden = true;
-  if (gameState.phase !== "build") return;
+  if (gameState.phase !== "build" || gameState.peeking) return;
 
-  if (!moved) {
-    // toque simples = seleciona/desseleciona ingrediente
-    selectIngredient(ingId);
-    return;
-  }
+  if (!moved) { selectIngredient(ingId); return; }
+
   const el = document.elementFromPoint(e.clientX, e.clientY);
   const board = el && el.closest(".pz-board");
   if (!board) return;
   const idx = parseInt(board.dataset.idx, 10);
   const pz = gameState.pizzas[idx];
+  if (!pz) return;
   const rect = pz.pizzaEl.getBoundingClientRect();
   const nx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
   const ny = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
@@ -1053,325 +1322,268 @@ function onDragEnd(e) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   SCORING — comparação pizza-modelo x pizza do jogador
+   PONTUAÇÃO — só posição, e de bom coração.
+   A bandeja garante tipo e quantidade certos; o que resta
+   avaliar é o quão perto de cada alvo o jogador chegou.
 ══════════════════════════════════════════════════════════ */
-function positionScoreForDist(d, close, far) {
+function positionScore(d, close, far) {
   close = close != null ? close : CONFIG.CLOSE_DIST;
   far = far != null ? far : CONFIG.FAR_DIST;
   if (d <= close) return 100;
   if (d >= far) return 0;
   const t = (d - close) / (far - close);
-  // queda mais acentuada que linear — distâncias medianas já pontuam bem menos (mais rígido)
-  return 100 * Math.pow(1 - t, 1.6);
+  return 100 * Math.pow(1 - t, CONFIG.FALLOFF);
 }
 
-function countByType(list) {
-  const m = {};
-  list.forEach(t => { m[t.type] = (m[t.type] || 0) + 1; });
-  return m;
-}
-
-// Power-up Coringa: cada topping marcado como "wildcard" vira, na hora de
-// pontuar, uma cópia perfeita (mesmo tipo e posição) de um topping-modelo
-// que AINDA NÃO foi coberto pelos toppings normais do jogador — ou seja,
-// o coringa preenche uma lacuna de verdade, em vez de duplicar acerto que
-// o jogador já tinha conseguido sozinho.
-function applyWildcards(target, player) {
-  const normalPlayers = player.filter(p => !p.wildcard);
-  const wildcards = player.filter(p => p.wildcard);
-  if (wildcards.length === 0) return player;
-
-  // Quais toppings-modelo já estão cobertos por um topping normal do mesmo tipo?
-  const usedNormal = new Set();
-  const covered = new Set();
-  target.forEach(mt => {
-    let best = null, bestD = Infinity;
-    normalPlayers.forEach(pt => {
-      if (pt.type !== mt.type || usedNormal.has(pt.id)) return;
-      const d = Math.hypot(mt.x - pt.x, mt.y - pt.y);
-      if (d < bestD) { bestD = d; best = pt; }
-    });
-    if (best) { usedNormal.add(best.id); covered.add(mt.id); }
-  });
-
-  // Os coringas preenchem, do mais próximo, os alvos que ainda faltam
-  const gaps = target.filter(mt => !covered.has(mt.id));
-  const claimedGaps = new Set();
-  const resolvedWildcards = wildcards.map(p => {
-    let best = null, bestD = Infinity;
-    gaps.forEach(mt => {
-      if (claimedGaps.has(mt.id)) return;
-      const d = Math.hypot(mt.x - p.x, mt.y - p.y);
-      if (d < bestD) { bestD = d; best = mt; }
-    });
-    if (best) {
-      claimedGaps.add(best.id);
-      return { ...p, type: best.type, x: best.x, y: best.y };
-    }
-    return p; // não sobrou lacuna pra preencher — vira um topping normal
-  });
-
-  return [...normalPlayers, ...resolvedWildcards];
-}
-
-function scorePizza(target, player, elapsedSec, budgetSec, tol) {
-  player = applyWildcards(target, player);
-  const closeD = tol && tol.close != null ? tol.close : undefined;
-  const farD = tol && tol.far != null ? tol.far : undefined;
-  const modelTypes = new Set(target.map(t => t.type));
-  const playerTypes = new Set(player.map(t => t.type));
-  const unionTypes = new Set([...modelTypes, ...playerTypes]);
-
-  // 1. ingredientes corretos (35%) — similaridade de conjuntos (Jaccard)
-  let inter = 0;
-  modelTypes.forEach(t => { if (playerTypes.has(t)) inter++; });
-  const ingredientScore = unionTypes.size === 0 ? 100 : (inter / unionTypes.size) * 100;
-
-  // 2. quantidade correta por ingrediente (25%)
-  const cm = countByType(target), cp = countByType(player);
-  let qtySum = 0, qtyN = 0;
-  unionTypes.forEach(t => {
-    const a = cm[t] || 0, b = cp[t] || 0;
-    // multiplicador >1 deixa a diferença de quantidade pesar mais (mais rígido)
-    qtySum += 1 - Math.min(1, (Math.abs(a - b) / Math.max(a, b, 1)) * 1.4);
-    qtyN++;
-  });
-  const quantityScore = qtyN === 0 ? 100 : (qtySum / qtyN) * 100;
-
-  // 3. posição aproximada (30%) — casamento guloso GLOBAL: monta todos os
-  // pares (alvo, jogador) do mesmo tipo, ordena pela distância e vai
-  // casando do par mais próximo pro mais distante. Isso evita que um
-  // alvo "roube" por engano o topping que na verdade era o par perfeito
-  // de outro alvo do mesmo ingrediente (bug do casamento por ordem simples).
+// Casamento guloso global entre alvos e toppings do jogador do mesmo tipo:
+// do par mais próximo pro mais distante, cada um usado uma vez só.
+function matchToppings(target, player) {
   const pairs = [];
-  target.forEach(mt => {
-    player.forEach(pt => {
-      if (pt.type === mt.type) pairs.push({ mt, pt, d: Math.hypot(mt.x - pt.x, mt.y - pt.y) });
-    });
-  });
+  target.forEach(mt => player.forEach(pt => {
+    if (pt.type === mt.type && !pt.decoy) {
+      pairs.push({ mt, pt, d: Math.hypot(mt.x - pt.x, mt.y - pt.y) });
+    }
+  }));
   pairs.sort((a, b) => a.d - b.d);
-  const usedTarget = new Set(), usedPlayer = new Set();
-  let posSum = 0, matchedCount = 0;
+  const usedT = new Set(), usedP = new Set();
+  const matched = [];
   pairs.forEach(({ mt, pt, d }) => {
-    if (usedTarget.has(mt.id) || usedPlayer.has(pt.id)) return;
-    usedTarget.add(mt.id);
-    usedPlayer.add(pt.id);
-    posSum += positionScoreForDist(d, closeD, farD);
-    matchedCount++;
+    if (usedT.has(mt.id) || usedP.has(pt.id)) return;
+    usedT.add(mt.id); usedP.add(pt.id);
+    matched.push({ mt, pt, d, score: 0 });
   });
-  const positionScore = target.length === 0 ? 100 : posSum / target.length;
+  return { matched, missed: target.filter(mt => !usedT.has(mt.id)), extras: player.filter(pt => !usedP.has(pt.id)) };
+}
 
-  // 4. tempo restante / eficiência (10%)
-  const ratio = budgetSec > 0 ? elapsedSec / budgetSec : 1;
-  let timeScore;
-  if (ratio <= 0.4) timeScore = 100;
-  else if (ratio >= 1.3) timeScore = 0;
-  else timeScore = 100 * (1 - (ratio - 0.4) / 0.9);
+function scorePizza(target, player, tol) {
+  const close = tol && tol.close, far = tol && tol.far;
+  const { matched, missed, extras } = matchToppings(target, player);
+  matched.forEach(m => { m.score = positionScore(m.d, close, far); });
 
-  let raw = ingredientScore * 0.35 + quantityScore * 0.25 + positionScore * 0.30 + timeScore * 0.10;
+  const sum = matched.reduce((s, m) => s + m.score, 0);
+  const posAvg = target.length === 0 ? 100 : sum / target.length;
 
-  // Toppings extras (colocados sem corresponder a nenhum alvo) reduzem a nota — penalidade mais pesada
-  const extraCount = Math.max(0, player.length - matchedCount);
-  const penalty = Math.min(45, extraCount * 8);
-  const nota = Math.max(0, Math.min(100, Math.round(raw - penalty)));
+  // Intrusos deixados na pizza (variante "Sabotagem") custam pouco
+  const decoyLeft = player.filter(p => p.decoy).length;
+  let nota = posAvg * CONFIG.SCORE_BOOST_MUL + CONFIG.SCORE_BOOST_ADD;
+  nota -= decoyLeft * 12;
+  nota = Math.max(0, Math.min(100, Math.round(nota)));
 
-  return { nota, ingredientScore, quantityScore, positionScore, timeScore, extraCount };
+  return { nota, matched, missed, extras, decoyLeft, posAvg };
 }
 
 /* ══════════════════════════════════════════════════════════
-   SERVIR / RESULTADO
+   SERVIR
 ══════════════════════════════════════════════════════════ */
-function servePizza() {
+function servePizza(auto) {
   if (gameState.phase !== "build" || gameState.peeking) return;
-  gameState.phase = "result";
+  gameState.phase = "judging";
+  clearInterval(gameState.timer);
   setIngredientsInteractive(false);
-  clearInterval(gameState.memorizeTimer);
+  setActionsInteractive(false);
+  dom.btnServe.classList.remove("is-ready");
+  dom.customerAvatar.classList.remove("is-impatient");
   playSound("serve");
-  vibrate(35);
+  vibrate(30);
+  setHudState(auto ? "Tempo!" : "Servindo...");
 
-  const elapsedSec = (performance.now() - gameState.buildStartTime) / 1000;
-  const cfg = getLevelConfig(gameState.level);
-  const budgetSec = buildBudgetSeconds(cfg.toppings * cfg.pizzas);
+  const elapsed = (performance.now() - gameState.buildStart) / 1000;
+  const tol = gameState.variant === "exigente"
+    ? { close: CONFIG.CLOSE_DIST * 0.72, far: CONFIG.FAR_DIST * 0.85 }
+    : null;
 
-  // Nível especial "Cliente exigente": tolerância de posição bem mais apertada
-  const tol = gameState.levelVariant === "exigente"
-    ? { close: CONFIG.CLOSE_DIST * 0.6, far: CONFIG.FAR_DIST * 0.7 }
-    : undefined;
+  const results = gameState.pizzas.map(pz => scorePizza(pz.target, pz.player, tol));
+  const nota = Math.round(results.reduce((s, r) => s + r.nota, 0) / results.length);
 
-  const results = gameState.pizzas.map(pz => scorePizza(pz.target, pz.player, elapsedSec, budgetSec, tol));
-  let nota = Math.round(results.reduce((s, r) => s + r.nota, 0) / results.length);
-  const minNota = Math.min(...results.map(r => r.nota));
-  if (results.length > 1 && minNota < 40) nota = Math.max(0, nota - 10);
-
-  showResult(nota, results, elapsedSec, budgetSec);
+  showJudging(results);
+  setTimeout(() => finishRound(nota, results, elapsed, auto), 1650);
 }
 
-function showResult(nota, results, elapsedSec, budgetSec) {
-  const passed = nota >= 60;
-  const excelente = nota >= 90;
-  const perfeita = nota >= 95;
+// Mostra o gabarito fantasma + o quão perto cada peça ficou.
+// É o momento "ahhh, era ali" — o feedback que ensina sem punir.
+function showJudging(results) {
+  gameState.pizzas.forEach((pz, i) => {
+    const r = results[i];
+    pz.toppingsEl.innerHTML = "";
+    pz.pizzaEl.classList.remove("is-empty");
 
-  const variant = gameState.levelVariant;
-  let pointsEarned = 0, bonusBreakdown = [];
-  if (passed) {
-    const base = nota * 100;
-    const bonusLevel = gameState.level * 250;
-    const bonusTier = perfeita ? 5000 : excelente ? 2500 : 0;
-    const bonusNoUndo = gameState.usedUndoOrClear ? 0 : 500;
-    const leftoverFrac = Math.max(0, Math.min(1, 1 - elapsedSec / budgetSec));
-    const bonusSpeed = Math.round(leftoverFrac * 1500);
-    const bonusExigente = variant === "exigente" ? 1500 : 0;
-    let subtotal = base + bonusLevel + bonusTier + bonusNoUndo + bonusSpeed + bonusExigente;
+    pz.target.forEach(t => pz.toppingsEl.appendChild(createToppingEl(t, "pz-topping--ghost")));
 
-    bonusBreakdown = [
-      { label: "Nota da pizza", value: base },
-      { label: "Bônus de nível", value: bonusLevel },
-      bonusTier ? { label: perfeita ? "Bônus perfeito" : "Bônus excelente", value: bonusTier, bonus: true } : null,
-      bonusNoUndo ? { label: "Sem desfazer/limpar", value: bonusNoUndo, bonus: true } : null,
-      bonusSpeed ? { label: "Bônus de velocidade", value: bonusSpeed, bonus: true } : null,
-      bonusExigente ? { label: "Bônus cliente exigente", value: bonusExigente, bonus: true } : null,
-    ].filter(Boolean);
+    r.matched.forEach(({ mt, pt, score }, k) => {
+      const cls = score >= 88 ? "pz-judge-good" : score >= 50 ? "pz-judge-ok" : "pz-judge-miss";
+      if (score < 96) {
+        const a = toppingPct(pt.x, pt.y), b = toppingPct(mt.x, mt.y);
+        const dx = b.left - a.left, dy = b.top - a.top;
+        const line = document.createElement("div");
+        line.className = "pz-judge-line " + cls;
+        line.style.left = a.left + "%";
+        line.style.top = a.top + "%";
+        line.style.width = Math.hypot(dx, dy) + "%";
+        line.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+        pz.toppingsEl.appendChild(line);
+      }
+      const el = createToppingEl(pt, `pz-topping--judge ${cls}`);
+      el.style.animationDelay = (k * 0.04) + "s";
+      pz.toppingsEl.appendChild(el);
+    });
 
-    // Nível especial "Pedido relâmpago": pontos em dobro nesse nível
-    if (variant === "relampago") {
-      bonusBreakdown.push({ label: "Pedido relâmpago — pontos em dobro", value: Math.round(subtotal), bonus: true });
-      subtotal *= 2;
-    }
+    r.extras.forEach(pt => {
+      pz.toppingsEl.appendChild(createToppingEl(pt, "pz-topping--judge pz-judge-miss"));
+    });
 
-    pointsEarned = Math.round(subtotal);
-    gameState.score += pointsEarned;
-    gameState.stats.completas++;
-    if (perfeita) gameState.stats.perfeitas++;
+    const acertos = r.matched.filter(m => m.score >= 88).length;
+    if (acertos > 0) floatPopup(`${acertos} no ponto`, i, { x: 0, y: -0.75 }, false);
+  });
+}
+
+function finishRound(nota, results, elapsed, auto) {
+  const passed = nota >= CONFIG.PASS_NOTE;
+  const great = nota >= CONFIG.GREAT_NOTE;
+  const perfect = nota >= CONFIG.PERFECT_NOTE;
+
+  if (!passed) return handleAngry(nota);
+
+  gameState.stats.servidas++;
+  if (perfect) gameState.stats.perfeitas++;
+  else if (great) gameState.stats.otimas++;
+
+  // ── pontos ──
+  const base = nota * 60;
+  const bonusRound = gameState.round * 200;
+  const bonusTier = perfect ? 4000 : great ? 2000 : 0;
+  const bonusNoUndo = gameState.usedUndo ? 0 : 400;
+  const leftover = Math.max(0, Math.min(1, 1 - elapsed / gameState.buildBudget));
+  const bonusSpeed = auto ? 0 : Math.round(leftover * 1200);
+  const bonusChaos = Math.round(gameState.shift.chaos * 350);
+
+  let subtotal = base + bonusRound + bonusTier + bonusNoUndo + bonusSpeed + bonusChaos;
+
+  const breakdown = [
+    { label: "Nota da pizza", value: base },
+    { label: "Bônus de rodada", value: bonusRound },
+    bonusTier ? { label: perfect ? "Pizza perfeita" : "Pizza ótima", value: bonusTier, bonus: true } : null,
+    bonusNoUndo ? { label: "Sem desfazer", value: bonusNoUndo, bonus: true } : null,
+    bonusSpeed ? { label: "Rapidez", value: bonusSpeed, bonus: true } : null,
+    bonusChaos ? { label: "Aguentou o caos", value: bonusChaos, bonus: true } : null,
+  ].filter(Boolean);
+
+  // variante especial
+  if (gameState.variant) {
+    const v = VARIANTS[gameState.variant];
+    const extra = Math.round(subtotal * v.bonus);
+    breakdown.push({ label: `${v.label} · +${Math.round(v.bonus * 100)}%`, value: extra, bonus: true });
+    subtotal += extra;
   }
 
-  updateHUD();
-
-  if (!passed) {
-    gameState.lives--;
-    gameState.excelenteStreak = 0; // sequência quebra em qualquer resultado ruim
-    updateHUD();
-    playSound("bravo");
-    vibrate([60, 40, 60]);
-    dom.stage.classList.add("is-shaking");
-    setTimeout(() => dom.stage.classList.remove("is-shaking"), 400);
-    setCustomerState("angry", pick(CUSTOMER_MESSAGES.brava));
-    dom.angryTitle.textContent = pick(CUSTOMER_MESSAGES.brava);
-    dom.angryLives.innerHTML = Array.from({ length: Math.max(0, gameState.lives) })
-      .map(() => '<span class="pz-life"></span>').join("");
-    setActionsInteractive(false);
-    if (gameState.lives <= 0) {
-      setTimeout(showGameOver, 900);
-    } else {
-      dom.ovAngry.hidden = false;
-    }
-    return;
+  // combo
+  gameState.combo++;
+  const mult = comboMultiplier();
+  if (mult > 1) {
+    const extra = Math.round(subtotal * (mult - 1));
+    breakdown.push({ label: `${comboName()} · x${Number.isInteger(mult) ? mult : mult.toFixed(1)}`, value: extra, bonus: true });
+    subtotal += extra;
+    playSound("combo");
   }
 
-  // Vida bônus: sequência de notas excelentes seguidas
-  let gotBonusLife = false;
-  if (excelente) {
-    gameState.excelenteStreak++;
-    if (gameState.excelenteStreak >= CONFIG.EXCELENTE_STREAK_FOR_LIFE && gameState.lives < CONFIG.MAX_LIVES) {
+  const points = Math.round(subtotal);
+  gameState.score += points;
+
+  // vida bônus por sequência de pizzas ótimas
+  if (great) {
+    gameState.greatStreak++;
+    if (gameState.greatStreak >= CONFIG.GREAT_STREAK_FOR_LIFE && gameState.lives < CONFIG.MAX_LIVES) {
       gameState.lives++;
-      gameState.excelenteStreak = 0;
-      gotBonusLife = true;
-      updateHUD();
+      gameState.greatStreak = 0;
+      breakdown.push({ label: "Sequência incrível — vida extra!", value: "+1 vida", bonus: true });
+      setTimeout(() => { playSound("vida"); vibrate([20, 20, 20]); }, 350);
     }
   } else {
-    gameState.excelenteStreak = 0;
+    gameState.greatStreak = 0;
   }
 
-  // Passou de nível
-  const tier = nota >= 90 ? "excelente" : nota >= 70 ? "boa" : "neutra";
-  const mood = nota >= 90 ? "great" : nota >= 70 ? "happy" : "neutral";
+  saveHighScoreIfNeeded();
+  updateHUD(true);
+  floatPopup("+" + points.toLocaleString("pt-BR"), 0, { x: 0, y: 0 }, true);
+
+  const tier = perfect ? "perfeita" : great ? "otima" : nota >= 62 ? "boa" : "neutra";
+  const mood = perfect || great ? "great" : nota >= 62 ? "happy" : "neutral";
   setCustomerState(mood, pick(CUSTOMER_MESSAGES[tier]));
 
-  if (excelente) {
-    launchConfetti(perfeita ? 140 : 80);
-    gameState.pizzas.forEach(pz => pz.pizzaEl.classList.toggle("is-glow", perfeita));
-    playSound("excelente");
-    vibrate(perfeita ? [30, 30, 30, 30] : [40, 30]);
+  if (great) {
+    launchConfetti(perfect ? 130 : 70);
+    playSound(perfect ? "perfeita" : "otima");
+    vibrate(perfect ? [25, 25, 25, 25] : [35, 25]);
+    gameState.pizzas.forEach(pz => pz.pizzaEl.classList.toggle("is-glow", perfect));
   }
 
-  if (gotBonusLife) {
-    bonusBreakdown.push({ label: "Sequência incrível — vida bônus!", value: "1 vida", bonus: true });
-    setTimeout(() => { playSound("desbloqueio"); vibrate([20, 20, 20]); }, 300);
-  }
-
-  dom.resultKicker.textContent = perfeita ? "Perfeita!" : excelente ? "Excelente!" : nota >= 70 ? "Boa pizza!" : "Passou raspando";
-  dom.resultTitle.textContent = perfeita ? "Uma obra de arte!" : excelente ? "Uau, que capricho!" : nota >= 70 ? "Ficou gostosa!" : "Quase não deu...";
+  dom.resultKicker.textContent = perfect ? "Obra de arte" : great ? "Excelente" : nota >= 62 ? "Boa pizza" : "Passou raspando";
+  dom.resultTitle.textContent = perfect ? "Idêntica à original!" : great ? "Que capricho!" : nota >= 62 ? "Ficou gostosa!" : "Quase não deu...";
   dom.resultNote.textContent = String(nota);
-  const circumference = 327;
-  dom.resultRingFill.style.strokeDashoffset = String(circumference * (1 - nota / 100));
-  dom.resultRingFill.style.stroke = perfeita ? "#FFD54A" : excelente ? "#3F8A4C" : nota >= 70 ? "#8EAD7B" : "#C7653A";
+  dom.resultRingFill.style.strokeDashoffset = String(327 * (1 - nota / 100));
+  dom.resultRingFill.style.stroke = perfect ? "#FFD54A" : great ? "#3F8A4C" : nota >= 62 ? "#8EAD7B" : "#C7653A";
 
-  dom.resultBreakdown.innerHTML = bonusBreakdown.map(b =>
-    `<div class="pz-score-breakdown__row"><span>${b.label}</span><strong class="${b.bonus ? "pz-score-breakdown__bonus" : ""}">${b.bonus ? "+" : ""}${b.value}</strong></div>`
+  dom.resultBreakdown.innerHTML = breakdown.map((b, i) =>
+    `<div class="pz-score-breakdown__row" style="animation-delay:${i * 0.05}s"><span>${b.label}</span><strong class="${b.bonus ? "pz-score-breakdown__bonus" : ""}">${b.bonus ? "+" : ""}${typeof b.value === "number" ? b.value.toLocaleString("pt-BR") : b.value}</strong></div>`
   ).join("");
-  dom.resultPoints.textContent = String(pointsEarned);
+  dom.resultPoints.textContent = points.toLocaleString("pt-BR");
+  dom.btnNext.textContent = "Próximo pedido";
 
-  setActionsInteractive(false);
-  dom.ovResult.hidden = false;
-
-  if (gameState.level >= CONFIG.TOTAL_LEVELS) {
-    dom.btnNext.textContent = "Ver resultado final";
-  } else {
-    dom.btnNext.textContent = "Próxima pizza";
-  }
+  setTimeout(() => { dom.ovResult.hidden = false; }, 300);
 }
 
-function advanceLevel() {
-  if (gameState.level >= CONFIG.TOTAL_LEVELS) {
-    showVictory();
-    return;
-  }
-  startLevel(gameState.level + 1);
+function handleAngry(nota) {
+  gameState.lives--;
+  gameState.combo = 0;
+  gameState.greatStreak = 0;
+  updateHUD();
+  playSound("bravo");
+  vibrate([60, 40, 60]);
+  dom.stage.classList.add("is-shaking");
+  setTimeout(() => dom.stage.classList.remove("is-shaking"), 420);
+  setCustomerState("angry", pick(CUSTOMER_MESSAGES.brava));
+
+  dom.angryTitle.textContent = pick(CUSTOMER_MESSAGES.brava);
+  dom.angrySub.textContent = gameState.lives > 0
+    ? `Nota ${nota}. Você perdeu uma vida — mas a pizza vem nova.`
+    : `Nota ${nota}. Era sua última vida...`;
+  dom.angryLives.innerHTML = Array.from({ length: Math.max(CONFIG.START_LIVES, gameState.lives) })
+    .map((_, i) => `<span class="pz-life${i < gameState.lives ? "" : " is-lost"}"></span>`).join("");
+
+  if (gameState.lives <= 0) setTimeout(showGameOver, 900);
+  else setTimeout(() => { dom.ovAngry.hidden = false; }, 400);
 }
 
 /* ══════════════════════════════════════════════════════════
-   GAME OVER / VITÓRIA
+   GAME OVER
 ══════════════════════════════════════════════════════════ */
-function showGameOver() {
-  gameState.phase = "gameover";
-  playSound("gameover");
-  vibrate([80, 50, 80, 50, 120]);
-  const isNew = saveHighScoreIfNeeded();
-  dom.gameoverScore.textContent = String(gameState.score);
-  dom.gameoverBest.textContent = String(gameState.highScore);
-  dom.gameoverNewbest.hidden = !isNew;
-  dom.ovAngry.hidden = true;
-  dom.ovGameover.hidden = false;
-  updateHUD();
-}
-
 function favoriteIngredient() {
-  const usage = gameState.stats.ingredientUsage;
-  const ids = Object.keys(usage);
-  if (ids.length === 0) return "—";
+  const usage = gameState.stats.usage;
+  const ids = Object.keys(usage).filter(k => usage[k] > 0);
+  if (!ids.length) return "—";
   ids.sort((a, b) => usage[b] - usage[a]);
   return ING_BY_ID[ids[0]] ? ING_BY_ID[ids[0]].nome : "—";
 }
 
-function showVictory() {
-  gameState.phase = "victory";
-  playSound("vitoria");
-  vibrate([40, 30, 40, 30, 40, 30, 80]);
-  // bastante confete pra comemorar de verdade — várias ondas em sequência
-  launchConfetti(160);
-  setTimeout(() => launchConfetti(160), 400);
-  setTimeout(() => launchConfetti(140), 900);
-  setTimeout(() => launchConfetti(100), 1500);
+function showGameOver() {
+  gameState.phase = "gameover";
+  clearInterval(gameState.timer);
+  clearInterval(gameState.flyerTimer);
+  playSound("gameover");
+  vibrate([80, 50, 80, 50, 120]);
   const isNew = saveHighScoreIfNeeded();
-  dom.victoryScore.textContent = String(gameState.score);
-  dom.victoryNewbest.hidden = !isNew;
-  dom.victoryStats.innerHTML = `
-    <div class="pz-final-stats__row"><span>Recorde</span><strong>${gameState.highScore}</strong></div>
-    <div class="pz-final-stats__row"><span>Pizzas completadas</span><strong>${gameState.stats.completas}</strong></div>
+  if (isNew) launchConfetti(90);
+
+  dom.gameoverScore.textContent = gameState.score.toLocaleString("pt-BR");
+  dom.gameoverNewbest.hidden = !isNew;
+  dom.gameoverStats.innerHTML = `
+    <div class="pz-final-stats__row"><span>Recorde</span><strong>${gameState.highScore.toLocaleString("pt-BR")}</strong></div>
+    <div class="pz-final-stats__row"><span>Pizzas servidas</span><strong>${gameState.stats.servidas}</strong></div>
     <div class="pz-final-stats__row"><span>Pizzas perfeitas</span><strong>${gameState.stats.perfeitas}</strong></div>
-    <div class="pz-final-stats__row"><span>Vidas restantes</span><strong>${gameState.lives}</strong></div>
+    <div class="pz-final-stats__row"><span>Turno alcançado</span><strong>${gameState.shift.name}</strong></div>
     <div class="pz-final-stats__row"><span>Ingrediente favorito</span><strong>${favoriteIngredient()}</strong></div>
   `;
-  dom.ovVictory.hidden = false;
+  dom.ovAngry.hidden = true;
+  dom.ovGameover.hidden = false;
   updateHUD();
 }
 

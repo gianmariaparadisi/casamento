@@ -164,9 +164,14 @@ function showScreen(name){
    ============================================================ */
 
 // Se a chave ainda for o placeholder, nem tentamos esperar a API carregar.
+// Guardamos o resultado numa flag porque o script da Google Maps carrega de forma
+// assíncrona e pode chamar initGame() DEPOIS desta checagem — sem a flag, initGame()
+// sobrescreveria a tela de erro com a tela inicial mesmo com a chave inválida.
+let apiKeyIsPlaceholder = false;
 function checkPlaceholderKey(){
   const scriptTag = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
   if (scriptTag && scriptTag.src.indexOf("SUA_GOOGLE_MAPS_API_KEY") !== -1){
+    apiKeyIsPlaceholder = true;
     showApiKeyError();
     return true;
   }
@@ -191,6 +196,8 @@ window.gm_authFailure = function(){
 // Chamado pelo callback do script da Google Maps API (?callback=initGame)
 window.initGame = function(){
   try{
+    // A chave ainda é o placeholder — a tela de erro já está visível, não a sobrescrevemos.
+    if (apiKeyIsPlaceholder) return;
     if (typeof google === "undefined" || !google.maps){
       showApiKeyError();
       return;
