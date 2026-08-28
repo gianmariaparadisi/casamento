@@ -82,6 +82,9 @@ html,body{ margin:0; padding:0; }
 }
 @media (max-width:900px) and (orientation:portrait){
   .wgl-rotate-hint{ display:flex; }
+  /* Em retrato o card da intro não cabe no palco 16:9 e ficava cortado no meio
+     da frase: some com ele e deixa só o aviso de girar o celular. */
+  .wgl-overlay--start .wgl-overlay__card{ display:none; }
 }
 
 /* ══ Moldura do jogo ══ */
@@ -141,7 +144,13 @@ html,body{ margin:0; padding:0; }
 @media (max-height:480px){
   .wgl-frame{ padding:4px 6px 6px; gap:4px; }
   .wgl-topbar{ display:none; }
-  .wgl-stage{ aspect-ratio:auto; height:96vh; height:96svh; border-radius:14px; }
+  .wgl-stage{
+    aspect-ratio:16/9;
+    height:96vh; height:96svh;
+    width:auto; max-width:100%;
+    align-self:center;
+    border-radius:14px;
+  }
 }
 
 /* ══ HUD ══ */

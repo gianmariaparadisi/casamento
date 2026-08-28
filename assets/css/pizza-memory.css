@@ -58,9 +58,12 @@ img{ display:block; max-width:100%; }
   max-width: 1080px;
   margin: 0 auto;
   padding: 12px 12px 32px;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 620px;
   display:flex;
   flex-direction:column;
+  justify-content:center;
 }
 .pz-topbar{
   display:flex; align-items:center; justify-content:space-between;
@@ -85,8 +88,9 @@ img{ display:block; max-width:100%; }
   overflow:hidden;
   display:flex;
   flex-direction:column;
-  aspect-ratio: 16/9;
-  min-height: 600px;
+  flex: 1 1 auto;
+  min-height: 520px;
+  max-height: 880px;
 }
 
 @media (max-width: 860px){
@@ -103,6 +107,7 @@ img{ display:block; max-width:100%; }
     aspect-ratio: auto;
     flex: 1 1 auto;
     min-height: 0;
+    max-height: none;
     border-radius: 16px;
   }
   .pz-board{ width: min(52vh, 80vw, 360px); width: min(52svh, 80vw, 360px); }
@@ -358,6 +363,7 @@ img{ display:block; max-width:100%; }
   min-height: 0;
   display:flex; align-items:center; justify-content:center;
   padding: 6px 14px;
+  container-type: size;
   background-image: url("../img/pizza/bench-grid-bg.png");
   background-size: cover; background-position:center;
   border-top: 1px dashed var(--pz-line);
@@ -384,6 +390,13 @@ img{ display:block; max-width:100%; }
   transition: transform .25s cubic-bezier(.2,1.3,.4,1);
 }
 .pz-pizzas--dual .pz-board{ width: min(29vh, 235px); }
+
+/* A tabua se mede pela BANCADA, nao pela janela: assim a madeira nunca
+   fica cortada em cima/embaixo (a arte da tabua vaza 4% para cada lado). */
+@supports (width: 1cqh){
+  .pz-board{ width: min(86cqh, 92cqw, 400px); }
+  .pz-pizzas--dual .pz-board{ width: min(62cqh, 44cqw, 270px); }
+}
 .pz-board__wood{
   position:absolute; inset:-4%;
   background-image: url("../img/pizza/pizza-board.png");
@@ -533,7 +546,7 @@ img{ display:block; max-width:100%; }
 }
 .pz-tray__head{
   display:flex; align-items:baseline; gap:8px; justify-content:center;
-  margin-bottom:5px;
+  margin-bottom:9px;
 }
 .pz-tray__title{
   font-size:.64rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em;
@@ -542,9 +555,9 @@ img{ display:block; max-width:100%; }
 .pz-tray__hint{ font-size:.62rem; color:var(--pz-ink-soft); }
 
 .pz-ingredients__row{
-  display:flex; gap:8px; justify-content:center; align-items:flex-end;
+  display:flex; gap:10px; justify-content:center; align-items:flex-end;
   flex-wrap:wrap;
-  padding:2px 4px 7px;
+  padding:10px 4px 7px;
   transition: opacity .2s ease, filter .2s ease;
 }
 .pz-ingredients__row.is-waiting{
@@ -853,4 +866,13 @@ img{ display:block; max-width:100%; }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
   .pz-stage[data-chaos] .pz-bench{ animation:none !important; transform:none !important; }
+}
+
+
+/* ── 7. AJUSTES DE TELA GRANDE ──────────────────────────── */
+@media (min-width: 861px){
+  /* barras e balão do cliente centralizados, em vez de esticados
+     por 1000px de largura */
+  .pz-hud, .pz-customer{ width:100%; max-width: 760px; margin-inline: auto; }
+  .pz-tray__head{ margin-bottom: 7px; }
 }
