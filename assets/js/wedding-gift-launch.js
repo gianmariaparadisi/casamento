@@ -2799,15 +2799,51 @@ function onPointerDown(e) {
   if (dist(world.x, world.y, anchor.x, anchor.y) > CFG.SLING_MAX_DRAG * 2.4) return;
   Aim.dragging = true;
   Aim.pointerId = e.pointerId !== undefined ? e.pointerId : "touch";
+  // Captura o ponteiro: garante que pointermove/pointerup continuem chegando
+  // mesmo se o dedo/cursor sair da tela no meio da puxada. Sem isso, soltar o
+  // botão fora da janela nunca dispara o pointerup e a mira fica presa — a
+  // cabecinha passa a seguir o cursor e o jogo não arremessa mais nada.
+  if (e.pointerId !== undefined && canvas.setPointerCapture) {
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* segue o baile */ }
+  }
   ensureAudio();
   SFX.pull();
   updateAimFromWorld(world);
   if (e.preventDefault) e.preventDefault();
 }
 
+function aimPointerMatches(e) {
+  return !(e && e.pointerId !== undefined && Aim.pointerId !== "touch" && e.pointerId !== Aim.pointerId);
+}
+
+function releaseAimPointer(e) {
+  if (!e || e.pointerId === undefined || !canvas.releasePointerCapture) return;
+  try {
+    if (!canvas.hasPointerCapture || canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+  } catch (err) { /* já foi solto */ }
+}
+
+/* Aborta a mira SEM gastar arremesso: o sistema roubou o gesto (gesto de
+   borda no celular, troca de aba, janela perdeu o foco). A cabecinha volta
+   pro estilingue e o jogador tenta de novo. */
+function cancelAim(e) {
+  if (!Aim.dragging || !aimPointerMatches(e)) return;
+  Aim.dragging = false;
+  Aim.trajectory = [];
+  Aim.power = 0;
+  Aim._finalV = null;
+  releaseAimPointer(e);
+  if (Game.currentProjectile && Game.currentProjectile.isStatic) {
+    Body.setPosition(Game.currentProjectile, slingAnchor());
+  }
+}
+
 function onPointerMove(e) {
   if (!Aim.dragging) return;
-  if (e.pointerId !== undefined && Aim.pointerId !== "touch" && e.pointerId !== Aim.pointerId) return;
+  if (!aimPointerMatches(e)) return;
+  // Rede de segurança do mouse: se chega um move sem nenhum botão apertado,
+  // o pointerup se perdeu (soltou fora da janela) — trata como solta.
+  if (e.pointerType === "mouse" && e.buttons === 0) { onPointerUp(e); return; }
   const p = pointFromEvent(e);
   updateAimFromWorld(screenToWorld(p.clientX, p.clientY));
   if (e.preventDefault) e.preventDefault();
@@ -2834,15 +2870,17 @@ function updateAimFromWorld(world) {
 }
 
 function onPointerUp(e) {
-  if (!Aim.dragging) return;
-  if (e.pointerId !== undefined && Aim.pointerId !== "touch" && e.pointerId !== Aim.pointerId) return;
+  if (!Aim.dragging || !aimPointerMatches(e)) return;
   Aim.dragging = false;
+  releaseAimPointer(e);
   const anchor = slingAnchor();
   const pulled = Math.hypot(anchor.x - Aim.dragX, anchor.y - Aim.dragY) > 10;
+  const finalV = Aim._finalV;
   Aim.trajectory = [];
   Aim.power = 0;
-  if (pulled && Aim._finalV && Game.currentProjectile) {
-    launchProjectile(Aim._finalV.x, Aim._finalV.y);
+  Aim._finalV = null;
+  if (pulled && finalV && Game.currentProjectile) {
+    launchProjectile(finalV.x, finalV.y);
   } else if (Game.currentProjectile) {
     Body.setPosition(Game.currentProjectile, anchor);
   }
@@ -3762,7 +3800,10 @@ function bindEvents() {
   canvas.addEventListener("pointerdown", onPointerDown);
   window.addEventListener("pointermove", onPointerMove);
   window.addEventListener("pointerup", onPointerUp);
-  window.addEventListener("pointercancel", onPointerUp);
+  // pointercancel NÃO arremessa: o gesto foi roubado, seria um tiro fantasma.
+  window.addEventListener("pointercancel", cancelAim);
+  window.addEventListener("blur", cancelAim);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) cancelAim(); });
   window.addEventListener("resize", resizeCanvas);
   window.addEventListener("orientationchange", function () { setTimeout(resizeCanvas, 60); });
   if (window.visualViewport) window.visualViewport.addEventListener("resize", resizeCanvas);
