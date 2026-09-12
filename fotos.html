@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Álbum de fotos colaborativo do casamento de Tiago e Gian, 12 de dezembro de 2026." />
+  <title>Álbum de Fotos, Tiago e Gian</title>
+
+  <!-- Open Graph / WhatsApp preview -->
+  <meta property="og:type"         content="website" />
+  <meta property="og:title"        content="Álbum de Fotos — Tiago e Gian" />
+  <meta property="og:description"  content="Esse álbum é de todos para todos! Adicione suas fotos, borradas ou certinhas, e compartilhe esse momento com a gente." />
+  <meta property="og:image"        content="https://gianmariaparadisi.github.io/casamento/assets/img/og-cover.jpg" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url"          content="https://gianmariaparadisi.github.io/casamento/fotos.html" />
+  <meta property="og:site_name"    content="Tiago e Gian · 12.12.2026" />
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Álbum de Fotos — Tiago e Gian" />
+  <meta name="twitter:description" content="Esse álbum é de todos para todos!" />
+  <meta name="twitter:image"       content="https://gianmariaparadisi.github.io/casamento/assets/img/og-cover.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    /* ── HERO ───────────────────────────────────────────── */
+    .fot-hero {
+      position: relative;
+      padding: 130px 5% 56px;
+      text-align: center;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 50% -12%, rgba(184,123,62,.16), transparent 58%),
+        radial-gradient(ellipse at 12% 100%, rgba(122,155,110,.14), transparent 55%),
+        linear-gradient(180deg, #FBF8F2 0%, var(--bg-main) 70%);
+      border-bottom: 1px solid var(--line);
+    }
+    .fot-hero__camera {
+      width: clamp(88px, 18vw, 132px);
+      height: auto;
+      margin: 0 auto .9rem;
+      display: block;
+      filter: drop-shadow(0 8px 18px rgba(42,40,32,.16));
+      animation: fot-float 5s ease-in-out infinite;
+    }
+    @keyframes fot-float {
+      0%,100% { transform: translateY(0) rotate(-2deg); }
+      50%     { transform: translateY(-9px) rotate(2deg); }
+    }
+    @media (prefers-reduced-motion: reduce) { .fot-hero__camera { animation: none; } }
+
+    .fot-hero__eyebrow {
+      font-size: .7rem; letter-spacing: .3em; text-transform: uppercase;
+      color: var(--terracotta); font-weight: 500; margin-bottom: .7rem;
+    }
+    .fot-hero__title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 8vw, 4.6rem);
+      font-weight: 300; line-height: 1.03; letter-spacing: .02em;
+      color: var(--text-main); margin-bottom: .6rem;
+    }
+    .fot-hero__title em { font-style: italic; color: var(--terracotta); }
+    .fot-hero__sub {
+      font-size: .95rem; color: var(--text-muted); line-height: 1.85;
+      max-width: 470px; margin-inline: auto;
+    }
+
+    /* Confetes decorativos do hero */
+    .fot-confete { position: absolute; pointer-events: none; opacity: .55; width: 26px; }
+    .fot-confete--1 { top: 16%;  left: 7%;   width: 30px; transform: rotate(-18deg); }
+    .fot-confete--2 { top: 30%;  right: 9%;  width: 24px; transform: rotate(24deg); }
+    .fot-confete--3 { bottom: 16%; left: 14%; width: 22px; transform: rotate(9deg); }
+    .fot-confete--4 { bottom: 24%; right: 15%; width: 28px; transform: rotate(-12deg); }
+    .fot-confete--5 { top: 58%;  left: 3%;   width: 20px; transform: rotate(40deg); }
+    .fot-confete--6 { top: 66%;  right: 4%;  width: 20px; transform: rotate(-33deg); }
+    @media (max-width: 640px) {
+      .fot-confete--3, .fot-confete--4 { display: none; }
+      .fot-hero { padding: 106px 5% 42px; }
+    }
+
+    /* ── SEÇÕES ─────────────────────────────────────────── */
+    .fot-section { padding: 3.5rem 5%; text-align: center; }
+    .fot-section--green {
+      background: var(--bg-green);
+      border-top: 1px solid var(--line-green);
+      border-bottom: 1px solid var(--line-green);
+    }
+    .fot-section__title {
+      font-family: var(--font-display);
+      font-size: clamp(1.7rem, 4vw, 2.5rem);
+      font-weight: 300; color: var(--text-main); margin-bottom: 1.6rem;
+    }
+
+    /* ── RECADO ─────────────────────────────────────────── */
+    .fot-recado {
+      position: relative;
+      max-width: 620px; margin-inline: auto;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 2.6rem 2rem 2.2rem;
+    }
+    .fot-recado__aspas {
+      width: 54px; margin: 0 auto .8rem; display: block; opacity: .5;
+    }
+    .fot-recado__texto {
+      font-family: var(--font-display);
+      font-size: clamp(1.08rem, 2.6vw, 1.42rem);
+      font-weight: 300; font-style: italic;
+      line-height: 1.75; color: var(--text-main);
+    }
+    .fot-recado__coracao { width: 40px; margin: 1.1rem auto 0; display: block; }
+    .fot-recado__orn {
+      position: absolute; width: 62px; opacity: .75; pointer-events: none;
+    }
+    .fot-recado__orn--tl { top: -16px; left: -16px; }
+    .fot-recado__orn--br { bottom: -16px; right: -16px; transform: rotate(180deg); }
+    @media (max-width: 560px) {
+      .fot-recado { padding: 2rem 1.3rem 1.8rem; }
+      .fot-recado__orn { width: 46px; }
+      .fot-recado__orn--tl { top: -12px; left: -10px; }
+      .fot-recado__orn--br { bottom: -12px; right: -10px; }
+    }
+
+    /* ── CTA ────────────────────────────────────────────── */
+    .fot-cta-wrap { margin-top: 2.2rem; }
+    .btn--album {
+      background: var(--terracotta); color: var(--white);
+      padding: 1.05rem 2.3rem; font-size: .84rem;
+      box-shadow: 0 8px 26px rgba(184,123,62,.32);
+      display: inline-flex; align-items: center; gap: .6rem;
+    }
+    .btn--album:hover { background: var(--terracotta-hover); transform: translateY(-2px); }
+    .btn--album img { width: 1.35em; height: 1.35em; object-fit: contain; }
+    .fot-cta-nota {
+      font-size: .78rem; color: var(--text-muted);
+      margin-top: .9rem; line-height: 1.7;
+      max-width: 400px; margin-inline: auto;
+    }
+
+    /* ── PASSOS ─────────────────────────────────────────── */
+    .fot-passos {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem;
+      max-width: 880px; margin-inline: auto;
+    }
+    @media (max-width: 720px) { .fot-passos { grid-template-columns: 1fr; } }
+    .fot-passo {
+      background: var(--white); border: 1px solid var(--line-green);
+      border-radius: var(--radius-lg); padding: 1.7rem 1.3rem;
+      box-shadow: var(--shadow-green); position: relative;
+    }
+    .fot-passo__num {
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+      background: var(--sage); color: #fff; width: 27px; height: 27px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: .76rem; font-weight: 600;
+    }
+    .fot-passo__icon { width: 3.6rem; height: 3.6rem; margin: .5rem auto .7rem; object-fit: contain; }
+    .fot-passo__title { font-family: var(--font-display); font-size: 1.22rem; font-weight: 400; margin-bottom: .4rem; }
+    .fot-passo__text { font-size: .83rem; color: var(--text-muted); line-height: 1.7; }
+
+    /* ── MURAL DE POLAROIDS ─────────────────────────────── */
+    .fot-mural {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem 1.1rem;
+      max-width: 720px; margin-inline: auto;
+    }
+    @media (max-width: 560px) { .fot-mural { grid-template-columns: repeat(2, 1fr); gap: 1.2rem .9rem; } }
+
+    .pol {
+      position: relative; width: 100%; aspect-ratio: 178 / 197;
+      filter: drop-shadow(0 8px 18px rgba(42,40,32,.2));
+      transition: transform var(--transition);
+    }
+    .pol:nth-child(4n+1) { transform: rotate(-3deg); }
+    .pol:nth-child(4n+2) { transform: rotate(2.4deg); }
+    .pol:nth-child(4n+3) { transform: rotate(-1.4deg); }
+    .pol:nth-child(4n)   { transform: rotate(3deg); }
+    .pol:hover { transform: rotate(0deg) scale(1.06); z-index: 2; }
+    .pol__frame { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .pol__photo {
+      position: absolute; object-fit: cover; display: block; background: var(--bg-soft);
+    }
+    .pol__cap {
+      position: absolute; left: 9%; right: 9%;
+      font-family: var(--font-display); font-size: clamp(.7rem, 1.7vw, .86rem);
+      text-align: center; line-height: 1.2; font-style: italic;
+    }
+    /* Moldura creme */
+    .pol--creme .pol__photo { left: 11.4%; top: 12.1%; width: 76.4%; height: 62%; }
+    .pol--creme .pol__cap   { top: 75%; color: #6E6252; }
+    /* Moldura verde */
+    .pol--verde .pol__photo { left: 11.9%; top: 11.1%; width: 73.5%; height: 66%; }
+    .pol--verde .pol__cap   { top: 79.5%; color: #F2EFE6; }
+
+    /* Polaroid vazia — "sua foto aqui" */
+    .pol--vaga .pol__photo {
+      background: repeating-linear-gradient(45deg, #F6F2EA, #F6F2EA 7px, #E6DFD2 7px, #E6DFD2 14px);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pol--vaga .pol__mais {
+      font-family: var(--font-body); font-size: 1.9rem; font-weight: 300;
+      color: var(--terracotta); line-height: 1;
+      width: 2.4rem; height: 2.4rem; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,.9); border: 1.5px solid var(--terracotta);
+      padding-bottom: .18rem;
+    }
+
+    /* ── FAIXA FINAL ────────────────────────────────────── */
+    .fot-final {
+      position: relative; text-align: center;
+      padding: 3.4rem 5%;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(122,155,110,.16), transparent 65%),
+        var(--bg-green);
+      border-top: 1px solid var(--line-green);
+    }
+    .fot-final__img { width: clamp(96px, 20vw, 140px); margin: 0 auto 1rem; }
+    .fot-final__txt {
+      font-family: var(--font-display); font-size: clamp(1.25rem, 3.4vw, 1.85rem);
+      font-weight: 300; font-style: italic; color: var(--sage-dark);
+      max-width: 520px; margin: 0 auto 1.6rem; line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── NAV ───────────────────────────────────────────── -->
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo-wrap">
+        <img src="assets/img/monograma_light.png" alt="" class="site-logo site-logo--mono" aria-hidden="true">
+        <span>Tiago e Gian</span>
+      </a>
+      <nav class="nav__links" id="navLinks" aria-label="Menu principal">
+        <a href="index.html#evento" data-it="La Giornata">O Dia</a>
+        <a href="index.html#cerimonia" data-it="Luogo &amp; Info">Local & Orientações</a>
+        <a href="presentes.html" data-it="Regali">Presentes</a>
+        <div class="nav__dropdown">
+          <button class="nav__dropdown-toggle" aria-haspopup="true">
+            <span data-it="Informazioni">Informações</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav__dropdown-menu">
+            <a href="fotos.html" data-it="Album di Foto">Álbum de Fotos</a>
+            <a href="padrinhos.html" data-it="Per i Testimoni">Para os Padrinhos</a>
+            <a href="transfer.html" data-it="Transfer">Transfer</a>
+            <a href="hospedagem.html" data-it="Dove Alloggiare">Hospedagem</a>
+          </div>
+        </div>
+        <a href="jogos.html" class="nav__key" aria-label="Segredo">
+          <img src="assets/img/icon-key.png" alt="" style="width:20px;height:20px;object-fit:contain;vertical-align:middle">
+        </a>
+        <a href="index.html#rsvp" class="nav__cta" data-it="Confermare presenza">Confirmar presença</a>
+      </nav>
+      <button class="nav__hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ─── HERO ──────────────────────────────────────────── -->
+  <div class="fot-hero">
+    <img src="assets/img/confetti-piece-01.png" alt="" class="fot-confete fot-confete--1" aria-hidden="true">
+    <img src="assets/img/confetti-piece-04.png" alt="" class="fot-confete fot-confete--2" aria-hidden="true">
+    <img src="assets/img/confetti-piece-07.png" alt="" class="fot-confete fot-confete--3" aria-hidden="true">
+    <img src="assets/img/confetti-piece-10.png" alt="" class="fot-confete fot-confete--4" aria-hidden="true">
+    <img src="assets/img/confetti-piece-05.png" alt="" class="fot-confete fot-confete--5" aria-hidden="true">
+    <img src="assets/img/confetti-piece-12.png" alt="" class="fot-confete fot-confete--6" aria-hidden="true">
+
+    <img src="assets/img/icon-camera.png" alt="" class="fot-hero__camera reveal">
+    <p class="fot-hero__eyebrow reveal" data-it="12 dicembre 2026 · Fazenda Quilombo">12 de dezembro de 2026 · Fazenda Quilombo</p>
+    <h1 class="fot-hero__title reveal" data-it-html="Album di <em>Foto</em>">Álbum de <em>Fotos</em></h1>
+    <p class="fot-hero__sub reveal" data-it="Un album collaborativo: le foto di tutti, in un unico posto.">Um álbum colaborativo: as fotos de todo mundo, num lugar só.</p>
+  </div>
+
+  <!-- ─── RECADO + CTA ──────────────────────────────────── -->
+  <div class="fot-section">
+    <div class="fot-recado reveal">
+      <img src="assets/img/corner-ornament-sage.png" alt="" class="fot-recado__orn fot-recado__orn--tl" aria-hidden="true">
+      <img src="assets/img/corner-ornament-sage.png" alt="" class="fot-recado__orn fot-recado__orn--br" aria-hidden="true">
+      <img src="assets/img/frame-quote-marks.png" alt="" class="fot-recado__aspas" aria-hidden="true">
+      <p class="fot-recado__texto" data-it="Questo album è di tutti per tutti! Aggiungi tutte le foto che vuoi, mosse o perfette, ripetute o uniche, con la posa o con la smorfia: l&#39;importante è condividere questo momento con tutti!">
+        Esse álbum é de todos para todos! Adicione quaisquer fotos que quiser, borradas ou certinhas, repetidas ou únicas, com carão ou com careta, o importante é compartilhar esse momento com todos!
+      </p>
+      <img src="assets/img/icon-heart-full.png" alt="" class="fot-recado__coracao" aria-hidden="true">
+    </div>
+
+    <div class="fot-cta-wrap reveal">
+      <a href="https://photos.app.goo.gl/WMtBwsQEMckEwEg99" target="_blank" rel="noopener" class="btn btn--album btn--lg">
+        <img src="assets/img/icon-camera.png" alt="">
+        <span data-it="Apri l&#39;album">Abrir o álbum</span>
+      </a>
+      <p class="fot-cta-nota" data-it="Il link apre l&#39;album condiviso su Google Foto. Puoi guardare le foto quando vuoi e aggiungerne quante ne vuoi.">
+        O link abre o álbum compartilhado no Google Fotos. Você pode ver as fotos quando quiser e adicionar quantas quiser.
+      </p>
+    </div>
+  </div>
+
+  <div class="divider-wrap" style="padding:.25rem 0 1rem;text-align:center"><img src="assets/img/divider-terracota.png" alt="" style="max-width:280px;width:55%;display:inline-block;opacity:.6"></div>
+
+  <!-- ─── COMO FUNCIONA ─────────────────────────────────── -->
+  <div class="fot-section fot-section--green">
+    <h2 class="fot-section__title reveal" data-it="Come funziona">Como funciona</h2>
+    <div class="fot-passos">
+      <div class="fot-passo reveal">
+        <span class="fot-passo__num">1</span>
+        <img src="assets/img/icon-camera.png" alt="" class="fot-passo__icon" loading="lazy">
+        <h3 class="fot-passo__title" data-it="Apri l&#39;album">Abra o álbum</h3>
+        <p class="fot-passo__text" data-it="Un clic sul pulsante e sei dentro. Nessuna password, nessun segreto.">Um clique no botão e você já está dentro. Sem senha, sem segredo.</p>
+      </div>
+      <div class="fot-passo reveal">
+        <span class="fot-passo__num">2</span>
+        <img src="assets/img/icon-party-popper.png" alt="" class="fot-passo__icon" loading="lazy">
+        <h3 class="fot-passo__title" data-it="Aggiungi le tue foto">Adicione suas fotos</h3>
+        <p class="fot-passo__text" data-it="Quante vuoi, quando vuoi. Anche i video sono i benvenuti.">Quantas quiser, quando quiser. Vídeos também são muito bem-vindos.</p>
+      </div>
+      <div class="fot-passo reveal">
+        <span class="fot-passo__num">3</span>
+        <img src="assets/img/icon-heart-full.png" alt="" class="fot-passo__icon" loading="lazy">
+        <h3 class="fot-passo__title" data-it="Guarda quelle degli altri">Veja as de todo mundo</h3>
+        <p class="fot-passo__text" data-it="L&#39;album cresce da solo: ogni volta che torni ci sarà qualcosa di nuovo.">O álbum vai crescendo sozinho: toda vez que você voltar, vai ter coisa nova.</p>
+      </div>
+    </div>
+
+    <p class="fot-cta-nota" style="margin-top:1.8rem;max-width:540px" data-it="E non serve aspettare il 12 dicembre: se hai una foto di un momento vissuto con noi, mettila già lì. Vale tutto, dal 2015 a ieri.">
+      E não precisa esperar o dia 12 de dezembro: se você tem alguma foto de um momento que viveu com a gente, já joga lá. Vale tudo, de qualquer época.
+    </p>
+  </div>
+
+  <!-- ─── MURAL ─────────────────────────────────────────── -->
+  <div class="fot-section">
+    <div class="section-icon-wrap reveal" style="margin-bottom:.4rem"><img src="assets/img/frame-monogram.png" alt="" style="width:6.5rem;height:6.5rem;object-fit:contain;opacity:.85;display:inline-block"></div>
+    <h2 class="fot-section__title reveal" data-it="Il muro delle foto">O mural</h2>
+    <p class="fot-cta-nota reveal" style="margin:-.8rem auto 2rem;max-width:460px" data-it="Qualche nostra foto per iniziare. Il resto dipende da voi.">Algumas fotos nossas para começar. O resto depende de vocês.</p>
+
+    <div class="fot-mural">
+      <div class="pol pol--creme reveal">
+        <img src="assets/img/GT03.jpg" alt="Tiago e Gian de terno num jardim" class="pol__photo" loading="lazy">
+        <img src="assets/img/frame-polaroid-01.png" alt="" class="pol__frame" aria-hidden="true">
+        <span class="pol__cap" data-it="in giardino">no jardim</span>
+      </div>
+      <div class="pol pol--verde reveal">
+        <img src="assets/img/GT09.jpg" alt="Tiago e Gian na beira da água" class="pol__photo" loading="lazy">
+        <img src="assets/img/frame-polaroid-02.png" alt="" class="pol__frame" aria-hidden="true">
+        <span class="pol__cap" data-it="in barca">no barco</span>
+      </div>
+      <div class="pol pol--creme reveal">
+        <img src="assets/img/GT10.jpg" alt="Tiago e Gian se beijando" class="pol__photo" loading="lazy">
+        <img src="assets/img/frame-polaroid-01.png" alt="" class="pol__frame" aria-hidden="true">
+        <span class="pol__cap" data-it="un bacio">um beijo</span>
+      </div>
+      <div class="pol pol--verde reveal">
+        <img src="assets/img/GT04.jpg" alt="Tiago e Gian em Nova York" class="pol__photo" loading="lazy">
+        <img src="assets/img/frame-polaroid-02.png" alt="" class="pol__frame" aria-hidden="true">
+        <span class="pol__cap" data-it="New York">Nova York</span>
+      </div>
+      <div class="pol pol--creme reveal">
+        <img src="assets/img/GT05.jpg" alt="Tiago e Gian com um buquê" class="pol__photo" loading="lazy">
+        <img src="assets/img/frame-polaroid-01.png" alt="" class="pol__frame" aria-hidden="true">
+        <span class="pol__cap" data-it="con il bouquet">com o buquê</span>
+      </div>
+      <div class="pol pol--verde reveal">
+        <img src="assets/img/Q02.jpg" alt="Entrada da Fazenda Quilombo" class="pol__photo" loading="lazy">
+        <img src="assets/img/frame-polaroid-02.png" alt="" class="pol__frame" aria-hidden="true">
+        <span class="pol__cap" data-it="la fazenda">a fazenda</span>
+      </div>
+      <div class="pol pol--creme reveal">
+        <img src="assets/img/Q05.jpg" alt="Capela da Fazenda Quilombo" class="pol__photo" loading="lazy">
+        <img src="assets/img/frame-polaroid-01.png" alt="" class="pol__frame" aria-hidden="true">
+        <span class="pol__cap" data-it="la cappella">a capela</span>
+      </div>
+      <a href="https://photos.app.goo.gl/WMtBwsQEMckEwEg99" target="_blank" rel="noopener" class="pol pol--creme pol--vaga reveal" aria-label="Adicionar sua foto ao álbum">
+        <span class="pol__photo"><span class="pol__mais">+</span></span>
+        <img src="assets/img/frame-polaroid-01.png" alt="" class="pol__frame" aria-hidden="true">
+        <span class="pol__cap" data-it="la tua foto qui">sua foto aqui</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ─── FAIXA FINAL ───────────────────────────────────── -->
+  <div class="fot-final">
+    <img src="assets/img/hero-obrigado.png" alt="" class="fot-final__img reveal" aria-hidden="true">
+    <p class="fot-final__txt reveal" data-it="Ogni foto che aggiungi è un pezzo di questa giornata che rimane con noi.">Cada foto que você coloca é um pedacinho desse dia que fica com a gente.</p>
+    <a href="https://photos.app.goo.gl/WMtBwsQEMckEwEg99" target="_blank" rel="noopener" class="btn btn--album btn--lg reveal">
+      <img src="assets/img/icon-camera.png" alt="">
+      <span data-it="Aggiungi le mie foto">Adicionar minhas fotos</span>
+    </a>
+  </div>
+
+  <!-- ─── RODAPÉ ────────────────────────────────────────── -->
+  <div class="flourish-wrap" style="padding:1.5rem 0 0;text-align:center"><img src="assets/img/footer-flourish.png" alt="" style="max-width:440px;width:85%;display:inline-block"></div>
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__names" aria-label="Tiago e Gian">
+        <img src="assets/img/logohorizontal_light.png" alt="Tiago e Gian" class="site-logo site-logo--footer">
+      </p>
+      <p class="footer__date">12 · 12 · 2026</p>
+      <a href="mailto:casamento.tiagoegian@gmail.com" class="footer__email">casamento.tiagoegian@gmail.com</a>
+      <div class="footer__links">
+        <a href="index.html" data-it="← Home">← Início</a>
+        <a href="index.html#rsvp" data-it="Confermare presenza">Confirmar presença</a>
+        <a href="presentes.html" data-it="Regali">Presentes</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/delights.js"></script>
+</body>
+</html>

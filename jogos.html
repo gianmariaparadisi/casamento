@@ -41,6 +41,18 @@
     @media (max-width: 600px) {
       .jogos-hero__img { max-height: 260px; border-radius: 0; }
     }
+    /* ─── BOTÃO ÁLBUM DE FOTOS ───────────────────────── */
+    .jogos-album { margin: 1.6rem auto 0; padding: 0 5%; max-width: 640px; }
+    .jogos-album__btn {
+      display: inline-flex; align-items: center; gap: .6rem;
+      background: var(--terracotta); color: var(--white);
+      padding: .95rem 1.9rem; font-size: .8rem;
+      box-shadow: 0 8px 24px rgba(184,123,62,.3);
+    }
+    .jogos-album__btn:hover { background: var(--terracotta-hover); transform: translateY(-2px); }
+    .jogos-album__btn img { width: 1.4em; height: 1.4em; object-fit: contain; }
+    .jogos-album__nota { font-size: .76rem; color: var(--text-muted); margin-top: .7rem; line-height: 1.6; }
+    @media (max-width: 480px) { .jogos-album__btn { width: 100%; justify-content: center; } }
     .jogos-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-top:2.5rem;max-width:860px;margin-inline:auto;justify-items:center; }
     .jogos-grid .jogo-card { width:100%; }
     @media(max-width:480px){
@@ -135,6 +147,7 @@
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="nav__dropdown-menu">
+            <a href="fotos.html" data-it="Album di Foto">Álbum de Fotos</a>
             <a href="padrinhos.html" data-it="Per i Testimoni">Para os Padrinhos</a>
             <a href="transfer.html" data-it="Transfer">Transfer</a>
             <a href="hospedagem.html" data-it="Dove Alloggiare">Hospedagem</a>
@@ -157,6 +170,13 @@
            class="jogos-hero__img reveal"
            id="jogos-hero-img"
            style="cursor:pointer" />
+      <div class="jogos-album">
+        <a href="fotos.html" class="btn jogos-album__btn">
+          <img src="assets/img/icon-camera.png" alt="">
+          <span data-it="Album di Foto del matrimonio">Álbum de Fotos do Casamento</span>
+        </a>
+        <p class="jogos-album__nota" data-it="Di tutti per tutti: aggiungi le foto che vuoi, quando vuoi.">De todos para todos: adicione as fotos que quiser, quando quiser.</p>
+      </div>
     </div>
     <div class="container" style="padding-bottom:80px">
       <div class="jogos-grid">
