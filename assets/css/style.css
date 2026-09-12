@@ -1192,3 +1192,8 @@ canvas {
 .music-toggle__bars span:nth-child(3){height:12px;animation-delay:.3s;}
 @keyframes musicBar { 0%,100%{transform:scaleY(.4);} 50%{transform:scaleY(1);} }
 @media(max-width:480px){ .music-toggle { right:14px;bottom:14px;width:50px;height:50px; } }
+
+/* ── HERO: 4 botões na mesma linha (inclui Álbum de Fotos) ── */
+@media (min-width: 980px) {
+  .hero__actions { width: 940px; margin-left: calc((700px - 940px) / 2); }
+}
