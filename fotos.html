@@ -67,6 +67,36 @@
       max-width: 470px; margin-inline: auto;
     }
 
+    /* ── DESTAQUE DO HERO ───────────────────────────────── */
+    .fot-destaque {
+      position: relative; z-index: 1;
+      max-width: 640px; margin: 2rem auto 0;
+      padding: 1.9rem 2rem 1.7rem;
+      background: linear-gradient(150deg, rgba(255,252,246,.97), rgba(250,240,228,.94));
+      border: 1.5px solid rgba(184,123,62,.45);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 10px 34px rgba(184,123,62,.16);
+    }
+    .fot-destaque__brilho {
+      position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+      width: 46px; height: 46px; object-fit: contain;
+      filter: drop-shadow(0 3px 8px rgba(42,40,32,.14));
+    }
+    .fot-destaque__txt {
+      font-family: var(--font-display);
+      font-size: clamp(1.22rem, 3.1vw, 1.78rem);
+      font-weight: 300; line-height: 1.5;
+      color: var(--text-main);
+    }
+    .fot-destaque__txt strong {
+      font-weight: 500; color: var(--terracotta);
+      font-style: italic;
+    }
+    @media (max-width: 560px) {
+      .fot-destaque { padding: 1.7rem 1.2rem 1.4rem; margin-top: 1.7rem; }
+      .fot-destaque__brilho { width: 38px; top: -19px; }
+    }
+
     /* Confetes decorativos do hero */
     .fot-confete { position: absolute; pointer-events: none; opacity: .55; width: 26px; }
     .fot-confete--1 { top: 16%;  left: 7%;   width: 30px; transform: rotate(-18deg); }
@@ -277,6 +307,13 @@
     <p class="fot-hero__eyebrow reveal" data-it="12 dicembre 2026 · Fazenda Quilombo">12 de dezembro de 2026 · Fazenda Quilombo</p>
     <h1 class="fot-hero__title reveal" data-it-html="Album di <em>Foto</em>">Álbum de <em>Fotos</em></h1>
     <p class="fot-hero__sub reveal" data-it="Un album collaborativo: le foto di tutti, in un unico posto.">Um álbum colaborativo: as fotos de todo mundo, num lugar só.</p>
+
+    <div class="fot-destaque reveal">
+      <img src="assets/img/icon-sparkle.png" alt="" class="fot-destaque__brilho" aria-hidden="true">
+      <p class="fot-destaque__txt" data-it-html="E non serve aspettare il 12 dicembre: se hai una foto di un momento vissuto con noi, <strong>mettila già lì</strong>. Vale tutto, di qualsiasi epoca.">
+        E não precisa esperar o dia 12 de dezembro: se você tem alguma foto de um momento que viveu com a gente, <strong>já joga lá</strong>. Vale tudo, de qualquer época.
+      </p>
+    </div>
   </div>
 
   <!-- ─── RECADO + CTA ──────────────────────────────────── -->
@@ -327,10 +364,6 @@
         <p class="fot-passo__text" data-it="L&#39;album cresce da solo: ogni volta che torni ci sarà qualcosa di nuovo.">O álbum vai crescendo sozinho: toda vez que você voltar, vai ter coisa nova.</p>
       </div>
     </div>
-
-    <p class="fot-cta-nota" style="margin-top:1.8rem;max-width:540px" data-it="E non serve aspettare il 12 dicembre: se hai una foto di un momento vissuto con noi, mettila già lì. Vale tutto, dal 2015 a ieri.">
-      E não precisa esperar o dia 12 de dezembro: se você tem alguma foto de um momento que viveu com a gente, já joga lá. Vale tudo, de qualquer época.
-    </p>
   </div>
 
   <!-- ─── MURAL ─────────────────────────────────────────── -->
