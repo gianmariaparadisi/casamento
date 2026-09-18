@@ -2769,6 +2769,25 @@ function endRun(victory) {
    ══════════════════════════════════════════════════════════════════════ */
 const Aim = { dragging: false, pointerId: null, dragX: 0, dragY: 0, trajectory: [], power: 0 };
 
+/* ── Diagnóstico de toque (só liga com ?debug=1 na URL) ─────────────────────
+   Serve pra depurar no celular de verdade: mostra, ao vivo, quais eventos de
+   toque chegam e o que o jogo fez com cada um. Sem ?debug=1 não custa nada. */
+const DBG_ON = /[?&]debug=1/.test(location.search);
+let dbgBox = null, dbgLines = [], dbgN = 0;
+function dbg(msg) {
+  if (!DBG_ON) return;
+  if (!dbgBox) {
+    dbgBox = document.createElement("div");
+    dbgBox.setAttribute("style", "position:fixed;top:4px;left:4px;z-index:9999;max-width:70vw;" +
+      "background:rgba(0,0,0,.72);color:#9f6;font:10px/1.35 ui-monospace,Menlo,monospace;" +
+      "padding:6px 8px;border-radius:8px;pointer-events:none;white-space:pre;");
+    document.body.appendChild(dbgBox);
+  }
+  dbgLines.push((++dbgN) + " " + msg);
+  if (dbgLines.length > 14) dbgLines.shift();
+  dbgBox.textContent = dbgLines.join("\n");
+}
+
 function screenToWorld(clientX, clientY) {
   const rect = canvas.getBoundingClientRect();
   const sx = (clientX - rect.left) * (CFG.VIEW_W / rect.width);
@@ -2790,13 +2809,28 @@ function pointFromEvent(e) {
 
 function onPointerDown(e) {
   if (Game.screen !== "playing") return;
+  /* Já tem um dedo mirando? Toque extra NÃO entra. Segurando o celular
+     deitado, ao puxar bem pra esquerda o polegar da mão que segura encosta
+     perto da borda — esse segundo toque roubava a mira (Aim.pointerId passava
+     a ser o do polegar e a mira pulava pra posição dele). Aí levantar o dedo
+     que puxava não arremessava nada: o pointerup vinha com o id "errado" e a
+     puxada virava um tiro fraco ou tiro nenhum. */
+  if (Aim.dragging) {
+    dbg("down id=" + e.pointerId + " IGNORADO (ja tem dedo mirando)");
+    if (e.preventDefault) e.preventDefault();
+    return;
+  }
   const body = Game.currentProjectile;
   if (!body || !body.isStatic) return;
   const p = pointFromEvent(e);
   const world = screenToWorld(p.clientX, p.clientY);
   const anchor = slingAnchor();
   // Área de pega generosa: em celular, mirar não pode exigir precisão de pixel.
-  if (dist(world.x, world.y, anchor.x, anchor.y) > CFG.SLING_MAX_DRAG * 2.4) return;
+  if (dist(world.x, world.y, anchor.x, anchor.y) > CFG.SLING_MAX_DRAG * 2.4) {
+    dbg("down id=" + e.pointerId + " IGNORADO (longe do estilingue)");
+    return;
+  }
+  dbg("down id=" + e.pointerId + " tipo=" + (e.pointerType || "?") + " -> mirando");
   Aim.dragging = true;
   Aim.pointerId = e.pointerId !== undefined ? e.pointerId : "touch";
   // Captura o ponteiro: garante que pointermove/pointerup continuem chegando
@@ -2828,6 +2862,7 @@ function releaseAimPointer(e) {
    pro estilingue e o jogador tenta de novo. */
 function cancelAim(e) {
   if (!Aim.dragging || !aimPointerMatches(e)) return;
+  dbg("mira CANCELADA (" + ((e && e.type) || "?") + ") sem arremessar");
   Aim.dragging = false;
   Aim.trajectory = [];
   Aim.power = 0;
@@ -2870,7 +2905,8 @@ function updateAimFromWorld(world) {
 }
 
 function onPointerUp(e) {
-  if (!Aim.dragging || !aimPointerMatches(e)) return;
+  if (!Aim.dragging) { if (e && e.type === "pointerup") dbg("up id=" + e.pointerId + " (nao estava mirando)"); return; }
+  if (!aimPointerMatches(e)) { dbg((e && e.type) + " id=" + e.pointerId + " IGNORADO (id != " + Aim.pointerId + ")"); return; }
   Aim.dragging = false;
   releaseAimPointer(e);
   const anchor = slingAnchor();
@@ -2880,8 +2916,11 @@ function onPointerUp(e) {
   Aim.power = 0;
   Aim._finalV = null;
   if (pulled && finalV && Game.currentProjectile) {
+    dbg(((e && e.type) || "?") + " -> ARREMESSOU  v=" + Math.round(Math.hypot(finalV.x, finalV.y)));
     launchProjectile(finalV.x, finalV.y);
   } else if (Game.currentProjectile) {
+    dbg(((e && e.type) || "?") + " -> NAO arremessou (puxada=" +
+        Math.round(Math.hypot(anchor.x - Aim.dragX, anchor.y - Aim.dragY)) + "px, minimo 10)");
     Body.setPosition(Game.currentProjectile, anchor);
   }
 }
