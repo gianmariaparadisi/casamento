@@ -3800,8 +3800,18 @@ function bindEvents() {
   canvas.addEventListener("pointerdown", onPointerDown);
   window.addEventListener("pointermove", onPointerMove);
   window.addEventListener("pointerup", onPointerUp);
-  // pointercancel NÃO arremessa: o gesto foi roubado, seria um tiro fantasma.
-  window.addEventListener("pointercancel", cancelAim);
+  // pointercancel ARREMESSA. No celular, puxar o dedo pra fora da tela (borda,
+  // gesto do sistema, barra de notificação) termina o toque com cancel, não com
+  // pointerup — tratar isso como desistência fazia o jogo simplesmente não
+  // arremessar. onPointerUp já devolve a cabecinha pro estilingue quando a
+  // puxada foi curta demais, então nada de tiro fantasma num toque parado.
+  window.addEventListener("pointercancel", onPointerUp);
+  // Backstop pra navegador que entrega touch mas engole o pointer event.
+  // onPointerUp sai fora se não estiver mirando, então repetição é inofensiva.
+  window.addEventListener("touchend", onPointerUp);
+  window.addEventListener("touchcancel", onPointerUp);
+  // Sair da aba/janela no meio da mira NÃO arremessa: aí o jogador saiu mesmo,
+  // e gastar um arremesso com ele longe da tela seria pior.
   window.addEventListener("blur", cancelAim);
   document.addEventListener("visibilitychange", function () { if (document.hidden) cancelAim(); });
   window.addEventListener("resize", resizeCanvas);
