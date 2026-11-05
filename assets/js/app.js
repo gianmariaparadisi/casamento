@@ -7,7 +7,7 @@
 const API_URL       = "https://script.google.com/macros/s/AKfycbyM4Z8xwYYEDRLaofBISOQJKKsn_tCeUuIl1wbLlQRmfjnK5E2DE94tv7HTAQvfwXQ7kg/exec";
 const EMAIL_CONTATO = "casamento.tiagoegian@gmail.com";
 const DATA_LIMITE_ALTERACAO = "12 de agosto de 2026";
-const DATA_CASAMENTO = new Date("2026-12-12T16:30:00-03:00");
+const DATA_CASAMENTO = new Date("2026-12-12T17:00:00-03:00");
 
 /* ── PIX POR PRESENTE ─────────────────────────────────────── */
 const PIX_MAP = {
