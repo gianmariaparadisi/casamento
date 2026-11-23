@@ -156,6 +156,7 @@
       <div class="tour__step"></div>
       <div class="tour__step"></div>
       <div class="tour__step"></div>
+      <div class="tour__step"></div>
     </div>
   </section>
 
@@ -1722,7 +1723,7 @@
         .replace('#include <normal_fragment_begin>', '#include <normal_fragment_begin>\n  normal = normalize(vNormal);');
     };
     const gCols = ['#6E9B3F', '#7FA84A', '#8DB255', '#5E8A36', '#9BB65C', '#A7B463'].map(c => new THREE.Color(c));
-    const field = (polyPx, toWorld, area) => {
+    const field = (polyPx, toWorld, area, hm = 1) => {
       const n = Math.round(area * density), xs = polyPx.map(p => p[0]), ys = polyPx.map(p => p[1]);
       const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
       const im = new THREE.InstancedMesh(blade, grassMat, n), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), col = new THREE.Color();
@@ -1730,7 +1731,7 @@
       while (k < n && guard++ < n * 4) {
         const x = rr(x0, x1), y = rr(y0, y1); if (!inPoly(x, y, polyPx)) continue;
         const v = toWorld(x, y); e.set(rr(-.25, .25), rnd() * 6.3, rr(-.25, .25)); q.setFromEuler(e);
-        const h = rr(.35, .75); m4.compose(v, q, V3(rr(1.2, 1.8), h, 1)); im.setMatrixAt(k, m4);
+        const h = rr(.35, .75) * hm; m4.compose(v, q, V3(rr(1.2, 1.8), h, 1)); im.setMatrixAt(k, m4);
         im.setColorAt(k, col.copy(pal(gCols, rnd())).multiplyScalar(rr(.85, 1.1))); k++;
       }
       im.count = k; im.receiveShadow = true; im.frustumCulled = true; im.computeBoundingSphere(); scene.add(im);
@@ -1746,7 +1747,7 @@
       [[600, 1112], [733, 1112], [742, 1280], [600, 1280]],
       [[766, 1112], [900, 1150], [905, 1280], [776, 1280]],
     ];
-    satLawns.forEach(pl => field(pl, (x, y) => P(x, y, .02), pxArea(pl) * S * S));
+    satLawns.forEach((pl, i) => field(pl, (x, y) => P(x, y, .02), pxArea(pl) * S * S, i === 0 ? .4 : 1));   // gramado da cerimônia: cortado baixinho
     const court = [[257, 377], [480, 377], [480, 455], [435, 455], [435, 527], [257, 527]];
     field(court, (x, y) => FW(x, y, .07), pxArea(court) * KF * KF);
   }
@@ -1846,7 +1847,7 @@
       for (let row = 0; row < 10; row += 2) for (const s of [-1, 1]) { const b0 = at(s * 1.65, 0, -(7 + row * 1.75), A);
         ab.add(M_BRASS, new THREE.CylinderGeometry(.03, .05, 1.1, 8), b0.x, .55, b0.z); cluster(V3(b0.x, 1.3, b0.z), 34, .38, .1, .2); }
       ab.build(ag);
-      const fm = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), std({ roughness: .75 }), fl.length);
+      const fm = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.85, 2), std({ roughness: .75 }), fl.length);
       fl.forEach(([v, s, c], i) => { mm.compose(v, new THREE.Quaternion().setFromEuler(new THREE.Euler(rnd() * 3, rnd() * 3, 0)), V3(s, s, s)); fm.setMatrixAt(i, mm); fm.setColorAt(i, pc.set(c)); });
       fm.castShadow = true; ag.add(fm); scene.add(ag); cariGroup(ag, 1.1, 35, 420, AC);
       // convidados de pé atrás e nas laterais
@@ -2251,22 +2252,23 @@
     { tgt: V3(farm.x + 1500, 0, farm.z + 600), cam: V3(farm.x + 9000, 1300, farm.z + 5200), hour: 16.5, fog: [9000, 40000], tilt: .4, fov: 44, pins: [['limeira', CITY_W.clone().setY(80)], ['fazenda', farm.clone().setY(60)]] },
     { tgt: P(700, 500), cam: P(760, 1700, 95), hour: 16.6, fog: [1500, 14000], tilt: .6, fov: 50, pins: [['fazenda2', P(800, 760, 30)]] },
     { tgt: P(745, 1084, 7), cam: P(757, 1222, 4.6), hour: 16.75, fog: [650, 2600], tilt: .9, fov: 46, pins: [['portal', P(745, 1093, 13.5)]] },
-    { tgt: P(880, 925, 1), off: [80, 52, 60], hour: 16.9, fog: [650, 2600], tilt: 1, pins: [['terreiro', P(900, 925, 4)]] },
+    { tgt: P(800, 1045, 2), cam: P(1005, 715, 34), hour: 16.9, fog: [900, 6000], tilt: .9, fov: 50, pins: [] },
+    { tgt: P(560, 455, 1), cam: P(452, 212, 27), hour: 17.05, clock: 17.1, fog: [900, 6000], tilt: .9, fov: 48, pins: [] },
     { tgt: CER_AT(0, 3.2, 3), cam: CER_AT(0, 4.6, -37), hour: 18.72, clock: 17.25, fog: [650, 2600], tilt: 1.2, fov: 50, pins: [['cerimonia', P(598, 478, 12)]] },
-    { tgt: FW(430, 1105, 2), off: [-26, 16, 28], hour: 18.8, clock: 17.9, fog: [650, 2600], tilt: 1.1, pins: [['entradaFesta', FW(430, 1112, 6)], ['wc', FW(757, 1030, 6)]] },
-    { tgt: FW(300, 485, 5), cam: FW(600, 170, 27), hour: 18.92, fog: [700, 2800], tilt: 1, fov: 46, pins: [['patio', FW(345, 462, 15)]] },
-    { tgt: FW(450, 715, 0), off: [8, 36, 30], hour: 19.5, roof: 0, fog: [650, 2600], tilt: .8, pins: [['bar', FW(475, 712, 3.4)], ['pista', FW(655, 710, 1.6)], ['mesas', FW(300, 568, 1.6)]] },
+    { tgt: FW(430, 1095, 2.6), cam: FW(485, 1215, 2.4), hour: 18.8, clock: 17.9, fog: [650, 2600], tilt: 1.1, fov: 52, pins: [] },
+    { tgt: FW(380, 520, 3), cam: FW(610, 355, 3.8), hour: 18.95, fog: [650, 2600], tilt: 1.2, fov: 54, pins: [] },
+    { tgt: FW(520, 790, .5), cam: FW(150, 640, 5.6), hour: 19.6, roof: 0, fov: 52, fog: [650, 2600], tilt: .8, pins: [] },
     { tgt: FW(215, 705, 1), off: [7, 12, 16], hour: 20.0, roof: 0, fog: [650, 2600], tilt: 1.3, pins: [['bolo', FW(92, 707, 3.4)], ['lounge', FW(300, 712, 2.8)]] },
     { tgt: FW(772, 705, 2.4), cam: FW(572, 712, 6.6), hour: 21.2, roof: 0, fog: [650, 2600], tilt: 1.3, fov: 48, pins: [['pistaN', FW(700, 705, 4.6)]] },
-    { tgt: FW(520, 1030, 1), off: [5, 19, 15], hour: 21.6, roof: 0, fog: [650, 2600], tilt: 1.1, pins: [['hall', FW(390, 1020, 3.8)], ['wc2', FW(757, 1028, 3.8)]] },
-    { tgt: FW(660, 1010, 0), cam: FW(660, 835, 13), hour: 21.4, roof: 0, fog: [650, 2600], tilt: 1.1, fov: 46, pins: [] },
+    { tgt: FW(690, 945, 2.3), cam: FW(560, 790, 2.7), hour: 21.7, roof: 0, fog: [650, 2600], tilt: 1.1, fov: 46, pins: [] },
+    { tgt: P(760, 880, 0), cam: P(905, 135, 78), hour: 21.9, fog: [1500, 9000], tilt: .8, fov: 50, pins: [] },
     { tgt: FW(560, 640, 4), cam: add(FW(460, 720), -230, 42, 270), hour: 22.2, roof: 0, fog: [1500, 9000], tilt: .7, pins: [['final', farm.clone().setY(40)]] },
   ];
   K.forEach(k => { k.cam = k.cam || add(k.tgt, ...k.off); k.roof = k.roof ?? 1; k.fov = k.fov || 40; });
   const camCurve = new THREE.CatmullRomCurve3(K.map(k => k.cam), false, 'centripetal');
   const tgtCurve = new THREE.CatmullRomCurve3(K.map(k => k.tgt), false, 'centripetal');
 
-  const TITLES = { 2: T('Entrada', 'Ingresso'), 3: T('Estacionamento', 'Parcheggio'), 4: T('Cerimônia · 17h15', 'Cerimonia · 17:15'), 7: T('Festa · 18h', 'Festa · 18:00'), 11: T('Banheiros', 'Bagni') };
+  const TITLES = { 2: T('Entrada', 'Ingresso'), 3: T('Estacionamento', 'Parcheggio'), 5: T('Cerimônia · 17h15', 'Cerimonia · 17:15'), 8: T('Festa · 18h', 'Festa · 18:00'), 11: T('Banheiros', 'Bagni') };
   const titleEl = document.getElementById('tourTitle'), cueEl = document.getElementById('tourCue');
   cueEl.querySelector('span').textContent = matchMedia('(pointer: coarse)').matches ? T('Deslize para continuar', 'Scorri per continuare') : T('Role para continuar', 'Scorri per continuare');
   let titleShown = null;
@@ -2396,7 +2398,7 @@
   new IntersectionObserver(([en]) => { visible = en.isIntersecting; }).observe(stage);
   const tmpV = V3(), camPos = V3(), camTgt = V3(), proj = V3();
   // rolagem → movimento percebido constante (deslocamento relativo à distância do alvo + giro), com pausa curta em cada lugar
-  const HOLD = .55, SAMP = 48, marks = []; let costTotal = 0;
+  const HOLD = .3, SAMP = 48, marks = []; let costTotal = 0;
   {
     const c0 = V3(), t0 = V3(), c1 = V3(), t1 = V3(), d0 = V3(), d1 = V3();
     for (let i = 0; i < K.length; i++) {
