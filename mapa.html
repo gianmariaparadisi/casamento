@@ -38,7 +38,7 @@
     body { background: #EFE6D6; }
     .tour { position: relative; }
     .tour__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: linear-gradient(180deg, #BFD3DF, #F0E2C8); z-index: 0; user-select: none; -webkit-user-select: none; }
-    .tour__stage canvas { display: block; width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; outline: none; touch-action: auto; }
+    .tour__stage canvas { display: block; width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; outline: none; touch-action: pan-y; }
     .map-labels { position: absolute; inset: 0; pointer-events: none; }
     .tour__steps { position: relative; z-index: 2; margin-top: -100vh; margin-top: -100svh; pointer-events: none; }
     .tour__step { min-height: 110vh; }
@@ -2028,9 +2028,10 @@
   controls.minPolarAngle = .12; controls.maxPolarAngle = 1.38; controls.minDistance = 6; controls.maxDistance = 900;
   controls.screenSpacePanning = false; controls.zoomToCursor = true; controls.rotateSpeed = .7;
   controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
+  renderer.domElement.style.touchAction = 'pan-y';   // no passeio, o toque rola a página
   const freeBtn = document.getElementById('freeBtn'), freeTime = document.getElementById('freeTime');
   function setFree(on) {
-    free = on; document.body.classList.toggle('tour-free', on); controls.enabled = on;
+    free = on; document.body.classList.toggle('tour-free', on); controls.enabled = on; renderer.domElement.style.touchAction = on ? 'none' : 'pan-y';
     if (on) { controls.target.copy(K[1].tgt); camera.position.copy(K[1].cam); curHour = -1; setTime(+freeTime.value); fadeTarget = 1; titleEl.style.opacity = 0; }
     resize();
   }
