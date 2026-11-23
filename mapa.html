@@ -799,9 +799,9 @@
 
   // junta muitas peças pequenas por material (poucas chamadas de desenho)
   class Batch {
-    constructor() { this.m = new Map(); }
+    constructor() { this.m = new Map(); this.s = 1; }
     add(mat, geo, x = 0, y = 0, z = 0, ry = 0, rx = 0, rz = 0, sx = 1, sy = 1, sz = 1) {
-      const m4 = new THREE.Matrix4().compose(V3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz, 'YXZ')), V3(sx, sy, sz));
+      const m4 = new THREE.Matrix4().compose(V3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz, 'YXZ')), V3(sx * this.s, sy * this.s, sz * this.s));
       const g = (geo.index ? geo.toNonIndexed() : geo.clone()).applyMatrix4(m4);
       for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'uv'].includes(k)) g.deleteAttribute(k);
       if (!g.attributes.uv) g.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count * 2), 2));
@@ -971,8 +971,8 @@
         car.add(shadowy(new THREE.Mesh(body, pm))); car.children[0].position.y = .62;
         const cab = shadowy(new THREE.Mesh(cabin, M.glass)); cab.position.set(0, 1.18, -.2); car.add(cab);
         const roof = shadowy(new THREE.Mesh(new RoundedBoxGeometry(1.5, .1, 1.9, 2, .05), pm)); roof.position.set(0, 1.5, -.25); car.add(roof);
-        for (const sx of [-.82, .82]) for (const sz of [-1.35, 1.35]) cb.add(M.dark, wheel, pos.x + Math.cos(ry) * sx + Math.sin(ry) * sz, .33, pos.z - Math.sin(ry) * sx + Math.cos(ry) * sz, ry);
-        car.position.copy(pos); car.rotation.y = ry; scene.add(car);
+        for (const sx of [-.82, .82]) for (const sz of [-1.35, 1.35]) cb.add(M.dark, wheel, pos.x + (Math.cos(ry) * sx + Math.sin(ry) * sz) * 1.8, .33 * 1.8, pos.z + (-Math.sin(ry) * sx + Math.cos(ry) * sz) * 1.8, ry, 0, 0, 1.8, 1.8, 1.8);
+        car.position.copy(pos); car.rotation.y = ry; car.scale.setScalar(1.8); scene.add(car);
       }
     }
     cb.build(scene);
@@ -1202,9 +1202,10 @@
   const M_GREEN = std({ color: 0x4E6B47, roughness: .95 }), M_TERRA = std({ color: 0xB0603D, roughness: .9 }), M_BOUCLE = std({ color: 0xEDE8DE, roughness: 1 });
   const M_BRASS = std({ color: 0xC7A15C, metalness: 1, roughness: .3 }), M_RATTAN = std({ color: 0xD6BC8A, roughness: .8 }), M_GLASSTOP = new THREE.MeshPhysicalMaterial({ color: 0xD8E4E2, roughness: .05, transparent: true, opacity: .45, envMapIntensity: 1.5 });
   const M_POT = std({ color: 0x5A3B2C, roughness: .7, metalness: .2 }), M_CAKE = std({ color: 0xFBF7F0, roughness: .6 }), M_DANCE = new THREE.MeshPhysicalMaterial({ color: 0xF4F1EC, roughness: .12, clearcoat: 1, clearcoatRoughness: .05 });
-  const fur = new Batch();
+  const FS = 1.35;   // móveis um pouco maiores: efeito maquete
+  const fur = new Batch(); fur.s = FS;
   const inst = new Map();   // peças repetidas → InstancedMesh
-  const addInst = (key, parts, x, y, z, ry) => { if (!inst.has(key)) inst.set(key, { parts, mats: [] }); inst.get(key).mats.push(new THREE.Matrix4().compose(V3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, ry, 0)), V3(1, 1, 1))); };
+  const addInst = (key, parts, x, y, z, ry) => { if (!inst.has(key)) inst.set(key, { parts, mats: [] }); inst.get(key).mats.push(new THREE.Matrix4().compose(V3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, ry, 0)), V3(FS, FS, FS))); };
   const geo = (...list) => mergeGeometries(list.map(g => { const n = g.index ? g.toNonIndexed() : g; for (const k of Object.keys(n.attributes)) if (!['position', 'normal', 'uv'].includes(k)) n.deleteAttribute(k); return n; }));
   const B = (w, h, d, x = 0, y = 0, z = 0, tile = TILE.wood) => boxGeo(w, h, d, tile).translate(x, y, z);
   const C = (r1, r2, h, x = 0, y = 0, z = 0, seg = 10) => new THREE.CylinderGeometry(r1, r2, h, seg).translate(x, y, z);
@@ -1220,18 +1221,18 @@
   // mesas de madeira aparente
   const roundTable = (cx, cy, n = 10, r = .9) => { const p = F(cx, cy); fur.add(M.wood, C(r, r, .045, 0, 0, 0, 32), p.x, FL + .745, p.z);
     fur.add(M.wood, B(r * 1.1, .6, .07), p.x, FL + .4, p.z, .7); fur.add(M.wood, B(r * 1.1, .6, .07), p.x, FL + .4, p.z, -.85);
-    for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; chair(p.x + Math.cos(a) * (r + .38), p.z + Math.sin(a) * (r + .38), p.x, p.z); }
+    for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; chair(p.x + Math.cos(a) * (r + .38) * FS, p.z + Math.sin(a) * (r + .38) * FS, p.x, p.z); }
     centerpiece(p.x, p.z); };
   const squareTable = (cx, cy) => { const p = F(cx, cy), s = .78; fur.add(M.wood, B(s * 2, .045, s * 2), p.x, FL + .745, p.z);
     fur.add(M.wood, B(1.3, .6, .07), p.x, FL + .4, p.z, .785); fur.add(M.wood, B(1.3, .6, .07), p.x, FL + .4, p.z, -.785);
-    for (const [ux, uz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) for (const o of [-.38, .38]) { const x = p.x + ux * (s + .32) + uz * o, z = p.z + uz * (s + .32) + ux * o; chair(x, z, p.x + uz * o, p.z + ux * o); }
+    for (const [ux, uz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) for (const o of [-.38, .38]) { const x = p.x + (ux * (s + .32) + uz * o) * FS, z = p.z + (uz * (s + .32) + ux * o) * FS; chair(x, z, p.x + uz * o * FS, p.z + ux * o * FS); }
     centerpiece(p.x, p.z); };
   const rectTable = (cx, cy, vertical) => { const p = F(cx, cy), L = 2.4, Wd = 1.0, ry = vertical ? Math.PI / 2 : 0;
     fur.add(M.wood, B(L, .045, Wd), p.x, FL + .745, p.z, ry);
-    for (const s of [-1, 1]) { const ox = s * .8; fur.add(M.wood, B(.07, .7, .8), p.x + (vertical ? 0 : ox), FL + .37, p.z + (vertical ? -ox : 0), ry); }
+    for (const s of [-1, 1]) { const ox = s * .8 * FS; fur.add(M.wood, B(.07, .7, .8), p.x + (vertical ? 0 : ox), FL + .37, p.z + (vertical ? -ox : 0), ry); }
     const ax = vertical ? [0, -1] : [1, 0], nx = vertical ? [1, 0] : [0, 1];
-    for (const t of [-.78, 0, .78]) for (const s of [-1, 1]) { const x = p.x + ax[0] * t + nx[0] * s * .82, z = p.z + ax[1] * t + nx[1] * s * .82; chair(x, z, p.x + ax[0] * t, p.z + ax[1] * t); }
-    for (const s of [-1, 1]) chair(p.x + ax[0] * s * 1.55, p.z + ax[1] * s * 1.55, p.x, p.z);
+    for (const t of [-.78, 0, .78]) for (const s of [-1, 1]) { const x = p.x + (ax[0] * t + nx[0] * s * .82) * FS, z = p.z + (ax[1] * t + nx[1] * s * .82) * FS; chair(x, z, p.x + ax[0] * t * FS, p.z + ax[1] * t * FS); }
+    for (const s of [-1, 1]) chair(p.x + ax[0] * s * 1.55 * FS, p.z + ax[1] * s * 1.55 * FS, p.x, p.z);
     centerpiece(p.x, p.z); };
   const flowers = [];
   function centerpiece(x, z) {
@@ -1249,20 +1250,20 @@
   const stool = (key, x, z, tx, tz) => addInst(key, key === 'stoolR' ? [[stoolWood, M.wood], [stoolSeat, M.cushion], [stoolBack, M_RATTAN]] : [[stoolWood, M.wood], [stoolSeat, M_BOUCLE], [stoolBack, M_BOUCLE]], x, FL, z, Math.atan2(tx - x, tz - z));
   const bistro = (cx, cy) => { const p = F(cx, cy); fur.add(M.wood, C(.36, .36, .035, 0, 0, 0, 24), p.x, FL + 1.06, p.z); fur.add(M.wood, C(.03, .03, 1.04, 0, 0, 0, 8), p.x, FL + .53, p.z);
     fur.add(M.wood, B(.7, .04, .06), p.x, FL + .03, p.z, .785); fur.add(M.wood, B(.7, .04, .06), p.x, FL + .03, p.z, -.785);
-    for (let i = 0; i < 3; i++) { const a = i / 3 * Math.PI * 2 + .5; stool('stoolW', p.x + Math.cos(a) * .62, p.z + Math.sin(a) * .62, p.x, p.z); } };
+    for (let i = 0; i < 3; i++) { const a = i / 3 * Math.PI * 2 + .5; stool('stoolW', p.x + Math.cos(a) * .62 * FS, p.z + Math.sin(a) * .62 * FS, p.x, p.z); } };
   [[550, 528], [605, 528], [661, 528], [522, 890], [587, 890], [655, 890]].forEach(p => bistro(...p));
   const communal = (cx, cy) => { const p = F(cx, cy); fur.add(M.wood, B(.65, .04, 2.1), p.x, FL + 1.06, p.z);
-    for (const s of [-1, 1]) fur.add(M.wood, B(.6, 1.04, .05), p.x, FL + .52, p.z + s * .95);
-    for (const s of [-1, 1]) for (const t of [-.72, -.24, .24, .72]) stool('stoolR', p.x + s * .55, p.z + t, p.x, p.z + t); };
+    for (const s of [-1, 1]) fur.add(M.wood, B(.6, 1.04, .05), p.x, FL + .52, p.z + s * .95 * FS);
+    for (const s of [-1, 1]) for (const t of [-.72, -.24, .24, .72]) stool('stoolR', p.x + s * .55 * FS, p.z + t * FS, p.x, p.z + t * FS); };
   [[724, 540], [787, 540], [720, 872], [782, 872], [527, 595]].forEach(p => communal(...p));
 
   // lounges
   const sofaW = (x, z, ry, mods, mat = M_BOUCLE) => { const W = .9 * mods;
-    const g = new THREE.Group(); g.position.set(x, FL, z); g.rotation.y = ry;
+    const g = new THREE.Group(); g.position.set(x, FL, z); g.rotation.y = ry; g.scale.setScalar(FS);
     const sb = new Batch(); sb.add(mat, new RoundedBoxGeometry(W, .42, .9, 2, .08), 0, .21, 0); sb.add(mat, new RoundedBoxGeometry(W, .45, .22, 2, .08), 0, .6, -.34);
     for (let i = 0; i < mods; i++) sb.add(mat, new RoundedBoxGeometry(.5, .4, .14, 2, .06), -W / 2 + .45 + i * .9, .62, -.18, 0, -.2);
     sb.build(g); festa.add(g); };
-  const armchair = (x, z, tx, tz, mat) => { const g = new THREE.Group(); g.position.set(x, FL, z); g.rotation.y = Math.atan2(tx - x, tz - z);
+  const armchair = (x, z, tx, tz, mat) => { const g = new THREE.Group(); g.position.set(x, FL, z); g.rotation.y = Math.atan2(tx - x, tz - z); g.scale.setScalar(FS);
     const ab = new Batch(); for (const s of [-1, 1]) ab.add(M.wood, B(.07, .62, .8, s * .38, .31, 0));
     ab.add(mat, new RoundedBoxGeometry(.7, .2, .72, 2, .06), 0, .36, .02); ab.add(mat, new RoundedBoxGeometry(.7, .42, .16, 2, .06), 0, .62, -.3, 0, -.12);
     ab.build(g); festa.add(g); };
@@ -1452,11 +1453,11 @@
     const big = FW(345, 462);
     list.push({ x: big.x, z: big.z, y: 0, r: 0, th: 7.5, trunk: 3.2 });
     for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283 + rr(-.2, .2), d = i ? rr(2.5, 4.2) : 0; list.push({ x: big.x + Math.cos(a) * d, z: big.z + Math.sin(a) * d, y: i ? rr(8.5, 11) : 12.5, r: rr(4, 5.2), th: 0, trunk: 0 }); }
-    potTrees.forEach(p => { const w = festa.localToWorld(p.clone()); list.push({ x: w.x, z: w.z, y: FL + 2.3, r: rr(.85, 1.05), th: 0, trunk: 0 }); });
+    potTrees.forEach(p => { const w = festa.localToWorld(p.clone()); list.push({ x: w.x, z: w.z, y: FL + 2.6, r: rr(1.15, 1.4), th: 0, trunk: 0 }); });
     // buganvílias (como no vídeo) ao redor do gramado da cerimônia, na entrada e na casa amarela
     const bushPts = [[572, 318], [566, 350], [560, 390], [552, 430], [545, 470], [538, 505], [470, 300], [430, 305], [400, 330], [398, 420], [405, 480], [450, 512],
       [712, 1078], [776, 1086], [700, 1060], [792, 1092], [890, 470], [995, 540], [655, 545], [770, 560], [880, 600]];
-    bushPts.forEach(([x, y]) => { const v = P(x + rr(-3, 3), y + rr(-3, 3)), r = rr(1.3, 2.1); list.push({ x: v.x, z: v.z, y: r * .7, r, th: 0, trunk: 0, kind: 'b', bush: true }); });
+    bushPts.forEach(([x, y]) => { const v = P(x + rr(-3, 3), y + rr(-3, 3)), r = rr(1.9, 2.9); list.push({ x: v.x, z: v.z, y: r * .7, r, th: 0, trunk: 0, kind: 'b', bush: true }); });
 
     const variants = [0, 1, 2].map(() => crownGeo());
     const coreGeo = new THREE.IcosahedronGeometry(.45, 1);
@@ -1550,7 +1551,7 @@
       while (k < n && guard++ < n * 4) {
         const x = rr(x0, x1), y = rr(y0, y1); if (!inPoly(x, y, polyPx)) continue;
         const v = toWorld(x, y); e.set(rr(-.25, .25), rnd() * 6.3, rr(-.25, .25)); q.setFromEuler(e);
-        const h = rr(.22, .5); m4.compose(v, q, V3(rr(.8, 1.3), h, 1)); im.setMatrixAt(k, m4);
+        const h = rr(.35, .75); m4.compose(v, q, V3(rr(1.2, 1.8), h, 1)); im.setMatrixAt(k, m4);
         im.setColorAt(k, col.copy(pal(gCols, rnd())).multiplyScalar(rr(.85, 1.1))); k++;
       }
       im.count = k; im.receiveShadow = true; im.frustumCulled = true; im.computeBoundingSphere(); scene.add(im);
@@ -1605,8 +1606,8 @@
       return out;
     };
     // fim de tarde: convidados no gramado da cerimônia e na frente da casa de máquinas
-    crowd([...clusterIn([[420, 330], [580, 320], [555, 500], [425, 490]], (x, y) => P(x, y), 20, 3, 6),
-           ...clusterIn([[640, 545], [800, 565], [790, 590], [640, 575]], (x, y) => P(x, y), 5, 2, 4)], (h) => h < 18.15);
+    crowd([...clusterIn([[420, 330], [580, 320], [555, 500], [425, 490]], (x, y) => P(x, y), 30, 3, 7),
+           ...clusterIn([[640, 545], [800, 565], [790, 590], [640, 575]], (x, y) => P(x, y), 8, 2, 5)], (h) => h < 18.15);
     // festa: grupos no pátio, terraço, bar, bistrôs + gente sentada nas mesas
     const fx = (x, y) => FW(x, y);
     crowd([...clusterIn([[280, 395], [460, 395], [460, 440], [280, 520]], fx, 5, 3, 5, .07),
@@ -1623,7 +1624,7 @@
     life.dance = crowd(dancers, (h) => h >= 19.8);
     // chegada: gente caminhando do estacionamento até a cerimônia
     const walkPath = new THREE.CatmullRomCurve3([P(880, 900), P(835, 760), P(845, 625), P(800, 585), P(700, 565), P(640, 545)].map(v => v.setY(.1)));
-    const walkers = []; for (let i = 0; i < 14; i++) walkers.push({ x: 0, z: 0, ry: 0, t: i / 14 + rr(0, .03), off: rr(-1.2, 1.2) });
+    const walkers = []; for (let i = 0; i < 24; i++) walkers.push({ x: 0, z: 0, ry: 0, t: i / 14 + rr(0, .03), off: rr(-1.2, 1.2) });
     life.walk = crowd(walkers, (h) => h < 18.15); life.walkPath = walkPath;
   }
   function lifeUpdate(hour, dt, t) {
@@ -1741,8 +1742,8 @@
   const flowerColor = (mat, i, p) => mat === 'Green' ? null : FLOWER[(i * 3 + (mat === 'Cyan' ? 0 : 2) + (p.c || 0)) % FLOWER.length];
   try {
     const [flowers, plant1, plant2, plant3, plant4, plant5, bush1, bush2, berry1, berry2, rock1, rock4, rock6] = await Promise.all([
-      parts('Flowers', .8), parts('Plant_1', .7), parts('Plant_2', .8), parts('Plant_3', .9), parts('Plant_4', .75), parts('Plant_5', 1.0),
-      parts('Bush_1', 1.3), parts('Bush_2', 1.1), parts('BushBerries_1', 1.2), parts('BushBerries_2', 1.1), parts('Rock_Moss_1', .55), parts('Rock_Moss_4', .7), parts('Rock_Moss_6', .5)]);
+      parts('Flowers', 1.5), parts('Plant_1', 1.4), parts('Plant_2', 1.6), parts('Plant_3', 1.8), parts('Plant_4', 1.5), parts('Plant_5', 2.0),
+      parts('Bush_1', 2.3), parts('Bush_2', 2.0), parts('BushBerries_1', 2.1), parts('BushBerries_2', 2.0), parts('Rock_Moss_1', 1.1), parts('Rock_Moss_4', 1.4), parts('Rock_Moss_6', 1.0)]);
     const fq = Q === 2 ? 1 : Q === 1 ? .6 : .3;   // densidade conforme o aparelho
     const thin = (arr) => arr.filter(() => rnd() < fq);
     const flowerPts = [], plantPts = [[], [], [], [], []], bushPts = [[], []], berryPts = [], rockPts = [[], [], []];
@@ -1760,7 +1761,7 @@
       thin(alongLine(W(-w / 2 - 2.1, -d / 2 + 2), W(-w / 2 - 2.1, d / 2 - 6), 2.2, 0, .4)).forEach((v, i) => plantPts[i % 5].push({ x: v.x, z: v.z, s: rr(.9, 1.3) }));
       // hera subindo a parede entre as janelas
       const ivy = new Batch(), n = 10;
-      for (let i = 0; i < n - 1; i++) { if (i % 3 === 1) continue; const z = -d / 2 + (i + 1) * d / n, h = rr(3.2, 5.6), pl = new THREE.PlaneGeometry(1.6, h);
+      for (let i = 0; i < n - 1; i++) { if (i % 3 === 1) continue; const z = -d / 2 + (i + 1) * d / n, h = rr(4.5, 7), pl = new THREE.PlaneGeometry(2.6, h);
         const uv = pl.attributes.uv; for (let k = 0; k < uv.count; k++) uv.setXY(k, uv.getX(k) * 1.4, uv.getY(k) * h / 1.3);
         const v = W(-w / 2 - .06, z); ivy.add(M_VINE, pl, v.x, h / 2, v.z, ROT - Math.PI / 2); }
       ivy.build(scene, false);
@@ -1786,7 +1787,7 @@
         const t = -len / 2 + (i + .5) * len / nW, ox = Math.sin(ry), oz = Math.cos(ry);
         const lx = fx + Math.cos(ry) * t + ox * .35, lz = fz - Math.sin(ry) * t + oz * .35, v = W(lx, lz, 1.05);
         boxes.add(M.woodDark, new THREE.BoxGeometry(1.3, .28, .36), v.x, v.y, v.z, ROT + ry);
-        for (let k = 0; k < 4; k++) flowerPts.push({ x: v.x + rr(-.5, .5) * Math.cos(ROT + ry), y: 1.15, z: v.z - rr(-.5, .5) * Math.sin(ROT + ry), s: .55, c: 1 + k }); } }
+        for (let k = 0; k < 3; k++) flowerPts.push({ x: v.x + rr(-.45, .45) * Math.cos(ROT + ry), y: 1.15, z: v.z - rr(-.45, .45) * Math.sin(ROT + ry), s: .4, c: 1 + k }); } }
       boxes.build(scene);
     }
     // flores do campo espalhadas nos gramados
@@ -1800,11 +1801,11 @@
     for (const [x, y] of [[385, 1122], [475, 1122], [500, 250], [645, 250], [500, 388], [645, 388], [70, 490], [850, 490], [70, 940], [850, 940]]) {
       const v = FW(x, y);
       const pot = new THREE.Mesh(new THREE.CylinderGeometry(.42, .32, .7, 14), M_POT); pot.position.set(v.x, .35, v.z); pot.castShadow = true; scene.add(pot);
-      plantPts[Math.floor(rnd() * 5)].push({ x: v.x, y: .65, z: v.z, s: rr(1.2, 1.6) });
+      plantPts[Math.floor(rnd() * 5)].push({ x: v.x, y: .65, z: v.z, s: rr(.7, .9) });
     }
     // arranjos grandes: bar, mesa do bolo, bem-casados, hall
     for (const [x, y, h, s] of [[475, 712, FL + 1.9, 2.2], [92, 655, FL + .79, 1.4], [92, 760, FL + .79, 1.4], [427, 898, FL + .8, 1.1], [330, 1027, FL + 1.95, 1], [215, 908, FL + 1.0, 1.2]]) {
-      const v = FW(x, y); for (let k = 0; k < 6; k++) flowerPts.push({ x: v.x + rr(-.25, .25) * s, y: h, z: v.z + rr(-.25, .25) * s, s: s * rr(.7, 1), c: k });
+      const v = FW(x, y); for (let k = 0; k < 6; k++) flowerPts.push({ x: v.x + rr(-.25, .25) * s, y: h, z: v.z + rr(-.25, .25) * s, s: s * rr(.4, .55), c: k });
     }
     scatter(flowers, flowerPts, flowerColor, false);
     [plant1, plant2, plant3, plant4, plant5].forEach((pp, i) => scatter(pp, plantPts[i], null));
