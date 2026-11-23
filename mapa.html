@@ -155,6 +155,7 @@
       <div class="tour__step"></div>
       <div class="tour__step"></div>
       <div class="tour__step"></div>
+      <div class="tour__step"></div>
     </div>
   </section>
 
@@ -1070,6 +1071,7 @@
   festa.position.copy(P(750, 412)); festa.rotation.y = ROT; scene.add(festa); festa.updateMatrixWorld();
   const F = (x, y, h = 0) => V3((x - FX0) * KF, h, (y - FY0) * KF);
   const FW = (x, y, h = 0) => festa.localToWorld(F(x, y, h));
+  const wcLights = [];
   const FADE = [];   // materiais dos telhados que somem no modo "por dentro"
   const fadeMat = (m) => { const c = m.clone(); c.transparent = true; c.opacity = 1; FADE.push(c); return c; };
   const FM = { hallRoof: fadeMat(M.metWhite), wingRoof: fadeMat(M.metGray), entRoof: fadeMat(M.tileBrown), pergola: fadeMat(M.glassClear) };
@@ -1214,13 +1216,13 @@
   box(M.paveLight, 115, 945, 855, 1110, FL);
   {
     const H = 3.6;
-    wall(M.plCream, 115, 945, 395, 945, H); wall(M.plCream, 460, 945, 700, 945, H); wall(M.plCream, 724, 945, 790, 945, H); wall(M.plCream, 814, 945, 855, 945, H);
+    wall(M.plCream, 115, 945, 395, 945, H); wall(M.plCream, 460, 945, 560, 945, H); wall(M.plCream, 584, 945, 700, 945, H); wall(M.plCream, 724, 945, 855, 945, H);
     wall(M.plCream, 115, 1110, 392, 1110, H); wall(M.plCream, 468, 1110, 855, 1110, H);
     wall(M.plCream, 115, 945, 115, 1110, H); wall(M.plCream, 855, 945, 855, 1110, H);
     wall(M.plCream, 305, 945, 305, 1110, H, .3);
-    wall(M.plCream, 490, 945, 490, 960, H); wall(M.plCream, 490, 995, 490, 1110, H);
-    wall(M.plCream, 660, 945, 660, 1060, H); wall(M.plCream, 660, 1092, 660, 1110, H);
-    for (const x of [690, 720, 750, 780]) wall(M.plWhite, x, 950, x, 990, 2.1, .06);
+    wall(M.plCream, 490, 945, 490, 1110, H);
+    wall(M.plCream, 660, 945, 660, 1110, H);
+    for (const x of [690, 720, 750, 780, 520, 550, 600, 630]) wall(M.plWhite, x, 950, x, 990, 2.1, .06);
     wall(M.plWhite, 665, 990, 790, 990, 2.1, .06);
     // banheiros: piso claro, cabines com vaso, bancada com pias e espelho; portas abrem para o salão
     box(M_SLAB, 662, 947, 853, 1108, .03, FL, 2);
@@ -1230,15 +1232,24 @@
     { const a = F(800, 1000), c = F(850, 1100); fb.add(M.stone, new THREE.BoxGeometry(c.x - a.x, .9, c.z - a.z), (a.x + c.x) / 2, FL + .45, (a.z + c.z) / 2);
       for (let i = 0; i < 4; i++) { const z = lerp(a.z + .6, c.z - .6, i / 3); fb.add(M_PORC, new THREE.CylinderGeometry(.22, .16, .12, 14), (a.x + c.x) / 2, FL + .95, z); }
       fb.add(M.glass, new THREE.BoxGeometry(.04, 1.1, c.z - a.z - .4), c.x - .05, FL + 1.75, (a.z + c.z) / 2); }
+    // banheiro feminino (a oeste do masculino), mesma organização
+    box(M_SLAB, 492, 947, 658, 1108, .03, FL, 2);
+    for (const x of [505, 535, 615, 645]) { const v = F(x, 962); fb.add(M_PORC, new THREE.CylinderGeometry(.2, .16, .42, 12), v.x, FL + .21, v.z); fb.add(M_PORC, new THREE.BoxGeometry(.42, .5, .18), v.x, FL + .45, v.z - .3); }
+    for (const x of [520, 550, 630, 660]) { const v = F(x - 15, 990); fb.add(M.woodLight, new THREE.BoxGeometry(1.2, 1.9, .04), v.x, FL + 1.05, v.z); }
+    { const a = F(495, 1000), c = F(545, 1100); fb.add(M.stone, new THREE.BoxGeometry(c.x - a.x, .9, c.z - a.z), (a.x + c.x) / 2, FL + .45, (a.z + c.z) / 2);
+      for (let i = 0; i < 4; i++) { const z = lerp(a.z + .6, c.z - .6, i / 3); fb.add(M_PORC, new THREE.CylinderGeometry(.22, .16, .12, 14), (a.x + c.x) / 2, FL + .95, z); }
+      fb.add(M.glass, new THREE.BoxGeometry(.04, 1.1, c.z - a.z - .4), a.x + .05, FL + 1.75, (a.z + c.z) / 2); }
+    for (const x of [575, 757]) { const L = new THREE.PointLight(0xFFE2B8, 0, 14, 2); L.position.copy(F(x, 1030, FL + 3)); festa.add(L); wcLights.push(L); }
     // placas WC no lado do salão
-    { const wcTex = canvasTex(128, 128, (g, w) => { g.fillStyle = '#F7F1E6'; g.beginPath(); g.arc(w / 2, w / 2, w / 2 - 2, 0, 7); g.fill(); g.strokeStyle = '#B87B3E'; g.lineWidth = 5; g.stroke();
-        g.fillStyle = '#2A2820'; g.font = '600 30px Inter, sans-serif'; g.textAlign = 'center'; g.fillText('WC', w / 2, 102);
-        for (const [cx, dress] of [[44, false], [84, true]]) { g.beginPath(); g.arc(cx, 30, 7, 0, 7); g.fill(); if (dress) { g.beginPath(); g.moveTo(cx - 12, 70); g.lineTo(cx + 12, 70); g.lineTo(cx, 40); g.fill(); } else g.fillRect(cx - 7, 40, 14, 30); } });
-      const wcMat = new THREE.MeshBasicMaterial({ map: wcTex, transparent: true });
-      for (const x of [712, 802]) { const v = F(x, 945); const s = new THREE.Mesh(new THREE.CircleGeometry(.45, 24), wcMat); s.position.set(v.x, FL + 2.9, v.z - .2); s.rotation.y = Math.PI; festa.add(s);
-        const fr = F(x, 945); fb.add(M.woodDark, new THREE.BoxGeometry(1.4, .12, .3), fr.x, FL + 2.35, fr.z); }
-      const st = F(757, 925); const pole = new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, 1.9, 6), M.dark); pole.position.set(st.x, FL + .95, st.z); festa.add(pole);
-      const sg = new THREE.Mesh(new THREE.CircleGeometry(.5, 24), wcMat); sg.position.set(st.x, FL + 2.2, st.z); sg.rotation.y = Math.PI; festa.add(sg);
+    { const sign = (kind) => canvasTex(128, 128, (g, w) => { g.fillStyle = '#F7F1E6'; g.beginPath(); g.arc(w / 2, w / 2, w / 2 - 2, 0, 7); g.fill(); g.strokeStyle = '#B87B3E'; g.lineWidth = 5; g.stroke();
+        g.fillStyle = '#2A2820'; g.textAlign = 'center'; g.font = '600 26px Inter, sans-serif'; g.fillText('WC', w / 2, 108);
+        const icon = (cx, dress) => { g.beginPath(); g.arc(cx, 30, 8, 0, 7); g.fill(); if (dress) { g.beginPath(); g.moveTo(cx - 14, 80); g.lineTo(cx + 14, 80); g.lineTo(cx, 42); g.fill(); } else g.fillRect(cx - 8, 42, 16, 38); };
+        if (kind === 'f') icon(64, true); else if (kind === 'm') icon(64, false); else { icon(44, false); icon(84, true); } });
+      const mat = (k) => new THREE.MeshBasicMaterial({ map: sign(k), transparent: true });
+      for (const [x, k] of [[712, 'm'], [572, 'f']]) { const v = F(x, 945); const s = new THREE.Mesh(new THREE.CircleGeometry(.5, 24), mat(k)); s.position.set(v.x, FL + 2.9, v.z - .2); s.rotation.y = Math.PI; festa.add(s);
+        fb.add(M.woodDark, new THREE.BoxGeometry(1.4, .12, .3), v.x, FL + 2.35, v.z); }
+      const st = F(642, 925); const pole = new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, 1.9, 6), M.dark); pole.position.set(st.x, FL + .95, st.z); festa.add(pole);
+      const sg = new THREE.Mesh(new THREE.CircleGeometry(.55, 24), mat('both')); sg.position.set(st.x, FL + 2.2, st.z); sg.rotation.y = Math.PI; festa.add(sg);
       const sg2 = sg.clone(); sg2.rotation.y = 0; sg2.position.z += .02; festa.add(sg2); }
     // portas e janelas da fachada sul
     const a = F(392, 1110), c = F(468, 1110);
@@ -1426,7 +1437,6 @@
     for (let i = 0; i < 8; i++) cb.add(i % 2 ? M.white : std({ color: 0x8FB8C9, roughness: .8 }), B(.2, .04, .9, -.7 + i * .2, 2.15, -.1));
     for (const sx of [-.55, .55]) cb.add(M.dark, C(.28, .28, .04, 0, 0, 0, 16).rotateZ(Math.PI / 2), sx, .28, .38);
     cb.build(g); festa.add(g);
-    const t = F(573, 1032); fur.add(M.wood, B(1.8, .04, .8), t.x, FL + .75, t.z); fur.add(M.wood, B(1.6, .72, .05), t.x, FL + .37, t.z);
   }
   // ombrelones no terraço
   for (const [x, y] of [[540, 290], [612, 350]]) { const p = F(x, y); fur.add(M.dark, C(.03, .03, 2.5, 0, 0, 0, 6), p.x, 1.3, p.z); fur.add(M.cushion, new THREE.ConeGeometry(1.5, .5, 8, 1, true), p.x, 2.55, p.z); fur.add(M.dark, C(.3, .3, .1, 0, 0, 0, 12), p.x, .1, p.z); }
@@ -1450,7 +1460,7 @@
   }
   // varal de luzinhas cruzando o salão (acende de verdade à noite)
   const bulbMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.3, 1.05, .7) });
-  const hallLights = [];
+  const hallLights = [...wcLights];
   {
     const bulbs = [];
     for (let i = 0; i < NB - 1; i++) {
@@ -2036,20 +2046,21 @@
     { tgt: P(790, 720), off: [70, 270, 250], hour: 16.6, fog: [1400, 5000], tilt: 1.1, pins: [['fazenda2', P(800, 760, 30)]] },
     { tgt: P(745, 1084, 7), cam: P(757, 1222, 4.6), hour: 16.75, fog: [650, 2600], tilt: .9, fov: 46, pins: [['portal', P(745, 1093, 13.5)]] },
     { tgt: P(880, 925, 1), off: [80, 52, 60], hour: 16.9, fog: [650, 2600], tilt: 1, pins: [['terreiro', P(900, 925, 4)]] },
-    { tgt: P(498, 352, 1.5), cam: P(548, 462, 7.5), hour: 17.25, fog: [650, 2600], tilt: 1.2, fov: 50, pins: [['cerimonia', P(598, 478, 12)]] },
-    { tgt: FW(430, 1105, 2), off: [-26, 16, 28], hour: 18.05, fog: [650, 2600], tilt: 1.1, pins: [['entradaFesta', FW(430, 1112, 6)], ['wc', FW(757, 1030, 6)]] },
-    { tgt: FW(300, 485, 5), cam: FW(600, 170, 27), hour: 18.88, fog: [700, 2800], tilt: 1, fov: 46, pins: [['patio', FW(345, 462, 15)]] },
+    { tgt: P(498, 345, 2.4), cam: P(470, 470, 4.6), hour: 18.72, clock: 17.25, fog: [650, 2600], tilt: 1.2, fov: 50, pins: [['cerimonia', P(598, 478, 12)]] },
+    { tgt: FW(430, 1105, 2), off: [-26, 16, 28], hour: 18.8, clock: 17.9, fog: [650, 2600], tilt: 1.1, pins: [['entradaFesta', FW(430, 1112, 6)], ['wc', FW(757, 1030, 6)]] },
+    { tgt: FW(300, 485, 5), cam: FW(600, 170, 27), hour: 18.92, fog: [700, 2800], tilt: 1, fov: 46, pins: [['patio', FW(345, 462, 15)]] },
     { tgt: FW(450, 715, 0), off: [8, 36, 30], hour: 19.5, roof: 0, fog: [650, 2600], tilt: .8, pins: [['bar', FW(475, 712, 3.4)], ['pista', FW(655, 710, 1.6)], ['mesas', FW(300, 568, 1.6)]] },
     { tgt: FW(215, 705, 1), off: [7, 12, 16], hour: 20.0, roof: 0, fog: [650, 2600], tilt: 1.3, pins: [['bolo', FW(92, 707, 3.4)], ['lounge', FW(300, 712, 2.8)]] },
     { tgt: FW(772, 705, 2.4), cam: FW(572, 712, 6.6), hour: 21.2, roof: 0, fog: [650, 2600], tilt: 1.3, fov: 48, pins: [['pistaN', FW(700, 705, 4.6)]] },
     { tgt: FW(520, 1030, 1), off: [5, 19, 15], hour: 21.6, roof: 0, fog: [650, 2600], tilt: 1.1, pins: [['hall', FW(390, 1020, 3.8)], ['wc2', FW(757, 1028, 3.8)]] },
+    { tgt: FW(660, 1010, 0), cam: FW(660, 835, 13), hour: 21.4, roof: 0, fog: [650, 2600], tilt: 1.1, fov: 46, pins: [] },
     { tgt: FW(520, 740, 0), cam: add(FW(460, 720), -170, 120, 250), hour: 22.2, roof: 0, fog: [1500, 9000], tilt: .7, pins: [['final', farm.clone().setY(40)]] },
   ];
   K.forEach(k => { k.cam = k.cam || add(k.tgt, ...k.off); k.roof = k.roof ?? 1; k.fov = k.fov || 40; });
   const camCurve = new THREE.CatmullRomCurve3(K.map(k => k.cam), false, 'centripetal');
   const tgtCurve = new THREE.CatmullRomCurve3(K.map(k => k.tgt), false, 'centripetal');
 
-  const TITLES = { 2: T('Entrada', 'Ingresso'), 3: T('Estacionamento', 'Parcheggio'), 4: T('Cerimônia · 17h15', 'Cerimonia · 17:15'), 7: T('Festa · 18h', 'Festa · 18:00') };
+  const TITLES = { 2: T('Entrada', 'Ingresso'), 3: T('Estacionamento', 'Parcheggio'), 4: T('Cerimônia · 17h15', 'Cerimonia · 17:15'), 7: T('Festa · 18h', 'Festa · 18:00'), 11: T('Banheiros', 'Bagni') };
   const titleEl = document.getElementById('tourTitle'), cueEl = document.getElementById('tourCue');
   cueEl.querySelector('span').textContent = matchMedia('(pointer: coarse)').matches ? T('Deslize para continuar', 'Scorri per continuare') : T('Role para continuar', 'Scorri per continuare');
   let titleShown = null;
@@ -2096,11 +2107,12 @@
     regionMats.ground.emissiveIntensity = nightK * 1.6;
     bloom.strength = .2 + goldK * .25 + nightK * .45; bloom.threshold = lerp(.92, .8, Math.max(nightK, goldK * .6));
     grade.uniforms.uWarm.value = .6 + goldK * 1.4 - nightK * .3;
-    const hh = Math.floor(h), mm = Math.min(55, Math.round((h - hh) * 12) * 5);
+    const ch = clockH ?? h, hh = Math.floor(ch), mm = Math.min(55, Math.round((ch - hh) * 12) * 5);
     timeBadge.innerHTML = `<img src="assets/img/${nightK > .5 ? 'icon-sparkle.png' : 'icon-sun.png'}" alt="">${hh}h${String(mm).padStart(2, '0')}`;
     envDirty = true;
   }
   const fogCol = CC('#EBD9BC');
+  let clockH = null;
   let baseExposure = .95;
 
   /* ── Pós-processamento ──────────────────────────────── */
@@ -2227,6 +2239,7 @@
       camPos.x += Math.sin(U_TIME.value * .21) * drift; camPos.y += Math.sin(U_TIME.value * .17 + 1) * drift * .5; camPos.z += Math.cos(U_TIME.value * .19) * drift;
       camera.position.copy(camPos); camera.lookAt(camTgt);
       setTime(lerp(A.hour, B.hour, fe));
+      clockH = lerp(A.clock ?? A.hour, B.clock ?? B.hour, fe);
       tilt = lerp(A.tilt, B.tilt, fe); fov = lerp(A.fov, B.fov, fe); roof = lerp(A.roof, B.roof, fe);
       fog = [lerp(A.fog[0], B.fog[0], fe), lerp(A.fog[1], B.fog[1], fe)];
       fadeTarget = roof;
@@ -2259,7 +2272,7 @@
     TX_WATER.normalMap.offset.x += dt * .02; TX_WATER.normalMap.offset.y += dt * .013;
     clouds.forEach(c => { c.userData.a += c.userData.sp * dt * .1; c.position.x = Math.cos(c.userData.a) * c.userData.d; c.position.z = Math.sin(c.userData.a) * c.userData.d; });
     if (tick % 3 === 0 && nightK > 0) drawLED(U_TIME.value);
-    lifeUpdate(curHour, dt, U_TIME.value); skyLifeUpdate(curHour, U_TIME.value); decorUpdate(dt, curHour);
+    lifeUpdate(clockH ?? curHour, dt, U_TIME.value); skyLifeUpdate(curHour, U_TIME.value); decorUpdate(dt, curHour);
     bulbMat.color.offsetHSL(0, 0, 0);
 
     // foco: a faixa nítida acompanha o alvo da cena
