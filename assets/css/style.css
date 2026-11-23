@@ -178,6 +178,10 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .btn--outline:hover { border-color: var(--sage); color: var(--sage-dark); }
 .btn--outline-green { background: transparent; color: var(--sage-dark); border: 1.5px solid var(--sage); }
 .btn--outline-green:hover { background: var(--bg-green); }
+.btn--feature { gap: .6rem; box-shadow: 0 6px 22px rgba(0,0,0,.22); }
+.btn--feature .btn__ico { flex-shrink: 0; transition: transform .35s ease; }
+.btn--feature:hover .btn__ico { transform: rotate(-8deg) scale(1.12); }
+.hero__actions .btn--feature { order: -1; }
 .btn--sm { padding: .52rem 1.1rem; font-size: .72rem; }
 .btn--lg { padding: .9rem 2.2rem; font-size: .82rem; }
 .btn:focus-visible { outline: 2px solid var(--sage); outline-offset: 3px; }
