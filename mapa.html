@@ -505,10 +505,10 @@
     vertexShader: 'varying vec3 vD; void main(){ vD = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
     fragmentShader: 'uniform vec3 top, mid, bot; uniform float opacity; varying vec3 vD; void main(){ float h = vD.y; vec3 c = h < 0.0 ? bot : mix(mix(bot, mid, smoothstep(0.0, 0.18, h)), top, smoothstep(0.15, 0.7, h)); gl_FragColor = vec4(c, opacity); }'
   });
-  const tintDome = new THREE.Mesh(new THREE.SphereGeometry(2550, 32, 16), tintMat); tintDome.renderOrder = -3; scene.add(tintDome);
-  const nightDome = new THREE.Mesh(new THREE.SphereGeometry(2600, 32, 16), nightMat); nightDome.renderOrder = -2; scene.add(nightDome);
+  const tintDome = new THREE.Mesh(new THREE.SphereGeometry(30000, 32, 16), tintMat); tintDome.renderOrder = -3; scene.add(tintDome);
+  const nightDome = new THREE.Mesh(new THREE.SphereGeometry(31000, 32, 16), nightMat); nightDome.renderOrder = -2; scene.add(nightDome);
   const starGeo = new THREE.BufferGeometry(); {
-    const a = []; for (let i = 0; i < 1100; i++) { const t = rnd() * 6.283, u = .05 + rnd() * .95, r = 2450, s = Math.sqrt(1 - u * u); a.push(Math.cos(t) * s * r, u * r, Math.sin(t) * s * r); }
+    const a = []; for (let i = 0; i < 1100; i++) { const t = rnd() * 6.283, u = .05 + rnd() * .95, r = 29000, s = Math.sqrt(1 - u * u); a.push(Math.cos(t) * s * r, u * r, Math.sin(t) * s * r); }
     starGeo.setAttribute('position', new THREE.Float32BufferAttribute(a, 3));
   }
   const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false, fog: false });
@@ -517,8 +517,8 @@
   // ambiente refletido (reflexos do céu em vidro, metal, água, carros)
   const envScene = new THREE.Scene();
   const skyEnv = new THREE.Mesh(sky.geometry, sky.material); skyEnv.scale.setScalar(900); envScene.add(skyEnv);
-  const tintEnv = new THREE.Mesh(tintDome.geometry, tintMat); tintEnv.scale.setScalar(.3); envScene.add(tintEnv);
-  const domeEnv = new THREE.Mesh(nightDome.geometry, nightMat); domeEnv.scale.setScalar(.3); envScene.add(domeEnv);
+  const tintEnv = new THREE.Mesh(tintDome.geometry, tintMat); tintEnv.scale.setScalar(.026); envScene.add(tintEnv);
+  const domeEnv = new THREE.Mesh(nightDome.geometry, nightMat); domeEnv.scale.setScalar(.026); envScene.add(domeEnv);
   const envGround = new THREE.Mesh(new THREE.CircleGeometry(800, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x5B6B3A })); envGround.position.y = -2; envScene.add(envGround);
   const pmrem = new THREE.PMREMGenerator(renderer);
   let envRT = null;
@@ -1930,16 +1930,16 @@
   const add = (v, x, y, z) => v.clone().add(V3(x, y, z));
   const K = [
     { tgt: V3(farm.x + 2400, 0, farm.z + 1400), off: [0, 4700, 5600], hour: 16.5, fog: [14000, 34000], tilt: .5, pins: [['limeira', CITY_W.clone().setY(80)], ['fazenda', farm.clone().setY(60)]] },
-    { tgt: P(790, 720), off: [70, 270, 250], hour: 16.6, fog: [700, 2600], tilt: 1.1, pins: [['fazenda2', P(800, 760, 30)]] },
-    { tgt: P(745, 1084, 7), cam: P(757, 1222, 4.6), hour: 16.75, fog: [380, 1600], tilt: .9, fov: 46, pins: [['portal', P(745, 1093, 13.5)]] },
-    { tgt: P(880, 925, 1), off: [80, 52, 60], hour: 16.9, fog: [380, 1600], tilt: 1, pins: [['terreiro', P(900, 925, 4)]] },
-    { tgt: P(605, 430, 4.5), cam: P(468, 395, 3.4), hour: 17.05, fog: [380, 1600], tilt: 1.2, fov: 50, pins: [['cerimonia', P(598, 478, 12)]] },
-    { tgt: FW(430, 1105, 2), off: [-26, 16, 28], hour: 18.05, fog: [380, 1600], tilt: 1.1, pins: [['entradaFesta', FW(430, 1112, 6)], ['wc', FW(757, 1030, 6)]] },
-    { tgt: FW(300, 485, 5), cam: FW(600, 170, 27), hour: 18.88, fog: [420, 1700], tilt: 1, fov: 46, pins: [['patio', FW(345, 462, 15)]] },
-    { tgt: FW(450, 715, 0), off: [8, 36, 30], hour: 19.5, roof: 0, fog: [400, 1600], tilt: .8, pins: [['bar', FW(475, 712, 3.4)], ['pista', FW(655, 710, 1.6)], ['mesas', FW(300, 568, 1.6)]] },
-    { tgt: FW(215, 705, 1), off: [7, 12, 16], hour: 20.0, roof: 0, fog: [400, 1600], tilt: 1.3, pins: [['bolo', FW(92, 707, 3.4)], ['lounge', FW(300, 712, 2.8)]] },
-    { tgt: FW(772, 705, 2.4), cam: FW(572, 712, 6.6), hour: 21.2, roof: 0, fog: [400, 1600], tilt: 1.3, fov: 48, pins: [['pistaN', FW(700, 705, 4.6)]] },
-    { tgt: FW(520, 1030, 1), off: [5, 19, 15], hour: 21.6, roof: 0, fog: [400, 1600], tilt: 1.1, pins: [['hall', FW(390, 1020, 3.8)], ['wc2', FW(757, 1028, 3.8)]] },
+    { tgt: P(790, 720), off: [70, 270, 250], hour: 16.6, fog: [1400, 5000], tilt: 1.1, pins: [['fazenda2', P(800, 760, 30)]] },
+    { tgt: P(745, 1084, 7), cam: P(757, 1222, 4.6), hour: 16.75, fog: [650, 2600], tilt: .9, fov: 46, pins: [['portal', P(745, 1093, 13.5)]] },
+    { tgt: P(880, 925, 1), off: [80, 52, 60], hour: 16.9, fog: [650, 2600], tilt: 1, pins: [['terreiro', P(900, 925, 4)]] },
+    { tgt: P(605, 430, 4.5), cam: P(468, 395, 3.4), hour: 17.05, fog: [650, 2600], tilt: 1.2, fov: 50, pins: [['cerimonia', P(598, 478, 12)]] },
+    { tgt: FW(430, 1105, 2), off: [-26, 16, 28], hour: 18.05, fog: [650, 2600], tilt: 1.1, pins: [['entradaFesta', FW(430, 1112, 6)], ['wc', FW(757, 1030, 6)]] },
+    { tgt: FW(300, 485, 5), cam: FW(600, 170, 27), hour: 18.88, fog: [700, 2800], tilt: 1, fov: 46, pins: [['patio', FW(345, 462, 15)]] },
+    { tgt: FW(450, 715, 0), off: [8, 36, 30], hour: 19.5, roof: 0, fog: [650, 2600], tilt: .8, pins: [['bar', FW(475, 712, 3.4)], ['pista', FW(655, 710, 1.6)], ['mesas', FW(300, 568, 1.6)]] },
+    { tgt: FW(215, 705, 1), off: [7, 12, 16], hour: 20.0, roof: 0, fog: [650, 2600], tilt: 1.3, pins: [['bolo', FW(92, 707, 3.4)], ['lounge', FW(300, 712, 2.8)]] },
+    { tgt: FW(772, 705, 2.4), cam: FW(572, 712, 6.6), hour: 21.2, roof: 0, fog: [650, 2600], tilt: 1.3, fov: 48, pins: [['pistaN', FW(700, 705, 4.6)]] },
+    { tgt: FW(520, 1030, 1), off: [5, 19, 15], hour: 21.6, roof: 0, fog: [650, 2600], tilt: 1.1, pins: [['hall', FW(390, 1020, 3.8)], ['wc2', FW(757, 1028, 3.8)]] },
     { tgt: FW(520, 740, 0), cam: add(FW(460, 720), -170, 120, 250), hour: 22.2, roof: 0, fog: [1500, 9000], tilt: .7, pins: [['final', farm.clone().setY(40)]] },
   ];
   K.forEach(k => { k.cam = k.cam || add(k.tgt, ...k.off); k.roof = k.roof ?? 1; k.fov = k.fov || 40; });
@@ -1971,10 +1971,10 @@
     SU.sunPosition.value.copy(sunDir); SU.rayleigh.value = lerp(3, 3.6, gold); SU.turbidity.value = lerp(2.6, 9, gold); SU.mieCoefficient.value = lerp(.003, .011, gold);
     nightMat.uniforms.opacity.value = 1 - smooth(-14 * DEG, -1 * DEG, el);
     { const u = tintMat.uniforms, dusk = smooth(-4 * DEG, 10 * DEG, el);
-      u.top.value.set('#3F7FD0').lerp(CC('#5A6FB0'), gold * .7);
-      u.mid.value.set('#8DBBE6').lerp(CC('#E9A9A0'), gold * .75);
-      u.bot.value.set('#F2DDBE').lerp(CC('#FFB070'), gold);
-      u.opacity.value = .72 * dusk;
+      u.top.value.set('#2F6FD6').lerp(CC('#5466B8'), gold * .7);
+      u.mid.value.set('#7DB4EC').lerp(CC('#F0989A'), gold * .8);
+      u.bot.value.set('#EED7AE').lerp(CC('#FF9F55'), gold);
+      u.opacity.value = .85 * dusk;
       fogCol.copy(u.bot.value).lerp(u.mid.value, .25).lerp(cFogNight, 1 - smooth(-12 * DEG, 2 * DEG, el)); }
     starMat.opacity = 1 - smooth(-16 * DEG, -6 * DEG, el);
 
@@ -2017,7 +2017,7 @@
   tiltH.enabled = tiltV.enabled = Q >= 1; composer.addPass(tiltH); composer.addPass(tiltV);
   composer.addPass(new OutputPass());
   const grade = new ShaderPass({
-    uniforms: { tDiffuse: { value: null }, uWarm: { value: 1 }, uContrast: { value: 1.07 }, uSat: { value: 1.12 }, uTime: { value: 0 }, uGrain: { value: Q === 0 ? 0 : .025 } },
+    uniforms: { tDiffuse: { value: null }, uWarm: { value: 1 }, uContrast: { value: 1.1 }, uSat: { value: 1.3 }, uTime: { value: 0 }, uGrain: { value: Q === 0 ? 0 : .025 } },
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
     fragmentShader: `uniform sampler2D tDiffuse; uniform float uWarm, uContrast, uSat, uTime, uGrain; varying vec2 vUv;
       void main(){ vec4 c = texture2D(tDiffuse, vUv); vec3 col = c.rgb; float l = dot(col, vec3(.299, .587, .114));
@@ -2085,7 +2085,7 @@
     if (!visible || document.hidden) return;
     U_TIME.value += dt; grade.uniforms.uTime.value = U_TIME.value % 10;
 
-    let tilt = 1, fov = 40, fog = [380, 1600], roof = 1;
+    let tilt = 1, fov = 40, fog = [650, 2600], roof = 1;
     if (!free) {
       pRaw = scrollProgress();
       pS += (pRaw - pS) * Math.min(dt * 3.2, 1);
