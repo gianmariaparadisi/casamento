@@ -498,6 +498,14 @@
     vertexShader: 'varying vec3 vD; void main(){ vD = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
     fragmentShader: 'uniform float opacity; varying vec3 vD; void main(){ float h = clamp(vD.y, 0.0, 1.0); vec3 c = mix(vec3(0.10, 0.12, 0.22), vec3(0.012, 0.02, 0.06), pow(h, 0.55)); gl_FragColor = vec4(c, opacity); }'
   });
+  // camada de cor por cima do céu físico: azul mais vivo no alto, horizonte quente
+  const tintMat = new THREE.ShaderMaterial({
+    uniforms: { top: { value: new THREE.Color('#3F7FD0') }, mid: { value: new THREE.Color('#8DBBE6') }, bot: { value: new THREE.Color('#F3D9B4') }, opacity: { value: .7 } },
+    transparent: true, depthWrite: false, side: THREE.BackSide, fog: false,
+    vertexShader: 'varying vec3 vD; void main(){ vD = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: 'uniform vec3 top, mid, bot; uniform float opacity; varying vec3 vD; void main(){ float h = vD.y; vec3 c = h < 0.0 ? bot : mix(mix(bot, mid, smoothstep(0.0, 0.18, h)), top, smoothstep(0.15, 0.7, h)); gl_FragColor = vec4(c, opacity); }'
+  });
+  const tintDome = new THREE.Mesh(new THREE.SphereGeometry(2550, 32, 16), tintMat); tintDome.renderOrder = -3; scene.add(tintDome);
   const nightDome = new THREE.Mesh(new THREE.SphereGeometry(2600, 32, 16), nightMat); nightDome.renderOrder = -2; scene.add(nightDome);
   const starGeo = new THREE.BufferGeometry(); {
     const a = []; for (let i = 0; i < 1100; i++) { const t = rnd() * 6.283, u = .05 + rnd() * .95, r = 2450, s = Math.sqrt(1 - u * u); a.push(Math.cos(t) * s * r, u * r, Math.sin(t) * s * r); }
@@ -509,6 +517,7 @@
   // ambiente refletido (reflexos do céu em vidro, metal, água, carros)
   const envScene = new THREE.Scene();
   const skyEnv = new THREE.Mesh(sky.geometry, sky.material); skyEnv.scale.setScalar(900); envScene.add(skyEnv);
+  const tintEnv = new THREE.Mesh(tintDome.geometry, tintMat); tintEnv.scale.setScalar(.3); envScene.add(tintEnv);
   const domeEnv = new THREE.Mesh(nightDome.geometry, nightMat); domeEnv.scale.setScalar(.3); envScene.add(domeEnv);
   const envGround = new THREE.Mesh(new THREE.CircleGeometry(800, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x5B6B3A })); envGround.position.y = -2; envScene.add(envGround);
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -1961,8 +1970,14 @@
     moon.intensity = .75 * (1 - smooth(-12 * DEG, 0, el));
     SU.sunPosition.value.copy(sunDir); SU.rayleigh.value = lerp(3, 3.6, gold); SU.turbidity.value = lerp(2.6, 9, gold); SU.mieCoefficient.value = lerp(.003, .011, gold);
     nightMat.uniforms.opacity.value = 1 - smooth(-14 * DEG, -1 * DEG, el);
+    { const u = tintMat.uniforms, dusk = smooth(-4 * DEG, 10 * DEG, el);
+      u.top.value.set('#3F7FD0').lerp(CC('#5A6FB0'), gold * .7);
+      u.mid.value.set('#8DBBE6').lerp(CC('#E9A9A0'), gold * .75);
+      u.bot.value.set('#F2DDBE').lerp(CC('#FFB070'), gold);
+      u.opacity.value = .72 * dusk;
+      fogCol.copy(u.bot.value).lerp(u.mid.value, .25).lerp(cFogNight, 1 - smooth(-12 * DEG, 2 * DEG, el)); }
     starMat.opacity = 1 - smooth(-16 * DEG, -6 * DEG, el);
-    fogCol.copy(cFogDay).lerp(cFogGold, gold).lerp(cFogNight, 1 - smooth(-12 * DEG, 2 * DEG, el));
+
     scene.environmentIntensity = lerp(.12, .26, day);
     baseExposure = lerp(1.6, .95, day) + goldK * .32;
     clouds.forEach(c => { c.material.color.copy(cCloudDay).lerp(cCloudGold, gold).lerp(cCloudNight, 1 - day); c.material.opacity = c.userData.base * (1 - .45 * (1 - day)); });
@@ -2107,7 +2122,7 @@
     for (const m of FADE) { const base = m.userData.base ?? 1, target = fadeTarget < 1 ? lerp(m.userData.festa ?? 0, base, fadeTarget) : base; m.opacity += (target - m.opacity) * Math.min(dt * 5, 1); m.depthWrite = m.opacity > .9; m.visible = m.opacity > .02; }
 
     // céu acompanha a câmera (para a vista bem do alto)
-    sky.position.copy(camera.position); nightDome.position.copy(camera.position); stars.position.copy(camera.position);
+    sky.position.copy(camera.position); tintDome.position.copy(camera.position); nightDome.position.copy(camera.position); stars.position.copy(camera.position);
     HILLS.forEach(o => o.visible = camera.position.y < 1100);
     sunGlow.position.copy(camera.position).addScaledVector(sunDir, 2400);
     for (const t of routeTex) t.offset.x -= dt * .55;
